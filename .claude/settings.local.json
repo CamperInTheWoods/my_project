@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(code \"c:\\\\Develope\\\\hello.py\")"
+      "Bash(code \"c:\\\\Develope\\\\hello.py\")",
+      "Bash(mkdir -p \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/2026-1/숭실\" \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/2026-1/국민\" \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/AI\" \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/기타\")",
+      "Bash(rm -rf \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/중어중문\" \"C:/Users/Heegyu Kim/Documents/External_Brain/my/study/임베디드\")",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\Heegyu Kim\\\\Documents\\\\External_Brain\\\\ai\\\\scripts\\\\daily-briefing.ps1\")",
+      "Bash(powershell.exe -Command \"Get-Date -Format ''yyyy-MM-dd HH:mm''\")",
+      "Bash(python -c \"print\\(''안녕하세요''\\)\")"
     ]
   }
 }
