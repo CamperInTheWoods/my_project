@@ -365,7 +365,7 @@
 
     <div class="ptitle">몬스터 ID 직접 입력</div>
     <div class="id-row">
-      <input type="number" id="mob-id-input" placeholder="예: 100100 (mapledb.kr URL의 q= 값)">
+      <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
       <button class="btn" onclick="loadById()">불러오기</button>
     </div>
     <div id="load-msg" class="msg"></div>
@@ -757,6 +757,7 @@ async function searchByName() {
   status.textContent = `⏳ "${q}" 검색 중...`; status.className = 'msg';
 
   try {
+    // 1단계: kms/284로 한국어 이름 검색
     const res = await fetch(
       `https://maplestory.io/api/kms/284/mob?name=${encodeURIComponent(q)}`,
       { signal: AbortSignal.timeout(8000) }
@@ -765,7 +766,7 @@ async function searchByName() {
     const data = await res.json();
 
     const raw = (Array.isArray(data) ? data : [])
-      .filter(m => m.name && m.name.includes(q) && m.id < 9000000); // 특수/이벤트 몹 제거
+      .filter(m => m.name && m.name.includes(q) && m.id < 9000000);
 
     // 이름 중복 제거 (같은 이름이면 ID 낮은 것만)
     const seen = new Map();
@@ -773,8 +774,7 @@ async function searchByName() {
       if (!seen.has(m.name) || m.id < seen.get(m.name).id) seen.set(m.name, m);
     }
 
-    // 정확히 일치 → 레벨 오름차순, 나머지는 뒤에
-    const mobs = [...seen.values()]
+    let mobs = [...seen.values()]
       .map(m => ({ id: m.id, name: m.name, level: m.level || 0 }))
       .sort((a, b) => {
         const aExact = a.name === q, bExact = b.name === q;
@@ -785,6 +785,33 @@ async function searchByName() {
     if (!mobs.length) {
       status.textContent = '검색 결과가 없습니다.'; status.className = 'msg err'; return;
     }
+
+    // 2단계: 각 결과의 linksTo(클래식 ID) 병렬 조회
+    // → 현대 KMS ID → 클래식 ID 변환 (메이플노트와 ID 일치)
+    status.textContent = `⏳ 클래식 ID 확인 중...`; status.className = 'msg';
+    const resolved = await Promise.all(mobs.map(async m => {
+      try {
+        const r = await fetch(
+          `https://maplestory.io/api/kms/284/mob/${m.id}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (!r.ok) return m;
+        const detail = await r.json();
+        // linksTo가 있으면 그게 클래식 ID
+        if (detail.linksTo && detail.linksTo !== m.id) {
+          return { ...m, id: detail.linksTo };
+        }
+      } catch {}
+      return m;
+    }));
+
+    // 클래식 ID 중복 제거
+    const finalSeen = new Map();
+    for (const m of resolved) {
+      if (!finalSeen.has(m.id)) finalSeen.set(m.id, m);
+    }
+    mobs = [...finalSeen.values()];
+
     status.textContent = `${mobs.length}개 결과`; status.className = 'msg';
     renderMobGrid(document.getElementById('search-results'), mobs);
   } catch(e) {
