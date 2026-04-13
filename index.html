@@ -850,7 +850,7 @@ function parseMonsterPage(html, mobId, fallbackName, fallbackLevel) {
 
   // 레벨/HP
   const body = doc.body?.innerText || '';
-  const lvM = body.match(/레벨[^\d]*(\d+)/);
+  const lvM = body.match(/(?:레벨|LEVEL)\s*:?\s*(\d+)/i);
   const hpM = body.match(/HP[^\d]*([0-9,]+)/);
   const level = (lvM ? parseInt(lvM[1]) : 0) || fallbackLevel || 0; // mapledb 우선, 없으면 fallback
   const hp    = hpM ? parseInt(hpM[1].replace(/,/g,'')) : 0;
