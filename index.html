@@ -707,11 +707,11 @@ function parseMapleNote(html, mobId, fallbackName, fallbackLevel) {
   const h2   = doc.querySelector('h2');
   const name = (h2 ? h2.textContent.trim() : '') || fallbackName || `몬스터 #${mobId}`;
 
-  // 레벨: <h3>Lv : 70</h3>
+  // 레벨: <h3>Lv : 70</h3> 또는 <h3>Lv 1</h3> — 콜론 선택적
   let level = 0;
   doc.querySelectorAll('h3').forEach(h => {
-    const m = h.textContent.match(/Lv\s*:\s*(\d+)/);
-    if (m) level = parseInt(m[1]);
+    const m = h.textContent.match(/Lv\s*:?\s*(\d+)/);
+    if (m && !level) level = parseInt(m[1]);
   });
   if (!level) level = fallbackLevel || 0;
 
@@ -721,23 +721,23 @@ function parseMapleNote(html, mobId, fallbackName, fallbackLevel) {
   if (hpEl) hp = parseInt(hpEl.textContent.replace(/[^0-9]/g, '')) || 0;
 
   // 드롭 아이템: /item_detail/{id} 링크
+  // a.href 대신 getAttribute 사용 — 상대경로 그대로 읽기
   const drops = [];
   const seen  = new Set();
-  doc.querySelectorAll('a[href*="/item_detail/"]').forEach(a => {
-    const m = a.href.match(/\/item_detail\/(\d+)/);
+  doc.querySelectorAll('a[href*="item_detail"]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    const m    = href.match(/item_detail\/(\d+)/);
     if (!m) return;
     const itemId = parseInt(m[1]);
     if (seen.has(itemId)) return; seen.add(itemId);
 
-    // 이름: <h3> 안
-    const nameEl = a.querySelector('h3');
+    const nameEl   = a.querySelector('h3');
     const itemName = nameEl ? nameEl.textContent.trim() : '';
     if (!itemName) return;
 
-    // 드롭률: % 포함 숫자 (아이템명 제외한 텍스트에서 추출)
-    const txt     = a.textContent.replace(itemName, '');
-    const rateM   = txt.match(/([\d.]+)%?/);
-    const rate    = rateM ? `${rateM[1]}%` : '?';
+    const txt   = a.textContent.replace(itemName, '');
+    const rateM = txt.match(/([\d.]+)\s*%/);
+    const rate  = rateM ? `${rateM[1]}%` : '?';
 
     drops.push({ name: itemName, id: itemId, rate });
   });
