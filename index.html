@@ -380,7 +380,7 @@
       <div class="info">
         <h2 id="mob-name">-</h2>
         <div id="mob-stats" class="stats"></div>
-        <a id="mob-link" href="#" target="_blank">mapledb.kr에서 보기 ↗</a>
+        <a id="mob-link" href="#" target="_blank">메이플노트에서 보기 ↗</a>
       </div>
       <div class="actions">
         <button class="btn sm danger" onclick="resetChecklist()">초기화</button>
@@ -429,145 +429,15 @@
 
 <script>
 // ══════════════════════════════════════════
-// 1. 프리셋 몬스터 데이터
+// 1. 자주 사용하는 몬스터 (ID/이름/레벨만 — 드롭은 메이플노트에서 실시간 로드)
 // ══════════════════════════════════════════
 const PRESET = [
-  {
-    id:100100, name:"달팽이", level:1, hp:8,
-    drops:[
-      {name:"달팽이의 껍질",         id:4000019, rate:"40%"   },
-      {name:"빨간 포션",             id:2000000, rate:"1%"    },
-      {name:"활전용 화살",           id:2060000, rate:"0.8%"  },
-      {name:"석궁전용 화살",         id:2061000, rate:"0.8%"  },
-      {name:"초록사과",              id:2010009, rate:"0.7%"  },
-      {name:"청동의 원석",           id:4010000, rate:"0.2%"  },
-      {name:"연두색 머리띠",         id:1002067, rate:"0.16%" },
-      {name:"가넷의 원석",           id:4020000, rate:"0.15%" },
-      {name:"투구 방어력 주문서 10%",id:2040002, rate:"0.006%"},
-      {name:"망토 방어력 주문서 60%",id:2041001, rate:"0.006%"},
-    ]
-  },
-  {
-    id:210100, name:"슬라임", level:6, hp:60,
-    drops:[
-      {name:"물컹물컹한 액체",       id:4000004, rate:"40%"   },
-      {name:"빨간 털실뭉치",         id:4031273, rate:"3.5%"  },
-      {name:"슬라임의 방울",         id:4000010, rate:"3%"    },
-      {name:"빨간 포션",             id:2000000, rate:"1%"    },
-      {name:"활전용 화살",           id:2060000, rate:"0.8%"  },
-      {name:"석궁전용 화살",         id:2061000, rate:"0.8%"  },
-      {name:"사파이어의 원석",       id:4020005, rate:"0.3%"  },
-      {name:"오리할콘의 원석",       id:4010005, rate:"0.2%"  },
-      {name:"쇠 도끼",              id:1412001, rate:"0.16%" },
-      {name:"베이지 니티",           id:1072023, rate:"0.06%" },
-      {name:"철제 도끼",             id:1412012, rate:"0.01%" },
-      {name:"가죽 핸드백",           id:1322007, rate:"0.01%" },
-      {name:"레모나",                id:1082019, rate:"0.01%" },
-      {name:"포크 창",               id:1432001, rate:"0.01%" },
-      {name:"흰색 두건",             id:1002019, rate:"0.01%" },
-      {name:"하의 방어력 주문서 10%",id:2040602, rate:"0.006%"},
-      {name:"망토 민첩 주문서 100%", id:2041018, rate:"0.006%"},
-    ]
-  },
-  {
-    id:1210100, name:"돼지", level:7, hp:75,
-    drops:[
-      {name:"동물의 가죽",           id:4000021, rate:"1.5%"  },
-      {name:"돼지의 머리",           id:4000017, rate:"1%"    },
-      {name:"빨간 포션",             id:2000000, rate:"1%"    },
-      {name:"석궁전용 화살",         id:2061000, rate:"0.8%"  },
-      {name:"활전용 화살",           id:2060000, rate:"0.8%"  },
-      {name:"초록사과",              id:2010009, rate:"0.7%"  },
-      {name:"토파즈의 원석",         id:4020006, rate:"0.3%"  },
-      {name:"돼지 오목알",           id:4030011, rate:"0.3%"  },
-      {name:"가니어",                id:1472000, rate:"0.1%"  },
-      {name:"금의 원석",             id:4010006, rate:"0.1%"  },
-      {name:"나무 망치",             id:1422000, rate:"0.08%" },
-      {name:"흑야",                  id:1040034, rate:"0.01%" },
-      {name:"흰색 가람 치마",        id:1061028, rate:"0.01%" },
-      {name:"갈색 가죽 모자",        id:1002008, rate:"0.01%" },
-      {name:"오렌지 스퀘이머",       id:1041014, rate:"0.01%" },
-      {name:"갈색 하드래더 바지",    id:1062002, rate:"0.01%" },
-      {name:"신발 회피 주문서 10%",  id:2040702, rate:"0.006%"},
-      {name:"망토 행운 주문서 100%", id:2041021, rate:"0.006%"},
-    ]
-  },
-  {
-    id:1210102, name:"주황버섯", level:8, hp:80,
-    drops:[
-      {name:"주황버섯의 갓",         id:4000001, rate:"40%"   },
-      {name:"빨간 포션",             id:2000000, rate:"1%"    },
-      {name:"활전용 화살",           id:2060000, rate:"0.8%"  },
-      {name:"청동의 원석",           id:4010000, rate:"0.8%"  },
-      {name:"석궁전용 화살",         id:2061000, rate:"0.8%"  },
-      {name:"버섯 오목알",           id:4030001, rate:"0.3%"  },
-      {name:"창",                    id:1432000, rate:"0.1%"  },
-      {name:"양날 도끼",             id:1312000, rate:"0.1%"  },
-      {name:"다이아몬드의 원석",     id:4020007, rate:"0.08%" },
-      {name:"흰색 고무신",           id:1072004, rate:"0.06%" },
-      {name:"브론즈 코이프",         id:1002043, rate:"0.06%" },
-      {name:"아르",                  id:1082012, rate:"0.01%" },
-      {name:"브라운 하드래더 부츠",  id:1072015, rate:"0.01%" },
-      {name:"빨간색 닌자 샌들",      id:1072031, rate:"0.01%" },
-      {name:"신발 점프력 주문서 10%",id:2040705, rate:"0.006%"},
-    ]
-  },
-  {
-    id:2230101, name:"좀비버섯", level:24, hp:500,
-    drops:[
-      {name:"죽은 자의 부적",        id:4000008, rate:"40%"   },
-      {name:"민첩함의 물약",         id:2002000, rate:"2%"    },
-      {name:"하얀 포션",             id:2000002, rate:"2%"    },
-      {name:"파란 포션",             id:2000003, rate:"2%"    },
-      {name:"주황 포션",             id:2000001, rate:"1%"    },
-      {name:"활전용 화살",           id:2060000, rate:"0.8%"  },
-      {name:"석궁전용 화살",         id:2061000, rate:"0.8%"  },
-      {name:"아다만티움의 원석",     id:4010003, rate:"0.5%"  },
-      {name:"미스릴의 원석",         id:4010002, rate:"0.3%"  },
-      {name:"에메랄드의 원석",       id:4020003, rate:"0.2%"  },
-      {name:"금 링 귀고리",          id:1032004, rate:"0.01%" },
-      {name:"추 귀고리",             id:1032000, rate:"0.01%" },
-      {name:"강철 도끼",             id:1412002, rate:"0.01%" },
-      {name:"사냥꾼의 활",           id:1452001, rate:"0.01%" },
-      {name:"지장의",                id:1040021, rate:"0.01%" },
-      {name:"스틸 코퍼럴",           id:1040009, rate:"0.01%" },
-      {name:"브라운 스니크",         id:1040048, rate:"0.008%"},
-      {name:"브라운 스니크 바지",    id:1060038, rate:"0.008%"},
-      {name:"그린 헌트",             id:1002158, rate:"0.007%"},
-      {name:"미스릴 완드",           id:1372003, rate:"0.007%"},
-      {name:"홍무 바지",             id:1060018, rate:"0.007%"},
-      {name:"블루 카운터",           id:1312007, rate:"0.006%"},
-      {name:"나카마키",              id:1432003, rate:"0.006%"},
-      {name:"화이트 데빌즈 로브",    id:1050031, rate:"0.006%"},
-      {name:"지천의",                id:1040026, rate:"0.006%"},
-      {name:"블루 데빌즈 로브",      id:1050030, rate:"0.006%"},
-      {name:"창 공격력 주문서 10%",  id:2044302, rate:"0.006%"},
-      {name:"핑크 핀터",             id:1002035, rate:"0.004%"},
-    ]
-  },
-  {
-    id:3230101, name:"주니어 레이스", level:35, hp:1500,
-    drops:[
-      {name:"식탁보",                id:4000035, rate:"50%"   },
-      {name:"하얀 포션",             id:2000002, rate:"1%"    },
-      {name:"아다만티움의 원석",     id:4010003, rate:"0.3%"  },
-      {name:"오팔의 원석",           id:4020004, rate:"0.2%"  },
-      {name:"목비 표창",             id:2070002, rate:"0.01%" },
-      {name:"배틀 보우",             id:1452000, rate:"0.01%" },
-      {name:"다크 잉그리트",         id:1051010, rate:"0.01%" },
-      {name:"다크 크로스 체인메일",  id:1050022, rate:"0.01%" },
-      {name:"블루 후르츠",           id:1051008, rate:"0.01%" },
-      {name:"미스릴 스케일러",       id:1082069, rate:"0.01%" },
-      {name:"펫장비 이동속도 주문서 10%",id:2048002,rate:"0.008%"},
-      {name:"다크 노엘",             id:1082056, rate:"0.008%"},
-      {name:"오리할콘 아르비욘",     id:1082047, rate:"0.008%"},
-      {name:"니암",                  id:1412004, rate:"0.008%"},
-      {name:"아다만티움 보닌",       id:1472016, rate:"0.006%"},
-      {name:"레드 피에르슈즈",       id:1072118, rate:"0.006%"},
-      {name:"레드 문슈즈",           id:1072114, rate:"0.006%"},
-      {name:"투구 체력 주문서 10%",  id:2040005, rate:"0.006%"},
-    ]
-  },
+  { id:100100,  name:"달팽이",       level:1  },
+  { id:210100,  name:"슬라임",       level:6  },
+  { id:1210100, name:"돼지",         level:7  },
+  { id:1210102, name:"주황버섯",     level:8  },
+  { id:2230101, name:"좀비버섯",     level:24 },
+  { id:3230101, name:"주니어 레이스",level:35 },
 ];
 
 // ══════════════════════════════════════════
@@ -682,10 +552,7 @@ function renderMobGrid(container, monsters) {
       <div class="mn">${m.name}</div>
       ${m.level ? `<div class="ml">Lv.${m.level}</div>` : ''}
     `;
-    c.addEventListener('click', () => {
-      if (m.drops && m.drops.length) activateMob(m);        // 프리셋: 드롭 데이터 있음
-      else fetchMobDrops(m.id, m.name, m.level);            // 검색결과: mapledb에서 드롭 로드
-    });
+    c.addEventListener('click', () => fetchMobDrops(m.id, m.name, m.level));
     container.appendChild(c);
   });
 }
@@ -945,7 +812,7 @@ function activateMob(mob) {
   document.getElementById('mob-stats').textContent =
     [mob.level?`Lv.${mob.level}`:'', mob.hp?`HP ${mob.hp.toLocaleString()}`:''].filter(Boolean).join('  ·  ');
   const lnk = document.getElementById('mob-link');
-  lnk.href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
+  lnk.href = `https://xn--o80b01o9mlw3kdzc.com/monster_detail/${mob.id}`;
 
   // 스톱워치 로그 초기화
   document.getElementById('sw-log-list').innerHTML = '';
@@ -1214,7 +1081,7 @@ function renderSaves() {
         }
         return;
       }
-      if (preset) activateMob(preset);
+      fetchMobDrops(mobId, name, preset ? preset.level : 0);
     });
     el.appendChild(chip);
   });
