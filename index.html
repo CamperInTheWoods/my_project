@@ -629,7 +629,10 @@ function renderMobGrid(container, monsters) {
       <div class="mn">${m.name}</div>
       ${m.level ? `<div class="ml">Lv.${m.level}</div>` : ''}
     `;
-    c.addEventListener('click', () => activateMob(m));
+    c.addEventListener('click', () => {
+      if (m.drops && m.drops.length) activateMob(m);        // 프리셋: 드롭 데이터 있음
+      else fetchMobDrops(m.id, m.name, m.level);            // 검색결과: mapledb에서 드롭 로드
+    });
     container.appendChild(c);
   });
 }
