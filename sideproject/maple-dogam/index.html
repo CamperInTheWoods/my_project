@@ -691,7 +691,8 @@ async function proxyFetch(url) {
 }
 
 // ══════════════════════════════════════════
-// 10. mapledb.kr 이름 검색
+// 10. maplestory.io API로 몬스터 이름 검색
+//     (CORS 프록시 불필요, 직접 호출)
 // ══════════════════════════════════════════
 async function searchByName() {
   const q = document.getElementById('name-input').value.trim();
@@ -701,9 +702,17 @@ async function searchByName() {
   status.textContent = `⏳ "${q}" 검색 중...`; status.className = 'msg';
 
   try {
-    const url = `https://mapledb.kr/search.php?q=${encodeURIComponent(q)}&t=mob`;
-    const html = await proxyFetch(url);
-    const mobs = parseSearchHTML(html);
+    const res = await fetch(
+      `https://maplestory.io/api/kms/284/mob?name=${encodeURIComponent(q)}`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) throw new Error(`API 오류 (${res.status})`);
+    const data = await res.json();
+
+    // 이름에 검색어 포함된 것만 필터 (API가 유사어도 반환할 수 있음)
+    const mobs = (Array.isArray(data) ? data : [])
+      .filter(m => m.name && m.name.includes(q))
+      .map(m => ({ id: m.id, name: m.name, level: m.level || 0 }));
 
     if (!mobs.length) {
       status.textContent = '검색 결과가 없습니다.'; status.className = 'msg err'; return;
