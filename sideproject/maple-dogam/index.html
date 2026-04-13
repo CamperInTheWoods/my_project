@@ -1085,6 +1085,7 @@ function incrementItem(itemId) {
   updateCardUI(itemId, state, drop);
   if (isFirst) addSwLog(drop.name, state.firstTime);
   updateProgress();
+  updateHuntEstimate();
   renderSaves();
 }
 
@@ -1105,6 +1106,7 @@ function decrementItem(e, itemId) {
 
   updateCardUI(itemId, state, drop);
   updateProgress();
+  updateHuntEstimate();
   renderSaves();
 }
 
