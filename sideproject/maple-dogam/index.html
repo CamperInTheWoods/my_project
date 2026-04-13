@@ -305,15 +305,15 @@
       <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
              oninput="onNameInput(this.value)"
              onkeydown="if(event.key==='Enter')searchByName()">
-      <button class="btn" onclick="searchByName()">mapledb 검색</button>
+      <button class="btn" onclick="searchByName()">검색</button>
     </div>
     <div id="search-status" class="msg"></div>
     <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
 
     <div class="divider"></div>
 
-    <div class="ptitle">자주 사용하는 몬스터</div>
-    <div class="mob-grid" id="mob-grid"></div>
+    <div class="ptitle">저장된 도감작</div>
+    <div id="saves-list" class="saves-wrap"></div>
 
     <div class="divider"></div>
 
@@ -371,11 +371,6 @@
     </div>
   </div>
 
-  <!-- ③ 저장된 도감작 -->
-  <div class="panel">
-    <div class="ptitle">저장된 도감작</div>
-    <div id="saves-list" class="saves-wrap"></div>
-  </div>
 
 </div>
 
@@ -640,23 +635,31 @@ function renderMobGrid(container, monsters) {
 }
 
 // ══════════════════════════════════════════
-// 8. 이름 검색 (프리셋 즉시 필터)
+// 8. 이름 검색 (프리셋 즉시 필터 + 자동 mapledb 검색)
 // ══════════════════════════════════════════
+let searchDebounce = null;
+
 function onNameInput(v) {
   const q = v.trim().toLowerCase();
   const res = document.getElementById('search-results');
   const status = document.getElementById('search-status');
+
+  clearTimeout(searchDebounce);
+
   if (!q) { res.innerHTML = ''; status.textContent = ''; return; }
 
+  // 프리셋 즉시 필터
   const hits = PRESET.filter(m => m.name.toLowerCase().includes(q));
   if (hits.length) {
     renderMobGrid(res, hits);
     status.textContent = '';
-  } else {
-    res.innerHTML = '';
-    status.textContent = '프리셋에 없습니다. 오른쪽 버튼으로 mapledb에서 검색하세요.';
-    status.className = 'msg';
+    return; // 프리셋에 있으면 온라인 검색 불필요
   }
+
+  // 프리셋에 없으면 600ms 후 자동으로 mapledb 검색
+  res.innerHTML = '';
+  status.textContent = '⏳ 검색 중...'; status.className = 'msg';
+  searchDebounce = setTimeout(() => searchByName(), 600);
 }
 
 // ══════════════════════════════════════════
@@ -1003,7 +1006,6 @@ function renderSaves() {
 // ══════════════════════════════════════════
 // 18. 초기 실행
 // ══════════════════════════════════════════
-renderMobGrid(document.getElementById('mob-grid'), PRESET);
 renderSaves();
 initSw();
 </script>
