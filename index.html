@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메이플랜드 도감작 체크리스트</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    :root {
+      --maple-brown: #7a4a1e;
+      --maple-gold: #f5a623;
+      --maple-light: #fdf6e3;
+      --maple-green: #4caf50;
+      --maple-red: #e53935;
+      --maple-gray: #9e9e9e;
+      --maple-dark: #3e2a10;
+      --maple-panel: #fffbf0;
+      --maple-border: #c8a86b;
+      --maple-shadow: rgba(122, 74, 30, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #2c1a0e url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      min-height: 100vh;
+      color: var(--maple-dark);
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #5c3310 0%, #8b5e3c 50%, #5c3310 100%);
+      border-bottom: 3px solid var(--maple-gold);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+    header h1 {
+      color: var(--maple-gold);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+      letter-spacing: -0.5px;
+    }
+    header .subtitle {
+      color: #d4b483;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+    .maple-leaf { font-size: 1.8rem; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--maple-panel);
+      border: 2px solid var(--maple-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 16px var(--maple-shadow);
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--maple-brown);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--maple-gold);
+      border-radius: 2px;
+    }
+
+    /* ── Monster Select ── */
+    .monster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .monster-card {
+      background: white;
+      border: 2px solid var(--maple-border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .monster-card:hover {
+      border-color: var(--maple-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--maple-shadow);
+    }
+    .monster-card.selected {
+      border-color: var(--maple-gold);
+      background: #fffbe8;
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.3);
+    }
+    .monster-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-size: 0.7rem;
+      color: var(--maple-gold);
+      font-weight: 700;
+    }
+    .monster-card img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      display: block;
+      margin: 0 auto 6px;
+    }
+    .monster-card .m-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--maple-dark);
+      line-height: 1.2;
+    }
+    .monster-card .m-level {
+      font-size: 0.68rem;
+      color: var(--maple-gray);
+      margin-top: 2px;
+    }
+
+    /* ── Search by ID ── */
+    .id-search {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .id-search input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid var(--maple-border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: white;
+      color: var(--maple-dark);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .id-search input:focus { border-color: var(--maple-gold); }
+    .id-search input::placeholder { color: var(--maple-gray); }
+    .btn {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #f5a623, #e08800);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 6px rgba(245,166,35,0.4);
+    }
+    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 0.75rem;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #e53935, #b71c1c);
+      box-shadow: 0 2px 6px rgba(229,57,53,0.4);
+    }
+    .loading-msg {
+      font-size: 0.8rem;
+      color: var(--maple-gray);
+      margin-top: 8px;
+      min-height: 18px;
+    }
+    .loading-msg.error { color: var(--maple-red); }
+
+    /* ── Active Monster Header ── */
+    #checklist-section { display: none; }
+    .monster-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .monster-header img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      background: white;
+      border: 2px solid var(--maple-border);
+      border-radius: 10px;
+      padding: 4px;
+    }
+    .monster-header .info h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--maple-dark);
+    }
+    .monster-header .info .stats {
+      font-size: 0.8rem;
+      color: var(--maple-gray);
+      margin-top: 2px;
+    }
+    .monster-header .info .source-link a {
+      font-size: 0.75rem;
+      color: var(--maple-brown);
+      text-decoration: none;
+    }
+    .monster-header .info .source-link a:hover { text-decoration: underline; }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ── Progress Bar ── */
+    .progress-wrap {
+      margin-bottom: 20px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .progress-label .count {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--maple-brown);
+    }
+    .progress-label .pct {
+      font-size: 0.8rem;
+      color: var(--maple-gray);
+    }
+    .progress-bar-bg {
+      height: 16px;
+      background: #e8d9b8;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--maple-border);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f5a623, #4caf50);
+      border-radius: 8px;
+      transition: width 0.4s ease;
+      min-width: 0;
+    }
+    .complete-badge {
+      display: none;
+      text-align: center;
+      padding: 12px;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border: 2px solid #4caf50;
+      border-radius: 10px;
+      color: #2e7d32;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    /* ── Drop Item List ── */
+    .drop-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .drop-category {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--maple-gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 0;
+      border-bottom: 1px dashed var(--maple-border);
+      margin-top: 8px;
+    }
+    .drop-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: white;
+      border: 2px solid #e8d9b8;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .drop-item:hover {
+      border-color: var(--maple-gold);
+      box-shadow: 0 2px 8px var(--maple-shadow);
+    }
+    .drop-item.checked {
+      background: #f0faf0;
+      border-color: #a5d6a7;
+      opacity: 0.75;
+    }
+    .drop-item .item-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      flex-shrink: 0;
+    }
+    .drop-item .item-info { flex: 1; min-width: 0; }
+    .drop-item .item-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--maple-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .drop-item.checked .item-name {
+      text-decoration: line-through;
+      color: var(--maple-gray);
+    }
+    .drop-item .item-rate {
+      font-size: 0.72rem;
+      color: var(--maple-gray);
+      margin-top: 2px;
+    }
+    .drop-item .check-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      color: transparent;
+      background: white;
+    }
+    .drop-item.checked .check-icon {
+      background: var(--maple-green);
+      border-color: var(--maple-green);
+      color: white;
+    }
+    .drop-item .rate-badge {
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 700;
+      flex-shrink: 0;
+      min-width: 46px;
+      text-align: center;
+    }
+    .rate-high { background: #fff3e0; color: #e65100; }
+    .rate-mid { background: #e8f4fd; color: #0277bd; }
+    .rate-low { background: #fce4ec; color: #c62828; }
+    .rate-rare { background: #f3e5f5; color: #6a1b9a; }
+
+    /* ── Save list display ── */
+    .saves-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .save-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      background: white;
+      border: 2px solid var(--maple-border);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .save-chip:hover { border-color: var(--maple-gold); }
+    .save-chip.active-save { border-color: var(--maple-gold); background: #fffbe8; }
+    .save-chip .progress-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--maple-green);
+    }
+    .save-chip .del-btn {
+      color: #ccc;
+      font-size: 0.7rem;
+      padding: 0 2px;
+      cursor: pointer;
+    }
+    .save-chip .del-btn:hover { color: var(--maple-red); }
+    .no-saves { font-size: 0.82rem; color: var(--maple-gray); }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .monster-grid { grid-template-columns: repeat(3, 1fr); }
+      header h1 { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="maple-leaf">🍁</div>
+  <div>
+    <h1>메이플랜드 도감작 체크리스트</h1>
+    <div class="subtitle">한 몬스터의 모든 드롭을 완성하세요</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ① 몬스터 선택 -->
+  <div class="panel">
+    <div class="panel-title">몬스터 선택</div>
+
+    <div class="monster-grid" id="monster-grid"></div>
+
+    <div class="panel-title" style="margin-top:12px">mapledb.kr 몬스터 ID로 불러오기</div>
+    <div class="id-search">
+      <input type="number" id="mob-id-input" placeholder="몬스터 ID 입력 (예: 100100)" />
+      <button class="btn" onclick="loadFromDB()">불러오기</button>
+    </div>
+    <div class="loading-msg" id="loading-msg"></div>
+  </div>
+
+  <!-- ② 저장된 도감작 목록 -->
+  <div class="panel">
+    <div class="panel-title">저장된 도감작</div>
+    <div id="saves-area">
+      <div class="saves-list" id="saves-list"></div>
+    </div>
+  </div>
+
+  <!-- ③ 체크리스트 -->
+  <div class="panel" id="checklist-section">
+    <div class="monster-header">
+      <img id="active-mob-img" src="" alt="monster" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+      <div class="info">
+        <h2 id="active-mob-name">-</h2>
+        <div class="stats" id="active-mob-stats"></div>
+        <div class="source-link" id="active-mob-link"></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-sm btn-danger" onclick="resetChecklist()">초기화</button>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span class="count" id="progress-count">0 / 0 완료</span>
+        <span class="pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div class="complete-badge" id="complete-badge">🎉 도감작 완성! 모든 아이템을 획득했습니다!</div>
+    </div>
+
+    <div class="drop-list" id="drop-list"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// 1. 사전 임베드된 몬스터 데이터 (mapledb.kr 기준)
+// ─────────────────────────────────────────────
+const PRESET_MONSTERS = [
+  {
+    id: 100100,
+    name: "달팽이",
+    level: 1, hp: 8,
+    drops: [
+      { name: "달팽이의 껍질",         id: 4000019, rate: "40%"   },
+      { name: "빨간 포션",             id: 2000000, rate: "1%"    },
+      { name: "활전용 화살",           id: 2060000, rate: "0.8%"  },
+      { name: "석궁전용 화살",         id: 2061000, rate: "0.8%"  },
+      { name: "초록사과",              id: 2010009, rate: "0.7%"  },
+      { name: "청동의 원석",           id: 4010000, rate: "0.2%"  },
+      { name: "연두색 머리띠",         id: 1002067, rate: "0.16%" },
+      { name: "가넷의 원석",           id: 4020000, rate: "0.15%" },
+      { name: "투구 방어력 주문서 10%",id: 2040002, rate: "0.006%"},
+      { name: "망토 방어력 주문서 60%",id: 2041001, rate: "0.006%"},
+    ]
+  },
+  {
+    id: 210100,
+    name: "슬라임",
+    level: 6, hp: 60,
+    drops: [
+      { name: "물컹물컹한 액체",       id: 4000004, rate: "40%"   },
+      { name: "빨간 털실뭉치",         id: 4031273, rate: "3.5%"  },
+      { name: "슬라임의 방울",         id: 4000010, rate: "3%"    },
+      { name: "빨간 포션",             id: 2000000, rate: "1%"    },
+      { name: "활전용 화살",           id: 2060000, rate: "0.8%"  },
+      { name: "석궁전용 화살",         id: 2061000, rate: "0.8%"  },
+      { name: "사파이어의 원석",       id: 4020005, rate: "0.3%"  },
+      { name: "오리할콘의 원석",       id: 4010005, rate: "0.2%"  },
+      { name: "쇠 도끼",               id: 1412001, rate: "0.16%" },
+      { name: "베이지 니티",           id: 1072023, rate: "0.06%" },
+      { name: "철제 도끼",             id: 1412012, rate: "0.01%" },
+      { name: "가죽 핸드백",           id: 1322007, rate: "0.01%" },
+      { name: "레모나",                id: 1082019, rate: "0.01%" },
+      { name: "포크 창",               id: 1432001, rate: "0.01%" },
+      { name: "흰색 두건",             id: 1002019, rate: "0.01%" },
+      { name: "하의 방어력 주문서 10%",id: 2040602, rate: "0.006%"},
+      { name: "망토 민첩 주문서 100%", id: 2041018, rate: "0.006%"},
+    ]
+  },
+  {
+    id: 1210100,
+    name: "돼지",
+    level: 7, hp: 75,
+    drops: [
+      { name: "동물의 가죽",           id: 4000021, rate: "1.5%"  },
+      { name: "돼지의 머리",           id: 4000017, rate: "1%"    },
+      { name: "빨간 포션",             id: 2000000, rate: "1%"    },
+      { name: "석궁전용 화살",         id: 2061000, rate: "0.8%"  },
+      { name: "활전용 화살",           id: 2060000, rate: "0.8%"  },
+      { name: "초록사과",              id: 2010009, rate: "0.7%"  },
+      { name: "토파즈의 원석",         id: 4020006, rate: "0.3%"  },
+      { name: "돼지 오목알",           id: 4030011, rate: "0.3%"  },
+      { name: "가니어",                id: 1472000, rate: "0.1%"  },
+      { name: "금의 원석",             id: 4010006, rate: "0.1%"  },
+      { name: "나무 망치",             id: 1422000, rate: "0.08%" },
+      { name: "흑야",                  id: 1040034, rate: "0.01%" },
+      { name: "흰색 가람 치마",        id: 1061028, rate: "0.01%" },
+      { name: "갈색 가죽 모자",        id: 1002008, rate: "0.01%" },
+      { name: "오렌지 스퀘이머",       id: 1041014, rate: "0.01%" },
+      { name: "갈색 하드래더 바지",    id: 1062002, rate: "0.01%" },
+      { name: "신발 회피 주문서 10%",  id: 2040702, rate: "0.006%"},
+      { name: "망토 행운 주문서 100%", id: 2041021, rate: "0.006%"},
+    ]
+  },
+  {
+    id: 1210102,
+    name: "주황버섯",
+    level: 8, hp: 80,
+    drops: [
+      { name: "주황버섯의 갓",         id: 4000001, rate: "40%"   },
+      { name: "빨간 포션",             id: 2000000, rate: "1%"    },
+      { name: "활전용 화살",           id: 2060000, rate: "0.8%"  },
+      { name: "청동의 원석",           id: 4010000, rate: "0.8%"  },
+      { name: "석궁전용 화살",         id: 2061000, rate: "0.8%"  },
+      { name: "버섯 오목알",           id: 4030001, rate: "0.3%"  },
+      { name: "창",                    id: 1432000, rate: "0.1%"  },
+      { name: "양날 도끼",             id: 1312000, rate: "0.1%"  },
+      { name: "다이아몬드의 원석",     id: 4020007, rate: "0.08%" },
+      { name: "흰색 고무신",           id: 1072004, rate: "0.06%" },
+      { name: "브론즈 코이프",         id: 1002043, rate: "0.06%" },
+      { name: "아르",                  id: 1082012, rate: "0.01%" },
+      { name: "브라운 하드래더 부츠",  id: 1072015, rate: "0.01%" },
+      { name: "빨간색 닌자 샌들",      id: 1072031, rate: "0.01%" },
+      { name: "신발 점프력 주문서 10%",id: 2040705, rate: "0.006%"},
+    ]
+  },
+  {
+    id: 2230101,
+    name: "좀비버섯",
+    level: 24, hp: 500,
+    drops: [
+      { name: "죽은 자의 부적",        id: 4000008, rate: "40%"   },
+      { name: "민첩함의 물약",         id: 2002000, rate: "2%"    },
+      { name: "하얀 포션",             id: 2000002, rate: "2%"    },
+      { name: "파란 포션",             id: 2000003, rate: "2%"    },
+      { name: "주황 포션",             id: 2000001, rate: "1%"    },
+      { name: "활전용 화살",           id: 2060000, rate: "0.8%"  },
+      { name: "석궁전용 화살",         id: 2061000, rate: "0.8%"  },
+      { name: "아다만티움의 원석",     id: 4010003, rate: "0.5%"  },
+      { name: "미스릴의 원석",         id: 4010002, rate: "0.3%"  },
+      { name: "에메랄드의 원석",       id: 4020003, rate: "0.2%"  },
+      { name: "금 링 귀고리",          id: 1032004, rate: "0.01%" },
+      { name: "추 귀고리",             id: 1032000, rate: "0.01%" },
+      { name: "강철 도끼",             id: 1412002, rate: "0.01%" },
+      { name: "사냥꾼의 활",           id: 1452001, rate: "0.01%" },
+      { name: "지장의",                id: 1040021, rate: "0.01%" },
+      { name: "스틸 코퍼럴",           id: 1040009, rate: "0.01%" },
+      { name: "브라운 스니크",         id: 1040048, rate: "0.008%"},
+      { name: "브라운 스니크 바지",    id: 1060038, rate: "0.008%"},
+      { name: "그린 헌트",             id: 1002158, rate: "0.007%"},
+      { name: "미스릴 완드",           id: 1372003, rate: "0.007%"},
+      { name: "홍무 바지",             id: 1060018, rate: "0.007%"},
+      { name: "블루 카운터",           id: 1312007, rate: "0.006%"},
+      { name: "나카마키",              id: 1432003, rate: "0.006%"},
+      { name: "화이트 데빌즈 로브",    id: 1050031, rate: "0.006%"},
+      { name: "지천의",                id: 1040026, rate: "0.006%"},
+      { name: "블루 데빌즈 로브",      id: 1050030, rate: "0.006%"},
+      { name: "창 공격력 주문서 10%",  id: 2044302, rate: "0.006%"},
+      { name: "핑크 핀터",             id: 1002035, rate: "0.004%"},
+    ]
+  },
+  {
+    id: 3230101,
+    name: "주니어 레이스",
+    level: 35, hp: 1500,
+    drops: [
+      { name: "식탁보",                id: 4000035, rate: "50%"   },
+      { name: "하얀 포션",             id: 2000002, rate: "1%"    },
+      { name: "아다만티움의 원석",     id: 4010003, rate: "0.3%"  },
+      { name: "오팔의 원석",           id: 4020004, rate: "0.2%"  },
+      { name: "목비 표창",             id: 2070002, rate: "0.01%" },
+      { name: "배틀 보우",             id: 1452000, rate: "0.01%" },
+      { name: "다크 잉그리트",         id: 1051010, rate: "0.01%" },
+      { name: "다크 크로스 체인메일",  id: 1050022, rate: "0.01%" },
+      { name: "블루 후르츠",           id: 1051008, rate: "0.01%" },
+      { name: "미스릴 스케일러",       id: 1082069, rate: "0.01%" },
+      { name: "펫장비 이동속도 주문서 10%", id: 2048002, rate: "0.008%"},
+      { name: "다크 노엘",             id: 1082056, rate: "0.008%"},
+      { name: "오리할콘 아르비욘",     id: 1082047, rate: "0.008%"},
+      { name: "니암",                  id: 1412004, rate: "0.008%"},
+      { name: "아다만티움 보닌",       id: 1472016, rate: "0.006%"},
+      { name: "레드 피에르슈즈",       id: 1072118, rate: "0.006%"},
+      { name: "레드 문슈즈",           id: 1072114, rate: "0.006%"},
+      { name: "투구 체력 주문서 10%",  id: 2040005, rate: "0.006%"},
+    ]
+  },
+];
+
+// ─────────────────────────────────────────────
+// 2. 상태
+// ─────────────────────────────────────────────
+let activeMonster = null;  // { id, name, level, hp, drops, sourceId }
+const STORAGE_KEY = 'maple_dogam_v1';
+
+function loadStorage() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveStorage(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ─────────────────────────────────────────────
+// 3. 이미지 URL
+// ─────────────────────────────────────────────
+function mobImgUrl(id) {
+  return `https://maplestory.io/api/kms/284/mob/${id}/icon`;
+}
+function itemImgUrl(id) {
+  return `https://maplestory.io/api/kms/284/item/${id}/icon`;
+}
+
+// ─────────────────────────────────────────────
+// 4. 드롭률 → 배지 등급
+// ─────────────────────────────────────────────
+function rateBadge(rateStr) {
+  const n = parseFloat(rateStr);
+  if (n >= 10)       return ['rate-high',  rateStr];
+  if (n >= 0.1)      return ['rate-mid',   rateStr];
+  if (n >= 0.01)     return ['rate-low',   rateStr];
+  return              ['rate-rare', rateStr];
+}
+
+// ─────────────────────────────────────────────
+// 5. 몬스터 그리드 렌더링
+// ─────────────────────────────────────────────
+function renderMonsterGrid() {
+  const grid = document.getElementById('monster-grid');
+  grid.innerHTML = '';
+  PRESET_MONSTERS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'monster-card';
+    card.dataset.mobId = m.id;
+    card.innerHTML = `
+      <img src="${mobImgUrl(m.id)}" alt="${m.name}"
+           onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+      <div class="m-name">${m.name}</div>
+      <div class="m-level">Lv.${m.level}</div>
+    `;
+    card.addEventListener('click', () => activateMonster(m));
+    grid.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────
+// 6. mapledb.kr에서 동적 로드 (CORS proxy)
+// ─────────────────────────────────────────────
+async function loadFromDB() {
+  const mobId = document.getElementById('mob-id-input').value.trim();
+  if (!mobId) { showMsg('몬스터 ID를 입력해주세요.', true); return; }
+
+  showMsg('⏳ mapledb.kr에서 데이터를 가져오는 중...');
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://mapledb.kr/search.php?q=${mobId}&t=mob`)}`;
+
+  try {
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('네트워크 오류');
+    const json = await res.json();
+    const html = json.contents;
+
+    if (!html) throw new Error('응답이 비어있습니다');
+
+    const monster = parseMapleDB(html, parseInt(mobId));
+    if (!monster) throw new Error('몬스터 데이터를 파싱할 수 없습니다. 올바른 몬스터 ID인지 확인해주세요.');
+
+    showMsg(`✅ "${monster.name}" 로드 완료!`);
+    activateMonster(monster);
+  } catch (e) {
+    showMsg(`❌ 오류: ${e.message}`, true);
+  }
+}
+
+function parseMapleDB(html, mobId) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // 몬스터 이름: 보통 <h1> 또는 타이틀
+  let name = '';
+  const h1 = doc.querySelector('h1');
+  if (h1) name = h1.textContent.trim();
+  if (!name) {
+    const title = doc.title;
+    const m = title.match(/^(.+?)\s*[-|]/);
+    if (m) name = m[1].trim();
+  }
+  if (!name) name = `몬스터 #${mobId}`;
+
+  // 레벨/HP 파싱 시도
+  let level = 0, hp = 0;
+  const bodyText = doc.body ? doc.body.innerText : '';
+  const lvMatch = bodyText.match(/레벨[^\d]*(\d+)/);
+  const hpMatch = bodyText.match(/HP[^\d]*([0-9,]+)/);
+  if (lvMatch) level = parseInt(lvMatch[1]);
+  if (hpMatch) hp = parseInt(hpMatch[1].replace(/,/g, ''));
+
+  // 드롭 아이템: t=item 링크를 찾음
+  const drops = [];
+  const seen = new Set();
+  const links = doc.querySelectorAll('a[href*="t=item"]');
+
+  links.forEach(a => {
+    const hrefMatch = a.href.match(/q=(\d+)&t=item/);
+    if (!hrefMatch) return;
+    const itemId = parseInt(hrefMatch[1]);
+    if (seen.has(itemId)) return;
+    seen.add(itemId);
+
+    // 이름: 텍스트 노드, h4, h3, span 등에서 추출
+    let itemName = '';
+    const heading = a.querySelector('h4, h3, h2, .name, [class*="name"], strong');
+    if (heading) {
+      itemName = heading.textContent.trim();
+    } else {
+      // 전체 텍스트에서 드롭율 관련 숫자/% 제거 후 사용
+      itemName = a.textContent.replace(/드랍율[\s\S]*|[0-9.]+%/g, '').trim();
+    }
+    if (!itemName) return;
+
+    // 드롭율
+    let rate = '';
+    const fullText = a.textContent;
+    const rateMatch = fullText.match(/([0-9.]+)%/);
+    if (rateMatch) rate = rateMatch[0];
+
+    drops.push({ name: itemName, id: itemId, rate: rate || '?' });
+  });
+
+  if (!drops.length && !name) return null;
+
+  return { id: mobId, name, level, hp, drops, fromDB: true };
+}
+
+function showMsg(msg, isErr = false) {
+  const el = document.getElementById('loading-msg');
+  el.textContent = msg;
+  el.className = 'loading-msg' + (isErr ? ' error' : '');
+}
+
+// ─────────────────────────────────────────────
+// 7. 몬스터 활성화 (체크리스트 로드)
+// ─────────────────────────────────────────────
+function activateMonster(monster) {
+  activeMonster = monster;
+
+  // 그리드 선택 표시
+  document.querySelectorAll('.monster-card').forEach(c => {
+    c.classList.toggle('selected', parseInt(c.dataset.mobId) === monster.id);
+  });
+
+  // 헤더 업데이트
+  document.getElementById('active-mob-img').src = mobImgUrl(monster.id);
+  document.getElementById('active-mob-name').textContent = monster.name;
+  document.getElementById('active-mob-stats').textContent =
+    [monster.level ? `Lv.${monster.level}` : '', monster.hp ? `HP ${monster.hp.toLocaleString()}` : ''].filter(Boolean).join('  ·  ');
+
+  const linkEl = document.getElementById('active-mob-link');
+  linkEl.innerHTML = `<a href="https://mapledb.kr/search.php?q=${monster.id}&t=mob" target="_blank">mapledb.kr에서 보기 ↗</a>`;
+
+  // 드롭 목록 렌더링
+  renderDropList();
+
+  document.getElementById('checklist-section').style.display = 'block';
+  document.getElementById('checklist-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─────────────────────────────────────────────
+// 8. 드롭 목록 렌더링
+// ─────────────────────────────────────────────
+function renderDropList() {
+  const list = document.getElementById('drop-list');
+  list.innerHTML = '';
+
+  const store = loadStorage();
+  const key = `mob_${activeMonster.id}`;
+  const checked = new Set(store[key] || []);
+
+  activeMonster.drops.forEach((drop, idx) => {
+    const isChecked = checked.has(drop.id);
+    const [badgeClass, rateText] = rateBadge(drop.rate);
+
+    const el = document.createElement('div');
+    el.className = 'drop-item' + (isChecked ? ' checked' : '');
+    el.dataset.itemId = drop.id;
+    el.innerHTML = `
+      <img class="item-icon"
+           src="${itemImgUrl(drop.id)}"
+           alt="${drop.name}"
+           onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+      <div class="item-info">
+        <div class="item-name">${drop.name}</div>
+        <div class="item-rate">드롭률 ${drop.rate}</div>
+      </div>
+      <span class="rate-badge ${badgeClass}">${rateText}</span>
+      <div class="check-icon">${isChecked ? '✓' : ''}</div>
+    `;
+    el.addEventListener('click', () => toggleItem(drop.id, el));
+    list.appendChild(el);
+  });
+
+  updateProgress();
+}
+
+// ─────────────────────────────────────────────
+// 9. 아이템 체크 토글
+// ─────────────────────────────────────────────
+function toggleItem(itemId, el) {
+  const store = loadStorage();
+  const key = `mob_${activeMonster.id}`;
+  const checked = new Set(store[key] || []);
+
+  if (checked.has(itemId)) {
+    checked.delete(itemId);
+    el.classList.remove('checked');
+    el.querySelector('.check-icon').textContent = '';
+  } else {
+    checked.add(itemId);
+    el.classList.add('checked');
+    el.querySelector('.check-icon').textContent = '✓';
+  }
+
+  store[key] = [...checked];
+  saveStorage(store);
+  updateProgress();
+  renderSavesList();
+}
+
+// ─────────────────────────────────────────────
+// 10. 진행도 업데이트
+// ─────────────────────────────────────────────
+function updateProgress() {
+  if (!activeMonster) return;
+  const store = loadStorage();
+  const key = `mob_${activeMonster.id}`;
+  const checked = new Set(store[key] || []);
+  const total = activeMonster.drops.length;
+  const done = activeMonster.drops.filter(d => checked.has(d.id)).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('progress-count').textContent = `${done} / ${total} 완료`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-bar').style.width = `${pct}%`;
+
+  const badge = document.getElementById('complete-badge');
+  badge.style.display = (done === total && total > 0) ? 'block' : 'none';
+}
+
+// ─────────────────────────────────────────────
+// 11. 초기화
+// ─────────────────────────────────────────────
+function resetChecklist() {
+  if (!activeMonster) return;
+  if (!confirm(`"${activeMonster.name}" 도감작 진행도를 초기화할까요?`)) return;
+  const store = loadStorage();
+  delete store[`mob_${activeMonster.id}`];
+  saveStorage(store);
+  renderDropList();
+  renderSavesList();
+}
+
+// ─────────────────────────────────────────────
+// 12. 저장된 도감작 목록 렌더링
+// ─────────────────────────────────────────────
+function renderSavesList() {
+  const store = loadStorage();
+  const list = document.getElementById('saves-list');
+  list.innerHTML = '';
+
+  const keys = Object.keys(store).filter(k => k.startsWith('mob_'));
+  if (!keys.length) {
+    list.innerHTML = '<span class="no-saves">아직 시작한 도감작이 없어요.</span>';
+    return;
+  }
+
+  keys.forEach(key => {
+    const mobId = parseInt(key.replace('mob_', ''));
+    const preset = PRESET_MONSTERS.find(m => m.id === mobId);
+    const name = preset ? preset.name : `#${mobId}`;
+    const checkedIds = store[key] || [];
+    const total = preset ? preset.drops.length : '?';
+    const done = checkedIds.length;
+    const isActive = activeMonster && activeMonster.id === mobId;
+
+    const chip = document.createElement('div');
+    chip.className = 'save-chip' + (isActive ? ' active-save' : '');
+    chip.innerHTML = `
+      <div class="progress-dot" style="background:${done === total ? '#4caf50' : '#f5a623'}"></div>
+      <span>${name} ${done}/${total}</span>
+      <span class="del-btn" title="삭제" data-key="${key}">✕</span>
+    `;
+    chip.addEventListener('click', (e) => {
+      if (e.target.classList.contains('del-btn')) {
+        const k = e.target.dataset.key;
+        if (confirm(`"${name}" 진행도를 삭제할까요?`)) {
+          const s = loadStorage();
+          delete s[k];
+          saveStorage(s);
+          renderSavesList();
+          if (activeMonster && activeMonster.id === mobId) {
+            renderDropList();
+          }
+        }
+        return;
+      }
+      if (preset) activateMonster(preset);
+    });
+    list.appendChild(chip);
+  });
+}
+
+// ─────────────────────────────────────────────
+// 13. 초기화
+// ─────────────────────────────────────────────
+renderMonsterGrid();
+renderSavesList();
+</script>
+</body>
+</html>
