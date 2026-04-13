@@ -648,17 +648,13 @@ function onNameInput(v) {
 
   if (!q) { res.innerHTML = ''; status.textContent = ''; return; }
 
-  // 프리셋 즉시 필터
+  // 프리셋 즉시 표시 (빠른 응답)
   const hits = PRESET.filter(m => m.name.toLowerCase().includes(q));
-  if (hits.length) {
-    renderMobGrid(res, hits);
-    status.textContent = '';
-    return; // 프리셋에 있으면 온라인 검색 불필요
-  }
+  if (hits.length) renderMobGrid(res, hits);
+  else res.innerHTML = '';
 
-  // 프리셋에 없으면 600ms 후 자동으로 mapledb 검색
-  res.innerHTML = '';
-  status.textContent = '⏳ 검색 중...'; status.className = 'msg';
+  // 항상 mapledb 전체 검색 (600ms debounce)
+  status.textContent = '⏳ 전체 DB 검색 중...'; status.className = 'msg';
   searchDebounce = setTimeout(() => searchByName(), 600);
 }
 
