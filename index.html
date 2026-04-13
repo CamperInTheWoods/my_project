@@ -1169,25 +1169,27 @@ function updateHuntEstimate() {
   const mobData = store[`mob_${activeMob.id}`] || {};
   const excl    = getExcluded();
 
-  let minKills = Infinity, topDrop = null;
+  // 수집한 아이템 중 확률 가장 높은 것: count / rate = 예상 킬수
+  let bestRate = 0, bestDrop = null, bestCount = 0;
 
   activeMob.drops.forEach(drop => {
     if (excl.has(drop.id)) return;
-    if ((mobData[drop.id]?.count || 0) > 0) return; // 이미 수집됨
+    const count = mobData[drop.id]?.count || 0;
+    if (count <= 0) return; // 수집한 것만 대상
 
-    const rate = parseFloat(drop.rate) / 100; // "0.006%" → 0.00006
+    const rate = parseFloat(drop.rate) / 100;
     if (!rate || rate <= 0) return;
 
-    const expected = Math.ceil(1 / rate);
-    if (expected < minKills) { minKills = expected; topDrop = drop; }
+    if (rate > bestRate) { bestRate = rate; bestDrop = drop; bestCount = count; }
   });
 
   const wrap = document.getElementById('hunt-estimate');
-  if (!topDrop) { wrap.style.display = 'none'; return; }
+  if (!bestDrop) { wrap.style.display = 'none'; return; }
 
+  const estimated = Math.round(bestCount / bestRate);
   wrap.style.display = '';
-  document.getElementById('hunt-count').textContent = `~${minKills.toLocaleString()}마리`;
-  document.getElementById('hunt-reason').textContent = `${topDrop.name} (${topDrop.rate}) 기준`;
+  document.getElementById('hunt-count').textContent = `~${estimated.toLocaleString()}마리`;
+  document.getElementById('hunt-reason').textContent = `${bestDrop.name} ${bestCount}개 ÷ ${bestDrop.rate}`;
 }
 
 // ══════════════════════════════════════════
