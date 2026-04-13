@@ -896,8 +896,8 @@ function parseMapleNote(html, mobId, fallbackName, fallbackLevel) {
     const itemName = nameEl ? nameEl.textContent.trim() : '';
     if (!itemName) return;
     const txt   = a.textContent.replace(itemName, '');
-    const rateM = txt.match(/([\d.]+)\s*%/);
-    const rate  = rateM ? `${rateM[1]}%` : '?';
+    const nums  = txt.match(/[\d.]+/g);
+    const rate  = nums && nums.length ? `${nums[nums.length - 1]}%` : '?';
     drops.push({ name: itemName, id: itemId, rate });
   });
   if (!drops.length && !h2) return null;
