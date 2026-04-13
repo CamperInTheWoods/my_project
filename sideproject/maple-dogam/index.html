@@ -1167,7 +1167,7 @@ function updateHuntEstimate() {
   const mobData = store[`mob_${activeMob.id}`] || {};
   const excl    = getExcluded();
 
-  let maxKills = 0, bottleneck = null;
+  let minKills = Infinity, topDrop = null;
 
   activeMob.drops.forEach(drop => {
     if (excl.has(drop.id)) return;
@@ -1177,15 +1177,15 @@ function updateHuntEstimate() {
     if (!rate || rate <= 0) return;
 
     const expected = Math.ceil(1 / rate);
-    if (expected > maxKills) { maxKills = expected; bottleneck = drop; }
+    if (expected < minKills) { minKills = expected; topDrop = drop; }
   });
 
   const wrap = document.getElementById('hunt-estimate');
-  if (!bottleneck) { wrap.style.display = 'none'; return; }
+  if (!topDrop) { wrap.style.display = 'none'; return; }
 
   wrap.style.display = '';
-  document.getElementById('hunt-count').textContent = `~${maxKills.toLocaleString()}마리`;
-  document.getElementById('hunt-reason').textContent = `${bottleneck.name} (${bottleneck.rate}) 기준`;
+  document.getElementById('hunt-count').textContent = `~${minKills.toLocaleString()}마리`;
+  document.getElementById('hunt-reason').textContent = `${topDrop.name} (${topDrop.rate}) 기준`;
 }
 
 // ══════════════════════════════════════════
