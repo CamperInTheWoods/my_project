@@ -593,20 +593,23 @@ function swElapsed(tab) {
 }
 
 function swToggle() {
-  const sw = activeTab().sw;
+  const tab = activeTab();
+  const sw = tab.sw;
   const panel = getActivePanel();
   if (sw.startTs !== null) {
+    // 일시정지
     sw.base += Date.now() - sw.startTs;
     sw.startTs = null;
     clearInterval(sw.ticker); sw.ticker = null;
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
+    saveSwState(tab); // 일시정지 시 저장
   } else {
-    const tabIdx = activeTabIdx;
+    // 시작
     sw.startTs = Date.now();
+    const tabRef = tab; // 탭 객체 직접 참조 (인덱스 변동 무관)
     sw.ticker = setInterval(() => {
-      const t = tabs[tabIdx];
-      swTickPanel(getPanelOf(tabIdx), t);
+      swTickPanel(getPanelOf(tabRef.idx), tabRef);
     }, 50);
     panel.querySelector('.sw-toggle').textContent = '⏸ 일시정지';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-pause sw-toggle';
@@ -615,14 +618,39 @@ function swToggle() {
 
 function swReset() {
   if (!confirm('스톱워치와 획득 기록을 리셋할까요?')) return;
-  const sw = activeTab().sw;
+  const tab = activeTab();
+  const sw = tab.sw;
   const panel = getActivePanel();
   clearInterval(sw.ticker); sw.ticker = null;
   sw.base = 0; sw.startTs = null;
   panel.querySelector('.sw-toggle').textContent = '▶ 시작';
   panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
   panel.querySelector('.sw-log-list').innerHTML = '';
-  swTickPanel(panel, activeTab());
+  swTickPanel(panel, tab);
+  // 리셋 시 저장된 sw 상태 삭제
+  if (activeMob) {
+    const s = loadS(); delete s[`sw_mob_${activeMob.id}`]; saveS(s);
+  }
+}
+
+// sw 상태를 localStorage에 저장 (몹별)
+function saveSwState(tab) {
+  const mob = tab.mob;
+  if (!mob) return;
+  const s = loadS();
+  s[`sw_mob_${mob.id}`] = { base: swElapsed(tab) };
+  saveS(s);
+}
+
+// 몹에 저장된 sw 상태를 탭에 복원 (항상 정지 상태로)
+function restoreSwState(tab, mob) {
+  const s = loadS();
+  const saved = s[`sw_mob_${mob.id}`];
+  // 현재 돌던 ticker 정지
+  clearInterval(tab.sw.ticker);
+  tab.sw.ticker = null;
+  tab.sw.startTs = null;
+  tab.sw.base = saved ? (saved.base || 0) : 0;
 }
 
 function swTickPanel(panel, tab) {
@@ -1043,11 +1071,18 @@ function switchTab(idx) {
   renderTabBar();
   // 전환된 탭 스톱워치 tick 재시작
   const tab = tabs[idx];
+  const swPanel = getPanelOf(idx);
   if (tab.sw.startTs !== null) {
     clearInterval(tab.sw.ticker);
-    tab.sw.ticker = setInterval(() => swTickPanel(getPanelOf(idx), tab), 50);
+    const tabRef = tab;
+    tab.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabRef.idx), tabRef), 50);
+    swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').textContent = '⏸ 일시정지');
+    swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').className = 'sw-btn sw-pause sw-toggle');
+  } else {
+    swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').textContent = '▶ 시작');
+    swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle');
   }
-  swTickPanel(getPanelOf(idx), tab);
+  swTickPanel(swPanel, tab);
 }
 
 function addTab() {
@@ -1079,8 +1114,8 @@ function closeTab(e, idx) {
     // 돌고 있던 스톱워치 ticker 재등록
     if (t.sw.startTs !== null) {
       clearInterval(t.sw.ticker);
-      const tabIdx = t.idx;
-      t.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabIdx), tabs[tabIdx]), 50);
+      const tabRef = t;
+      t.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabRef.idx), tabRef), 50);
     }
   });
   activeTabIdx = Math.min(activeTabIdx, tabs.length - 1);
@@ -1105,6 +1140,15 @@ function restorePanelForTab(tab) {
     .map(d => ({ name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
     .filter(e => e.ms !== null).sort((a, b) => a.ms - b.ms);
   logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms));
+  // sw 버튼 상태 반영
+  const swToggleBtn = panel.querySelector('.sw-toggle');
+  if (swToggleBtn) {
+    if (tab.sw.startTs !== null) {
+      swToggleBtn.textContent = '⏸ 일시정지'; swToggleBtn.className = 'sw-btn sw-pause sw-toggle';
+    } else {
+      swToggleBtn.textContent = '▶ 시작'; swToggleBtn.className = 'sw-btn sw-start sw-toggle';
+    }
+  }
   swTickPanel(panel, tab);
 }
 
@@ -1112,8 +1156,15 @@ function restorePanelForTab(tab) {
 // 11. 몬스터 활성화
 // ══════════════════════════════════════════
 function activateMob(mob) {
+  const tab = activeTab();
+
+  // 이전 몹 sw 상태 저장 (다른 몹으로 교체 시)
+  if (tab.mob && tab.mob.id !== mob.id) {
+    saveSwState(tab);
+  }
+
   // 현재 탭에 몹 할당
-  activeTab().mob = mob;
+  tab.mob = mob;
 
   // 탭 패널이 없으면 첫 탭 패널 생성
   if (!document.querySelector('.tab-panel')) {
@@ -1138,6 +1189,12 @@ function activateMob(mob) {
   const s = loadS();
   s[`mob_${mob.id}_meta`] = { name: mob.name };
   saveS(s);
+
+  // 스톱워치 상태 복원 (몹별 저장된 시간)
+  restoreSwState(tab, mob);
+  panel.querySelector('.sw-toggle').textContent = '▶ 시작';
+  panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
+  swTickPanel(panel, tab);
 
   // 스톱워치 로그 복원
   panel.querySelector('.sw-log-list').innerHTML = '';
