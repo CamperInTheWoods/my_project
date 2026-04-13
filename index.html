@@ -712,10 +712,23 @@ async function searchByName() {
     if (!res.ok) throw new Error(`API 오류 (${res.status})`);
     const data = await res.json();
 
-    // 이름에 검색어 포함된 것만 필터 (API가 유사어도 반환할 수 있음)
-    const mobs = (Array.isArray(data) ? data : [])
-      .filter(m => m.name && m.name.includes(q))
-      .map(m => ({ id: m.id, name: m.name, level: m.level || 0 }));
+    const raw = (Array.isArray(data) ? data : [])
+      .filter(m => m.name && m.name.includes(q) && m.id < 9000000); // 특수/이벤트 몹 제거
+
+    // 이름 중복 제거 (같은 이름이면 ID 낮은 것만)
+    const seen = new Map();
+    for (const m of raw) {
+      if (!seen.has(m.name) || m.id < seen.get(m.name).id) seen.set(m.name, m);
+    }
+
+    // 정확히 일치 → 레벨 오름차순, 나머지는 뒤에
+    const mobs = [...seen.values()]
+      .map(m => ({ id: m.id, name: m.name, level: m.level || 0 }))
+      .sort((a, b) => {
+        const aExact = a.name === q, bExact = b.name === q;
+        if (aExact !== bExact) return aExact ? -1 : 1;
+        return a.level - b.level;
+      });
 
     if (!mobs.length) {
       status.textContent = '검색 결과가 없습니다.'; status.className = 'msg err'; return;
