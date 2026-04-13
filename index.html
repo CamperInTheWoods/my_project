@@ -601,8 +601,12 @@ function swToggle() {
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
   } else {
+    const tabIdx = activeTabIdx;
     sw.startTs = Date.now();
-    sw.ticker = setInterval(() => swTickPanel(panel, activeTab()), 50);
+    sw.ticker = setInterval(() => {
+      const t = tabs[tabIdx];
+      swTickPanel(getPanelOf(tabIdx), t);
+    }, 50);
     panel.querySelector('.sw-toggle').textContent = '⏸ 일시정지';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-pause sw-toggle';
   }
@@ -1070,8 +1074,13 @@ function closeTab(e, idx) {
   tabs.forEach(t => {
     const p = buildTabPanel(t);
     panelsEl.appendChild(p);
-    // 몹이 있으면 패널 복원
     if (t.mob) restorePanelForTab(t);
+    // 돌고 있던 스톱워치 ticker 재등록
+    if (t.sw.startTs !== null) {
+      clearInterval(t.sw.ticker);
+      const tabIdx = t.idx;
+      t.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabIdx), tabs[tabIdx]), 50);
+    }
   });
   activeTabIdx = Math.min(activeTabIdx, tabs.length - 1);
   switchTab(activeTabIdx);
@@ -1148,16 +1157,19 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 // 12. 아이템 그리드 렌더
 // ══════════════════════════════════════════
-let showExcluded = true; // 기본: 제외 아이템 보임
+const showExcludedByTab = {}; // 탭별 제외 아이템 보기 상태
+function getShowExcluded() { return showExcludedByTab[activeTabIdx] !== false; }
+function setShowExcluded(v) { showExcludedByTab[activeTabIdx] = v; }
 
 function toggleExclView() {
-  showExcluded = !showExcluded;
+  setShowExcluded(!getShowExcluded());
+  const show = getShowExcluded();
   const panel = getActivePanel();
   const btn = panel.querySelector('.excl-toggle');
-  btn.textContent = showExcluded ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
-  btn.className   = showExcluded ? 'excl-toggle' : 'excl-toggle hide-excl';
+  btn.textContent = show ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
+  btn.className   = show ? 'excl-toggle' : 'excl-toggle hide-excl';
   panel.querySelectorAll('.item-card.excl').forEach(c => {
-    c.style.display = showExcluded ? '' : 'none';
+    c.style.display = show ? '' : 'none';
   });
 }
 
@@ -1191,7 +1203,7 @@ function renderItemGridInPanel(panel, mob) {
     const state = mobData[drop.id] || { count:0, firstTime:null };
     const isExcl = excluded.has(drop.id);
     const card   = buildItemCard(drop, state, isExcl);
-    if (isExcl && !showExcluded) card.style.display = 'none';
+    if (isExcl && !getShowExcluded()) card.style.display = 'none';
     grid.appendChild(card);
   });
 }
@@ -1393,7 +1405,8 @@ function renderSaves() {
   const el = document.getElementById('saves-list');
   el.innerHTML = '';
 
-  const keys = Object.keys(store).filter(k => k.startsWith('mob_'));
+  // mob_숫자 형태만 (mob_숫자_meta 등 제외)
+  const keys = Object.keys(store).filter(k => /^mob_\d+$/.test(k));
   if (!keys.length) {
     el.innerHTML = '<span class="no-saves">아직 시작한 도감작이 없습니다.</span>'; return;
   }
