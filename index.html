@@ -213,6 +213,41 @@
     .item-card .decr:hover { background:var(--red); color:white; }
     .item-card.nf .decr { display:none; }
 
+    /* exclude button */
+    .item-card .excl-btn {
+      position:absolute; top:5px; left:5px;
+      width:17px; height:17px; border-radius:50%;
+      border:none; background:rgba(200,200,200,.6); color:#555;
+      font-size:.65rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s;
+    }
+    .item-card:hover .excl-btn { opacity:1; }
+    .item-card .excl-btn:hover { background:#9e9e9e; color:white; }
+
+    /* excluded state */
+    .item-card.excl {
+      background:#1a1014; border-color:#2a1a20;
+      opacity:.55;
+    }
+    .item-card.excl .icon-wrap { background:#110a0d; }
+    .item-card.excl .icon-wrap img { filter:brightness(.08) saturate(0); }
+    .item-card.excl .cname { color:#4a3030; text-decoration:line-through; }
+    .item-card.excl .crate,.item-card.excl .ccnt,.item-card.excl .ctime { color:#3a2020; }
+    .item-card.excl .excl-btn { opacity:1; background:rgba(180,60,60,.5); color:#ffaaaa; }
+    .item-card.excl .excl-btn:hover { background:var(--red); color:white; }
+    .item-card.excl .decr { display:none; }
+
+    /* 제외 토글 버튼 */
+    .excl-toggle {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:5px 10px; border-radius:8px; border:1.5px solid var(--border);
+      background:white; font-family:inherit; font-size:.75rem;
+      color:var(--gray); cursor:pointer; transition:all .15s; margin-bottom:10px;
+    }
+    .excl-toggle:hover { border-color:var(--gold); color:var(--brown); }
+    .excl-toggle.hide-excl { background:#fff0f0; border-color:#f5c6c6; color:var(--red); }
+
     /* ─ Stopwatch ─ */
     .sw-display {
       font-family:'Courier New',monospace;
@@ -354,6 +389,7 @@
     <!-- 아이템 그리드 + 스톱워치 -->
     <div class="main-layout">
       <div class="items-section panel" style="padding:14px">
+        <button class="excl-toggle" id="excl-toggle-btn" onclick="toggleExclView()">👁 제외된 아이템 보기</button>
         <div id="item-grid" class="item-grid"></div>
       </div>
       <div class="sw-section panel">
@@ -861,26 +897,53 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 // 12. 아이템 그리드 렌더
 // ══════════════════════════════════════════
+let showExcluded = true; // 기본: 제외 아이템 보임
+
+function toggleExclView() {
+  showExcluded = !showExcluded;
+  const btn = document.getElementById('excl-toggle-btn');
+  btn.textContent = showExcluded ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
+  btn.className   = showExcluded ? 'excl-toggle' : 'excl-toggle hide-excl';
+  document.querySelectorAll('.item-card.excl').forEach(c => {
+    c.style.display = showExcluded ? '' : 'none';
+  });
+}
+
+function getExcluded() {
+  const store = loadS();
+  return new Set(store[`excl_${activeMob.id}`] || []);
+}
+
+function setExcluded(set) {
+  const store = loadS();
+  store[`excl_${activeMob.id}`] = [...set];
+  saveS(store);
+}
+
 function renderItemGrid() {
   const grid = document.getElementById('item-grid');
   grid.innerHTML = '';
   const store = loadS();
   const key = `mob_${activeMob.id}`;
-  const mobData = store[key] || {};
+  const mobData   = store[key] || {};
+  const excluded  = getExcluded();
 
   activeMob.drops.forEach(drop => {
     const state = mobData[drop.id] || { count:0, firstTime:null };
-    const card = buildItemCard(drop, state);
+    const isExcl = excluded.has(drop.id);
+    const card   = buildItemCard(drop, state, isExcl);
+    if (isExcl && !showExcluded) card.style.display = 'none';
     grid.appendChild(card);
   });
 
   updateProgress();
 }
 
-function buildItemCard(drop, state) {
-  const found = state.count > 0;
-  const card = document.createElement('div');
-  card.className = `item-card ${found ? 'fd' : 'nf'} fade-in`;
+function buildItemCard(drop, state, isExcl = false) {
+  const found = state.count > 0 && !isExcl;
+  const cls   = isExcl ? 'excl' : (found ? 'fd' : 'nf');
+  const card  = document.createElement('div');
+  card.className = `item-card ${cls} fade-in`;
   card.dataset.itemId = drop.id;
 
   card.innerHTML = `
@@ -890,15 +953,27 @@ function buildItemCard(drop, state) {
     </div>
     <div class="card-body">
       <div class="cname" title="${drop.name}">${drop.name}</div>
-      <div class="crate">${rateBadge(drop.rate)}</div>
-      <div class="ccnt">수집 ${state.count}회</div>
-      <div class="ctime">${state.firstTime !== null ? '첫 출현 ' + fmtTime(state.firstTime) : ''}</div>
+      <div class="crate">${isExcl ? '<span style="font-size:.6rem;color:#4a3030">제외됨</span>' : rateBadge(drop.rate)}</div>
+      <div class="ccnt">${isExcl ? '' : `수집 ${state.count}회`}</div>
+      <div class="ctime">${(!isExcl && state.firstTime !== null) ? '첫 출현 ' + fmtTime(state.firstTime) : ''}</div>
     </div>
-    <button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>
+    <button class="excl-btn" title="${isExcl?'제외 해제':'이 아이템 제외'}"
+            onclick="toggleExclude(event,${drop.id})">${isExcl ? '↩' : '✕'}</button>
+    ${!isExcl ? `<button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>` : ''}
   `;
 
-  card.addEventListener('click', () => incrementItem(drop.id));
+  if (!isExcl) card.addEventListener('click', () => incrementItem(drop.id));
   return card;
+}
+
+function toggleExclude(e, itemId) {
+  e.stopPropagation();
+  const excl = getExcluded();
+  if (excl.has(itemId)) excl.delete(itemId);
+  else                   excl.add(itemId);
+  setExcluded(excl);
+  renderItemGrid();
+  renderSaves();
 }
 
 // ══════════════════════════════════════════
@@ -981,13 +1056,17 @@ function addSwLog(name, ms) {
 // ══════════════════════════════════════════
 function updateProgress() {
   if (!activeMob) return;
-  const store = loadS();
+  const store   = loadS();
   const mobData = store[`mob_${activeMob.id}`] || {};
-  const total = activeMob.drops.length;
-  const done  = activeMob.drops.filter(d => (mobData[d.id]?.count||0) > 0).length;
-  const pct   = total ? Math.round(done/total*100) : 0;
+  const excl    = getExcluded();
 
-  document.getElementById('prog-cnt').textContent  = `${done} / ${total} 완료`;
+  const active  = activeMob.drops.filter(d => !excl.has(d.id));
+  const total   = active.length;
+  const done    = active.filter(d => (mobData[d.id]?.count||0) > 0).length;
+  const pct     = total ? Math.round(done/total*100) : 0;
+  const exclCnt = excl.size;
+
+  document.getElementById('prog-cnt').textContent  = `${done} / ${total} 완료${exclCnt ? `  (제외 ${exclCnt}개)` : ''}`;
   document.getElementById('prog-pct').textContent  = `${pct}%`;
   document.getElementById('prog-fill').style.width = `${pct}%`;
   document.getElementById('complete-badge').style.display = (done===total&&total>0) ? 'block' : 'none';
