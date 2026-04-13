@@ -163,6 +163,20 @@
     .prog-fill { height:100%; background:linear-gradient(90deg,#f5a623,#4caf50); border-radius:7px; transition:width .4s ease; }
     .complete-badge { display:none; text-align:center; padding:10px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border:2px solid #4caf50; border-radius:8px; color:#2e7d32; font-weight:700; font-size:.9rem; margin-top:10px; }
 
+    /* ─ 메소 비 ─ */
+    #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; overflow:hidden; }
+    .meso-coin {
+      position:absolute; top:-60px; font-size:1.6rem;
+      animation: mesoFall linear forwards;
+      user-select:none; pointer-events:none;
+    }
+    @keyframes mesoFall {
+      0%   { transform: translateY(0) rotate(0deg) scale(1); opacity:1; }
+      80%  { opacity:1; }
+      100% { transform: translateY(110vh) rotate(720deg) scale(.7); opacity:0; }
+    }
+    .sw-log-entry.complete { background:#fff9e6; border-left:3px solid #f5a623; font-weight:700; color:#7a4a1e; }
+
     /* ─ Main layout (items + stopwatch) ─ */
     .main-layout { display:flex; gap:16px; align-items:flex-start; }
     .items-section { flex:1; min-width:0; }
@@ -373,6 +387,7 @@
   </div>
 </header>
 
+<div id="meso-rain"></div>
 <div class="container">
 
   <!-- ① 몬스터 선택 -->
@@ -1408,7 +1423,17 @@ function updateProgressInPanel(panel, mob) {
   panel.querySelector('.prog-cnt').textContent  = `${done} / ${total} 완료${exclCnt ? `  (제외 ${exclCnt}개)` : ''}`;
   panel.querySelector('.prog-pct').textContent  = `${pct}%`;
   panel.querySelector('.prog-fill').style.width = `${pct}%`;
-  panel.querySelector('.complete-badge').style.display = (done===total&&total>0) ? 'block' : 'none';
+
+  const justCompleted = done === total && total > 0;
+  const badge = panel.querySelector('.complete-badge');
+  const wasComplete = badge.style.display === 'block';
+  badge.style.display = justCompleted ? 'block' : 'none';
+
+  // 방금 완료된 경우 (이전에 안 완료 상태였을 때만)
+  if (justCompleted && !wasComplete) {
+    onDogamComplete(panel, mob);
+  }
+
   updateHuntEstimateInPanel(panel, mob);
 }
 
@@ -1441,6 +1466,56 @@ function updateHuntEstimateInPanel(panel, mob) {
   wrap.style.display = '';
   panel.querySelector('.hunt-count').textContent = `~${estimated.toLocaleString()}마리`;
   panel.querySelector('.hunt-reason').textContent = `${bestDrop.name} ${bestCount}개 ÷ ${bestDrop.rate}`;
+}
+
+// ══════════════════════════════════════════
+// 15-B. 도감작 완료 이벤트
+// ══════════════════════════════════════════
+function onDogamComplete(panel, mob) {
+  const tab = tabs.find(t => t.mob && t.mob.id === mob.id);
+
+  // 1. 스톱워치 멈추기
+  if (tab) {
+    const sw = tab.sw;
+    if (sw.startTs !== null) {
+      sw.base += Date.now() - sw.startTs;
+      sw.startTs = null;
+      clearInterval(sw.ticker); sw.ticker = null;
+      saveSwState(tab);
+      panel.querySelector('.sw-toggle').textContent = '▶ 시작';
+      panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
+    }
+    const elapsed = swElapsed(tab);
+
+    // 2. 획득 기록에 완료 항목 추가
+    const list = panel.querySelector('.sw-log-list');
+    const entry = document.createElement('div');
+    entry.className = 'sw-log-entry complete fade-in';
+    entry.innerHTML = `<span class="lt">${fmtTime(elapsed)}</span><span class="ln">🎉 도감작 완료!</span>`;
+    list.insertBefore(entry, list.firstChild);
+  }
+
+  // 3. 메소 비
+  mesoRain();
+}
+
+function mesoRain() {
+  const container = document.getElementById('meso-rain');
+  const count = 60;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const coin = document.createElement('div');
+      coin.className = 'meso-coin';
+      coin.textContent = '🪙';
+      coin.style.left = `${Math.random() * 100}%`;
+      const duration = 1.5 + Math.random() * 2;
+      const delay = Math.random() * 1.5;
+      coin.style.animation = `mesoFall ${duration}s ${delay}s linear forwards`;
+      coin.style.fontSize = `${1.2 + Math.random() * 1.2}rem`;
+      container.appendChild(coin);
+      coin.addEventListener('animationend', () => coin.remove());
+    }, i * 30);
+  }
 }
 
 // ══════════════════════════════════════════
