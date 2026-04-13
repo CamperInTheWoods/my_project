@@ -680,7 +680,6 @@ function renderMobGrid(container, monsters) {
     c.innerHTML = `
       <img src="${mobImg(m.id)}" alt="${m.name}" onerror="this.src='${BLANK}'">
       <div class="mn">${m.name}</div>
-      ${m.level ? `<div class="ml">Lv.${m.level}</div>` : ''}
     `;
     c.addEventListener('click', () => {
       if (m.drops && m.drops.length) activateMob(m);        // 프리셋: 드롭 데이터 있음
@@ -897,7 +896,7 @@ function activateMob(mob) {
   document.getElementById('mob-img').src = mobImg(mob.id);
   document.getElementById('mob-name').textContent = mob.name;
   document.getElementById('mob-stats').textContent =
-    [mob.level?`Lv.${mob.level}`:'', mob.hp?`HP ${mob.hp.toLocaleString()}`:''].filter(Boolean).join('  ·  ');
+    mob.hp ? `HP ${mob.hp.toLocaleString()}` : '';
   const lnk = document.getElementById('mob-link');
   lnk.href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
