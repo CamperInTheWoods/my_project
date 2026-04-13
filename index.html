@@ -338,7 +338,7 @@
   <span style="font-size:1.7rem">🍁</span>
   <div>
     <h1>메이플랜드 도감작 체크리스트</h1>
-    <div class="sub">한 몬스터의 모든 드롭을 완성하세요</div>
+    <div class="sub">도감길드 파이팅</div>
   </div>
 </header>
 
@@ -972,6 +972,11 @@ function activateMob(mob) {
   const lnk = document.getElementById('mob-link');
   lnk.href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
+  // 몬스터 이름 meta 저장 (저장된 도감작에서 이름 표시용)
+  const s = loadS();
+  s[`mob_${mob.id}_meta`] = { name: mob.name };
+  saveS(s);
+
   // 스톱워치 로그 초기화
   document.getElementById('sw-log-list').innerHTML = '';
 
@@ -1220,10 +1225,13 @@ function renderSaves() {
   keys.forEach(key => {
     const mobId = parseInt(key.replace('mob_',''));
     const preset = PRESET.find(m => m.id === mobId);
-    const name   = preset ? preset.name : `#${mobId}`;
+    // 저장된 이름: activeMob이 이 몹이면 그 이름, 아니면 PRESET, 아니면 ID
+    const savedName = (activeMob && activeMob.id === mobId)
+      ? activeMob.name
+      : (preset ? preset.name : (store[`mob_${mobId}_meta`]?.name || `#${mobId}`));
     const items  = store[key] || {};
     const done   = Object.values(items).filter(s => (s.count||0)>0).length;
-    const total  = preset ? preset.drops.length : Object.keys(items).length;
+    const total  = Object.keys(items).length;
     const isAct  = activeMob && activeMob.id === mobId;
     const full   = done === total && total > 0;
 
@@ -1231,19 +1239,24 @@ function renderSaves() {
     chip.className = 'save-chip' + (isAct?' act':'');
     chip.innerHTML = `
       <div class="dot" style="background:${full?'#4caf50':done>0?'#f5a623':'#ccc'}"></div>
-      <span>${name} ${done}/${total}</span>
+      <span>${savedName} ${done}/${total}</span>
       <span class="del" data-key="${key}" title="삭제">✕</span>
     `;
     chip.addEventListener('click', e => {
       if (e.target.classList.contains('del')) {
         const k = e.target.dataset.key;
-        if (confirm(`"${name}" 진행도를 삭제할까요?`)) {
+        if (confirm(`"${savedName}" 진행도를 삭제할까요?`)) {
           const s = loadS(); delete s[k]; saveS(s); renderSaves();
           if (activeMob && activeMob.id === mobId) renderItemGrid();
         }
         return;
       }
-      if (preset) activateMob(preset);
+      // 클릭 시: preset이면 바로, 아니면 메이플노트에서 다시 로드
+      if (preset) {
+        activateMob(preset);
+      } else {
+        fetchMobDrops(mobId, savedName, 0);
+      }
     });
     el.appendChild(chip);
   });
