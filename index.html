@@ -977,8 +977,14 @@ function activateMob(mob) {
   s[`mob_${mob.id}_meta`] = { name: mob.name };
   saveS(s);
 
-  // 스톱워치 로그 초기화
+  // 스톱워치 로그: 저장된 firstTime 기록으로 복원
   document.getElementById('sw-log-list').innerHTML = '';
+  const mobStore = loadS()[`mob_${mob.id}`] || {};
+  const logEntries = mob.drops
+    .map(d => ({ name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
+    .filter(e => e.ms !== null)
+    .sort((a, b) => a.ms - b.ms);
+  logEntries.forEach(e => addSwLog(e.name, e.ms));
 
   renderItemGrid();
 
