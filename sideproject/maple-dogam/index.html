@@ -248,6 +248,17 @@
     .excl-toggle:hover { border-color:var(--gold); color:var(--brown); }
     .excl-toggle.hide-excl { background:#fff0f0; border-color:#f5c6c6; color:var(--red); }
 
+    /* ─ Hunt Estimate ─ */
+    .hunt-count {
+      font-size:1.5rem; font-weight:700; color:var(--dark);
+      text-align:center; letter-spacing:-.5px; padding:4px 0 2px;
+    }
+    .hunt-reason {
+      font-size:.65rem; color:var(--gray); text-align:center;
+      line-height:1.4; padding-bottom:2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
     /* ─ Stopwatch ─ */
     .sw-display {
       font-family:'Courier New',monospace;
@@ -393,6 +404,12 @@
         <div id="item-grid" class="item-grid"></div>
       </div>
       <div class="sw-section panel">
+        <div id="hunt-estimate" style="display:none">
+          <div class="ptitle">🗡 예상 사냥 마릿수</div>
+          <div id="hunt-count" class="hunt-count"></div>
+          <div id="hunt-reason" class="hunt-reason"></div>
+          <div class="divider" style="margin:10px 0 12px"></div>
+        </div>
         <div class="ptitle">⏱ 스톱워치</div>
         <div id="sw-display" class="sw-display">00:00.00</div>
         <div class="sw-btns">
@@ -1070,6 +1087,34 @@ function updateProgress() {
   document.getElementById('prog-pct').textContent  = `${pct}%`;
   document.getElementById('prog-fill').style.width = `${pct}%`;
   document.getElementById('complete-badge').style.display = (done===total&&total>0) ? 'block' : 'none';
+  updateHuntEstimate();
+}
+
+function updateHuntEstimate() {
+  if (!activeMob) return;
+  const store   = loadS();
+  const mobData = store[`mob_${activeMob.id}`] || {};
+  const excl    = getExcluded();
+
+  let maxKills = 0, bottleneck = null;
+
+  activeMob.drops.forEach(drop => {
+    if (excl.has(drop.id)) return;
+    if ((mobData[drop.id]?.count || 0) > 0) return; // 이미 수집됨
+
+    const rate = parseFloat(drop.rate) / 100; // "0.006%" → 0.00006
+    if (!rate || rate <= 0) return;
+
+    const expected = Math.ceil(1 / rate);
+    if (expected > maxKills) { maxKills = expected; bottleneck = drop; }
+  });
+
+  const wrap = document.getElementById('hunt-estimate');
+  if (!bottleneck) { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = '';
+  document.getElementById('hunt-count').textContent = `~${maxKills.toLocaleString()}마리`;
+  document.getElementById('hunt-reason').textContent = `${bottleneck.name} (${bottleneck.rate}) 기준`;
 }
 
 // ══════════════════════════════════════════
