@@ -331,6 +331,8 @@
     .sw-start { background:#4caf50; color:white; }
     .sw-pause { background:#f5a623; color:white; }
     .sw-reset { background:#e0e0e0; color:#555; }
+    .sw-sync { background:#e8f4fd; color:#1a6fa8; border:1px solid #a8d4f0; font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
+    .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
 
     /* sw log */
     .sw-log { margin-top:14px; }
@@ -586,7 +588,7 @@ const PRESET = [
 const MAX_TABS = 3;
 
 function makeTab(idx) {
-  return { idx, mob: null, sw: { base:0, startTs:null, ticker:null } };
+  return { idx, mob: null, sw: { base:0, startTs:null, ticker:null }, synced: false };
 }
 
 let tabs = [makeTab(0)];
@@ -618,45 +620,84 @@ function swElapsed(tab) {
   return sw.startTs !== null ? sw.base + (Date.now() - sw.startTs) : sw.base;
 }
 
-function swToggle() {
-  const tab = activeTab();
-  const sw = tab.sw;
-  const panel = getActivePanel();
-  if (sw.startTs !== null) {
-    // 일시정지
-    sw.base += Date.now() - sw.startTs;
-    sw.startTs = null;
-    clearInterval(sw.ticker); sw.ticker = null;
-    panel.querySelector('.sw-toggle').textContent = '▶ 시작';
-    panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
-    saveSwState(tab); // 일시정지 시 저장
-  } else {
-    // 시작
-    sw.startTs = Date.now();
-    const tabRef = tab; // 탭 객체 직접 참조 (인덱스 변동 무관)
-    sw.ticker = setInterval(() => {
-      swTickPanel(getPanelOf(tabRef.idx), tabRef);
-    }, 50);
+function _swStartOne(tab, panel) {
+  if (tab.sw.startTs !== null) return;
+  tab.sw.startTs = Date.now();
+  const tabRef = tab;
+  tab.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabRef.idx), tabRef), 50);
+  if (panel) {
     panel.querySelector('.sw-toggle').textContent = '⏸ 일시정지';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-pause sw-toggle';
+  }
+}
+
+function _swPauseOne(tab, panel) {
+  if (tab.sw.startTs === null) return;
+  tab.sw.base += Date.now() - tab.sw.startTs;
+  tab.sw.startTs = null;
+  clearInterval(tab.sw.ticker); tab.sw.ticker = null;
+  if (panel) {
+    panel.querySelector('.sw-toggle').textContent = '▶ 시작';
+    panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
+  }
+  saveSwState(tab);
+}
+
+function _swResetOne(tab, panel) {
+  clearInterval(tab.sw.ticker); tab.sw.ticker = null;
+  tab.sw.base = 0; tab.sw.startTs = null;
+  if (panel) {
+    panel.querySelector('.sw-toggle').textContent = '▶ 시작';
+    panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
+    panel.querySelector('.sw-log-list').innerHTML = '';
+    swTickPanel(panel, tab);
+  }
+  if (tab.mob) { const s = loadS(); delete s[`sw_mob_${tab.mob.id}`]; saveS(s); }
+}
+
+function swToggle() {
+  const tab = activeTab();
+  const panel = getActivePanel();
+  const isRunning = tab.sw.startTs !== null;
+  if (isRunning) _swPauseOne(tab, panel);
+  else _swStartOne(tab, panel);
+  if (tab.synced) {
+    tabs.forEach(t => {
+      if (t !== tab && t.synced) {
+        const p = getPanelOf(t.idx);
+        if (isRunning) _swPauseOne(t, p);
+        else _swStartOne(t, p);
+      }
+    });
   }
 }
 
 function swReset() {
   if (!confirm('스톱워치와 획득 기록을 리셋할까요?')) return;
   const tab = activeTab();
-  const sw = tab.sw;
-  const panel = getActivePanel();
-  clearInterval(sw.ticker); sw.ticker = null;
-  sw.base = 0; sw.startTs = null;
-  panel.querySelector('.sw-toggle').textContent = '▶ 시작';
-  panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
-  panel.querySelector('.sw-log-list').innerHTML = '';
-  swTickPanel(panel, tab);
-  // 리셋 시 저장된 sw 상태 삭제
-  if (activeMob) {
-    const s = loadS(); delete s[`sw_mob_${activeMob.id}`]; saveS(s);
+  _swResetOne(tab, getActivePanel());
+  if (tab.synced) {
+    tabs.forEach(t => { if (t !== tab && t.synced) _swResetOne(t, getPanelOf(t.idx)); });
   }
+}
+
+function swSyncToggle() {
+  const tab = activeTab();
+  tab.synced = !tab.synced;
+  updateSyncBtn(getActivePanel(), tab);
+}
+
+function updateSyncBtn(panel, tab) {
+  if (!panel) return;
+  const btn = panel.querySelector('.sw-sync');
+  if (!btn) return;
+  btn.style.display = tabs.length >= 2 ? '' : 'none';
+  btn.textContent = tab.synced ? '🔗 동기화 중' : '🔗 동기화';
+  btn.className = 'sw-sync' + (tab.synced ? ' sw-sync-on' : '');
+}
+
+function updateAllSyncBtns() {
+  tabs.forEach(t => updateSyncBtn(getPanelOf(t.idx), t));
 }
 
 // sw 상태를 localStorage에 저장 (몹별)
@@ -1044,6 +1085,9 @@ function buildTabPanel(tab) {
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
           <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
         </div>
+        <div style="text-align:center;margin-top:6px">
+          <button class="sw-sync" onclick="swSyncToggle()">🔗 동기화</button>
+        </div>
         <div class="sw-log">
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
           <div class="sw-log-list"></div>
@@ -1121,6 +1165,7 @@ function addTab() {
   document.getElementById('tab-panels').appendChild(panel);
   document.getElementById('section-checklist').style.display = 'block';
   switchTab(idx);
+  updateAllSyncBtns();
 }
 
 function closeTab(e, idx) {
@@ -1147,6 +1192,7 @@ function closeTab(e, idx) {
   });
   activeTabIdx = Math.min(activeTabIdx, tabs.length - 1);
   switchTab(activeTabIdx);
+  updateAllSyncBtns();
 }
 
 function restorePanelForTab(tab) {
