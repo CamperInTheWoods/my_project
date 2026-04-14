@@ -691,7 +691,7 @@ function updateSyncBtn(panel, tab) {
   if (!panel) return;
   const btn = panel.querySelector('.sw-sync');
   if (!btn) return;
-  btn.style.display = tabs.length >= 2 ? '' : 'none';
+  btn.style.display = tabs.length >= 2 ? 'block' : 'none';
   btn.textContent = tab.synced ? '🔗 동기화 중' : '🔗 동기화';
   btn.className = 'sw-sync' + (tab.synced ? ' sw-sync-on' : '');
 }
