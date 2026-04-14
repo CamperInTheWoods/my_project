@@ -341,7 +341,9 @@
       background:white; margin-bottom:4px; border:1px solid #eee;
     }
     .sw-log-entry .lt { color:var(--gold); font-weight:700; font-family:'Courier New',monospace; flex-shrink:0; }
-    .sw-log-entry .ln { color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sw-log-entry .ln { color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+    .sw-log-entry .ldel { margin-left:auto; flex-shrink:0; background:none; border:none; cursor:pointer; color:#bbb; font-size:.75rem; padding:0 2px; line-height:1; }
+    .sw-log-entry .ldel:hover { color:#e55; }
     .sw-log-list::-webkit-scrollbar { width:4px; }
     .sw-log-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
@@ -684,10 +686,11 @@ function swTickPanel(panel, tab) {
 
 function fmtTime(ms) {
   if (ms < 0) ms = 0;
-  const m  = Math.floor(ms / 60000);
+  const h  = Math.floor(ms / 3600000);
+  const m  = Math.floor((ms % 3600000) / 60000);
   const s  = Math.floor((ms % 60000) / 1000);
   const cs = Math.floor((ms % 1000) / 10);
-  return `${pad(m)}:${pad(s)}.${pad(cs)}`;
+  return `${pad(h)}:${pad(m)}:${pad(s)}.${pad(cs)}`;
 }
 function pad(n) { return String(n).padStart(2,'0'); }
 
@@ -1036,7 +1039,7 @@ function buildTabPanel(tab) {
           <div class="divider" style="margin:10px 0 12px"></div>
         </div>
         <div class="ptitle">⏱ 스톱워치</div>
-        <div class="sw-display">00:00.00</div>
+        <div class="sw-display">00:00:00.00</div>
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
           <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
@@ -1161,9 +1164,9 @@ function restorePanelForTab(tab) {
   // 획득 기록 복원
   const mobStore = loadS()[`mob_${mob.id}`] || {};
   const logEntries = mob.drops
-    .map(d => ({ name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
+    .map(d => ({ id: d.id, name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
     .filter(e => e.ms !== null).sort((a, b) => a.ms - b.ms);
-  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms));
+  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms, e.id));
   // sw 버튼 상태 반영
   const swToggleBtn = panel.querySelector('.sw-toggle');
   if (swToggleBtn) {
@@ -1224,9 +1227,9 @@ function activateMob(mob) {
   panel.querySelector('.sw-log-list').innerHTML = '';
   const mobStore = loadS()[`mob_${mob.id}`] || {};
   const logEntries = mob.drops
-    .map(d => ({ name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
+    .map(d => ({ id: d.id, name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
     .filter(e => e.ms !== null).sort((a, b) => a.ms - b.ms);
-  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms));
+  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms, e.id));
 
   renderItemGrid();
 
@@ -1346,7 +1349,7 @@ function incrementItem(itemId) {
   saveS(store);
 
   updateCardUI(itemId, state, drop);
-  if (isFirst) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime);
+  if (isFirst) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, itemId);
   updateProgress();
   updateHuntEstimate();
   renderSaves();
@@ -1399,14 +1402,31 @@ function updateCardUI(itemId, state, drop) {
 function addSwLog(name, ms) {
   addSwLogToPanel(getActivePanel(), name, ms);
 }
-function addSwLogToPanel(panel, name, ms) {
+function addSwLogToPanel(panel, name, ms, dropId) {
   if (!panel) return;
   const list = panel.querySelector('.sw-log-list');
   const entry = document.createElement('div');
   entry.className = 'sw-log-entry fade-in';
-  entry.innerHTML = `<span class="lt">${fmtTime(ms)}</span><span class="ln">${name}</span>`;
+  if (dropId != null) entry.dataset.dropId = dropId;
+  entry.innerHTML = `<span class="lt">${fmtTime(ms)}</span><span class="ln">${name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
   while (list.children.length > 15) list.removeChild(list.lastChild);
+}
+function deleteLogEntry(btn) {
+  const entry = btn.closest('.sw-log-entry');
+  const dropId = entry.dataset.dropId ? Number(entry.dataset.dropId) : null;
+  if (dropId != null && activeMob) {
+    const s = loadS();
+    const key = `mob_${activeMob.id}`;
+    if (s[key]?.[dropId]) {
+      s[key][dropId].firstTime = null;
+      saveS(s);
+      // 카드 시간 표시도 초기화
+      const card = getActivePanel()?.querySelector(`.item-card[data-id="${dropId}"]`);
+      if (card) card.querySelector('.ctime').textContent = '';
+    }
+  }
+  entry.remove();
 }
 
 // ══════════════════════════════════════════
