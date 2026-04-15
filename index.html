@@ -331,6 +331,7 @@
     .sw-start { background:#4caf50; color:white; }
     .sw-pause { background:#f5a623; color:white; }
     .sw-reset { background:#e0e0e0; color:#555; }
+    .sw-channel { background:#e8f4fd; color:#1a6fa8; font-size:.8rem; }
     .sw-sync { background:#e8f4fd; color:#1a6fa8; border:1px solid #a8d4f0; font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
     .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
 
@@ -350,26 +351,81 @@
     .sw-log-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
     /* ─ Saves ─ */
-    .saves-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
-    .save-chip {
-      display:flex; align-items:center; gap:6px;
-      padding:5px 10px; background:white;
-      border:2px solid var(--border); border-radius:20px;
-      font-size:.76rem; cursor:pointer; transition:all .12s;
+    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:6px; }
+    .save-card {
+      position:relative; background:white; border:2px solid var(--border);
+      border-radius:12px; padding:12px 10px 10px; cursor:pointer;
+      transition:all .15s; text-align:center;
     }
-    .save-chip:hover { border-color:var(--gold); }
-    .save-chip.act { border-color:var(--gold); background:#fffbe8; }
-    .save-chip .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .save-chip .del { color:#ccc; font-size:.68rem; padding:0 2px; cursor:pointer; }
-    .save-chip .del:hover { color:var(--red); }
+    .save-card:hover { border-color:var(--gold); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .save-card.act { border-color:var(--gold); background:#fffbe8; }
+    .save-card.complete { border-color:#4caf50; background:#f1fff3; }
+    .save-card-name {
+      font-size:.78rem; font-weight:700; color:var(--dark);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px;
+    }
+    .save-card-pct {
+      font-size:1.6rem; font-weight:900; line-height:1;
+      color:var(--gold); margin-bottom:4px;
+    }
+    .save-card.complete .save-card-pct { color:#4caf50; }
+    .save-card-count { font-size:.65rem; color:var(--gray); margin-bottom:8px; }
+    .save-card-bar-bg {
+      height:6px; background:#eee; border-radius:3px; overflow:hidden;
+    }
+    .save-card-bar-fill {
+      height:100%; border-radius:3px;
+      background:linear-gradient(90deg,#f5a623,#e8890a);
+      transition:width .3s;
+    }
+    .save-card.complete .save-card-bar-fill { background:linear-gradient(90deg,#66bb6a,#43a047); }
+    .save-card-del {
+      position:absolute; top:6px; right:8px;
+      background:none; border:none; color:#ccc; font-size:.7rem;
+      cursor:pointer; padding:0; line-height:1;
+    }
+    .save-card-del:hover { color:var(--red); }
     .no-saves { font-size:.8rem; color:var(--gray); }
+
+    /* ─ Timeline ─ */
+    .tl-rows { margin-top:4px; }
+    .tl-row { position:relative; margin-bottom:20px; }
+    .tl-callouts { position:relative; min-height:52px; }
+    .tl-callout { position:absolute; transform:translateX(-50%); }
+    .tl-callout-box {
+      position:relative; width:34px; height:34px;
+      border:2px solid #aaa; border-radius:6px;
+      background:white; overflow:hidden;
+      box-shadow:0 1px 4px rgba(0,0,0,.15);
+    }
+    .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
+    .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
+    .tl-first-badge { position:absolute; top:-6px; right:-6px; background:#f5a623; color:white; font-size:.5rem; width:13px; height:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; z-index:1; }
+    .tl-r0 { border-color:#3498db; }
+    .tl-r1 { border-color:#2ecc71; box-shadow:0 1px 5px rgba(46,204,113,.3); }
+    .tl-r2 { border-color:#f1c40f; box-shadow:0 1px 5px rgba(241,196,15,.3); }
+    .tl-r3 { border-color:#e67e22; box-shadow:0 1px 6px rgba(230,126,34,.4); }
+    .tl-r4 { border-color:#e74c3c; box-shadow:0 1px 6px rgba(231,76,60,.4); }
+    .tl-r5 { border-color:#9b59b6; box-shadow:0 1px 6px rgba(155,89,182,.45); }
+    .tl-bar-wrap { height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
+    .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
+    .tl-labels { display:flex; justify-content:space-between; font-size:.6rem; color:#999; margin-top:3px; font-weight:600; }
+    .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
+    .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
+    .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
+    .tl-cluster.open .tl-cluster-badge { opacity:0; }
+    .tl-ch-mark { position:absolute; top:0; width:2px; background:rgba(52,152,219,0.28); transform:translateX(-50%); pointer-events:none; }
+    .tl-ch-mark::before { content:'CH'; position:absolute; top:2px; left:50%; transform:translateX(-50%); font-size:.42rem; color:#3498db; white-space:nowrap; font-weight:700; }
+    .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
     .rb { font-size:.58rem; padding:1px 5px; border-radius:10px; font-weight:700; }
-    .rh { background:#fff3e0; color:#e65100; }
-    .rm { background:#e8f4fd; color:#0277bd; }
-    .rl { background:#fce4ec; color:#c62828; }
-    .rr { background:#f3e5f5; color:#6a1b9a; }
+    .rb-blue   { background:#e8f4fd; color:#1a6fa8; }
+    .rb-green  { background:#e8f8e8; color:#1a7a1a; }
+    .rb-yellow { background:#fff8e1; color:#996600; }
+    .rb-orange { background:#fff3e0; color:#e65100; }
+    .rb-red    { background:#fce4ec; color:#c62828; }
+    .rb-purple { background:#f3e5f5; color:#6a1b9a; }
 
     /* ─ Responsive ─ */
     @media(max-width:640px){
@@ -650,9 +706,10 @@ function _swResetOne(tab, panel) {
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
     panel.querySelector('.sw-log-list').innerHTML = '';
+    const tl = panel.querySelector('.tl-section'); if (tl) tl.style.display='none';
     swTickPanel(panel, tab);
   }
-  if (tab.mob) { const s = loadS(); delete s[`sw_mob_${tab.mob.id}`]; saveS(s); }
+  if (tab.mob) { const s = loadS(); delete s[`sw_mob_${tab.mob.id}`]; delete s[`sw_ch_${tab.mob.id}`]; saveS(s); }
 }
 
 function swToggle() {
@@ -723,6 +780,216 @@ function restoreSwState(tab, mob) {
 function swTickPanel(panel, tab) {
   const el = panel?.querySelector('.sw-display');
   if (el) el.textContent = fmtTime(swElapsed(tab));
+  const sec = Math.floor(swElapsed(tab) / 1000);
+  if (tab._tlLastSec !== sec) { tab._tlLastSec = sec; if (tab.mob) updateTimelineBar(panel, tab); }
+}
+
+// ══════════════════════════════════════════
+// 5. 타임라인
+// ══════════════════════════════════════════
+const TL_ROW_MS = 1 * 3600 * 1000;   // 1시간 = 한 줄
+const TL_MAX_MS = 100 * 3600 * 1000; // 100시간 = 빨강 기준
+
+const TL_RARITY = [
+  { min:1,     cls:'tl-r0', color:'#3498db'  }, // 파랑  (1%~100%)
+  { min:0.1,   cls:'tl-r1', color:'#2ecc71'  }, // 초록  (0.1%~1%)
+  { min:0.01,  cls:'tl-r2', color:'#f1c40f'  }, // 노랑  (0.01%~0.1%)
+  { min:0.007, cls:'tl-r3', color:'#e67e22'  }, // 주황  (0.007%~0.01%)
+  { min:0.005, cls:'tl-r4', color:'#e74c3c'  }, // 빨강  (0.005%~0.007%)
+  { min:0,     cls:'tl-r5', color:'#9b59b6'  }, // 보라  (0.005% 이하)
+];
+function tlRarity(rateStr) {
+  const r = parseFloat(rateStr);
+  if (isNaN(r)) return TL_RARITY[4];
+  for (const t of TL_RARITY) if (r >= t.min) return t;
+  return TL_RARITY[4];
+}
+function tlColor(ms) {
+  const p = Math.min(ms / TL_MAX_MS, 1);
+  let h, s, l;
+  if (p <= 0.5) {
+    const t = p * 2;
+    h = Math.round(120 - t * 90); s = Math.round(70 + t * 10); l = Math.round(47 - t * 2);
+  } else {
+    const t = (p - 0.5) * 2;
+    h = Math.round(30 - t * 30); s = Math.round(80 + t * 10); l = Math.round(45 - t * 8);
+  }
+  return `hsl(${h},${s}%,${l}%)`;
+}
+function tlRowGrad(row) {
+  return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
+}
+function renderTimeline(panel, mob, tab) {
+  const section = panel?.querySelector('.tl-section');
+  if (!section) return;
+  const totalMs = swElapsed(tab);
+  if (totalMs < 1000) { section.style.display='none'; return; }
+  section.style.display = '';
+
+  const s = loadS();
+  const store  = s[`mob_${mob.id}`] || {};
+  const excl   = new Set(s[`excl_${mob.id}`] || []);
+  const chMarks = s[`sw_ch_${mob.id}`] || [];
+
+  const items = mob.drops
+    .filter(d => !excl.has(d.id) && store[d.id]?.firstTime != null)
+    .map(d => ({ ...d, firstTime: store[d.id].firstTime }))
+    .sort((a,b) => a.firstTime - b.firstTime);
+  const firstId = items.length ? items[0].id : null;
+
+  const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
+  let rowsHtml = '';
+  for (let row = 0; row < totalRows; row++) {
+    const rStart = row * TL_ROW_MS, rEnd = rStart + TL_ROW_MS;
+    const fillPct = totalMs >= rEnd ? 100 : ((totalMs - rStart) / TL_ROW_MS * 100).toFixed(1);
+    const rowItems = items.filter(d => d.firstTime >= rStart && d.firstTime < rEnd);
+
+    // 클러스터 그룹핑 (4% 이내 = 같은 클러스터)
+    const OVERLAP = 4;
+    const clusters = [];
+    rowItems.forEach(d => {
+      const xPct = (d.firstTime - rStart) / TL_ROW_MS * 100;
+      const hit = clusters.find(c => Math.abs(c.xPct - xPct) < OVERLAP);
+      if (hit) hit.items.push(d);
+      else clusters.push({ xPct, items:[d] });
+    });
+    const calloutsH = 52;
+
+    let callHtml = '';
+    clusters.forEach(({ xPct, items }) => {
+      const cx = Math.min(Math.max(xPct, 2), 98).toFixed(1);
+      const topRar = tlRarity(items[items.length-1].rate);
+      if (items.length === 1) {
+        const d = items[0]; const rar = tlRarity(d.rate); const isF = d.id === firstId;
+        callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
+          <div class="tl-callout-box ${rar.cls}" title="${d.name}${isF?' ★첫 획득':''}">
+            ${isF?'<div class="tl-first-badge">★</div>':''}
+            <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
+          </div>
+          <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
+        </div>`;
+      } else {
+        // 덱으로 쌓기 — 클릭하면 펼쳐짐
+        let wrapsHtml = '';
+        items.forEach((d, i) => {
+          const rar = tlRarity(d.rate); const isF = d.id === firstId;
+          const rot = (i - (items.length-1)/2) * 6;
+          wrapsHtml += `<div class="tl-callout-wrap" style="transform:rotate(${rot}deg)">
+            <div class="tl-callout-box ${rar.cls}" title="${d.name}${isF?' ★첫 획득':''}">
+              ${isF?'<div class="tl-first-badge">★</div>':''}
+              <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
+            </div>
+            <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
+          </div>`;
+        });
+        callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
+          ${wrapsHtml}
+          <div class="tl-cluster-badge">${items.length}</div>
+        </div>`;
+      }
+    });
+
+    // 채널변경 마커
+    let chHtml = '';
+    chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
+      const xPct = ((ms - rStart) / TL_ROW_MS * 100).toFixed(1);
+      chHtml += `<div class="tl-ch-mark" style="left:clamp(1px,${xPct}%,calc(100% - 1px));height:${calloutsH + 8}px"></div>`;
+    });
+
+    rowsHtml += `<div class="tl-row" data-row="${row}">
+      <div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>
+      <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+      <div class="tl-labels"><span>${row}시간</span><span>${row+1}시간</span></div>
+      ${chHtml}
+    </div>`;
+  }
+  section.querySelector('.tl-rows').innerHTML = rowsHtml;
+}
+function deleteChannelEntry(btn) {
+  const entry = btn.closest('.sw-log-entry');
+  const ms = Number(entry.dataset.chMs);
+  if (activeMob) {
+    const s = loadS();
+    const key = `sw_ch_${activeMob.id}`;
+    s[key] = (s[key] || []).filter(t => t !== ms);
+    saveS(s);
+    renderTimeline(getActivePanel(), activeMob, activeTab());
+  }
+  entry.remove();
+}
+
+function tlToggleCluster(e, el) {
+  e.stopPropagation();
+  const wraps = [...el.querySelectorAll('.tl-callout-wrap')];
+  const isOpen = el.classList.toggle('open');
+  const spread = 46;
+  const offset = -(wraps.length - 1) * spread / 2;
+  wraps.forEach((w, i) => {
+    w.style.transform = isOpen
+      ? `translateX(${offset + i * spread}px) rotate(0deg)`
+      : `rotate(${(i - (wraps.length-1)/2) * 6}deg)`;
+  });
+}
+
+function restoreLogEntries(panel, mob) {
+  const s = loadS();
+  const mobStore = s[`mob_${mob.id}`] || {};
+  const itemEntries = mob.drops
+    .filter(d => mobStore[d.id]?.firstTime != null)
+    .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
+  const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
+  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms); // 최신순
+  const list = panel.querySelector('.sw-log-list');
+  all.forEach(e => {
+    const el = document.createElement('div');
+    if (e.isCh) {
+      el.className = 'sw-log-entry sw-log-channel';
+      el.dataset.chMs = e.ms;
+      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+    } else {
+      el.className = 'sw-log-entry';
+      el.dataset.dropId = e.id;
+      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${e.name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+    }
+    list.appendChild(el);
+  });
+}
+
+function swChannelMark() {
+  const tab = activeTab();
+  const panel = getActivePanel();
+  const ms = swElapsed(tab);
+  if (ms < 100) return;
+  if (tab.mob) {
+    const s = loadS();
+    const key = `sw_ch_${tab.mob.id}`;
+    const chs = s[key] || []; chs.push(ms); s[key] = chs; saveS(s);
+  }
+  const list = panel.querySelector('.sw-log-list');
+  const entry = document.createElement('div');
+  entry.className = 'sw-log-entry sw-log-channel fade-in';
+  entry.dataset.chMs = ms;
+  entry.innerHTML = `<span class="lt">${fmtTime(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+  list.insertBefore(entry, list.firstChild);
+  if (tab.mob) renderTimeline(panel, tab.mob, tab);
+}
+
+function updateTimelineBar(panel, tab) {
+  const section = panel?.querySelector('.tl-section');
+  if (!section || !tab.mob) return;
+  const totalMs = swElapsed(tab);
+  if (totalMs < 1000) { section.style.display='none'; return; }
+  section.style.display = '';
+  const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
+  if (section.querySelectorAll('.tl-row').length !== totalRows) {
+    renderTimeline(panel, tab.mob, tab); return;
+  }
+  const rows = section.querySelectorAll('.tl-row');
+  const last = rows[rows.length-1];
+  if (!last) return;
+  const lastStart = (totalRows-1) * TL_ROW_MS;
+  const fill = last.querySelector('.tl-bar-fill');
+  if (fill) fill.style.width = Math.min(100, (totalMs-lastStart)/TL_ROW_MS*100).toFixed(1)+'%';
 }
 
 function fmtTime(ms) {
@@ -732,6 +999,13 @@ function fmtTime(ms) {
   const s  = Math.floor((ms % 60000) / 1000);
   const cs = Math.floor((ms % 1000) / 10);
   return `${pad(h)}:${pad(m)}:${pad(s)}.${pad(cs)}`;
+}
+function fmtTimeLog(ms) {
+  if (ms < 0) ms = 0;
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
 }
 function pad(n) { return String(n).padStart(2,'0'); }
 
@@ -749,10 +1023,12 @@ function itemImg(id) { return `https://maplestory.io/api/kms/284/item/${id}/icon
 // ══════════════════════════════════════════
 function rateBadge(r) {
   const n = parseFloat(r);
-  if (n >= 10)   return `<span class="rb rh">${r}</span>`;
-  if (n >= 0.1)  return `<span class="rb rm">${r}</span>`;
-  if (n >= 0.01) return `<span class="rb rl">${r}</span>`;
-  return               `<span class="rb rr">${r}</span>`;
+  if (n >= 1)     return `<span class="rb rb-blue">${r}</span>`;
+  if (n >= 0.1)   return `<span class="rb rb-green">${r}</span>`;
+  if (n >= 0.01)  return `<span class="rb rb-yellow">${r}</span>`;
+  if (n >= 0.007) return `<span class="rb rb-orange">${r}</span>`;
+  if (n >= 0.005) return `<span class="rb rb-red">${r}</span>`;
+  return                 `<span class="rb rb-purple">${r}</span>`;
 }
 
 // ══════════════════════════════════════════
@@ -1083,6 +1359,7 @@ function buildTabPanel(tab) {
         <div class="sw-display">00:00:00.00</div>
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
+          <button class="sw-btn sw-channel" onclick="swChannelMark()">📡 채널변경</button>
           <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
         </div>
         <div style="text-align:center;margin-top:6px">
@@ -1091,6 +1368,10 @@ function buildTabPanel(tab) {
         <div class="sw-log">
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
           <div class="sw-log-list"></div>
+        </div>
+        <div class="tl-section" style="display:none">
+          <div class="ptitle" style="margin-top:14px;font-size:.65rem">📊 타임라인</div>
+          <div class="tl-rows"></div>
         </div>
       </div>
     </div>`;
@@ -1201,18 +1482,15 @@ function restorePanelForTab(tab) {
   const mob = tab.mob;
   panel.querySelector('.mob-img').src = mobImg(mob.id);
   panel.querySelector('.mob-name').textContent = mob.name;
-  panel.querySelector('.mob-stats').textContent = mob.hp ? `HP ${mob.hp.toLocaleString()}` : '';
+  panel.querySelector('.mob-stats').textContent = '';
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
   // 아이템 그리드 복원
   renderItemGridInPanel(panel, mob);
   updateProgressInPanel(panel, mob);
   updateHuntEstimateInPanel(panel, mob);
   // 획득 기록 복원
-  const mobStore = loadS()[`mob_${mob.id}`] || {};
-  const logEntries = mob.drops
-    .map(d => ({ id: d.id, name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
-    .filter(e => e.ms !== null).sort((a, b) => a.ms - b.ms);
-  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms, e.id));
+  restoreLogEntries(panel, mob);
+  renderTimeline(panel, mob, tabs.find(t => t.mob?.id === mob.id) || activeTab());
   // sw 버튼 상태 반영
   const swToggleBtn = panel.querySelector('.sw-toggle');
   if (swToggleBtn) {
@@ -1255,12 +1533,12 @@ function activateMob(mob) {
   // 헤더 업데이트
   panel.querySelector('.mob-img').src = mobImg(mob.id);
   panel.querySelector('.mob-name').textContent = mob.name;
-  panel.querySelector('.mob-stats').textContent = mob.hp ? `HP ${mob.hp.toLocaleString()}` : '';
+  panel.querySelector('.mob-stats').textContent = '';
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
   // 몬스터 이름 meta 저장
   const s = loadS();
-  s[`mob_${mob.id}_meta`] = { name: mob.name };
+  s[`mob_${mob.id}_meta`] = { name: mob.name, total: mob.drops.length };
   saveS(s);
 
   // 스톱워치 상태 복원 (몹별 저장된 시간)
@@ -1271,11 +1549,8 @@ function activateMob(mob) {
 
   // 스톱워치 로그 복원
   panel.querySelector('.sw-log-list').innerHTML = '';
-  const mobStore = loadS()[`mob_${mob.id}`] || {};
-  const logEntries = mob.drops
-    .map(d => ({ id: d.id, name: d.name, ms: mobStore[d.id]?.firstTime ?? null }))
-    .filter(e => e.ms !== null).sort((a, b) => a.ms - b.ms);
-  logEntries.forEach(e => addSwLogToPanel(panel, e.name, e.ms, e.id));
+  restoreLogEntries(panel, mob);
+  renderTimeline(panel, mob, tab);
 
   renderItemGrid();
 
@@ -1296,6 +1571,7 @@ function toggleExclView() {
   setShowExcluded(!getShowExcluded());
   const show = getShowExcluded();
   const panel = getActivePanel();
+  if (!panel) return;
   const btn = panel.querySelector('.excl-toggle');
   btn.textContent = show ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
   btn.className   = show ? 'excl-toggle' : 'excl-toggle hide-excl';
@@ -1399,6 +1675,7 @@ function incrementItem(itemId) {
   updateProgress();
   updateHuntEstimate();
   renderSaves();
+  renderTimeline(getActivePanel(), activeMob, activeTab());
 }
 
 function decrementItem(e, itemId) {
@@ -1420,6 +1697,7 @@ function decrementItem(e, itemId) {
   updateProgress();
   updateHuntEstimate();
   renderSaves();
+  renderTimeline(getActivePanel(), activeMob, activeTab());
 }
 
 function updateCardUI(itemId, state, drop) {
@@ -1454,7 +1732,7 @@ function addSwLogToPanel(panel, name, ms, dropId) {
   const entry = document.createElement('div');
   entry.className = 'sw-log-entry fade-in';
   if (dropId != null) entry.dataset.dropId = dropId;
-  entry.innerHTML = `<span class="lt">${fmtTime(ms)}</span><span class="ln">${name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
   while (list.children.length > 15) list.removeChild(list.lastChild);
 }
@@ -1468,7 +1746,7 @@ function deleteLogEntry(btn) {
       s[key][dropId].firstTime = null;
       saveS(s);
       // 카드 시간 표시도 초기화
-      const card = getActivePanel()?.querySelector(`.item-card[data-id="${dropId}"]`);
+      const card = getActivePanel()?.querySelector(`.item-card[data-item-id="${dropId}"]`);
       if (card) card.querySelector('.ctime').textContent = '';
     }
   }
@@ -1566,7 +1844,7 @@ function onDogamComplete(panel, mob) {
     const list = panel.querySelector('.sw-log-list');
     const entry = document.createElement('div');
     entry.className = 'sw-log-entry complete fade-in';
-    entry.innerHTML = `<span class="lt">${fmtTime(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`;
+    entry.innerHTML = `<span class="lt">${fmtTimeLog(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`;
     list.insertBefore(entry, list.firstChild);
   }
 
@@ -1623,25 +1901,39 @@ function renderSaves() {
   keys.forEach(key => {
     const mobId = parseInt(key.replace('mob_',''));
     const preset = PRESET.find(m => m.id === mobId);
-    // 저장된 이름: activeMob이 이 몹이면 그 이름, 아니면 PRESET, 아니면 ID
     const savedName = (activeMob && activeMob.id === mobId)
       ? activeMob.name
       : (preset ? preset.name : (store[`mob_${mobId}_meta`]?.name || `#${mobId}`));
     const items  = store[key] || {};
-    const done   = Object.values(items).filter(s => (s.count||0)>0).length;
-    const total  = Object.keys(items).length;
+    const excl   = new Set(store[`excl_${mobId}`] || []);
+    const meta   = store[`mob_${mobId}_meta`] || {};
+    let done, total;
+    if (activeMob && activeMob.id === mobId) {
+      const activeDrops = activeMob.drops.filter(d => !excl.has(d.id));
+      total = activeDrops.length;
+      done  = activeDrops.filter(d => (items[d.id]?.count||0) > 0).length;
+    } else {
+      const allTotal = meta.total || Object.keys(items).length;
+      total = Math.max(1, allTotal - excl.size);
+      done  = Math.min(total, Object.entries(items).filter(([id,s]) => !excl.has(Number(id)) && (s.count||0)>0).length);
+    }
     const isAct  = activeMob && activeMob.id === mobId;
-    const full   = done === total && total > 0;
+    const full   = total > 0 && done === total;
+    const pct    = total > 0 ? Math.round(done / total * 100) : 0;
 
-    const chip = document.createElement('div');
-    chip.className = 'save-chip' + (isAct?' act':'');
-    chip.innerHTML = `
-      <div class="dot" style="background:${full?'#4caf50':done>0?'#f5a623':'#ccc'}"></div>
-      <span>${savedName} ${done}/${total}</span>
-      <span class="del" data-key="${key}" title="삭제">✕</span>
+    const card = document.createElement('div');
+    card.className = 'save-card' + (isAct ? ' act' : '') + (full ? ' complete' : '');
+    card.innerHTML = `
+      <button class="save-card-del" data-key="${key}" title="삭제">✕</button>
+      <div class="save-card-name" title="${savedName}">${savedName}</div>
+      <div class="save-card-pct">${pct}%</div>
+      <div class="save-card-count">${done} / ${total}</div>
+      <div class="save-card-bar-bg">
+        <div class="save-card-bar-fill" style="width:${pct}%"></div>
+      </div>
     `;
-    chip.addEventListener('click', e => {
-      if (e.target.classList.contains('del')) {
+    card.addEventListener('click', e => {
+      if (e.target.classList.contains('save-card-del')) {
         const k = e.target.dataset.key;
         if (confirm(`"${savedName}" 진행도를 삭제할까요?`)) {
           const s = loadS(); delete s[k]; saveS(s); renderSaves();
@@ -1649,14 +1941,10 @@ function renderSaves() {
         }
         return;
       }
-      // 클릭 시: preset이면 바로, 아니면 메이플노트에서 다시 로드
-      if (preset) {
-        activateMob(preset);
-      } else {
-        fetchMobDrops(mobId, savedName, 0);
-      }
+      if (preset) activateMob(preset);
+      else fetchMobDrops(mobId, savedName, 0);
     });
-    el.appendChild(chip);
+    el.appendChild(card);
   });
 }
 
