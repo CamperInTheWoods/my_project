@@ -780,8 +780,28 @@ function restoreSwState(tab, mob) {
 function swTickPanel(panel, tab) {
   const el = panel?.querySelector('.sw-display');
   if (el) el.textContent = fmtTime(swElapsed(tab));
-  const sec = Math.floor(swElapsed(tab) / 1000);
-  if (tab._tlLastSec !== sec) { tab._tlLastSec = sec; if (tab.mob) updateTimelineBar(panel, tab); }
+  if (!tab.mob) return;
+  const totalMs = swElapsed(tab);
+  if (totalMs < 1000) return;
+  const sec = Math.floor(totalMs / 1000);
+  const min = Math.floor(totalMs / 60000);
+  // 매초: 행 수 변경 감지 (1시간 지나면 새 줄 추가)
+  if (tab._tlLastSec !== sec) {
+    tab._tlLastSec = sec;
+    const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
+    const section = panel?.querySelector('.tl-section');
+    const currentRows = section ? section.querySelectorAll('.tl-row').length : 0;
+    if (currentRows !== totalRows) {
+      renderTimeline(panel, tab.mob, tab);
+      tab._tlLastMin = min;
+      return;
+    }
+  }
+  // 매분: 마지막 행 게이지 fill 업데이트
+  if (tab._tlLastMin !== min) {
+    tab._tlLastMin = min;
+    tlUpdateFill(panel, totalMs);
+  }
 }
 
 // ══════════════════════════════════════════
@@ -974,16 +994,10 @@ function swChannelMark() {
   if (tab.mob) renderTimeline(panel, tab.mob, tab);
 }
 
-function updateTimelineBar(panel, tab) {
+function tlUpdateFill(panel, totalMs) {
   const section = panel?.querySelector('.tl-section');
-  if (!section || !tab.mob) return;
-  const totalMs = swElapsed(tab);
-  if (totalMs < 1000) { section.style.display='none'; return; }
-  section.style.display = '';
+  if (!section) return;
   const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
-  if (section.querySelectorAll('.tl-row').length !== totalRows) {
-    renderTimeline(panel, tab.mob, tab); return;
-  }
   const rows = section.querySelectorAll('.tl-row');
   const last = rows[rows.length-1];
   if (!last) return;
