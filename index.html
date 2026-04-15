@@ -910,10 +910,10 @@ function renderTimeline(panel, mob, tab) {
     });
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
+      ${chHtml}
       <div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>
       <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
       <div class="tl-labels"><span>${row}시간</span><span>${row+1}시간</span></div>
-      ${chHtml}
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
