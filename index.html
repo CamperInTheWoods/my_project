@@ -400,7 +400,6 @@
     }
     .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
     .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
-    .tl-first-badge { position:absolute; top:-6px; right:-6px; background:#f5a623; color:white; font-size:.5rem; width:13px; height:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; z-index:1; }
     .tl-r0 { border-color:#3498db; }
     .tl-r1 { border-color:#2ecc71; box-shadow:0 1px 5px rgba(46,204,113,.3); }
     .tl-r2 { border-color:#f1c40f; box-shadow:0 1px 5px rgba(241,196,15,.3); }
@@ -869,17 +868,16 @@ function renderTimeline(panel, mob, tab) {
       if (hit) hit.items.push(d);
       else clusters.push({ xPct, items:[d] });
     });
-    const calloutsH = 52;
+    const calloutsH = rowItems.length > 0 ? 46 : 8;
 
     let callHtml = '';
     clusters.forEach(({ xPct, items }) => {
       const cx = Math.min(Math.max(xPct, 2), 98).toFixed(1);
       const topRar = tlRarity(items[items.length-1].rate);
       if (items.length === 1) {
-        const d = items[0]; const rar = tlRarity(d.rate); const isF = d.id === firstId;
+        const d = items[0]; const rar = tlRarity(d.rate);
         callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
-          <div class="tl-callout-box ${rar.cls}" title="${d.name}${isF?' ★첫 획득':''}">
-            ${isF?'<div class="tl-first-badge">★</div>':''}
+          <div class="tl-callout-box ${rar.cls}" title="${d.name}">
             <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
           </div>
           <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
@@ -888,11 +886,10 @@ function renderTimeline(panel, mob, tab) {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
         let wrapsHtml = '';
         items.forEach((d, i) => {
-          const rar = tlRarity(d.rate); const isF = d.id === firstId;
+          const rar = tlRarity(d.rate);
           const rot = (i - (items.length-1)/2) * 6;
           wrapsHtml += `<div class="tl-callout-wrap" style="transform:rotate(${rot}deg)">
-            <div class="tl-callout-box ${rar.cls}" title="${d.name}${isF?' ★첫 획득':''}">
-              ${isF?'<div class="tl-first-badge">★</div>':''}
+            <div class="tl-callout-box ${rar.cls}" title="${d.name}">
               <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
             </div>
             <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
