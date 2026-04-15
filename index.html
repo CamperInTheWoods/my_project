@@ -126,6 +126,7 @@
       font-family:inherit; font-weight:500;
     }
     .tab-btn.active { background:var(--panel); color:var(--dark); font-weight:700; }
+    .tab-btn .tab-sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#1a6fa8; margin-left:3px; vertical-align:middle; box-shadow:0 0 0 2px rgba(26,111,168,.25); }
     .tab-btn img { width:24px; height:24px; object-fit:contain; image-rendering:pixelated; }
     .tab-btn .tab-close {
       margin-left:2px; color:#bbb; font-size:.9rem; line-height:1;
@@ -741,6 +742,7 @@ function swSyncToggle() {
   const tab = activeTab();
   tab.synced = !tab.synced;
   updateSyncBtn(getActivePanel(), tab);
+  renderTabBar();
 }
 
 function updateSyncBtn(panel, tab) {
@@ -1403,6 +1405,7 @@ function renderTabBar() {
     btn.innerHTML = `
       ${tab.mob ? `<img src="${imgSrc}" onerror="this.style.display='none'">` : ''}
       <span>${name}</span>
+      ${tab.synced ? `<span class="tab-sync-dot" title="동기화 중"></span>` : ''}
       ${tabs.length > 1 ? `<span class="tab-close" data-tidx="${tab.idx}" onclick="closeTab(event,${tab.idx})">✕</span>` : ''}
     `;
     btn.addEventListener('click', e => {
@@ -1929,6 +1932,9 @@ function renderSaves() {
 
     const card = document.createElement('div');
     card.className = 'save-card' + (isAct ? ' act' : '') + (full ? ' complete' : '');
+    const swSaved = store[`sw_mob_${mobId}`];
+    const elapsedMs = swSaved?.base || 0;
+    const elapsedStr = elapsedMs >= 1000 ? fmtTimeLog(elapsedMs) : '';
     card.innerHTML = `
       <button class="save-card-del" data-key="${key}" title="삭제">✕</button>
       <div class="save-card-name" title="${savedName}">${savedName}</div>
@@ -1937,6 +1943,7 @@ function renderSaves() {
       <div class="save-card-bar-bg">
         <div class="save-card-bar-fill" style="width:${pct}%"></div>
       </div>
+      ${elapsedStr ? `<div style="font-size:.6rem;color:#aaa;margin-top:5px">⏱ ${elapsedStr}</div>` : ''}
     `;
     card.addEventListener('click', e => {
       if (e.target.classList.contains('save-card-del')) {
