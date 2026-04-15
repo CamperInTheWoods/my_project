@@ -982,7 +982,7 @@ function swChannelMark() {
   const entry = document.createElement('div');
   entry.className = 'sw-log-entry sw-log-channel fade-in';
   entry.dataset.chMs = ms;
-  entry.innerHTML = `<span class="lt">${fmtTime(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
   if (tab.mob) renderTimeline(panel, tab.mob, tab);
 }
