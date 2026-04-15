@@ -389,8 +389,8 @@
 
     /* ─ Timeline ─ */
     .tl-rows { margin-top:4px; }
-    .tl-row { position:relative; margin-bottom:20px; }
-    .tl-callouts { position:relative; min-height:52px; }
+    .tl-row { position:relative; margin-bottom:6px; }
+    .tl-callouts { position:relative; min-height:46px; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
       position:relative; width:34px; height:34px;
@@ -825,15 +825,11 @@ function tlRarity(rateStr) {
   return TL_RARITY[4];
 }
 function tlColor(ms) {
-  const p = Math.min(ms / TL_MAX_MS, 1);
-  let h, s, l;
-  if (p <= 0.5) {
-    const t = p * 2;
-    h = Math.round(120 - t * 90); s = Math.round(70 + t * 10); l = Math.round(47 - t * 2);
-  } else {
-    const t = (p - 0.5) * 2;
-    h = Math.round(30 - t * 30); s = Math.round(80 + t * 10); l = Math.round(45 - t * 8);
-  }
+  // sqrt 커브: 초반 시간에도 색 변화가 눈에 보이게
+  const p = Math.sqrt(Math.min(ms / TL_MAX_MS, 1));
+  const h = Math.round(120 - p * 120); // 초록(120) → 빨강(0)
+  const s = Math.round(72 + p * 18);   // 채도 증가
+  const l = Math.round(46 - p * 8);    // 명도 감소
   return `hsl(${h},${s}%,${l}%)`;
 }
 function tlRowGrad(row) {
