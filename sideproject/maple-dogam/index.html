@@ -413,8 +413,8 @@
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
     .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
-    .tl-ch-mark { position:absolute; top:0; width:2px; background:rgba(52,152,219,0.28); transform:translateX(-50%); pointer-events:none; }
-    .tl-ch-mark::before { content:'CH'; position:absolute; top:2px; left:50%; transform:translateX(-50%); font-size:.42rem; color:#3498db; white-space:nowrap; font-weight:700; }
+    .tl-ch-mark { position:absolute; top:0; bottom:0; width:3px; background:#fff; opacity:0.85; transform:translateX(-50%); pointer-events:none; border-radius:2px; }
+    .tl-ch-mark::before { content:'CH'; position:absolute; top:-14px; left:50%; transform:translateX(-50%); font-size:.42rem; color:#1a6fa8; white-space:nowrap; font-weight:800; background:rgba(232,244,253,0.9); padding:1px 3px; border-radius:3px; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -902,17 +902,16 @@ function renderTimeline(panel, mob, tab) {
       }
     });
 
-    // 채널변경 마커
+    // 채널변경 마커 (bar-wrap 안에 배치)
     let chHtml = '';
     chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
       const xPct = ((ms - rStart) / TL_ROW_MS * 100).toFixed(1);
-      chHtml += `<div class="tl-ch-mark" style="left:clamp(1px,${xPct}%,calc(100% - 1px));height:${calloutsH + 8}px"></div>`;
+      chHtml += `<div class="tl-ch-mark" style="left:clamp(2px,${xPct}%,calc(100% - 2px))"></div>`;
     });
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
-      ${chHtml}
       <div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>
-      <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+      <div class="tl-bar-wrap" style="position:relative;overflow:visible">${chHtml}<div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
       <div class="tl-labels"><span>${row}시간</span><span>${row+1}시간</span></div>
     </div>`;
   }
