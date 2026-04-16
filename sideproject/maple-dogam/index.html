@@ -390,8 +390,10 @@
 
     /* ─ Timeline ─ */
     .tl-rows { margin-top:4px; }
-    .tl-row { position:relative; margin-bottom:6px; }
+    .tl-row { position:relative; margin-bottom:3px; }
     .tl-callouts { position:relative; min-height:0; }
+    .tl-bar-row { display:flex; align-items:center; gap:5px; }
+    .tl-label { font-size:.55rem; color:#bbb; white-space:nowrap; min-width:24px; text-align:right; font-weight:600; flex-shrink:0; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
       position:relative; width:34px; height:34px;
@@ -407,9 +409,8 @@
     .tl-r3 { border-color:#e67e22; box-shadow:0 1px 6px rgba(230,126,34,.4); }
     .tl-r4 { border-color:#e74c3c; box-shadow:0 1px 6px rgba(231,76,60,.4); }
     .tl-r5 { border-color:#9b59b6; box-shadow:0 1px 6px rgba(155,89,182,.45); }
-    .tl-bar-wrap { height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
+    .tl-bar-wrap { flex:1; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
-    .tl-labels { display:flex; justify-content:space-between; font-size:.6rem; color:#999; margin-top:3px; font-weight:600; }
     .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
     .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
@@ -891,7 +892,7 @@ function renderTimeline(panel, mob, tab) {
       if (hit) hit.items.push(d);
       else clusters.push({ xPct, items:[d] });
     });
-    const calloutsH = rowItems.length > 0 ? 46 : 8;
+    const calloutsH = rowItems.length > 0 ? 42 : 0;
 
     let callHtml = '';
     clusters.forEach(({ xPct, items }) => {
@@ -933,9 +934,11 @@ function renderTimeline(panel, mob, tab) {
     });
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
-      <div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>
-      <div class="tl-bar-wrap" style="position:relative;overflow:visible">${chHtml}<div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
-      <div class="tl-labels"><span>${row}시간</span><span>${row+1}시간</span></div>
+      ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
+      <div class="tl-bar-row">
+        <span class="tl-label">${row}h</span>
+        <div class="tl-bar-wrap" style="position:relative;overflow:visible">${chHtml}<div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+      </div>
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
