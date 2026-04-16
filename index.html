@@ -255,8 +255,9 @@
     .item-card .ctime { font-size:.6rem; line-height:1.6; transition:color .2s; height:1em; }
 
     /* decrement button */
+    /* decrement button (위) */
     .item-card .decr {
-      position:absolute; bottom:5px; right:5px;
+      position:absolute; bottom:26px; right:5px;
       width:17px; height:17px; border-radius:50%;
       border:none; background:rgba(200,200,200,.6); color:#555;
       font-size:.7rem; cursor:pointer;
@@ -267,6 +268,21 @@
     .item-card:hover .decr { opacity:1; }
     .item-card .decr:hover { background:var(--red); color:white; }
     .item-card.nf .decr { display:none; }
+
+    /* bulk button (아래) */
+    .item-card .bulk-btn {
+      position:absolute; bottom:5px; right:5px;
+      width:17px; height:17px; border-radius:50%;
+      border:none; background:rgba(200,200,200,.6); color:#555;
+      font-size:.6rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s;
+      pointer-events:auto; line-height:1;
+    }
+    .item-card:hover .bulk-btn { opacity:1; }
+    .item-card .bulk-btn:hover { background:#1a6fa8; color:white; }
+    .item-card.nf .bulk-btn { display:none; }
+    .item-card.excl .bulk-btn { display:none; }
 
     /* exclude button */
     .item-card .excl-btn {
@@ -403,6 +419,7 @@
     }
     .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
     .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
+    .tl-arrow-spacer { height:5px; }
     .tl-r0 { border-color:#3498db; }
     .tl-r1 { border-color:#2ecc71; box-shadow:0 1px 5px rgba(46,204,113,.3); }
     .tl-r2 { border-color:#f1c40f; box-shadow:0 1px 5px rgba(241,196,15,.3); }
@@ -446,6 +463,84 @@
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
     .found-flash { animation:flash .4s ease; }
     @keyframes flash { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.8)} 100%{box-shadow:0 0 0 10px rgba(76,175,80,0)} }
+
+    /* ─ Bulk popup ─ */
+    .bulk-overlay {
+      display:none; position:fixed; inset:0; z-index:9000;
+      background:rgba(0,0,0,.6); backdrop-filter:blur(3px);
+      align-items:center; justify-content:center;
+    }
+    .bulk-overlay.open { display:flex; }
+    .bulk-popup {
+      background:var(--panel); border:2px solid var(--gold);
+      border-radius:16px; padding:22px 24px 18px;
+      box-shadow:0 8px 40px rgba(0,0,0,.7);
+      min-width:260px; max-width:320px; width:90%;
+      animation:fadeIn .2s ease;
+    }
+    .bulk-popup .bp-header {
+      display:flex; align-items:center; gap:10px; margin-bottom:16px;
+    }
+    .bulk-popup .bp-header img {
+      width:38px; height:38px; object-fit:contain; image-rendering:pixelated;
+    }
+    .bulk-popup .bp-name {
+      font-size:.85rem; font-weight:700; color:var(--dark);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;
+    }
+    .bulk-popup .bp-count-row {
+      text-align:center; margin-bottom:14px;
+    }
+    .bulk-popup .bp-count-label {
+      font-size:.6rem; color:var(--gray); margin-bottom:4px;
+    }
+    .bulk-popup .bp-count-display {
+      font-size:1.6rem; font-weight:700; color:var(--dark); line-height:1;
+    }
+    .bulk-popup .bp-delta-hint {
+      font-size:.65rem; color:var(--gray); margin-top:3px; min-height:1em;
+    }
+    .bulk-popup .bp-delta-hint.pos { color:#4caf50; }
+    .bulk-popup .bp-delta-hint.neg { color:#e53935; }
+    .bulk-popup .bp-btns {
+      display:grid; grid-template-columns:1fr 1fr 1fr;
+      gap:6px; margin-bottom:16px;
+    }
+    .bulk-popup .bp-adj {
+      padding:9px 0; border-radius:8px; border:none;
+      font-family:inherit; font-size:.8rem; font-weight:700;
+      cursor:pointer; transition:all .12s;
+    }
+    .bulk-popup .bp-adj.neg {
+      background:#fff0f0; color:#c62828; border:1.5px solid #ffcdd2;
+    }
+    .bulk-popup .bp-adj.neg:hover { background:#e53935; color:white; border-color:#e53935; }
+    .bulk-popup .bp-adj.pos {
+      background:#f0fff4; color:#2e7d32; border:1.5px solid #c8e6c9;
+    }
+    .bulk-popup .bp-adj.pos:hover { background:#4caf50; color:white; border-color:#4caf50; }
+    .bulk-popup .bp-actions {
+      display:flex; gap:8px;
+    }
+    .bulk-popup .bp-cancel {
+      flex:1; padding:9px; border-radius:8px;
+      border:1.5px solid var(--border); background:white;
+      color:var(--gray); font-family:inherit; font-size:.8rem; font-weight:700;
+      cursor:pointer; transition:all .12s;
+    }
+    .bulk-popup .bp-cancel:hover { background:#f5f5f5; }
+    .bulk-popup .bp-confirm {
+      flex:2; padding:9px; border-radius:8px;
+      border:none; background:linear-gradient(135deg,#f5a623,#e08800);
+      color:white; font-family:inherit; font-size:.8rem; font-weight:700;
+      cursor:pointer; transition:all .12s;
+      box-shadow:0 2px 8px rgba(224,136,0,.4);
+    }
+    .bulk-popup .bp-confirm:hover { background:linear-gradient(135deg,#ffb93a,#f09000); }
+    .bulk-popup .bp-confirm:disabled {
+      background:#ccc; box-shadow:none; cursor:default;
+    }
+
   </style>
 </head>
 <body>
@@ -459,6 +554,34 @@
 </header>
 
 <div id="meso-rain"></div>
+
+<!-- Bulk count popup -->
+<div class="bulk-overlay" id="bulk-overlay" onclick="bulkOverlayClick(event)">
+  <div class="bulk-popup">
+    <div class="bp-header">
+      <img id="bp-icon" src="" alt="">
+      <div class="bp-name" id="bp-name"></div>
+    </div>
+    <div class="bp-count-row">
+      <div class="bp-count-label">현재 수집 수량</div>
+      <div class="bp-count-display" id="bp-count">0</div>
+      <div class="bp-delta-hint" id="bp-delta-hint"></div>
+    </div>
+    <div class="bp-btns">
+      <button class="bp-adj pos" onclick="bulkAdjust(+1)">+1</button>
+      <button class="bp-adj pos" onclick="bulkAdjust(+10)">+10</button>
+      <button class="bp-adj pos" onclick="bulkAdjust(+100)">+100</button>
+      <button class="bp-adj neg" onclick="bulkAdjust(-1)">−1</button>
+      <button class="bp-adj neg" onclick="bulkAdjust(-10)">−10</button>
+      <button class="bp-adj neg" onclick="bulkAdjust(-100)">−100</button>
+    </div>
+    <div class="bp-actions">
+      <button class="bp-cancel" onclick="closeBulkPopup()">취소</button>
+      <button class="bp-confirm" id="bp-confirm" onclick="applyBulk()">확인</button>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- ① 몬스터 선택 -->
@@ -613,6 +736,29 @@ const PRESET = [
       {name:"블루 데빌즈 로브",      id:1050030, rate:"0.006%"},
       {name:"창 공격력 주문서 10%",  id:2044302, rate:"0.006%"},
       {name:"핑크 핀터",             id:1002035, rate:"0.004%"},
+    ]
+  },
+  {
+    id:9400002, name:"구름여우", level:30, hp:920,
+    drops:[
+      {name:"여우 꼬리",                  id:4000066, rate:"40%"   },
+      {name:"빨간 포션",                  id:2000000, rate:"1%"    },
+      {name:"자수정의 원석",              id:4020001, rate:"0.3%"  },
+      {name:"강철의 원석",               id:4010001, rate:"0.3%"  },
+      {name:"어묵(꼬치)",                id:2022021, rate:"0.1%"  },
+      {name:"블루 레골러",               id:1040073, rate:"0.01%" },
+      {name:"블루 폴레패더햇",           id:1002138, rate:"0.008%"},
+      {name:"레드 폴레패더햇",           id:1002139, rate:"0.008%"},
+      {name:"사파이어 메일",             id:1051014, rate:"0.008%"},
+      {name:"미스릴 배틀 그리브",        id:1072039, rate:"0.008%"},
+      {name:"신문지 투구",               id:1002418, rate:"0.008%"},
+      {name:"이글크로",                  id:1462004, rate:"0.006%"},
+      {name:"당커",                      id:1312006, rate:"0.006%"},
+      {name:"캣츠 아이",                 id:1032008, rate:"0.006%"},
+      {name:"하늘색 우산",               id:1302017, rate:"0.006%"},
+      {name:"한손도끼 공격력 주문서 10%",id:2043102, rate:"0.006%"},
+      {name:"펫장비 이동속도 주문서 60%",id:2048001, rate:"0.005%"},
+      {name:"두손검 공격력 주문서 10%",  id:2044002, rate:"0.004%"},
     ]
   },
   {
@@ -882,8 +1028,8 @@ function renderTimeline(panel, mob, tab) {
     const fillPct = totalMs >= rEnd ? 100 : ((totalMs - rStart) / TL_ROW_MS * 100).toFixed(1);
     const rowItems = items.filter(d => d.firstTime >= rStart && d.firstTime < rEnd);
 
-    // 클러스터 그룹핑 (4% 이내 = 같은 클러스터)
-    const OVERLAP = 4;
+    // 클러스터 그룹핑 (10% 이내 = 같은 클러스터, 1h 기준 ~6분)
+    const OVERLAP = 10;
     const clusters = [];
     rowItems.forEach(d => {
       const xPct = (d.firstTime - rStart) / TL_ROW_MS * 100;
@@ -896,7 +1042,6 @@ function renderTimeline(panel, mob, tab) {
     let callHtml = '';
     clusters.forEach(({ xPct, items }) => {
       const cx = Math.min(Math.max(xPct, 2), 98).toFixed(1);
-      const topRar = tlRarity(items[items.length-1].rate);
       if (items.length === 1) {
         const d = items[0]; const rar = tlRarity(d.rate);
         callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
@@ -907,15 +1052,17 @@ function renderTimeline(panel, mob, tab) {
         </div>`;
       } else {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
+        const centerIdx = Math.round((items.length - 1) / 2);
         let wrapsHtml = '';
         items.forEach((d, i) => {
           const rar = tlRarity(d.rate);
           const rot = (i - (items.length-1)/2) * 6;
+          const isCenter = i === centerIdx;
           wrapsHtml += `<div class="tl-callout-wrap" style="transform:rotate(${rot}deg)">
             <div class="tl-callout-box ${rar.cls}" title="${d.name}">
               <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
             </div>
-            <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
+            ${isCenter ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
           </div>`;
         });
         callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
@@ -965,7 +1112,7 @@ function tlToggleCluster(e, el) {
   e.stopPropagation();
   const wraps = [...el.querySelectorAll('.tl-callout-wrap')];
   const isOpen = el.classList.toggle('open');
-  const spread = 46;
+  const spread = 32;
   const offset = -(wraps.length - 1) * spread / 2;
   wraps.forEach((w, i) => {
     w.style.transform = isOpen
@@ -1674,6 +1821,7 @@ function buildItemCard(drop, state, isExcl = false) {
     <button class="excl-btn" title="${isExcl?'제외 해제':'이 아이템 제외'}"
             onclick="toggleExclude(event,${drop.id})">${isExcl ? '↩' : '✕'}</button>
     ${!isExcl ? `<button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>` : ''}
+    ${!isExcl ? `<button class="bulk-btn" title="수량 일괄 조정" onclick="bulkBtnClick(event,${drop.id})">≡</button>` : ''}
   `;
 
   if (!isExcl) card.addEventListener('click', () => incrementItem(drop.id));
@@ -1693,6 +1841,104 @@ function toggleExclude(e, itemId) {
 // ══════════════════════════════════════════
 // 13. 아이템 카운트 조작
 // ══════════════════════════════════════════
+
+// ── Bulk popup ──
+let _bpItemId = null;
+let _bpPendingDelta = 0;
+let _bpOrigCount = 0;
+
+function bulkBtnClick(e, itemId) {
+  e.stopPropagation();
+  openBulkPopup(itemId);
+}
+
+function openBulkPopup(itemId) {
+  if (!activeMob) return;
+  const drop = activeMob.drops.find(d => d.id === itemId);
+  if (!drop) return;
+  const store = loadS();
+  const state = store[`mob_${activeMob.id}`]?.[itemId] || { count:0 };
+  _bpItemId = itemId;
+  _bpPendingDelta = 0;
+  _bpOrigCount = state.count;
+
+  document.getElementById('bp-icon').src = itemImg(itemId);
+  document.getElementById('bp-icon').onerror = function(){ this.src = BLANK; };
+  document.getElementById('bp-name').textContent = drop.name;
+  _bpRenderCount();
+  document.getElementById('bulk-overlay').classList.add('open');
+}
+
+function _bpRenderCount() {
+  const newCount = Math.max(0, _bpOrigCount + _bpPendingDelta);
+  document.getElementById('bp-count').textContent = newCount;
+  const hint = document.getElementById('bp-delta-hint');
+  const confirm = document.getElementById('bp-confirm');
+  if (_bpPendingDelta === 0) {
+    hint.textContent = '';
+    hint.className = 'bp-delta-hint';
+    confirm.disabled = true;
+  } else {
+    const sign = _bpPendingDelta > 0 ? '+' : '';
+    hint.textContent = `${_bpOrigCount}개 → ${newCount}개 (${sign}${_bpPendingDelta})`;
+    hint.className = 'bp-delta-hint ' + (_bpPendingDelta > 0 ? 'pos' : 'neg');
+    confirm.disabled = false;
+  }
+}
+
+function bulkAdjust(delta) {
+  const newCount = _bpOrigCount + _bpPendingDelta + delta;
+  if (newCount < 0 && delta < 0) {
+    // clamp: don't go below 0
+    _bpPendingDelta = -_bpOrigCount;
+  } else {
+    _bpPendingDelta += delta;
+  }
+  _bpRenderCount();
+}
+
+function applyBulk() {
+  if (!activeMob || _bpItemId == null || _bpPendingDelta === 0) { closeBulkPopup(); return; }
+  const drop = activeMob.drops.find(d => d.id === _bpItemId);
+  if (!drop) { closeBulkPopup(); return; }
+  const store = loadS();
+  const key = `mob_${activeMob.id}`;
+  if (!store[key]) store[key] = {};
+  const state = store[key][_bpItemId] || { count:0, firstTime:null, times:[] };
+  if (!state.times) state.times = state.firstTime ? [state.firstTime] : [];
+  const newCount = Math.max(0, state.count + _bpPendingDelta);
+  const t = swElapsed(activeTab());
+  if (newCount > state.count) {
+    // adding items: record times for each added
+    const wasZero = state.count === 0;
+    if (wasZero && newCount > 0) state.firstTime = t;
+    for (let i = state.count; i < newCount; i++) state.times.push(t);
+    if (wasZero && newCount > 0) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, _bpItemId);
+  } else if (newCount < state.count) {
+    // removing items: pop from times
+    for (let i = state.count; i > newCount; i--) state.times.pop();
+    if (newCount === 0) { state.firstTime = null; state.times = []; }
+  }
+  state.count = newCount;
+  store[key][_bpItemId] = state;
+  saveS(store);
+  updateCardUI(_bpItemId, state, drop);
+  updateProgress();
+  updateHuntEstimate();
+  renderSaves();
+  renderTimeline(getActivePanel(), activeMob, activeTab());
+  closeBulkPopup();
+}
+
+function closeBulkPopup() {
+  document.getElementById('bulk-overlay').classList.remove('open');
+  _bpItemId = null;
+}
+
+function bulkOverlayClick(e) {
+  if (e.target === document.getElementById('bulk-overlay')) closeBulkPopup();
+}
+
 function incrementItem(itemId) {
   if (!activeMob) return;
   const drop = activeMob.drops.find(d => d.id === itemId);
@@ -1966,7 +2212,8 @@ function renderSaves() {
     const card = document.createElement('div');
     card.className = 'save-card' + (isAct ? ' act' : '') + (full ? ' complete' : '');
     const swSaved = store[`sw_mob_${mobId}`];
-    const elapsedMs = swSaved?.base || 0;
+    const activeT = tabs.find(t => t.mob && t.mob.id === mobId);
+    const elapsedMs = activeT ? swElapsed(activeT) : (swSaved?.base || 0);
     const elapsedStr = elapsedMs >= 1000 ? fmtTimeLog(elapsedMs) : '';
     card.innerHTML = `
       <button class="save-card-del" data-key="${key}" title="삭제">✕</button>
