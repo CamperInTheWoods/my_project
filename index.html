@@ -414,6 +414,8 @@
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
     .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
+    .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
+    .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; bottom:0; width:3px; background:#fff; opacity:0.85; transform:translateX(-50%); pointer-events:none; border-radius:2px; }
     .tl-ch-mark::before { content:'CH'; position:absolute; top:-14px; left:50%; transform:translateX(-50%); font-size:.42rem; color:#1a6fa8; white-space:nowrap; font-weight:800; background:rgba(232,244,253,0.9); padding:1px 3px; border-radius:3px; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
@@ -826,16 +828,24 @@ function tlRarity(rateStr) {
   return TL_RARITY[4];
 }
 function tlColor(ms) {
-  // sqrt 커브: 초반 시간에도 색 변화가 눈에 보이게
+  // sqrt 커브: 파랑(240)→빨강(0), 6시간에서도 시안으로 눈에 띄게 변화
   const p = Math.sqrt(Math.min(ms / TL_MAX_MS, 1));
-  const h = Math.round(120 - p * 120); // 초록(120) → 빨강(0)
-  const s = Math.round(72 + p * 18);   // 채도 증가
-  const l = Math.round(46 - p * 8);    // 명도 감소
+  const h = Math.round(240 - p * 240); // 파랑(240) → 빨강(0)
+  const s = Math.round(70 + p * 20);
+  const l = Math.round(50 - p * 10);
   return `hsl(${h},${s}%,${l}%)`;
 }
 function tlRowGrad(row) {
   return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
+let tlShowAll = false;
+function tlToggleShowAll() {
+  tlShowAll = !tlShowAll;
+  const panel = getActivePanel();
+  const tab = activeTab();
+  if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
+}
+
 function renderTimeline(panel, mob, tab) {
   const section = panel?.querySelector('.tl-section');
   if (!section) return;
@@ -848,11 +858,22 @@ function renderTimeline(panel, mob, tab) {
   const excl   = new Set(s[`excl_${mob.id}`] || []);
   const chMarks = s[`sw_ch_${mob.id}`] || [];
 
-  const items = mob.drops
-    .filter(d => !excl.has(d.id) && store[d.id]?.firstTime != null)
-    .map(d => ({ ...d, firstTime: store[d.id].firstTime }))
-    .sort((a,b) => a.firstTime - b.firstTime);
-  const firstId = items.length ? items[0].id : null;
+  // 아이템 목록: 전체 모드면 times[] 각각, 최초 모드면 firstTime만
+  const items = [];
+  const firstTimes = new Map(); // id → firstTime (최초 획득 추적용)
+  mob.drops.filter(d => !excl.has(d.id)).forEach(d => {
+    const st = store[d.id];
+    if (!st || st.firstTime == null) return;
+    firstTimes.set(d.id, st.firstTime);
+    if (tlShowAll) {
+      const allTimes = st.times?.length ? st.times : [st.firstTime];
+      allTimes.forEach(t => items.push({ ...d, firstTime: t }));
+    } else {
+      items.push({ ...d, firstTime: st.firstTime });
+    }
+  });
+  items.sort((a,b) => a.firstTime - b.firstTime);
+  const globalFirst = items.length ? items[0].firstTime : null;
 
   const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
   let rowsHtml = '';
@@ -918,6 +939,11 @@ function renderTimeline(panel, mob, tab) {
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
+  // 토글 버튼 업데이트
+  const ptitleEl = section.querySelector('.ptitle');
+  if (ptitleEl) {
+    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll?' on':''}" onclick="tlToggleShowAll()">${tlShowAll ? '최초만' : '전체'}</button>`;
+  }
 }
 function deleteChannelEntry(btn) {
   const entry = btn.closest('.sw-log-entry');
@@ -1672,9 +1698,12 @@ function incrementItem(itemId) {
   const store = loadS();
   const key = `mob_${activeMob.id}`;
   if (!store[key]) store[key] = {};
-  const state = store[key][itemId] || { count:0, firstTime:null };
+  const state = store[key][itemId] || { count:0, firstTime:null, times:[] };
+  if (!state.times) state.times = state.firstTime ? [state.firstTime] : [];
   const isFirst = state.count === 0;
-  if (isFirst) state.firstTime = swElapsed(activeTab());
+  const t = swElapsed(activeTab());
+  if (isFirst) state.firstTime = t;
+  state.times.push(t);
   state.count++;
   store[key][itemId] = state;
   saveS(store);
@@ -1698,7 +1727,8 @@ function decrementItem(e, itemId) {
   const state = store[key]?.[itemId];
   if (!state || state.count <= 0) return;
   state.count--;
-  if (state.count === 0) state.firstTime = null;
+  if (state.times) state.times.pop();
+  if (state.count === 0) { state.firstTime = null; state.times = []; }
   store[key][itemId] = state;
   saveS(store);
 
