@@ -393,8 +393,7 @@
     .tl-row { position:relative; margin-bottom:4px; }
     .tl-callouts { position:relative; min-height:0; }
     .tl-bar-zone { position:relative; }
-    .tl-bl { position:absolute; left:3px; top:0; height:8px; line-height:8px; font-size:.44rem; color:rgba(255,255,255,.9); font-weight:800; pointer-events:none; z-index:1; text-shadow:0 0 3px rgba(0,0,0,.4); }
-    .tl-br { position:absolute; right:3px; top:0; height:8px; line-height:8px; font-size:.44rem; color:rgba(0,0,0,.22); font-weight:700; pointer-events:none; z-index:1; }
+    .tl-time-labels { display:flex; justify-content:space-between; font-size:.42rem; color:#bbb; margin-top:2px; font-weight:700; line-height:1; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
       position:relative; width:34px; height:34px;
@@ -929,9 +928,7 @@ function renderTimeline(panel, mob, tab) {
     // 채널변경 마커 (bar-wrap 안에 배치)
     let chHtml = '';
     chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
-      const raw = (ms - rStart) / TL_ROW_MS * 100;
-      // 양 끝 라벨(1h/2h)과 겹치지 않게 8~92% 범위로 제한
-      const xPct = Math.min(Math.max(raw, 8), 92).toFixed(1);
+      const xPct = ((ms - rStart) / TL_ROW_MS * 100).toFixed(1);
       chHtml += `<div class="tl-ch-mark" style="left:${xPct}%"></div>`;
     });
 
@@ -939,10 +936,9 @@ function renderTimeline(panel, mob, tab) {
       ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
       <div class="tl-bar-zone">
         <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
-        <span class="tl-bl">${row}h</span>
-        <span class="tl-br">${row+1}h</span>
         ${chHtml}
       </div>
+      <div class="tl-time-labels"><span>${row}h</span><span>${row+1}h</span></div>
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
