@@ -390,9 +390,11 @@
 
     /* ─ Timeline ─ */
     .tl-rows { margin-top:4px; }
-    .tl-row { position:relative; margin-bottom:3px; }
+    .tl-row { position:relative; margin-bottom:4px; }
     .tl-callouts { position:relative; min-height:0; }
-    .tl-label { font-size:.5rem; color:#bbb; font-weight:700; display:block; margin-bottom:1px; }
+    .tl-bar-zone { position:relative; }
+    .tl-bl { position:absolute; left:3px; top:0; height:8px; line-height:8px; font-size:.44rem; color:rgba(255,255,255,.9); font-weight:800; pointer-events:none; z-index:1; text-shadow:0 0 3px rgba(0,0,0,.4); }
+    .tl-br { position:absolute; right:3px; top:0; height:8px; line-height:8px; font-size:.44rem; color:rgba(0,0,0,.22); font-weight:700; pointer-events:none; z-index:1; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
       position:relative; width:34px; height:34px;
@@ -416,8 +418,8 @@
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
-    .tl-ch-mark { position:absolute; bottom:0; width:2px; height:8px; background:#3498db; opacity:0.7; transform:translateX(-50%); pointer-events:none; border-radius:1px; }
-    .tl-ch-mark::before { content:'CH'; position:absolute; top:-12px; left:50%; transform:translateX(-50%); font-size:.4rem; color:#1a6fa8; white-space:nowrap; font-weight:800; }
+    .tl-ch-mark { position:absolute; bottom:0; width:3px; height:20px; background:#3498db; transform:translateX(-50%); pointer-events:none; border-radius:2px 2px 0 0; z-index:2; }
+    .tl-ch-mark::after { content:'CH'; position:absolute; top:-13px; left:50%; transform:translateX(-50%); font-size:.38rem; color:#1a6fa8; white-space:nowrap; font-weight:900; letter-spacing:-.3px; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -934,8 +936,11 @@ function renderTimeline(panel, mob, tab) {
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
       ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
-      <span class="tl-label">${row}h</span>
-      <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+      <div class="tl-bar-zone">
+        <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+        <span class="tl-bl">${row}h</span>
+        <span class="tl-br">${row+1}h</span>
+      </div>
       ${chHtml}
     </div>`;
   }
