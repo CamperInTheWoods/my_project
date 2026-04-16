@@ -392,8 +392,7 @@
     .tl-rows { margin-top:4px; }
     .tl-row { position:relative; margin-bottom:3px; }
     .tl-callouts { position:relative; min-height:0; }
-    .tl-bar-row { display:flex; align-items:center; gap:5px; }
-    .tl-label { font-size:.55rem; color:#bbb; white-space:nowrap; min-width:24px; text-align:right; font-weight:600; flex-shrink:0; }
+    .tl-label { font-size:.5rem; color:#bbb; font-weight:700; display:block; margin-bottom:1px; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
       position:relative; width:34px; height:34px;
@@ -409,7 +408,7 @@
     .tl-r3 { border-color:#e67e22; box-shadow:0 1px 6px rgba(230,126,34,.4); }
     .tl-r4 { border-color:#e74c3c; box-shadow:0 1px 6px rgba(231,76,60,.4); }
     .tl-r5 { border-color:#9b59b6; box-shadow:0 1px 6px rgba(155,89,182,.45); }
-    .tl-bar-wrap { flex:1; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
+    .tl-bar-wrap { position:relative; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
     .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
@@ -417,8 +416,8 @@
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
-    .tl-ch-mark { position:absolute; top:0; bottom:0; width:3px; background:#fff; opacity:0.85; transform:translateX(-50%); pointer-events:none; border-radius:2px; }
-    .tl-ch-mark::before { content:'CH'; position:absolute; top:-14px; left:50%; transform:translateX(-50%); font-size:.42rem; color:#1a6fa8; white-space:nowrap; font-weight:800; background:rgba(232,244,253,0.9); padding:1px 3px; border-radius:3px; }
+    .tl-ch-mark { position:absolute; bottom:0; width:2px; height:8px; background:#3498db; opacity:0.7; transform:translateX(-50%); pointer-events:none; border-radius:1px; }
+    .tl-ch-mark::before { content:'CH'; position:absolute; top:-12px; left:50%; transform:translateX(-50%); font-size:.4rem; color:#1a6fa8; white-space:nowrap; font-weight:800; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -935,10 +934,9 @@ function renderTimeline(panel, mob, tab) {
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
       ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
-      <div class="tl-bar-row">
-        <span class="tl-label">${row}h</span>
-        <div class="tl-bar-wrap" style="position:relative;overflow:visible">${chHtml}<div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
-      </div>
+      <span class="tl-label">${row}h</span>
+      <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
+      ${chHtml}
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
