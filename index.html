@@ -1917,7 +1917,7 @@ function applyBulk() {
   } else if (newCount < state.count) {
     // removing items: pop from times
     for (let i = state.count; i > newCount; i--) state.times.pop();
-    if (newCount === 0) { state.firstTime = null; state.times = []; }
+    if (newCount === 0) { state.firstTime = null; state.times = []; removeItemLog(getActivePanel(), _bpItemId); }
   }
   state.count = newCount;
   store[key][_bpItemId] = state;
@@ -1977,7 +1977,7 @@ function decrementItem(e, itemId) {
   if (!state || state.count <= 0) return;
   state.count--;
   if (state.times) state.times.pop();
-  if (state.count === 0) { state.firstTime = null; state.times = []; }
+  if (state.count === 0) { state.firstTime = null; state.times = []; removeItemLog(getActivePanel(), itemId); }
   store[key][itemId] = state;
   saveS(store);
 
@@ -2011,6 +2011,11 @@ function updateCardUI(itemId, state, drop) {
 // ══════════════════════════════════════════
 // 14. 스톱워치 로그
 // ══════════════════════════════════════════
+function removeItemLog(panel, itemId) {
+  if (!panel) return;
+  panel.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`).forEach(el => el.remove());
+}
+
 function addSwLog(name, ms) {
   addSwLogToPanel(getActivePanel(), name, ms);
 }
