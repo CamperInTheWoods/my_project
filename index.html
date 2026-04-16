@@ -418,7 +418,7 @@
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
-    .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,0.75); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
+    .tl-ch-mark { position:absolute; top:-5px; width:2px; height:13px; background:#3498db; transform:translateX(-50%); pointer-events:none; border-radius:2px; z-index:2; opacity:.85; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -929,8 +929,10 @@ function renderTimeline(panel, mob, tab) {
     // 채널변경 마커 (bar-wrap 안에 배치)
     let chHtml = '';
     chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
-      const xPct = ((ms - rStart) / TL_ROW_MS * 100).toFixed(1);
-      chHtml += `<div class="tl-ch-mark" style="left:clamp(2px,${xPct}%,calc(100% - 2px))"></div>`;
+      const raw = (ms - rStart) / TL_ROW_MS * 100;
+      // 양 끝 라벨(1h/2h)과 겹치지 않게 8~92% 범위로 제한
+      const xPct = Math.min(Math.max(raw, 8), 92).toFixed(1);
+      chHtml += `<div class="tl-ch-mark" style="left:${xPct}%"></div>`;
     });
 
     rowsHtml += `<div class="tl-row" data-row="${row}">
