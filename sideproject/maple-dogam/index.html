@@ -811,7 +811,8 @@ Object.defineProperty(window, 'activeMob', {
 const S_KEY = 'maple_dogam_v2';
 
 function loadS()    { try{return JSON.parse(localStorage.getItem(S_KEY))||{};}catch{return{};} }
-function saveS(d)   { localStorage.setItem(S_KEY, JSON.stringify(d)); }
+function saveS(d)   { try{localStorage.setItem(S_KEY, JSON.stringify(d));}catch(e){console.warn('저장 실패(용량 초과?):',e);} }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ══════════════════════════════════════════
 // 4. 스톱워치 (탭별)
@@ -1043,8 +1044,8 @@ function renderTimeline(panel, mob, tab) {
       if (items.length === 1) {
         const d = items[0]; const rar = tlRarity(d.rate);
         callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
-          <div class="tl-callout-box ${rar.cls}" title="${d.name}">
-            <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
+          <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
           </div>
           <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
         </div>`;
@@ -1057,8 +1058,8 @@ function renderTimeline(panel, mob, tab) {
           const rot = (i - (items.length-1)/2) * 6;
           const isCenter = i === centerIdx;
           wrapsHtml += `<div class="tl-callout-wrap" style="transform:rotate(${rot}deg)">
-            <div class="tl-callout-box ${rar.cls}" title="${d.name}">
-              <img src="${itemImg(d.id)}" alt="${d.name}" onerror="this.src='${BLANK}'">
+            <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+              <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
             </div>
             ${isCenter ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
           </div>`;
@@ -1126,7 +1127,7 @@ function restoreLogEntries(panel, mob) {
     .filter(d => mobStore[d.id]?.firstTime != null)
     .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
   const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
-  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms).slice(0, 15); // 최신순, 최대 15개
+  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms);
   const list = panel.querySelector('.sw-log-list');
   all.forEach(e => {
     const el = document.createElement('div');
@@ -1137,7 +1138,7 @@ function restoreLogEntries(panel, mob) {
     } else {
       el.className = 'sw-log-entry';
       el.dataset.dropId = e.id;
-      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${e.name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
     }
     list.appendChild(el);
   });
@@ -1233,8 +1234,8 @@ function renderMobGrid(container, monsters) {
     c.className = 'mob-card fade-in';
     c.dataset.mobId = m.id;
     c.innerHTML = `
-      <img src="${mobImg(m.id)}" alt="${m.name}" onerror="this.src='${BLANK}'">
-      <div class="mn">${m.name}</div>
+      <img src="${mobImg(m.id)}" alt="${escHtml(m.name)}" onerror="this.src='${BLANK}'">
+      <div class="mn">${escHtml(m.name)}</div>
     `;
     c.addEventListener('click', () => {
       if (m.drops && m.drops.length) activateMob(m);        // 프리셋: 드롭 데이터 있음
@@ -1818,11 +1819,11 @@ function buildItemCard(drop, state, isExcl = false) {
 
   card.innerHTML = `
     <div class="icon-wrap">
-      <img src="${itemImg(drop.id)}" alt="${drop.name}" onerror="this.src='${BLANK}'">
+      <img src="${itemImg(drop.id)}" alt="${escHtml(drop.name)}" onerror="this.src='${BLANK}'">
       <span class="cn" style="${found?'':'display:none'}">${state.count}</span>
     </div>
     <div class="card-body">
-      <div class="cname" title="${drop.name}">${drop.name}</div>
+      <div class="cname" title="${escHtml(drop.name)}">${escHtml(drop.name)}</div>
       <div class="crate">${isExcl ? '<span style="font-size:.6rem;color:#4a3030">제외됨</span>' : rateBadge(drop.rate)}</div>
       <div class="ccnt">${isExcl ? '' : `수집 ${state.count}회`}</div>
       <div class="ctime">${(!isExcl && state.firstTime !== null) ? '첫 출현 ' + fmtTime(state.firstTime) : ''}</div>
@@ -2031,9 +2032,8 @@ function addSwLogToPanel(panel, name, ms, dropId) {
   const entry = document.createElement('div');
   entry.className = 'sw-log-entry fade-in';
   if (dropId != null) entry.dataset.dropId = dropId;
-  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${name}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${escHtml(name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
-  while (list.children.length > 15) list.removeChild(list.lastChild);
 }
 function deleteLogEntry(btn) {
   const entry = btn.closest('.sw-log-entry');
@@ -2228,7 +2228,7 @@ function renderSaves() {
     const elapsedStr = elapsedMs >= 1000 ? fmtTimeLog(elapsedMs) : '';
     card.innerHTML = `
       <button class="save-card-del" data-key="${key}" title="삭제">✕</button>
-      <div class="save-card-name" title="${savedName}">${savedName}</div>
+      <div class="save-card-name" title="${escHtml(savedName)}">${escHtml(savedName)}</div>
       <div class="save-card-pct">${pct}%</div>
       <div class="save-card-count">${done} / ${total}</div>
       <div class="save-card-bar-bg">
