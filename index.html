@@ -984,9 +984,10 @@ function tlColor(ms) {
 function tlRowGrad(row) {
   return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
-let tlShowAll = false;
+const tlShowAllByTab = {};
+function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
 function tlToggleShowAll() {
-  tlShowAll = !tlShowAll;
+  tlShowAllByTab[activeTabIdx] = !tlShowAll();
   const panel = getActivePanel();
   const tab = activeTab();
   if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
@@ -1006,12 +1007,10 @@ function renderTimeline(panel, mob, tab) {
 
   // 아이템 목록: 전체 모드면 times[] 각각, 최초 모드면 firstTime만
   const items = [];
-  const firstTimes = new Map(); // id → firstTime (최초 획득 추적용)
   mob.drops.filter(d => !excl.has(d.id)).forEach(d => {
     const st = store[d.id];
     if (!st || st.firstTime == null) return;
-    firstTimes.set(d.id, st.firstTime);
-    if (tlShowAll) {
+    if (tlShowAll()) {
       const allTimes = st.times?.length ? st.times : [st.firstTime];
       allTimes.forEach(t => items.push({ ...d, firstTime: t }));
     } else {
@@ -1019,7 +1018,6 @@ function renderTimeline(panel, mob, tab) {
     }
   });
   items.sort((a,b) => a.firstTime - b.firstTime);
-  const globalFirst = items.length ? items[0].firstTime : null;
 
   const totalRows = Math.max(1, Math.ceil(totalMs / TL_ROW_MS));
   let rowsHtml = '';
@@ -1092,7 +1090,7 @@ function renderTimeline(panel, mob, tab) {
   // 토글 버튼 업데이트
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll?' on':''}" onclick="tlToggleShowAll()">${tlShowAll ? '최초만' : '전체'}</button>`;
+    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '최초만' : '전체'}</button>`;
   }
 }
 function deleteChannelEntry(btn) {
@@ -1128,7 +1126,7 @@ function restoreLogEntries(panel, mob) {
     .filter(d => mobStore[d.id]?.firstTime != null)
     .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
   const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
-  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms); // 최신순
+  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms).slice(0, 15); // 최신순, 최대 15개
   const list = panel.querySelector('.sw-log-list');
   all.forEach(e => {
     const el = document.createElement('div');
@@ -1145,9 +1143,7 @@ function restoreLogEntries(panel, mob) {
   });
 }
 
-function swChannelMark() {
-  const tab = activeTab();
-  const panel = getActivePanel();
+function _swChannelMarkOne(tab, panel) {
   const ms = swElapsed(tab);
   if (ms < 100) return;
   if (tab.mob) {
@@ -1155,13 +1151,25 @@ function swChannelMark() {
     const key = `sw_ch_${tab.mob.id}`;
     const chs = s[key] || []; chs.push(ms); s[key] = chs; saveS(s);
   }
-  const list = panel.querySelector('.sw-log-list');
+  const list = panel?.querySelector('.sw-log-list');
+  if (!list) return;
   const entry = document.createElement('div');
   entry.className = 'sw-log-entry sw-log-channel fade-in';
   entry.dataset.chMs = ms;
   entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
   if (tab.mob) renderTimeline(panel, tab.mob, tab);
+}
+
+function swChannelMark() {
+  const tab = activeTab();
+  const panel = getActivePanel();
+  _swChannelMarkOne(tab, panel);
+  if (tab.synced) {
+    tabs.forEach(t => {
+      if (t !== tab && t.synced) _swChannelMarkOne(t, getPanelOf(t.idx));
+    });
+  }
 }
 
 function tlUpdateFill(panel, totalMs) {
@@ -1516,7 +1524,7 @@ function buildTabPanel(tab) {
         <a class="mob-link" href="#" target="_blank">mapledb.kr에서 보기 ↗</a>
       </div>
       <div class="actions">
-        <button class="btn sm danger" onclick="resetChecklist()">초기화</button>
+<button class="btn sm danger" onclick="resetChecklist()">초기화</button>
       </div>
     </div>
     <div class="panel" style="padding:14px 18px">
@@ -1637,7 +1645,8 @@ function addTab() {
 function closeTab(e, idx) {
   e.stopPropagation();
   if (tabs.length <= 1) return;
-  // 스톱워치 정지
+  // 스톱워치 상태 저장 후 정지
+  saveSwState(tabs[idx]);
   clearInterval(tabs[idx].sw.ticker);
   tabs.splice(idx, 1);
   // idx 재정렬
@@ -2016,9 +2025,6 @@ function removeItemLog(panel, itemId) {
   panel.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`).forEach(el => el.remove());
 }
 
-function addSwLog(name, ms) {
-  addSwLogToPanel(getActivePanel(), name, ms);
-}
 function addSwLogToPanel(panel, name, ms, dropId) {
   if (!panel) return;
   const list = panel.querySelector('.sw-log-list');
@@ -2038,9 +2044,9 @@ function deleteLogEntry(btn) {
     if (s[key]?.[dropId]) {
       s[key][dropId].firstTime = null;
       saveS(s);
-      // 카드 시간 표시도 초기화
       const card = getActivePanel()?.querySelector(`.item-card[data-item-id="${dropId}"]`);
       if (card) card.querySelector('.ctime').textContent = '';
+      renderTimeline(getActivePanel(), activeMob, activeTab());
     }
   }
   entry.remove();
@@ -2239,6 +2245,11 @@ function renderSaves() {
         }
         return;
       }
+      // 이미 어떤 탭에 열려있으면 그 탭으로 전환
+      const existingTab = tabs.find(t => t.mob && t.mob.id === mobId);
+      if (existingTab) { switchTab(existingTab.idx); return; }
+      // 현재 탭이 비어있으면 그냥 여기서 열기, 아니면 새 탭 추가
+      if (activeTab().mob && tabs.length < MAX_TABS) addTab();
       if (preset) activateMob(preset);
       else fetchMobDrops(mobId, savedName, 0);
     });
