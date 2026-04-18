@@ -1117,33 +1117,43 @@ function deleteChannelEntry(btn) {
 
 function tlToggleCluster(e, el) {
   e.stopPropagation();
-  const wraps = [...el.querySelectorAll('.tl-callout-wrap')];
+  const allWraps = [...el.querySelectorAll('.tl-callout-wrap')];
   const isOpen = el.classList.toggle('open');
-  const spread = 32;
-  const offset = -(wraps.length - 1) * spread / 2;
+
+  allWraps.forEach(w => { w.querySelector('.tl-dup-badge')?.remove(); w.style.display = ''; });
 
   if (isOpen) {
-    const idCount = {};
-    wraps.forEach(w => { const id = w.dataset.itemId; idCount[id] = (idCount[id]||0)+1; });
-    wraps.forEach(w => {
-      w.querySelector('.tl-dup-badge')?.remove();
-      const n = idCount[w.dataset.itemId];
-      if (n > 1) {
+    // 같은 아이템 ID는 첫 번째만 표시, 나머지 숨김
+    const seen = {};
+    const visibleWraps = [];
+    allWraps.forEach(w => {
+      const id = w.dataset.itemId;
+      if (!seen[id]) { seen[id] = { wrap: w, count: 0 }; visibleWraps.push(w); }
+      seen[id].count++;
+    });
+    const visibleSet = new Set(visibleWraps);
+    allWraps.forEach(w => { if (!visibleSet.has(w)) w.style.display = 'none'; });
+
+    // ×n 뱃지 (중복 있는 것만)
+    Object.values(seen).forEach(({ wrap, count }) => {
+      if (count > 1) {
         const b = document.createElement('div');
         b.className = 'tl-dup-badge';
-        b.textContent = `×${n}`;
-        w.appendChild(b);
+        b.textContent = `×${count}`;
+        wrap.appendChild(b);
       }
     });
-  } else {
-    wraps.forEach(w => w.querySelector('.tl-dup-badge')?.remove());
-  }
 
-  wraps.forEach((w, i) => {
-    w.style.transform = isOpen
-      ? `translateX(${offset + i * spread}px) rotate(0deg)`
-      : `rotate(${(i - (wraps.length-1)/2) * 6}deg)`;
-  });
+    // 유니크 아이템들만 펼치기
+    const spread = 32;
+    const offset = -(visibleWraps.length - 1) * spread / 2;
+    visibleWraps.forEach((w, i) => { w.style.transform = `translateX(${offset + i * spread}px) rotate(0deg)`; });
+    allWraps.forEach(w => { if (!visibleSet.has(w)) w.style.transform = 'rotate(0deg)'; });
+  } else {
+    allWraps.forEach((w, i) => {
+      w.style.transform = `rotate(${(i - (allWraps.length-1)/2) * 6}deg)`;
+    });
+  }
 }
 
 function restoreLogEntries(panel, mob) {
