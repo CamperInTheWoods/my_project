@@ -430,8 +430,11 @@
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
     .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
+    .tl-cluster .tl-extra { display:none; }
+    .tl-cluster.open .tl-extra { display:flex; flex-direction:column; }
     .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
+    .tl-dup-badge { position:absolute; top:-4px; right:-4px; background:#333; color:#fff; font-size:.45rem; font-weight:700; border-radius:5px; padding:1px 3px; line-height:1.3; pointer-events:none; z-index:5; }
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
@@ -1051,22 +1054,27 @@ function renderTimeline(panel, mob, tab) {
         </div>`;
       } else {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
-        const centerIdx = Math.round((items.length - 1) / 2);
+        const MAX_VIS = 3;
+        const extraCount = items.length - MAX_VIS;
         let wrapsHtml = '';
         items.forEach((d, i) => {
           const rar = tlRarity(d.rate);
           const rot = (i - (items.length-1)/2) * 6;
-          const isCenter = i === centerIdx;
-          wrapsHtml += `<div class="tl-callout-wrap" style="transform:rotate(${rot}deg)">
+          const isExtra = i >= MAX_VIS;
+          // 접힌 상태 화살표: 3개 이하면 원래 center, 초과면 index 1 고정
+          const arrowIdx = items.length > MAX_VIS ? 1 : Math.round((items.length-1)/2);
+          const showArrow = i === arrowIdx;
+          wrapsHtml += `<div class="tl-callout-wrap${isExtra?' tl-extra':''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
             <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
               <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
             </div>
-            ${isCenter ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
+            ${showArrow ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
           </div>`;
         });
+        const badgeText = extraCount > 0 ? `+${extraCount}` : items.length;
         callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
           ${wrapsHtml}
-          <div class="tl-cluster-badge">${items.length}</div>
+          <div class="tl-cluster-badge">${badgeText}</div>
         </div>`;
       }
     });
@@ -1113,6 +1121,24 @@ function tlToggleCluster(e, el) {
   const isOpen = el.classList.toggle('open');
   const spread = 32;
   const offset = -(wraps.length - 1) * spread / 2;
+
+  if (isOpen) {
+    const idCount = {};
+    wraps.forEach(w => { const id = w.dataset.itemId; idCount[id] = (idCount[id]||0)+1; });
+    wraps.forEach(w => {
+      w.querySelector('.tl-dup-badge')?.remove();
+      const n = idCount[w.dataset.itemId];
+      if (n > 1) {
+        const b = document.createElement('div');
+        b.className = 'tl-dup-badge';
+        b.textContent = `×${n}`;
+        w.appendChild(b);
+      }
+    });
+  } else {
+    wraps.forEach(w => w.querySelector('.tl-dup-badge')?.remove());
+  }
+
   wraps.forEach((w, i) => {
     w.style.transform = isOpen
       ? `translateX(${offset + i * spread}px) rotate(0deg)`
