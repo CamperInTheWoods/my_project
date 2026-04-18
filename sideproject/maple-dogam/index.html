@@ -1065,7 +1065,7 @@ function renderTimeline(panel, mob, tab) {
         let wrapsHtml = '';
         orderedItems.forEach((d, i) => {
           const rar = tlRarity(d.rate);
-          const rot = (i - (orderedItems.length-1)/2) * 6;
+          const rot = i < visCount ? (i - (visCount-1)/2) * 6 : 0; // visible 개수 기준 팬 효과
           const isExtra = i >= MAX_VIS;
           const showArrow = i === arrowIdx;
           wrapsHtml += `<div class="tl-callout-wrap${isExtra?' tl-extra':''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
@@ -1147,8 +1147,8 @@ function tlToggleCluster(e, el) {
       }
     });
 
-    // 유니크 아이템들만 펼치기 (44px = 34px 아이콘 + 10px 여백)
-    const spread = 44;
+    // 유니크 아이템들만 펼치기 (37px = 34px 아이콘 + 3px 여백)
+    const spread = 37;
     const offset = -(visibleWraps.length - 1) * spread / 2;
     visibleWraps.forEach((w, i) => {
       w.style.transform = `translateX(${offset + i * spread}px) rotate(0deg)`;
@@ -1156,8 +1156,10 @@ function tlToggleCluster(e, el) {
     });
     allWraps.forEach(w => { if (!visibleSet.has(w)) { w.style.transform = 'rotate(0deg)'; w.style.zIndex = ''; } });
   } else {
+    const visibles = allWraps.filter(w => !w.classList.contains('tl-extra'));
+    const vc = visibles.length;
     allWraps.forEach((w, i) => {
-      w.style.transform = `rotate(${(i - (allWraps.length-1)/2) * 6}deg)`;
+      w.style.transform = i < vc ? `rotate(${(i - (vc-1)/2) * 6}deg)` : 'rotate(0deg)';
       w.style.zIndex = '';
     });
   }
