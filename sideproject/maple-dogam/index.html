@@ -1054,15 +1054,19 @@ function renderTimeline(panel, mob, tab) {
         </div>`;
       } else {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
-        const MAX_VIS = 3;
-        const extraCount = items.length - MAX_VIS;
+        // 유니크 아이템 먼저, 중복은 뒤로 (접힌 상태에서 종류별 대표 아이콘 표시)
+        const seenIds = new Set();
+        const uniqueItems = [], dupItems = [];
+        items.forEach(d => { if (!seenIds.has(d.id)) { seenIds.add(d.id); uniqueItems.push(d); } else dupItems.push(d); });
+        const orderedItems = [...uniqueItems, ...dupItems];
+        const MAX_VIS = 3; // 접힌 상태 최대 표시 종류 수
+        const visCount = Math.min(uniqueItems.length, MAX_VIS);
+        const arrowIdx = visCount > 1 ? 1 : 0;
         let wrapsHtml = '';
-        items.forEach((d, i) => {
+        orderedItems.forEach((d, i) => {
           const rar = tlRarity(d.rate);
-          const rot = (i - (items.length-1)/2) * 6;
+          const rot = (i - (orderedItems.length-1)/2) * 6;
           const isExtra = i >= MAX_VIS;
-          // 접힌 상태 화살표: 3개 이하면 원래 center, 초과면 index 1 고정
-          const arrowIdx = items.length > MAX_VIS ? 1 : Math.round((items.length-1)/2);
           const showArrow = i === arrowIdx;
           wrapsHtml += `<div class="tl-callout-wrap${isExtra?' tl-extra':''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
             <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
@@ -1071,10 +1075,9 @@ function renderTimeline(panel, mob, tab) {
             ${showArrow ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
           </div>`;
         });
-        const badgeText = extraCount > 0 ? `+${extraCount}` : items.length;
         callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
           ${wrapsHtml}
-          <div class="tl-cluster-badge">${badgeText}</div>
+          <div class="tl-cluster-badge">+${items.length}</div>
         </div>`;
       }
     });
@@ -1144,14 +1147,18 @@ function tlToggleCluster(e, el) {
       }
     });
 
-    // 유니크 아이템들만 펼치기
-    const spread = 32;
+    // 유니크 아이템들만 펼치기 (44px = 34px 아이콘 + 10px 여백)
+    const spread = 44;
     const offset = -(visibleWraps.length - 1) * spread / 2;
-    visibleWraps.forEach((w, i) => { w.style.transform = `translateX(${offset + i * spread}px) rotate(0deg)`; });
-    allWraps.forEach(w => { if (!visibleSet.has(w)) w.style.transform = 'rotate(0deg)'; });
+    visibleWraps.forEach((w, i) => {
+      w.style.transform = `translateX(${offset + i * spread}px) rotate(0deg)`;
+      w.style.zIndex = visibleWraps.length - i; // 왼쪽이 위로
+    });
+    allWraps.forEach(w => { if (!visibleSet.has(w)) { w.style.transform = 'rotate(0deg)'; w.style.zIndex = ''; } });
   } else {
     allWraps.forEach((w, i) => {
       w.style.transform = `rotate(${(i - (allWraps.length-1)/2) * 6}deg)`;
+      w.style.zIndex = '';
     });
   }
 }
