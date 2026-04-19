@@ -438,11 +438,9 @@
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
-    .tl-dot { position:absolute; width:8px; height:8px; border-radius:50%; top:50%; transform:translate(-50%,-50%); cursor:pointer; border:1.5px solid rgba(0,0,0,.2); z-index:3; transition:transform .15s; }
-    .tl-dot:hover { transform:translate(-50%,-50%) scale(1.6); }
-    .tl-dot-popup { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); background:white; border:1.5px solid #c8a86b; border-radius:7px; padding:5px 7px; display:flex; align-items:center; gap:5px; white-space:nowrap; box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:20; pointer-events:none; }
-    .tl-dot-popup img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
-    .tl-dot-popup span { font-size:.6rem; color:#3e2a10; font-weight:500; max-width:100px; overflow:hidden; text-overflow:ellipsis; }
+    .tl-dot-callout { cursor:pointer; }
+    .tl-dot-circle { width:10px; height:10px; border-radius:50%; border:1.5px solid rgba(0,0,0,.2); margin:0 auto; transition:transform .15s; }
+    .tl-dot-callout:hover .tl-dot-circle { transform:scale(1.5); }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -993,22 +991,28 @@ function tlColor(ms) {
 function tlRowGrad(row) {
   return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
-const tlModeByTab = {}; // 0=최초만 1=전체 2=점
-function tlMode() { return tlModeByTab[activeTabIdx] || 0; }
-function tlShowAll() { return tlMode() === 1; }
+const tlShowAllByTab = {}, tlDotModeByTab = {};
+function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
+function tlDotMode() { return tlDotModeByTab[activeTabIdx] || false; }
 function tlToggleShowAll() {
-  tlModeByTab[activeTabIdx] = (tlMode() + 1) % 3;
-  const panel = getActivePanel();
-  const tab = activeTab();
+  tlShowAllByTab[activeTabIdx] = !tlShowAll();
+  const panel = getActivePanel(); const tab = activeTab();
   if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
 }
-function tlDotClick(e, dot) {
+function tlToggleDotMode() {
+  tlDotModeByTab[activeTabIdx] = !tlDotMode();
+  const panel = getActivePanel(); const tab = activeTab();
+  if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
+}
+function tlDotToggle(e, callout) {
   e.stopPropagation();
-  document.querySelectorAll('.tl-dot-popup').forEach(p => p.remove());
-  const popup = document.createElement('div');
-  popup.className = 'tl-dot-popup';
-  popup.innerHTML = `<img src="${itemImg(dot.dataset.id)}" onerror="this.src='${BLANK}'"><span>${dot.dataset.name}</span>`;
-  dot.appendChild(popup);
+  const circle = callout.querySelector('.tl-dot-circle');
+  const box    = callout.querySelector('.tl-callout-box');
+  const arrow  = callout.querySelector('.tl-arrow');
+  const open   = box.style.display !== 'none';
+  circle.style.display = open ? '' : 'none';
+  box.style.display    = open ? 'none' : '';
+  arrow.style.display  = open ? 'none' : '';
 }
 
 function renderTimeline(panel, mob, tab) {
@@ -1103,20 +1107,29 @@ function renderTimeline(panel, mob, tab) {
       chHtml += `<div class="tl-ch-mark" style="left:${xPct}%"></div>`;
     });
 
-    // 점 모드: callout 대신 바 위에 원점
-    let dotHtml = '';
-    if (tlMode() === 2) {
+    // 점 모드: callout 자리에 원점, 클릭하면 카드로 펼침
+    let dotCallHtml = '';
+    if (tlDotMode() && rowItems.length > 0) {
       rowItems.forEach(d => {
-        const xPct = ((d.firstTime - rStart) / TL_ROW_MS * 100).toFixed(1);
+        const xPct = Math.min(Math.max((d.firstTime - rStart) / TL_ROW_MS * 100, 2), 98).toFixed(1);
         const rar = tlRarity(d.rate);
-        dotHtml += `<div class="tl-dot" style="left:${xPct}%;background:${rar.color}" data-id="${d.id}" data-name="${escHtml(d.name)}" onclick="tlDotClick(event,this)"></div>`;
+        dotCallHtml += `<div class="tl-callout tl-dot-callout" style="left:${xPct}%;bottom:0" onclick="tlDotToggle(event,this)">
+          <div class="tl-dot-circle" style="background:${rar.color}"></div>
+          <div class="tl-callout-box ${rar.cls}" style="display:none">
+            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
+          </div>
+          <div class="tl-arrow" style="display:none;border-top-color:${rar.color}"></div>
+        </div>`;
       });
     }
 
+    const showCallouts = !tlDotMode() && calloutsH > 0;
+    const showDotArea  = tlDotMode() && rowItems.length > 0;
     rowsHtml += `<div class="tl-row" data-row="${row}">
-      ${tlMode() !== 2 && calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
+      ${showCallouts ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
+      ${showDotArea  ? `<div class="tl-callouts" style="height:42px">${dotCallHtml}</div>` : ''}
       <div class="tl-bar-zone">
-        <div class="tl-bar-wrap" style="overflow:visible"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div>${dotHtml}</div>
+        <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
         ${chHtml}
       </div>
       <div class="tl-time-labels"><span>${row}h</span><span>${row+1}h</span></div>
@@ -1126,8 +1139,7 @@ function renderTimeline(panel, mob, tab) {
   // 토글 버튼 업데이트
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    const modeLabels = ['최초만','전체','점'];
-    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlMode()>0?' on':''}" onclick="tlToggleShowAll()">${modeLabels[tlMode()]}</button>`;
+    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll()?'전체':'최초'}</button><button class="tl-toggle-btn${tlDotMode()?' on':''}" onclick="tlToggleDotMode()">${tlDotMode()?'점':'기본'}</button>`;
   }
 }
 function deleteChannelEntry(btn) {
@@ -2338,7 +2350,6 @@ function renderSaves() {
   renderTabBar();
 })();
 renderSaves();
-document.addEventListener('click', () => document.querySelectorAll('.tl-dot-popup').forEach(p => p.remove()));
 </script>
 </body>
 </html>
