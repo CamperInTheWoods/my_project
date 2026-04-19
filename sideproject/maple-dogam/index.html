@@ -438,9 +438,6 @@
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
-    .tl-dot-callout { cursor:pointer; }
-    .tl-dot-circle { width:10px; height:10px; border-radius:50%; border:1.5px solid rgba(0,0,0,.2); margin:0 auto; transition:transform .15s; }
-    .tl-dot-callout:hover .tl-dot-circle { transform:scale(1.5); }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -991,28 +988,13 @@ function tlColor(ms) {
 function tlRowGrad(row) {
   return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
-const tlShowAllByTab = {}, tlDotModeByTab = {};
+const tlShowAllByTab = {};
 function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
-function tlDotMode() { return tlDotModeByTab[activeTabIdx] || false; }
 function tlToggleShowAll() {
   tlShowAllByTab[activeTabIdx] = !tlShowAll();
-  const panel = getActivePanel(); const tab = activeTab();
+  const panel = getActivePanel();
+  const tab = activeTab();
   if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
-}
-function tlToggleDotMode() {
-  tlDotModeByTab[activeTabIdx] = !tlDotMode();
-  const panel = getActivePanel(); const tab = activeTab();
-  if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
-}
-function tlDotToggle(e, callout) {
-  e.stopPropagation();
-  const circle = callout.querySelector('.tl-dot-circle');
-  const box    = callout.querySelector('.tl-callout-box');
-  const arrow  = callout.querySelector('.tl-arrow');
-  const open   = box.style.display !== 'none';
-  circle.style.display = open ? '' : 'none';
-  box.style.display    = open ? 'none' : '';
-  arrow.style.display  = open ? 'none' : '';
 }
 
 function renderTimeline(panel, mob, tab) {
@@ -1100,34 +1082,15 @@ function renderTimeline(panel, mob, tab) {
       }
     });
 
-    // 채널변경 마커
+    // 채널변경 마커 (bar-wrap 안에 배치)
     let chHtml = '';
     chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
       const xPct = ((ms - rStart) / TL_ROW_MS * 100).toFixed(1);
       chHtml += `<div class="tl-ch-mark" style="left:${xPct}%"></div>`;
     });
 
-    // 점 모드: callout 자리에 원점, 클릭하면 카드로 펼침
-    let dotCallHtml = '';
-    if (tlDotMode() && rowItems.length > 0) {
-      rowItems.forEach(d => {
-        const xPct = Math.min(Math.max((d.firstTime - rStart) / TL_ROW_MS * 100, 2), 98).toFixed(1);
-        const rar = tlRarity(d.rate);
-        dotCallHtml += `<div class="tl-callout tl-dot-callout" style="left:${xPct}%;bottom:0" onclick="tlDotToggle(event,this)">
-          <div class="tl-dot-circle" style="background:${rar.color}"></div>
-          <div class="tl-callout-box ${rar.cls}" style="display:none">
-            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
-          </div>
-          <div class="tl-arrow" style="display:none;border-top-color:${rar.color}"></div>
-        </div>`;
-      });
-    }
-
-    const showCallouts = !tlDotMode() && calloutsH > 0;
-    const showDotArea  = tlDotMode() && rowItems.length > 0;
     rowsHtml += `<div class="tl-row" data-row="${row}">
-      ${showCallouts ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
-      ${showDotArea  ? `<div class="tl-callouts" style="height:42px">${dotCallHtml}</div>` : ''}
+      ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
       <div class="tl-bar-zone">
         <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${tlRowGrad(row)}"></div></div>
         ${chHtml}
@@ -1139,7 +1102,7 @@ function renderTimeline(panel, mob, tab) {
   // 토글 버튼 업데이트
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll()?'전체':'최초'}</button><button class="tl-toggle-btn${tlDotMode()?' on':''}" onclick="tlToggleDotMode()">${tlDotMode()?'점':'기본'}</button>`;
+    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '최초만' : '전체'}</button>`;
   }
 }
 function deleteChannelEntry(btn) {
