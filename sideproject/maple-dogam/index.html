@@ -437,6 +437,9 @@
     .tl-dup-badge { position:absolute; top:-4px; right:-4px; background:#333; color:#fff; font-size:.45rem; font-weight:700; border-radius:5px; padding:1px 3px; line-height:1.3; pointer-events:none; z-index:5; }
     .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
     .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
+    .tl-filter-bar { display:flex; gap:5px; margin-top:10px; }
+    .tl-filter-btn { font-size:.6rem; padding:3px 8px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; font-family:inherit; }
+    .tl-filter-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
@@ -988,34 +991,63 @@ function tlColor(ms) {
 function tlRowGrad(row) {
   return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
-const tlShowAllByTab = {};
-function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
+function itemCategory(id) {
+  if (id >= 1000000 && id < 2000000) return 'equip';
+  if (id >= 2040000 && id < 2050000) return 'scroll';
+  if (id >= 2000000 && id < 3000000) return 'potion';
+  if (id >= 4000000 && id < 5000000) return 'etc';
+  return 'etc';
+}
+function isEquipOrScroll(id) { const c = itemCategory(id); return c === 'equip' || c === 'scroll'; }
+
+const tlShowAllByTab = {}, tlEquipOnlyByTab = {};
+function tlShowAll()   { return tlShowAllByTab[activeTabIdx]   || false; }
+function tlEquipOnly() { return tlEquipOnlyByTab[activeTabIdx] || false; }
+
+function _tlRefreshFilters(panel, mob) {
+  if (!panel || !mob) return;
+  renderTimeline(panel, mob, tabs.find(t => t.mob?.id === mob.id) || activeTab());
+  const list = panel.querySelector('.sw-log-list');
+  if (list) { list.innerHTML = ''; restoreLogEntries(panel, mob); }
+  // 필터 바 버튼 상태 업데이트
+  const bar = panel.querySelector('.tl-filter-bar');
+  if (bar) {
+    bar.querySelector('.tl-showall-btn').textContent = tlShowAll() ? '전체' : '최초만';
+    bar.querySelector('.tl-showall-btn').classList.toggle('on', tlShowAll());
+    bar.querySelector('.tl-equip-btn').classList.toggle('on', tlEquipOnly());
+  }
+}
 function tlToggleShowAll() {
   tlShowAllByTab[activeTabIdx] = !tlShowAll();
-  const panel = getActivePanel();
-  const tab = activeTab();
-  if (panel && tab?.mob) {
-    renderTimeline(panel, tab.mob, tab);
-    const list = panel.querySelector('.sw-log-list');
-    if (list) { list.innerHTML = ''; restoreLogEntries(panel, tab.mob); }
-  }
+  _tlRefreshFilters(getActivePanel(), activeTab()?.mob);
+}
+function tlToggleEquipOnly() {
+  tlEquipOnlyByTab[activeTabIdx] = !tlEquipOnly();
+  _tlRefreshFilters(getActivePanel(), activeTab()?.mob);
 }
 
 function renderTimeline(panel, mob, tab) {
   const section = panel?.querySelector('.tl-section');
   if (!section) return;
   const totalMs = swElapsed(tab);
-  if (totalMs < 1000) { section.style.display='none'; return; }
+  if (totalMs < 1000) { section.style.display='none'; panel.querySelector('.tl-filter-bar').style.display='none'; return; }
   section.style.display = '';
+  const filterBar = panel.querySelector('.tl-filter-bar');
+  if (filterBar) {
+    filterBar.style.display = 'flex';
+    filterBar.querySelector('.tl-showall-btn').textContent = tlShowAll() ? '전체' : '최초만';
+    filterBar.querySelector('.tl-showall-btn').classList.toggle('on', tlShowAll());
+    filterBar.querySelector('.tl-equip-btn').classList.toggle('on', tlEquipOnly());
+  }
 
   const s = loadS();
   const store  = s[`mob_${mob.id}`] || {};
   const excl   = new Set(s[`excl_${mob.id}`] || []);
   const chMarks = s[`sw_ch_${mob.id}`] || [];
 
-  // 아이템 목록: 전체 모드면 times[] 각각, 최초 모드면 firstTime만
+  // 아이템 목록: equip 필터 + 전체/최초 모드
   const items = [];
-  mob.drops.filter(d => !excl.has(d.id)).forEach(d => {
+  mob.drops.filter(d => !excl.has(d.id) && (!tlEquipOnly() || isEquipOrScroll(d.id))).forEach(d => {
     const st = store[d.id];
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
@@ -1109,7 +1141,7 @@ function renderTimeline(panel, mob, tab) {
   // 토글 버튼 업데이트
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    ptitleEl.innerHTML = `📊 타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '최초만' : '전체'}</button>`;
+    ptitleEl.textContent = '📊 타임라인';
   }
 }
 function deleteChannelEntry(btn) {
@@ -1176,14 +1208,15 @@ function restoreLogEntries(panel, mob) {
   const s = loadS();
   const mobStore = s[`mob_${mob.id}`] || {};
   let itemEntries;
+  const drops = mob.drops.filter(d => !tlEquipOnly() || isEquipOrScroll(d.id));
   if (tlShowAll()) {
     itemEntries = [];
-    mob.drops.filter(d => mobStore[d.id]?.firstTime != null).forEach(d => {
+    drops.filter(d => mobStore[d.id]?.firstTime != null).forEach(d => {
       const times = mobStore[d.id].times?.length ? mobStore[d.id].times : [mobStore[d.id].firstTime];
       times.forEach(ms => itemEntries.push({ ms, isCh: false, id: d.id, name: d.name }));
     });
   } else {
-    itemEntries = mob.drops
+    itemEntries = drops
       .filter(d => mobStore[d.id]?.firstTime != null)
       .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
   }
@@ -1622,6 +1655,10 @@ function buildTabPanel(tab) {
         <div class="sw-log">
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
           <div class="sw-log-list"></div>
+        </div>
+        <div class="tl-filter-bar" style="display:none">
+          <button class="tl-filter-btn tl-showall-btn" onclick="tlToggleShowAll()">최초만</button>
+          <button class="tl-filter-btn tl-equip-btn" onclick="tlToggleEquipOnly()">장비+주문서만</button>
         </div>
         <div class="tl-section" style="display:none">
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📊 타임라인</div>
