@@ -1829,6 +1829,13 @@ function activateMob(mob) {
   panel.querySelector('.mob-stats').textContent = '';
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
+  // 드롭률 ? 아이템 자동 제외 (처음 로드 시에만, 이미 excl 키 있으면 스킵)
+  const sInit = loadS();
+  if (!sInit.hasOwnProperty(`excl_${mob.id}`)) {
+    const autoExcl = mob.drops.filter(d => d.rate === '?').map(d => d.id);
+    if (autoExcl.length) { sInit[`excl_${mob.id}`] = autoExcl; saveS(sInit); }
+  }
+
   // 몬스터 이름 meta 저장
   const s = loadS();
   s[`mob_${mob.id}_meta`] = { name: mob.name, total: mob.drops.length };
