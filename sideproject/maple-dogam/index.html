@@ -994,7 +994,11 @@ function tlToggleShowAll() {
   tlShowAllByTab[activeTabIdx] = !tlShowAll();
   const panel = getActivePanel();
   const tab = activeTab();
-  if (panel && tab?.mob) renderTimeline(panel, tab.mob, tab);
+  if (panel && tab?.mob) {
+    renderTimeline(panel, tab.mob, tab);
+    const list = panel.querySelector('.sw-log-list');
+    if (list) { list.innerHTML = ''; restoreLogEntries(panel, tab.mob); }
+  }
 }
 
 function renderTimeline(panel, mob, tab) {
@@ -1054,10 +1058,13 @@ function renderTimeline(panel, mob, tab) {
         </div>`;
       } else {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
-        // 유니크 아이템 먼저, 중복은 뒤로 (접힌 상태에서 종류별 대표 아이콘 표시)
+        // 유니크 아이템 먼저(희귀도 낮은 것이 마지막=덱 맨 위), 중복은 뒤로
         const seenIds = new Set();
         const uniqueItems = [], dupItems = [];
         items.forEach(d => { if (!seenIds.has(d.id)) { seenIds.add(d.id); uniqueItems.push(d); } else dupItems.push(d); });
+        // 내림차순(흔한→희귀) 정렬 → 희귀 아이템이 index MAX_VIS-1 = DOM 맨 위(z-index 최고)
+        const parseRate = r => { const n = parseFloat(r); return isNaN(n) ? 100 : n; };
+        uniqueItems.sort((a, b) => parseRate(b.rate) - parseRate(a.rate));
         const orderedItems = [...uniqueItems, ...dupItems];
         const MAX_VIS = 3; // 접힌 상태 최대 표시 종류 수
         const visCount = Math.min(uniqueItems.length, MAX_VIS);
@@ -1168,9 +1175,18 @@ function tlToggleCluster(e, el) {
 function restoreLogEntries(panel, mob) {
   const s = loadS();
   const mobStore = s[`mob_${mob.id}`] || {};
-  const itemEntries = mob.drops
-    .filter(d => mobStore[d.id]?.firstTime != null)
-    .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
+  let itemEntries;
+  if (tlShowAll()) {
+    itemEntries = [];
+    mob.drops.filter(d => mobStore[d.id]?.firstTime != null).forEach(d => {
+      const times = mobStore[d.id].times?.length ? mobStore[d.id].times : [mobStore[d.id].firstTime];
+      times.forEach(ms => itemEntries.push({ ms, isCh: false, id: d.id, name: d.name }));
+    });
+  } else {
+    itemEntries = mob.drops
+      .filter(d => mobStore[d.id]?.firstTime != null)
+      .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
+  }
   const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
   const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms);
   const list = panel.querySelector('.sw-log-list');
@@ -2014,6 +2030,7 @@ function incrementItem(itemId) {
 
   updateCardUI(itemId, state, drop);
   if (isFirst) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, itemId);
+  else if (tlShowAll()) addSwLogToPanel(getActivePanel(), drop.name, t, itemId);
   updateProgress();
   updateHuntEstimate();
   renderSaves();
