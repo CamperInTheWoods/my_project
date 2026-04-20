@@ -478,6 +478,121 @@
     .rb-red    { background:#fce4ec; color:#c62828; }
     .rb-purple { background:#f3e5f5; color:#6a1b9a; }
 
+    /* ─ Result Modal ─ */
+    .result-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:1000;
+      display:flex; align-items:center; justify-content:center;
+      padding:16px; backdrop-filter:blur(4px);
+    }
+    .result-modal {
+      max-width:520px; width:100%; max-height:90vh; overflow-y:auto;
+      border-radius:20px; box-shadow:0 16px 60px rgba(0,0,0,.5);
+    }
+    /* 카드 본체 — 다크 배경 */
+    .result-card {
+      background:linear-gradient(160deg,#1e1408 0%,#2d1f0a 60%,#1a1005 100%);
+      border-radius:20px; padding:28px 24px 24px;
+      display:flex; flex-direction:column; gap:20px;
+      border:1px solid rgba(245,166,35,.25);
+    }
+    /* 상단 히어로 */
+    .result-hero { display:flex; align-items:center; gap:18px; min-width:0; }
+    .result-hero > div:last-child { min-width:0; flex:1; }
+    .result-mob-img-wrap {
+      width:100px; height:100px; flex-shrink:0;
+      background:rgba(255,255,255,.06); border-radius:14px;
+      border:2px solid rgba(245,166,35,.3);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .result-mob-img { width:86px; height:86px; object-fit:contain; }
+    .result-mob-name {
+      font-size:1.35rem; font-weight:800; color:#fff; line-height:1.2; margin-bottom:10px;
+      text-shadow:0 2px 8px rgba(0,0,0,.6);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;
+    }
+    /* 스탯 블록 */
+    .result-hero-stats { display:flex; gap:8px; flex-wrap:wrap; }
+    .result-stat-block {
+      background:rgba(255,255,255,.07); border:1px solid rgba(245,166,35,.2);
+      border-radius:10px; padding:8px 12px; display:flex; flex-direction:column; gap:2px;
+    }
+    .rsb-label { font-size:.55rem; color:rgba(255,255,255,.45); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .rsb-value { font-size:1.05rem; font-weight:800; color:var(--gold); line-height:1.2; white-space:nowrap; }
+    .rsb-value.small { font-size:.85rem; color:rgba(255,255,255,.7); white-space:nowrap; }
+    /* 구분선 */
+    .result-divider { height:1px; background:rgba(245,166,35,.18); }
+    /* 아이템 섹션 */
+    .result-section-title {
+      font-size:.58rem; color:rgba(255,255,255,.4); margin-bottom:8px;
+      font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    }
+    .result-items-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+    .ri-cell {
+      position:relative; border-radius:8px; border:3px solid rgba(80,80,80,.6);
+      background:rgba(255,255,255,.05); aspect-ratio:1;
+      display:flex; align-items:center; justify-content:center;
+      cursor:default; overflow:visible;
+    }
+    .ri-cell.ri-found {
+      background:rgba(255,240,180,.13);
+      box-shadow:0 0 8px var(--ri-color, rgba(245,166,35,.5)), inset 0 0 6px rgba(255,255,255,.06);
+    }
+    .ri-cell.ri-nf { opacity:.4; }
+    .ri-cell.ri-nf img { filter:brightness(.18) saturate(0); }
+    /* 도감 완성 카드 */
+    .result-card.complete {
+      background:linear-gradient(160deg,#1a1000 0%,#2e1d00 40%,#3d2600 70%,#1a1000 100%);
+      border-color:rgba(245,166,35,.6);
+      box-shadow:0 0 40px rgba(245,166,35,.25), inset 0 0 60px rgba(245,166,35,.04);
+    }
+    .result-card.complete .result-mob-img-wrap {
+      border-color:rgba(245,166,35,.7);
+      box-shadow:0 0 20px rgba(245,166,35,.35);
+    }
+    .result-card.complete .result-mob-name::after {
+      content:' ✓'; color:var(--gold); font-size:1rem;
+    }
+    .result-card.complete .result-stat-block {
+      border-color:rgba(245,166,35,.4);
+      background:rgba(245,166,35,.1);
+    }
+    .ri-cell img { width:76%; height:76%; object-fit:contain; }
+    .ri-cnt {
+      position:absolute; top:3px; right:3px;
+      font-size:.55rem; font-weight:700; color:#fff;
+      background:var(--gold); border-radius:8px; padding:1px 5px; line-height:1.5;
+      min-width:17px; text-align:center;
+    }
+    .ri-rate {
+      position:absolute; bottom:2px; left:3px;
+      font-size:.46rem; font-weight:700; border-radius:4px; padding:1px 3px; line-height:1.4;
+    }
+    .ri-tooltip {
+      display:none; position:absolute; bottom:calc(100% + 6px); left:50%;
+      transform:translateX(-50%); background:#1a1008; color:#fff;
+      font-size:.6rem; padding:5px 9px; border-radius:7px; white-space:nowrap;
+      z-index:10; pointer-events:none; line-height:1.6;
+      border:1px solid rgba(245,166,35,.3);
+    }
+    .ri-tooltip::after {
+      content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      border:4px solid transparent; border-top-color:#1a1008;
+    }
+    .ri-cell:hover .ri-tooltip { display:block; }
+    /* 액션 버튼 */
+    .result-actions {
+      display:flex; gap:8px; margin-top:4px; justify-content:flex-end;
+      padding-top:16px; border-top:1px solid rgba(245,166,35,.15);
+    }
+    .result-btn {
+      padding:8px 18px; border-radius:9px; border:none; cursor:pointer;
+      font-family:inherit; font-size:.8rem; font-weight:700; transition:all .15s;
+    }
+    .result-btn-close { background:rgba(255,255,255,.1); color:rgba(255,255,255,.6); }
+    .result-btn-close:hover { background:rgba(255,255,255,.18); }
+    .result-btn-save { background:var(--gold); color:#1a0f00; }
+    .result-btn-save:hover { background:#ffbe40; }
+
     /* ─ Responsive ─ */
     @media(max-width:640px){
       .main-layout { flex-direction:column; }
@@ -574,6 +689,7 @@
     }
 
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -1083,7 +1199,7 @@ function renderTimeline(panel, mob, tab) {
         const d = items[0]; const rar = tlRarity(d.rate);
         callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
           <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
-            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
+            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
           </div>
           <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
         </div>`;
@@ -1105,7 +1221,7 @@ function renderTimeline(panel, mob, tab) {
           const showArrow = i === arrowIdx;
           wrapsHtml += `<div class="tl-callout-wrap${isExtra?' tl-extra':''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
             <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
-              <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="this.src='${BLANK}'">
+              <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
             </div>
             ${showArrow ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
           </div>`;
@@ -1298,6 +1414,11 @@ function initSw() { /* 탭 생성 시 각 탭에서 초기화 */ }
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 function mobImg(id)  { return `https://maplestory.io/api/kms/284/mob/${id}/icon`; }
 function itemImg(id) { return `https://maplestory.io/api/kms/284/item/${id}/icon`; }
+function onItemImgError(img, id) {
+  const fb = parseInt(img.dataset.fb || '0');
+  if (fb === 0) { img.dataset.fb = '1'; img.src = `https://maplestory.io/api/gms/62/item/${id}/icon`; }
+  else { img.src = BLANK; }
+}
 
 // ══════════════════════════════════════════
 // 6. 드롭률 배지
@@ -1613,6 +1734,7 @@ function buildTabPanel(tab) {
         <a class="mob-link" href="#" target="_blank">mapledb.kr에서 보기 ↗</a>
       </div>
       <div class="actions">
+<button class="btn sm" onclick="openResultModal()" title="도감작 결과 카드">📋 결과</button>
 <button class="btn sm danger" onclick="resetChecklist()">초기화</button>
       </div>
     </div>
@@ -1943,7 +2065,7 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
 
   card.innerHTML = `
     <div class="icon-wrap">
-      <img src="${itemImg(drop.id)}" alt="${escHtml(drop.name)}" onerror="this.src='${BLANK}'">
+      <img src="${itemImg(drop.id)}" alt="${escHtml(drop.name)}" onerror="onItemImgError(this,${drop.id})">
       <span class="cn" style="${found?'':'display:none'}">${state.count}</span>
     </div>
     <div class="card-body">
@@ -1998,8 +2120,9 @@ function openBulkPopup(itemId) {
   _bpPendingDelta = 0;
   _bpOrigCount = state.count;
 
-  document.getElementById('bp-icon').src = itemImg(itemId);
-  document.getElementById('bp-icon').onerror = function(){ this.src = BLANK; };
+  const bpIconEl = document.getElementById('bp-icon');
+  bpIconEl.src = itemImg(itemId);
+  bpIconEl.onerror = function(){ onItemImgError(this, itemId); };
   document.getElementById('bp-name').textContent = drop.name;
   _bpRenderCount();
   document.getElementById('bulk-overlay').classList.add('open');
@@ -2254,7 +2377,7 @@ function updateHuntEstimateInPanel(panel, mob) {
 
   const estimated = Math.round(bestCount / bestRate);
   wrap.style.display = '';
-  panel.querySelector('.hunt-count').textContent = `~${estimated.toLocaleString()}마리`;
+  panel.querySelector('.hunt-count').innerHTML = `<span style="font-size:.7em;opacity:.6">(약)</span> ${estimated.toLocaleString()}마리`;
   const label = `${bestDrop.name} ${bestCount}개 / ${bestDrop.rate}`;
   panel.querySelector('.hunt-reason').textContent = label;
 }
@@ -2400,7 +2523,189 @@ function renderSaves() {
 }
 
 // ══════════════════════════════════════════
-// 18. 초기 실행
+// 18. 도감작 결과 카드
+// ══════════════════════════════════════════
+function rarityColor(rateStr) {
+  const r = parseFloat(rateStr);
+  if (isNaN(r)) return { bg:'rgba(155,89,182,.25)', fg:'#ce93d8' };
+  if (r >= 1)     return { bg:'rgba(52,152,219,.25)',  fg:'#7ec8e3' };
+  if (r >= 0.1)   return { bg:'rgba(46,204,113,.22)',  fg:'#7ddfab' };
+  if (r >= 0.01)  return { bg:'rgba(241,196,15,.22)',  fg:'#f9e14b' };
+  if (r >= 0.007) return { bg:'rgba(230,126,34,.22)',  fg:'#f5a55a' };
+  if (r >= 0.005) return { bg:'rgba(231,76,60,.22)',   fg:'#f08080' };
+  return                  { bg:'rgba(155,89,182,.25)', fg:'#ce93d8' };
+}
+function rarityBorderColor(rateStr) {
+  const r = parseFloat(rateStr);
+  if (isNaN(r)) return '#9b59b6';
+  if (r >= 1)     return '#3498db';
+  if (r >= 0.1)   return '#2ecc71';
+  if (r >= 0.01)  return '#f1c40f';
+  if (r >= 0.007) return '#e67e22';
+  if (r >= 0.005) return '#e74c3c';
+  return '#9b59b6';
+}
+
+function openResultModal(mob) {
+  mob = mob || activeMob;
+  if (!mob) return;
+  const s        = loadS();
+  const mobData  = s[`mob_${mob.id}`] || {};
+  const excl     = new Set(s[`excl_${mob.id}`] || []);
+  const tlBaseId = s[`tl_base_${mob.id}`]?.id;
+  const tab      = tabs.find(t => t.mob?.id === mob.id) || activeTab();
+  const elapsedMs = swElapsed(tab);
+
+  // 진척도
+  const drops    = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+  const total    = drops.length;
+  const done     = drops.filter(d => (mobData[d.id]?.count || 0) > 0).length;
+  const pct      = total ? Math.round(done / total * 100) : 0;
+
+  // 예상마릿수
+  let huntHtml = '—';
+  const huntStore = s[`tl_base_${mob.id}`];
+  if (huntStore) {
+    const bd = mob.drops.find(d => d.id === huntStore.id);
+    if (bd) {
+      const cnt  = mobData[bd.id]?.count || 0;
+      const rate = parseFloat(bd.rate) / 100;
+      if (cnt > 0 && rate > 0) huntHtml = `<span style="font-size:.65em;opacity:.55">(약)</span> ${Math.round(cnt / rate).toLocaleString()}마리`;
+    }
+  } else {
+    let bestRate = 0, bestDrop = null, bestCount = 0;
+    drops.forEach(d => {
+      const cnt  = mobData[d.id]?.count || 0;
+      const rate = parseFloat(d.rate) / 100;
+      if (cnt > 0 && rate > 0 && rate > bestRate) { bestRate = rate; bestDrop = d; bestCount = cnt; }
+    });
+    if (bestDrop) huntHtml = `<span style="font-size:.65em;opacity:.55">(약)</span> ${Math.round(bestCount / bestRate).toLocaleString()}마리`;
+  }
+
+  // 아이템 그리드 (제외 아이템 제외, 5열)
+  const visDrops = mob.drops.filter(d => !excl.has(d.id));
+  const itemCells = visDrops.map(d => {
+    const cnt      = mobData[d.id]?.count || 0;
+    const found    = cnt > 0;
+    const border   = found ? rarityBorderColor(d.rate) : 'rgba(80,80,80,.5)';
+    const cls      = found ? 'ri-cell ri-found' : 'ri-cell ri-nf';
+    const timeLabel = (found && mobData[d.id]?.firstTime != null) ? `첫 출현 ${fmtTimeLog(mobData[d.id].firstTime)}` : '';
+    const rc       = rarityColor(d.rate);
+    const rateRaw  = d.rate != null ? String(d.rate).replace(/%/g, '') : '?';
+    const rateDisp = rateRaw === '?' ? '?' : rateRaw + '%';
+    const glowStyle = found ? `border-color:${border};--ri-color:${border}80` : '';
+    return `<div class="${cls}" style="${glowStyle}">
+      <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
+      ${found ? `<span class="ri-cnt">×${cnt}</span>` : ''}
+      <span class="ri-rate" style="background:${rc.bg};color:${rc.fg}">${escHtml(rateDisp)}</span>
+      <div class="ri-tooltip">${escHtml(d.name)}<br>${found ? cnt+'개 수집' : '미획득'}${timeLabel ? '<br>'+timeLabel : ''}</div>
+    </div>`;
+  }).join('');
+
+  const card = document.getElementById('result-card-export');
+  const isComplete = done === total && total > 0;
+  const timeStr = fmtTime(elapsedMs).replace(/\.\d+$/, '');
+  card.className = `result-card${isComplete ? ' complete' : ''}`;
+  card.innerHTML = `
+    <div class="result-hero">
+      <div class="result-mob-img-wrap">
+        <img class="result-mob-img" src="${mobImg(mob.id)}" alt="${escHtml(mob.name)}" onerror="this.src='${BLANK}'">
+      </div>
+      <div>
+        <div class="result-mob-name">${escHtml(mob.name)}</div>
+        <div class="result-hero-stats">
+          <div class="result-stat-block">
+            <span class="rsb-label">소요 시간</span>
+            <span class="rsb-value">${timeStr}</span>
+          </div>
+          <div class="result-stat-block">
+            <span class="rsb-label">예상 사냥</span>
+            <span class="rsb-value">${huntHtml}</span>
+          </div>
+          <div class="result-stat-block">
+            <span class="rsb-label">진척도</span>
+            <span class="rsb-value small">${done}/${total} (${pct}%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="result-divider"></div>
+    <div>
+      <div class="result-section-title">획득 아이템</div>
+      <div class="result-items-grid">${itemCells}</div>
+    </div>
+  `;
+
+  document.getElementById('result-overlay').style.display = 'flex';
+}
+
+function closeResultModal(e) {
+  if (e && e.target !== document.getElementById('result-overlay')) return;
+  document.getElementById('result-overlay').style.display = 'none';
+}
+
+function exportResultImage() {
+  const target = document.getElementById('result-card-export');
+  const btn    = document.querySelector('.result-btn-save');
+  btn.textContent = '준비 중...'; btn.disabled = true;
+
+  // 모든 img를 fetch → data URL 변환 후 교체 (CORS 우회)
+  const imgs = [...target.querySelectorAll('img')];
+  const origSrcs = imgs.map(i => i.src);
+
+  function fetchDataUrl(url) {
+    return fetch(url)
+      .then(r => { if (!r.ok) throw new Error(); return r.blob(); })
+      .then(blob => new Promise(res => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      }));
+  }
+  function toDataUrl(url) {
+    // KMS 실패 시 GMS로 폴백
+    const gmsFallback = url.replace('/api/kms/284/item/', '/api/gms/62/item/');
+    return fetchDataUrl(url)
+      .catch(() => gmsFallback !== url ? fetchDataUrl(gmsFallback) : Promise.reject())
+      .catch(() => null);
+  }
+
+  Promise.all(imgs.map(img => toDataUrl(img.src)))
+    .then(dataUrls => {
+      dataUrls.forEach((du, i) => { if (du) imgs[i].src = du; });
+      // 교체된 src 로드 대기
+      return Promise.all(imgs.map(img =>
+        img.complete ? Promise.resolve() :
+        new Promise(res => { img.onload = res; img.onerror = res; })
+      ));
+    })
+    .then(() => {
+      target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = 'none');
+      return html2canvas(target, {
+        backgroundColor: null, scale: 2,
+        useCORS: true, allowTaint: false, logging: false
+      });
+    })
+    .then(canvas => {
+      // src 원복
+      imgs.forEach((img, i) => img.src = origSrcs[i]);
+      target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = '');
+      btn.textContent = '이미지 저장'; btn.disabled = false;
+      const a = document.createElement('a');
+      a.download = `도감작_${activeMob?.name || 'result'}_${Date.now()}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    })
+    .catch(() => {
+      imgs.forEach((img, i) => img.src = origSrcs[i]);
+      target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = '');
+      btn.textContent = '이미지 저장'; btn.disabled = false;
+      alert('이미지 저장 실패. 브라우저 설정을 확인해주세요.');
+    });
+}
+
+// ══════════════════════════════════════════
+// 19. 초기 실행
 // ══════════════════════════════════════════
 // 첫 번째 탭 패널 생성 (몹은 아직 없음, 섹션은 숨김)
 (function() {
@@ -2411,6 +2716,16 @@ function renderSaves() {
 })();
 renderSaves();
 </script>
+<div id="result-overlay" class="result-overlay" style="display:none" onclick="closeResultModal(event)">
+  <div class="result-modal" id="result-modal-inner">
+    <div id="result-card-export" class="result-card"></div>
+    <div class="result-actions">
+      <button class="result-btn result-btn-close" onclick="closeResultModal()">닫기</button>
+      <button class="result-btn result-btn-save" onclick="exportResultImage()">이미지 저장</button>
+    </div>
+  </div>
+</div>
+
 <div style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);pointer-events:none;user-select:none;letter-spacing:.03em;">똘레로_1.062.0</div>
 </body>
 </html>
