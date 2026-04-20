@@ -309,6 +309,30 @@
     .item-card.excl .excl-btn:hover { background:var(--red); color:white; }
     .item-card.excl .decr { display:none; }
 
+    /* 사냥 기준 버튼 */
+    .item-card .tl-base-btn {
+      position:absolute; bottom:47px; right:5px;
+      width:15px; height:15px; border-radius:50%;
+      border:1.5px solid rgba(180,180,180,.3); background:rgba(255,255,255,.06);
+      color:rgba(160,160,160,.6); font-size:.5rem; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; opacity:0; transition:opacity .15s, background .15s, border-color .15s, color .15s;
+    }
+    .item-card:hover .tl-base-btn { opacity:1; }
+    .item-card:hover .tl-base-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(245,166,35,.12); }
+    .item-card.tl-base .tl-base-btn {
+      opacity:1; background:var(--gold); border-color:var(--gold); color:#fff;
+      box-shadow:0 0 6px rgba(245,166,35,.5);
+    }
+    .item-card.tl-base-hidden .tl-base-btn {
+      opacity:1; background:#a06c10; border-color:#c88a20; color:#f5d080;
+      box-shadow:0 0 4px rgba(200,138,32,.3);
+    }
+    .item-card.excl .tl-base-btn { display:none; }
+    /* 사냥기준 카드 강조 */
+    .item-card.tl-base { border-color:#c8a84b !important; }
+    .item-card.tl-base-hidden { border-color:#7a5f1a !important; opacity:.75; }
+
     /* 제외 토글 버튼 */
     .excl-toggle {
       display:inline-flex; align-items:center; gap:5px;
@@ -405,6 +429,13 @@
     .no-saves { font-size:.8rem; color:var(--gray); }
 
     /* ─ Timeline ─ */
+    .tl-toggle-btn {
+      font-size:.58rem; padding:2px 8px; border-radius:8px;
+      border:1px solid var(--border); background:#f5f0e8; color:var(--brown);
+      cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle;
+      transition:background .15s, color .15s, border-color .15s;
+    }
+    .tl-toggle-btn.on { background:var(--gold); color:#fff; border-color:var(--gold); }
     .tl-rows { margin-top:4px; }
     .tl-row { position:relative; margin-bottom:4px; }
     .tl-callouts { position:relative; min-height:0; }
@@ -435,11 +466,6 @@
     .tl-cluster-badge { position:absolute; top:-5px; right:-7px; background:#555; color:#fff; font-size:.5rem; min-width:14px; height:14px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:700; padding:0 2px; pointer-events:none; z-index:10; transition:opacity .2s; }
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
     .tl-dup-badge { position:absolute; top:-4px; right:-4px; background:#333; color:#fff; font-size:.45rem; font-weight:700; border-radius:5px; padding:1px 3px; line-height:1.3; pointer-events:none; z-index:5; }
-    .tl-toggle-btn { font-size:.58rem; padding:2px 7px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; margin-left:6px; font-family:inherit; vertical-align:middle; }
-    .tl-toggle-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
-    .tl-filter-bar { display:flex; gap:5px; margin-top:10px; }
-    .tl-filter-btn { font-size:.6rem; padding:3px 8px; border-radius:8px; border:1px solid var(--border); background:#f5f0e8; color:var(--brown); cursor:pointer; font-family:inherit; }
-    .tl-filter-btn.on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
@@ -988,66 +1014,39 @@ function tlColor(ms) {
   const l = Math.round(50 - p * 10);
   return `hsl(${h},${s}%,${l}%)`;
 }
-function tlRowGrad(row) {
-  return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
-}
-function itemCategory(id) {
-  if (id >= 1000000 && id < 2000000) return 'equip';
-  if (id >= 2040000 && id < 2050000) return 'scroll';
-  if (id >= 2000000 && id < 3000000) return 'potion';
-  if (id >= 4000000 && id < 5000000) return 'etc';
-  return 'etc';
-}
-function isEquipOrScroll(id) { const c = itemCategory(id); return c === 'equip' || c === 'scroll'; }
-
-const tlShowAllByTab = {}, tlEquipOnlyByTab = {};
-function tlShowAll()   { return tlShowAllByTab[activeTabIdx]   || false; }
-function tlEquipOnly() { return tlEquipOnlyByTab[activeTabIdx] || false; }
-
-function _tlRefreshFilters(panel, mob) {
-  if (!panel || !mob) return;
-  renderTimeline(panel, mob, tabs.find(t => t.mob?.id === mob.id) || activeTab());
-  const list = panel.querySelector('.sw-log-list');
-  if (list) { list.innerHTML = ''; restoreLogEntries(panel, mob); }
-  // 필터 바 버튼 상태 업데이트
-  const bar = panel.querySelector('.tl-filter-bar');
-  if (bar) {
-    bar.querySelector('.tl-showall-btn').textContent = tlShowAll() ? '전체' : '최초만';
-    bar.querySelector('.tl-showall-btn').classList.toggle('on', tlShowAll());
-    bar.querySelector('.tl-equip-btn').classList.toggle('on', tlEquipOnly());
-  }
-}
+const tlShowAllByTab = {};
+function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
 function tlToggleShowAll() {
   tlShowAllByTab[activeTabIdx] = !tlShowAll();
-  _tlRefreshFilters(getActivePanel(), activeTab()?.mob);
+  const panel = getActivePanel();
+  const tab = activeTab();
+  if (panel && tab?.mob) {
+    renderTimeline(panel, tab.mob, tab);
+    const list = panel.querySelector('.sw-log-list');
+    if (list) { list.innerHTML = ''; restoreLogEntries(panel, tab.mob); }
+  }
 }
-function tlToggleEquipOnly() {
-  tlEquipOnlyByTab[activeTabIdx] = !tlEquipOnly();
-  _tlRefreshFilters(getActivePanel(), activeTab()?.mob);
+
+function tlRowGrad(row) {
+  return `linear-gradient(90deg,${tlColor(row*TL_ROW_MS)},${tlColor((row+1)*TL_ROW_MS)})`;
 }
 
 function renderTimeline(panel, mob, tab) {
   const section = panel?.querySelector('.tl-section');
   if (!section) return;
   const totalMs = swElapsed(tab);
-  if (totalMs < 1000) { section.style.display='none'; panel.querySelector('.tl-filter-bar').style.display='none'; return; }
+  if (totalMs < 1000) { section.style.display='none'; return; }
   section.style.display = '';
-  const filterBar = panel.querySelector('.tl-filter-bar');
-  if (filterBar) {
-    filterBar.style.display = 'flex';
-    filterBar.querySelector('.tl-showall-btn').textContent = tlShowAll() ? '전체' : '최초만';
-    filterBar.querySelector('.tl-showall-btn').classList.toggle('on', tlShowAll());
-    filterBar.querySelector('.tl-equip-btn').classList.toggle('on', tlEquipOnly());
-  }
 
   const s = loadS();
-  const store  = s[`mob_${mob.id}`] || {};
-  const excl   = new Set(s[`excl_${mob.id}`] || []);
+  const store   = s[`mob_${mob.id}`] || {};
+  const excl    = new Set(s[`excl_${mob.id}`] || []);
+  const tlBase  = s[`tl_base_${mob.id}`] || null;
   const chMarks = s[`sw_ch_${mob.id}`] || [];
 
-  // 아이템 목록: equip 필터 + 전체/최초 모드
+  // tl_base hidden 아이템은 타임라인에서 제외
   const items = [];
-  mob.drops.filter(d => !excl.has(d.id) && (!tlEquipOnly() || isEquipOrScroll(d.id))).forEach(d => {
+  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id)).forEach(d => {
     const st = store[d.id];
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
@@ -1090,13 +1089,10 @@ function renderTimeline(panel, mob, tab) {
         </div>`;
       } else {
         // 덱으로 쌓기 — 클릭하면 펼쳐짐
-        // 유니크 아이템 먼저(희귀도 낮은 것이 마지막=덱 맨 위), 중복은 뒤로
+        // 유니크 아이템 먼저, 중복은 뒤로 (접힌 상태에서 종류별 대표 아이콘 표시)
         const seenIds = new Set();
         const uniqueItems = [], dupItems = [];
         items.forEach(d => { if (!seenIds.has(d.id)) { seenIds.add(d.id); uniqueItems.push(d); } else dupItems.push(d); });
-        // 내림차순(흔한→희귀) 정렬 → 희귀 아이템이 index MAX_VIS-1 = DOM 맨 위(z-index 최고)
-        const parseRate = r => { const n = parseFloat(r); return isNaN(n) ? 100 : n; };
-        uniqueItems.sort((a, b) => parseRate(b.rate) - parseRate(a.rate));
         const orderedItems = [...uniqueItems, ...dupItems];
         const MAX_VIS = 3; // 접힌 상태 최대 표시 종류 수
         const visCount = Math.min(uniqueItems.length, MAX_VIS);
@@ -1138,10 +1134,9 @@ function renderTimeline(panel, mob, tab) {
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
-  // 토글 버튼 업데이트
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    ptitleEl.textContent = '📊 타임라인';
+    ptitleEl.innerHTML = `타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '최초만' : '전체'}</button>`;
   }
 }
 function deleteChannelEntry(btn) {
@@ -1207,18 +1202,17 @@ function tlToggleCluster(e, el) {
 function restoreLogEntries(panel, mob) {
   const s = loadS();
   const mobStore = s[`mob_${mob.id}`] || {};
+  const tlBase   = s[`tl_base_${mob.id}`] || null;
   let itemEntries;
-  const drops = mob.drops.filter(d => !tlEquipOnly() || isEquipOrScroll(d.id));
+  const drops = mob.drops.filter(d => mobStore[d.id]?.firstTime != null && !(tlBase?.hidden && tlBase.id === d.id));
   if (tlShowAll()) {
     itemEntries = [];
-    drops.filter(d => mobStore[d.id]?.firstTime != null).forEach(d => {
+    drops.forEach(d => {
       const times = mobStore[d.id].times?.length ? mobStore[d.id].times : [mobStore[d.id].firstTime];
       times.forEach(ms => itemEntries.push({ ms, isCh: false, id: d.id, name: d.name }));
     });
   } else {
-    itemEntries = drops
-      .filter(d => mobStore[d.id]?.firstTime != null)
-      .map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
+    itemEntries = drops.map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
   }
   const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
   const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms);
@@ -1656,12 +1650,8 @@ function buildTabPanel(tab) {
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
           <div class="sw-log-list"></div>
         </div>
-        <div class="tl-filter-bar" style="display:none">
-          <button class="tl-filter-btn tl-showall-btn" onclick="tlToggleShowAll()">최초만</button>
-          <button class="tl-filter-btn tl-equip-btn" onclick="tlToggleEquipOnly()">장비+주문서만</button>
-        </div>
         <div class="tl-section" style="display:none">
-          <div class="ptitle" style="margin-top:14px;font-size:.65rem">📊 타임라인</div>
+          <div class="ptitle" style="margin-top:14px;font-size:.65rem">타임라인</div>
           <div class="tl-rows"></div>
         </div>
       </div>
@@ -1829,13 +1819,6 @@ function activateMob(mob) {
   panel.querySelector('.mob-stats').textContent = '';
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
-  // 드롭률 ? 아이템 자동 제외 (처음 로드 시에만, 이미 excl 키 있으면 스킵)
-  const sInit = loadS();
-  if (!sInit.hasOwnProperty(`excl_${mob.id}`)) {
-    const autoExcl = mob.drops.filter(d => d.rate === '?').map(d => d.id);
-    if (autoExcl.length) { sInit[`excl_${mob.id}`] = autoExcl; saveS(sInit); }
-  }
-
   // 몬스터 이름 meta 저장
   const s = loadS();
   s[`mob_${mob.id}_meta`] = { name: mob.name, total: mob.drops.length };
@@ -1891,6 +1874,35 @@ function setExcluded(set) {
   saveS(store);
 }
 
+// tl_base_${mobId} = { id, hidden } | null
+// 사냥 횟수 기준 아이템. hidden=true면 타임라인/기록에서도 숨김
+function getTlBase(mobId) { return loadS()[`tl_base_${mobId}`] || null; }
+function setTlBase(mobId, val) {
+  const store = loadS();
+  if (val == null) delete store[`tl_base_${mobId}`];
+  else             store[`tl_base_${mobId}`] = val;
+  saveS(store);
+}
+function toggleTlBase(e, itemId) {
+  e.stopPropagation();
+  const mobId = activeMob.id;
+  const cur = getTlBase(mobId);
+  if (!cur || cur.id !== itemId) {
+    setTlBase(mobId, { id: itemId, hidden: false }); // 다른 아이템 → 기준 지정 (타임라인 표시)
+  } else if (!cur.hidden) {
+    setTlBase(mobId, { id: itemId, hidden: true });  // 같은 아이템 재클릭 → 타임라인 숨김
+  } else {
+    setTlBase(mobId, null);                           // 한 번 더 → 해제
+  }
+  renderItemGrid();
+  const panel = getActivePanel();
+  renderTimeline(panel, activeMob, activeTab());
+  const list = panel?.querySelector('.sw-log-list');
+  if (list) { list.innerHTML = ''; restoreLogEntries(panel, activeMob); }
+  updateProgress();
+  updateHuntEstimate();
+}
+
 function renderItemGrid() {
   const panel = getActivePanel();
   if (!panel || !activeMob) return;
@@ -1905,22 +1917,29 @@ function renderItemGridInPanel(panel, mob) {
   const key = `mob_${mob.id}`;
   const mobData  = store[key] || {};
   const excluded = new Set(store[`excl_${mob.id}`] || []);
+  const tlBase   = getTlBase(mob.id);
 
   mob.drops.forEach(drop => {
-    const state = mobData[drop.id] || { count:0, firstTime:null };
-    const isExcl = excluded.has(drop.id);
-    const card   = buildItemCard(drop, state, isExcl);
+    const state      = mobData[drop.id] || { count:0, firstTime:null };
+    const isExcl     = excluded.has(drop.id);
+    const baseState  = tlBase?.id === drop.id ? (tlBase.hidden ? 2 : 1) : 0;
+    const card       = buildItemCard(drop, state, isExcl, baseState);
     if (isExcl && !getShowExcluded()) card.style.display = 'none';
     grid.appendChild(card);
   });
 }
 
-function buildItemCard(drop, state, isExcl = false) {
-  const found = state.count > 0 && !isExcl;
-  const cls   = isExcl ? 'excl' : (found ? 'fd' : 'nf');
-  const card  = document.createElement('div');
-  card.className = `item-card ${cls} fade-in`;
+// baseState: 0=없음, 1=기준(타임라인표시), 2=기준(타임라인숨김)
+function buildItemCard(drop, state, isExcl = false, baseState = 0) {
+  const found    = state.count > 0 && !isExcl;
+  const baseCls  = baseState === 2 ? ' tl-base-hidden' : baseState === 1 ? ' tl-base' : '';
+  const cls      = isExcl ? 'excl' : (found ? 'fd' : 'nf');
+  const card     = document.createElement('div');
+  card.className = `item-card ${cls}${baseCls} fade-in`;
   card.dataset.itemId = drop.id;
+
+  const baseTip  = baseState === 0 ? '사냥 횟수 기준으로 지정' :
+                   baseState === 1 ? '다시 클릭: 타임라인에서도 숨기기' : '다시 클릭: 해제';
 
   card.innerHTML = `
     <div class="icon-wrap">
@@ -1935,6 +1954,8 @@ function buildItemCard(drop, state, isExcl = false) {
     </div>
     <button class="excl-btn" title="${isExcl?'제외 해제':'이 아이템 제외'}"
             onclick="toggleExclude(event,${drop.id})">${isExcl ? '↩' : '✕'}</button>
+    ${!isExcl ? `<button class="tl-base-btn" title="${baseTip}"
+            onclick="toggleTlBase(event,${drop.id})">⚑</button>` : ''}
     ${!isExcl ? `<button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>` : ''}
     ${!isExcl ? `<button class="bulk-btn" title="수량 일괄 조정" onclick="bulkBtnClick(event,${drop.id})">≡</button>` : ''}
   `;
@@ -2074,7 +2095,6 @@ function incrementItem(itemId) {
 
   updateCardUI(itemId, state, drop);
   if (isFirst) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, itemId);
-  else if (tlShowAll()) addSwLogToPanel(getActivePanel(), drop.name, t, itemId);
   updateProgress();
   updateHuntEstimate();
   renderSaves();
@@ -2171,8 +2191,9 @@ function updateProgressInPanel(panel, mob) {
   const store   = loadS();
   const mobData = store[`mob_${mob.id}`] || {};
   const excl    = new Set(store[`excl_${mob.id}`] || []);
+  const tlBaseId = store[`tl_base_${mob.id}`]?.id;
 
-  const active  = mob.drops.filter(d => !excl.has(d.id));
+  const active  = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
   const total   = active.length;
   const done    = active.filter(d => (mobData[d.id]?.count||0) > 0).length;
   const pct     = total ? Math.round(done/total*100) : 0;
@@ -2205,17 +2226,28 @@ function updateHuntEstimateInPanel(panel, mob) {
   const store   = loadS();
   const mobData = store[`mob_${mob.id}`] || {};
   const excl    = new Set(store[`excl_${mob.id}`] || []);
+  const tlBase  = store[`tl_base_${mob.id}`] || null;
 
   let bestRate = 0, bestDrop = null, bestCount = 0;
 
-  mob.drops.forEach(drop => {
-    if (excl.has(drop.id)) return;
-    const count = mobData[drop.id]?.count || 0;
-    if (count <= 0) return;
-    const rate = parseFloat(drop.rate) / 100;
-    if (!rate || rate <= 0) return;
-    if (rate > bestRate) { bestRate = rate; bestDrop = drop; bestCount = count; }
-  });
+  // 사냥 기준 아이템이 지정된 경우 해당 아이템만 사용
+  if (tlBase) {
+    const drop = mob.drops.find(d => d.id === tlBase.id);
+    if (drop) {
+      const count = mobData[drop.id]?.count || 0;
+      const rate  = parseFloat(drop.rate) / 100;
+      if (count > 0 && rate > 0) { bestDrop = drop; bestCount = count; bestRate = rate; }
+    }
+  } else {
+    mob.drops.forEach(drop => {
+      if (excl.has(drop.id)) return;
+      const count = mobData[drop.id]?.count || 0;
+      if (count <= 0) return;
+      const rate = parseFloat(drop.rate) / 100;
+      if (!rate || rate <= 0) return;
+      if (rate > bestRate) { bestRate = rate; bestDrop = drop; bestCount = count; }
+    });
+  }
 
   const wrap = panel.querySelector('.hunt-estimate');
   if (!bestDrop) { wrap.style.display = 'none'; return; }
@@ -2223,8 +2255,10 @@ function updateHuntEstimateInPanel(panel, mob) {
   const estimated = Math.round(bestCount / bestRate);
   wrap.style.display = '';
   panel.querySelector('.hunt-count').textContent = `~${estimated.toLocaleString()}마리`;
-  panel.querySelector('.hunt-reason').textContent = `${bestDrop.name} ${bestCount}개 ÷ ${bestDrop.rate}`;
+  const label = `${bestDrop.name} ${bestCount}개 / ${bestDrop.rate}`;
+  panel.querySelector('.hunt-reason').textContent = label;
 }
+
 
 // ══════════════════════════════════════════
 // 15-B. 도감작 완료 이벤트
@@ -2310,17 +2344,19 @@ function renderSaves() {
       ? activeMob.name
       : (preset ? preset.name : (store[`mob_${mobId}_meta`]?.name || `#${mobId}`));
     const items  = store[key] || {};
-    const excl   = new Set(store[`excl_${mobId}`] || []);
-    const meta   = store[`mob_${mobId}_meta`] || {};
+    const excl      = new Set(store[`excl_${mobId}`] || []);
+    const tlBaseId  = store[`tl_base_${mobId}`]?.id;
+    const meta      = store[`mob_${mobId}_meta`] || {};
     let done, total;
     if (activeMob && activeMob.id === mobId) {
-      const activeDrops = activeMob.drops.filter(d => !excl.has(d.id));
+      const activeDrops = activeMob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
       total = activeDrops.length;
       done  = activeDrops.filter(d => (items[d.id]?.count||0) > 0).length;
     } else {
+      const baseAdj = tlBaseId ? 1 : 0;
       const allTotal = meta.total || Object.keys(items).length;
-      total = Math.max(1, allTotal - excl.size);
-      done  = Math.min(total, Object.entries(items).filter(([id,s]) => !excl.has(Number(id)) && (s.count||0)>0).length);
+      total = Math.max(1, allTotal - excl.size - baseAdj);
+      done  = Math.min(total, Object.entries(items).filter(([id,s]) => !excl.has(Number(id)) && Number(id) !== tlBaseId && (s.count||0)>0).length);
     }
     const isAct  = activeMob && activeMob.id === mobId;
     const full   = total > 0 && done === total;
@@ -2375,5 +2411,6 @@ function renderSaves() {
 })();
 renderSaves();
 </script>
+<div style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);pointer-events:none;user-select:none;letter-spacing:.03em;">똘레로_ver62.00</div>
 </body>
 </html>
