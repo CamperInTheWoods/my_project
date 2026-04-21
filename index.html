@@ -1553,8 +1553,10 @@ function renderMobGrid(container, monsters) {
       <div class="mn">${escHtml(m.name)}</div>
     `;
     c.addEventListener('click', () => {
-      if (m.drops && m.drops.length) activateMob(m);        // 프리셋: 드롭 데이터 있음
-      else fetchMobDrops(m.id, m.name, m.level);            // 검색결과: mapledb에서 드롭 로드
+      const preset = PRESET.find(p => p.id === m.id);
+      if (preset) activateMob(preset);                       // 프리셋 우선
+      else if (m.drops && m.drops.length) activateMob(m);   // 드롭 있으면 바로 사용
+      else fetchMobDrops(m.id, m.name, m.level);            // 없으면 API에서 로드
     });
     container.appendChild(c);
   });
@@ -2908,7 +2910,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.065.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.065.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
