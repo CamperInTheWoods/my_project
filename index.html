@@ -1719,6 +1719,10 @@ async function loadById() {
 }
 
 async function fetchMobDrops(mobId, knownName, knownLevel) {
+  // 0차: 프리셋 우선
+  const preset = PRESET.find(p => p.id === mobId);
+  if (preset) { activateMob(preset); return; }
+
   // 1차: 메이플노트 클래식 (드롭 데이터 정확)
   setLoadMsg('⏳ 메이플노트에서 드롭 데이터 로드 중...');
   try {
@@ -2910,7 +2914,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.065.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.065.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
