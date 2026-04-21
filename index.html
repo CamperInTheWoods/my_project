@@ -1324,7 +1324,7 @@ function renderTimeline(panel, mob, tab) {
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
   const ptitleEl = section.querySelector('.ptitle');
   if (ptitleEl) {
-    ptitleEl.innerHTML = `타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '최초만' : '전체'}</button>`;
+    ptitleEl.innerHTML = `타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '전체' : '최초만'}</button>`;
   }
 }
 function deleteChannelEntry(btn) {
@@ -2874,7 +2874,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.064.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.064.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
