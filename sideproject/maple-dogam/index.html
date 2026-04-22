@@ -466,7 +466,7 @@
       padding:16px; backdrop-filter:blur(4px);
     }
     .result-modal {
-      max-width:520px; width:100%; max-height:90vh; overflow-y:auto;
+      max-width:520px; width:100%; overflow: visible;
       border-radius:20px; box-shadow:0 16px 60px rgba(0,0,0,.5);
     }
     /* 카드 본체 — 다크 배경 */
@@ -528,6 +528,14 @@
       50%  { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+    @keyframes prismaFlow {
+      0%   { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes prismaFlowBox {
+      0%   { background-position: 0% center, 0% 0%; }
+      100% { background-position: 300% center, 0% 0%; }
+    }
     @keyframes borderGlow {
       0%,100% { box-shadow: 0 0 18px 3px rgba(245,166,35,.55), 0 0 60px rgba(245,100,35,.18), inset 0 0 30px rgba(245,166,35,.06); }
       25%      { box-shadow: 0 0 22px 5px rgba(200,80,255,.4),  0 0 70px rgba(80,200,255,.18), inset 0 0 30px rgba(180,80,255,.05); }
@@ -537,6 +545,10 @@
     @keyframes foilFlow {
       0%   { background-position: 0% 0%; }
       100% { background-position: 200% 200%; }
+    }
+    @keyframes goldSweep {
+      0%   { transform: translateX(-120%) skewX(-20deg); }
+      100% { transform: translateX(250%)  skewX(-20deg); }
     }
     .result-card.complete {
       background: linear-gradient(160deg,#1a0e00 0%,#2a1800 35%,#1e1200 60%,#2e1a00 100%);
@@ -574,7 +586,59 @@
         rgba(245,166,35,.08) 0%, rgba(180,80,255,.05) 30%,
         rgba(80,200,255,.07) 60%, rgba(80,255,160,.05) 100%
       );
+      overflow:hidden;
     }
+    /* 금빛 광택 스윕 */
+    .result-card.complete {
+      transform: perspective(700px) rotateX(0deg) rotateY(0deg);
+      transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .result-card.complete.tilt {
+      transform: perspective(700px)
+        rotateX(calc((var(--my, 0.5) - 0.5) * -12deg))
+        rotateY(calc((var(--mx, 0.5) - 0.5) * 12deg));
+    }
+    .result-card.complete .gold-shimmer {
+      position:absolute; inset:0; border-radius:20px; z-index:2; pointer-events:none; overflow:hidden;
+      mix-blend-mode: color-dodge;
+      opacity:0; transition: opacity 0.5s ease;
+    }
+    .result-card.complete.tilt .gold-shimmer { opacity:0.55; }
+    /* 배경 전체를 물들이는 넓은 무지개 */
+    .result-card.complete .gold-shimmer::before {
+      content:'';
+      position:absolute; inset:-40%;
+      background: conic-gradient(
+        from calc(var(--mx, 0.5) * 270deg + 180deg)
+        at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+        rgba(255,80,80,.22),
+        rgba(255,200,50,.22),
+        rgba(60,255,140,.22),
+        rgba(40,190,255,.22),
+        rgba(180,60,255,.22),
+        rgba(255,80,80,.22)
+      );
+      filter: blur(38px);
+    }
+    /* 마우스 위치 중심 specular */
+    .result-card.complete .gold-shimmer::after {
+      content:'';
+      position:absolute; inset:0;
+      background: radial-gradient(
+        ellipse 55% 45% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+        rgba(255,255,255,.08) 0%,
+        transparent 65%
+      );
+    }
+    .result-card.complete .mouse-glow {
+      position:absolute; inset:0; border-radius:20px; z-index:3; pointer-events:none;
+      background: radial-gradient(
+        ellipse 50% 40% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+        rgba(255,255,255,.08) 0%, transparent 70%);
+      mix-blend-mode: overlay;
+      opacity:0; transition:opacity 0.45s ease;
+    }
+    .result-card.complete.tilt .mouse-glow { opacity:1; }
     .result-card.complete .result-mob-img-wrap {
       border: 2px solid transparent;
       background:
@@ -589,7 +653,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: prismaShift 4s ease infinite;
+      animation: prismaFlow 3s linear infinite;
     }
     .result-card.complete .result-mob-name::after {
       content:' ✦';
@@ -602,8 +666,10 @@
     .result-card.complete .result-stat-block {
       border: 1px solid transparent;
       background:
-        linear-gradient(rgba(245,166,35,.08),rgba(245,166,35,.08)) padding-box,
+        linear-gradient(90deg, rgba(255,210,80,.28) 0%, rgba(120,230,255,.20) 35%, rgba(190,100,255,.22) 65%, rgba(255,210,80,.28) 100%) padding-box,
         linear-gradient(135deg,rgba(245,166,35,.5),rgba(180,80,255,.4),rgba(80,200,255,.5)) border-box;
+      background-size: 300% auto, 100%;
+      animation: prismaFlowBox 4s linear infinite;
     }
     .result-card.complete .rsb-value {
       background: linear-gradient(90deg, #ffd966 0%, #fff5c0 40%, #c8f0ff 70%, #ffd966 100%);
@@ -611,7 +677,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: prismaShift 5s ease infinite;
+      animation: prismaFlow 4s linear infinite;
     }
     .result-card.complete .rsb-label { color: rgba(255,220,140,.6); }
     .result-card.complete .result-divider {
@@ -655,6 +721,8 @@
     .result-actions {
       display:flex; gap:8px; margin-top:4px; justify-content:flex-end;
       padding-top:16px; border-top:1px solid rgba(245,166,35,.15);
+      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+      overflow: hidden;
     }
     .result-btn {
       padding:8px 18px; border-radius:9px; border:none; cursor:pointer;
@@ -2772,6 +2840,7 @@ function openResultModal(mob) {
   const timeStr = fmtTime(elapsedMs).replace(/\.\d+$/, '');
   card.className = `result-card${isComplete ? ' complete' : ''}`;
   card.innerHTML = `
+    ${isComplete ? '<div class="gold-shimmer"></div><div class="mouse-glow"></div>' : ''}
     <div class="result-hero">
       <div class="result-hero-left">
         <div class="result-mob-img-wrap">
@@ -2786,7 +2855,7 @@ function openResultModal(mob) {
             <span class="rsb-value">${timeStr}</span>
           </div>
           <div class="result-stat-block">
-            <span class="rsb-label">예상 사냥</span>
+            <span class="rsb-label">예상 사냥 횟수</span>
             <span class="rsb-value">${huntHtml}</span>
           </div>
           <div class="result-stat-block full">
@@ -2804,10 +2873,42 @@ function openResultModal(mob) {
   `;
 
   document.getElementById('result-overlay').style.display = 'flex';
+
+  // 마우스 반응형 홀로그래픽 shimmer
+  let _tiltRaf = null;
+  card._onMouseMove = function(e) {
+    if (!card.classList.contains('complete')) return;
+    if (_tiltRaf) { cancelAnimationFrame(_tiltRaf); _tiltRaf = null; }
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)));
+    card.style.setProperty('--my', Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)));
+    card.classList.add('tilt');
+  };
+  card._onMouseLeave = function() {
+    if (_tiltRaf) cancelAnimationFrame(_tiltRaf);
+    const startMx = parseFloat(card.style.getPropertyValue('--mx') || '0.5');
+    const startMy = parseFloat(card.style.getPropertyValue('--my') || '0.5');
+    const dur = 620;
+    const t0 = performance.now();
+    function easeOut(t) { return 1 - (1 - t) * (1 - t) * (1 - t); }
+    function step(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = easeOut(p);
+      card.style.setProperty('--mx', startMx + (0.5 - startMx) * e);
+      card.style.setProperty('--my', startMy + (0.5 - startMy) * e);
+      if (p < 1) { _tiltRaf = requestAnimationFrame(step); }
+      else { card.classList.remove('tilt'); _tiltRaf = null; }
+    }
+    _tiltRaf = requestAnimationFrame(step);
+  };
+  card.removeEventListener('mousemove', card._onMouseMove);
+  card.removeEventListener('mouseleave', card._onMouseLeave);
+  card.addEventListener('mousemove', card._onMouseMove);
+  card.addEventListener('mouseleave', card._onMouseLeave);
+
   // 관리자 패널
   const adminPanel = document.getElementById('admin-time-panel');
   if (adminPanel) {
-    const modal = document.getElementById('result-modal-inner');
     if (window._adminMode) {
       modal.appendChild(adminPanel);
       adminPanel.style.display = 'block';
@@ -2847,24 +2948,7 @@ function exportResultImage() {
       .catch(() => null);
   }
 
-  const PAD = 24;
-  const CARD_RADIUS = 20;
-  const isComplete = target.classList.contains('complete');
-  const bg = isComplete ? '#120a00' : '#181005';
-
-  // wrapper로 감싸서 사방 PAD만큼 여백 확보 — glow/테두리 클리핑 방지
-  const parent = target.parentNode;
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = `padding:${PAD}px;background:${bg};border-radius:${PAD + CARD_RADIUS}px;display:inline-block;`;
-  parent.insertBefore(wrapper, target);
-  wrapper.appendChild(target);
-
-  const restoreDOM = () => {
-    if (wrapper.contains(target)) parent.insertBefore(target, wrapper);
-    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-  };
   const cleanup = () => {
-    restoreDOM();
     imgs.forEach((img, i) => img.src = origSrcs[i]);
     target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = '');
     btn.textContent = '이미지 저장'; btn.disabled = false;
@@ -2880,7 +2964,7 @@ function exportResultImage() {
     })
     .then(() => {
       target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = 'none');
-      return domtoimage.toPng(wrapper, { scale: 2 });
+      return domtoimage.toPng(target, { scale: 2 });
     })
     .then(dataUrl => {
       cleanup();
@@ -2914,7 +2998,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.065.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.067.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
