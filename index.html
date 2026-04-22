@@ -2987,7 +2987,7 @@ function exportResultImage() {
     })
     .then(() => {
       target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = 'none');
-      return domtoimage.toPng(target, { scale: 2, height: target.scrollHeight + 4, width: target.scrollWidth });
+      return domtoimage.toPng(target, { scale: 2, height: target.scrollHeight + 30, width: target.scrollWidth });
     })
     .then(dataUrl => {
       cleanup();
@@ -3021,7 +3021,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.068.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.068.4</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
