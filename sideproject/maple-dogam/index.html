@@ -2975,6 +2975,7 @@ function exportResultImage() {
     imgs.forEach((img, i) => img.src = origSrcs[i]);
     target.querySelectorAll('.ri-tooltip').forEach(t => t.style.display = '');
     target.style.removeProperty('transform');
+    target.style.removeProperty('padding-bottom');
     btn.textContent = '이미지 저장'; btn.disabled = false;
   };
 
@@ -2992,10 +2993,12 @@ function exportResultImage() {
       target.style.setProperty('--mx', '0.5');
       target.style.setProperty('--my', '0.5');
       target.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg)';
+      target.style.paddingBottom = (parseInt(getComputedStyle(target).paddingBottom) + 16) + 'px';
       return new Promise(r => setTimeout(r, 80));
     })
     .then(() => {
-      return domtoimage.toPng(target, { scale: 2, height: target.scrollHeight + 30, width: target.scrollWidth });
+      const rect = target.getBoundingClientRect();
+      return domtoimage.toPng(target, { scale: 2, height: Math.ceil(rect.height), width: Math.ceil(rect.width) });
     })
     .then(dataUrl => {
       cleanup();
@@ -3029,7 +3032,7 @@ renderSaves();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.068.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.068.6</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
