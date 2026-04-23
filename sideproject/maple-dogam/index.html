@@ -95,8 +95,23 @@
     .btn.danger { background:linear-gradient(135deg,#e53935,#b71c1c); box-shadow:0 2px 6px rgba(229,57,53,.4); }
     .btn.sm { padding:5px 12px; font-size:.75rem; }
 
-    .msg { font-size:.78rem; color:var(--gray); margin-top:6px; min-height:16px; }
-    .msg.err { color:var(--red); }
+    .msg { font-size:.75rem; color:var(--gray); margin-top:6px; min-height:16px; display:flex; align-items:center; gap:5px; }
+    .msg.err  { color:var(--red); }
+    .msg-icon { display:inline-flex; width:14px; height:14px; border-radius:50%; align-items:center; justify-content:center; flex-shrink:0; }
+    .msg.loading .msg-icon {
+      border:2px solid rgba(200,146,42,.25); border-top-color:rgba(245,166,35,.85);
+      animation:msgSpin .65s linear infinite;
+    }
+    .msg.done .msg-icon {
+      background:rgba(76,175,80,.15); border:1.5px solid rgba(76,175,80,.5);
+      color:#4caf50; font-size:.55rem; font-weight:900;
+    }
+    .msg.err .msg-icon {
+      background:rgba(229,57,53,.12); border:1.5px solid rgba(229,57,53,.5);
+      color:var(--red); font-size:.55rem; font-weight:900;
+    }
+    .msg.done { color:#4caf50; }
+    @keyframes msgSpin { to { transform:rotate(360deg); } }
 
     /* ─ Monster grid ─ */
     .mob-grid {
@@ -607,10 +622,7 @@
     .del-confirm-btn-del:hover { background:rgba(180,30,30,.2); color:rgba(255,120,120,.92); }
 
     /* ─ Saves ─ */
-    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:6px; max-height:260px; overflow-y:auto; padding-right:2px; }
-    .saves-wrap::-webkit-scrollbar { width:4px; }
-    .saves-wrap::-webkit-scrollbar-track { background:transparent; }
-    .saves-wrap::-webkit-scrollbar-thumb { background:rgba(200,146,42,.3); border-radius:2px; }
+    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:6px; }
     .save-card {
       position:relative; background:white; border:2px solid var(--border);
       border-radius:12px; padding:12px 10px 10px; cursor:pointer;
@@ -1141,6 +1153,7 @@
       <button class="btn" onclick="searchByName()">검색</button>
     </div>
     <div id="search-status" class="msg"></div>
+    <div id="load-msg" class="msg"></div>
     <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
 
     <div class="divider"></div>
@@ -1170,7 +1183,6 @@
         <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
         <button class="btn" onclick="loadById()">불러오기</button>
       </div>
-      <div id="load-msg" class="msg"></div>
     </div>
   </div>
 
@@ -1941,11 +1953,10 @@ let searchDebounce = null;
 function onNameInput(v) {
   const q = v.trim().toLowerCase();
   const res = document.getElementById('search-results');
-  const status = document.getElementById('search-status');
 
   clearTimeout(searchDebounce);
 
-  if (!q) { res.innerHTML = ''; status.textContent = ''; return; }
+  if (!q) { res.innerHTML = ''; setSearchMsg(''); return; }
 
   // 프리셋 즉시 표시 (빠른 응답)
   const hits = PRESET.filter(m => m.name.toLowerCase().includes(q));
@@ -1953,7 +1964,7 @@ function onNameInput(v) {
   else res.innerHTML = '';
 
   // 항상 mapledb 전체 검색 (600ms debounce)
-  status.textContent = '⏳ 전체 DB 검색 중...'; status.className = 'msg';
+  setSearchMsg('⏳ 전체 DB 검색 중...');
   searchDebounce = setTimeout(() => searchByName(), 600);
 }
 
@@ -1997,8 +2008,7 @@ async function searchByName() {
   const q = document.getElementById('name-input').value.trim();
   if (!q) return;
 
-  const status = document.getElementById('search-status');
-  status.textContent = `⏳ "${q}" 검색 중...`; status.className = 'msg';
+  setSearchMsg(`⏳ "${q}" 검색 중...`);
 
   try {
     // 1단계: kms/284로 한국어 이름 검색
@@ -2027,12 +2037,12 @@ async function searchByName() {
       });
 
     if (!mobs.length) {
-      status.textContent = '검색 결과가 없습니다.'; status.className = 'msg err'; return;
+      setSearchMsg('❌ 검색 결과가 없습니다.'); return;
     }
 
     // 2단계: 각 결과의 linksTo(클래식 ID) 병렬 조회
     // → 현대 KMS ID → 클래식 ID 변환 (메이플노트와 ID 일치)
-    status.textContent = `⏳ 클래식 ID 확인 중...`; status.className = 'msg';
+    setSearchMsg(`⏳ 클래식 ID 확인 중...`);
     const resolved = await Promise.all(mobs.map(async m => {
       try {
         const r = await fetch(
@@ -2056,10 +2066,10 @@ async function searchByName() {
     }
     mobs = [...finalSeen.values()];
 
-    status.textContent = `${mobs.length}개 결과`; status.className = 'msg';
+    setSearchMsg(`✅ ${mobs.length}개 결과`);
     renderMobGrid(document.getElementById('search-results'), mobs);
   } catch(e) {
-    status.textContent = `❌ ${e.message}`; status.className = 'msg err';
+    setSearchMsg(`❌ ${e.message}`);
   }
 }
 
@@ -2196,9 +2206,21 @@ function parseMonsterPage(html, mobId, fallbackName, fallbackLevel) {
   return { id: mobId, name, level, hp, drops, fromDB: true };
 }
 
+function _applyMsg(el, t, state) {
+  if (!t) { el.innerHTML = ''; el.className = 'msg'; return; }
+  const iconInner = state === 'loading' ? '' : state === 'done' ? '✓' : state === 'err' ? '✕' : '';
+  el.innerHTML = `<span class="msg-icon">${escHtml(iconInner)}</span><span>${escHtml(t)}</span>`;
+  el.className = 'msg' + (state ? ` ${state}` : '');
+}
+
 function setLoadMsg(t, err=false) {
-  const el = document.getElementById('load-msg');
-  el.textContent = t; el.className = 'msg' + (err?' err':'');
+  const state = err || t.includes('❌') ? 'err' : t.includes('⏳') ? 'loading' : t.includes('✅') ? 'done' : '';
+  _applyMsg(document.getElementById('load-msg'), t.replace(/^[⏳✅❌]\s?/, ''), state);
+}
+
+function setSearchMsg(t) {
+  const state = t.includes('❌') || t.includes('없습니다') ? 'err' : t.includes('⏳') ? 'loading' : t.includes('개 결과') ? 'done' : '';
+  _applyMsg(document.getElementById('search-status'), t.replace(/^[⏳✅❌]\s?/, ''), state);
 }
 
 // ══════════════════════════════════════════
@@ -3618,7 +3640,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
