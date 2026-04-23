@@ -74,6 +74,12 @@
     .search-row input:focus, .id-row input:focus { border-color:var(--gold); }
     .search-row input::placeholder, .id-row input::placeholder { color:var(--gray); }
     .id-row { display:flex; gap:8px; margin-top:8px; }
+    .id-section { overflow:hidden; transition:max-height .3s ease, opacity .3s ease; }
+    .id-section.collapsed { max-height:0; opacity:0; pointer-events:none; }
+    .id-section.expanded  { max-height:80px; opacity:1; }
+    .ptitle-toggle { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+    .ptitle-toggle .toggle-arrow { font-size:.75rem; color:var(--gray); transition:transform .3s; }
+    .ptitle-toggle.collapsed .toggle-arrow { transform:rotate(-90deg); }
 
     .btn {
       padding:8px 18px;
@@ -371,6 +377,194 @@
     .sw-log-entry .ldel:hover { color:#e55; }
     .sw-log-list::-webkit-scrollbar { width:4px; }
     .sw-log-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+    /* ─ 완료 진열장 ─ */
+    .trophy-open-btn {
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      background:linear-gradient(135deg,rgba(245,166,35,.12),rgba(245,166,35,.06));
+      border:1.5px solid rgba(245,166,35,.35); border-radius:10px;
+      padding:8px 12px; margin-top:6px; transition:border-color .2s, background .2s;
+    }
+    .trophy-open-btn:hover { border-color:rgba(245,166,35,.8); background:linear-gradient(135deg,rgba(245,166,35,.22),rgba(245,166,35,.1)); }
+    .trophy-open-btn .tob-icon { font-size:1.1rem; }
+    .trophy-open-btn .tob-text { flex:1; }
+    .trophy-open-btn .tob-title { font-size:.75rem; color:rgba(245,166,35,.9); font-weight:700; }
+    .trophy-open-btn .tob-sub { font-size:.6rem; color:rgba(200,168,107,.6); margin-top:1px; }
+    .trophy-open-btn .tob-arrow { font-size:.65rem; color:rgba(200,168,107,.5); }
+
+    /* 트로피룸 모달 */
+    .trophy-overlay {
+      display:none; position:fixed; inset:0; z-index:300;
+      background:rgba(0,0,0,.7); align-items:center; justify-content:center;
+    }
+    .trophy-overlay.open { display:flex; }
+    .trophy-modal {
+      position:relative;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 5px),
+        radial-gradient(ellipse at 25% 20%, rgba(120,15,15,.45) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 80%, rgba(90,10,10,.4) 0%, transparent 55%),
+        linear-gradient(160deg, #1c0404, #2a0808, #1c0404);
+      border:none;
+      border-radius:18px;
+      width:min(640px,94vw); max-height:82vh; display:flex; flex-direction:column;
+      box-shadow:
+        0 0 0 3px #6b2e0a,
+        0 0 0 5px #c8922a,
+        0 0 0 7px #5a2508,
+        0 24px 70px rgba(0,0,0,.85),
+        inset 0 1px 0 rgba(255,220,130,.08);
+      overflow:hidden;
+    }
+    .trophy-modal-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px 12px;
+      border-bottom:1px solid rgba(200,146,42,.35);
+      background:linear-gradient(90deg, rgba(200,146,42,.06), transparent, rgba(200,146,42,.06));
+      flex-shrink:0;
+    }
+    .trophy-modal-title { font-size:1rem; font-weight:700; color:var(--gold); letter-spacing:.04em; }
+    .trophy-modal-sub { font-size:.65rem; color:rgba(200,168,107,.6); margin-top:2px; }
+    .trophy-modal-close {
+      width:28px; height:28px; border-radius:50%; border:1.5px solid rgba(245,166,35,.4);
+      background:none; color:rgba(245,166,35,.7); font-size:.8rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:all .15s;
+    }
+    .trophy-modal-close:hover { background:rgba(245,166,35,.15); color:var(--gold); }
+    .trophy-sort-bar { display:flex; gap:6px; padding:10px 22px; border-bottom:1px solid rgba(200,146,42,.18); flex-shrink:0; }
+    .trophy-sort-btn {
+      display:flex; align-items:center; gap:4px;
+      padding:4px 10px; border-radius:6px; border:1.5px solid rgba(245,166,35,.2);
+      background:none; color:rgba(200,168,107,.6); font-size:.65rem; font-weight:600;
+      cursor:pointer; font-family:inherit; transition:all .15s;
+    }
+    .trophy-sort-btn:hover { border-color:rgba(245,166,35,.5); color:rgba(245,166,35,.85); }
+    .trophy-sort-btn.active { border-color:rgba(245,166,35,.7); background:rgba(245,166,35,.12); color:rgba(245,166,35,.95); }
+    .trophy-sort-arrow { font-size:.6rem; }
+    .trophy-modal-body {
+      overflow-y:auto; padding:22px 24px;
+      background:
+        repeating-linear-gradient(0deg,  rgba(255,255,255,.008) 0px, rgba(255,255,255,.008) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.008) 0px, rgba(255,255,255,.008) 1px, transparent 1px, transparent 4px),
+        radial-gradient(ellipse at 50% 0%, rgba(150,20,20,.25) 0%, transparent 65%),
+        linear-gradient(180deg, #1e0508, #250608, #1e0508);
+      box-shadow:inset 0 4px 16px rgba(0,0,0,.4), inset 0 -4px 16px rgba(0,0,0,.4);
+    }
+    .trophy-modal-body::-webkit-scrollbar { width:5px; }
+    .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.2); }
+    .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(200,146,42,.4); border-radius:3px; }
+    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px; }
+    .trophy-card {
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      background:linear-gradient(170deg, #3a2010, #261408);
+      border:1.5px solid rgba(200,168,107,.35);
+      border-radius:12px;
+      padding:18px 12px 14px; cursor:pointer;
+      box-shadow:
+        0 6px 18px rgba(0,0,0,.55),
+        0 1px 0 rgba(255,220,100,.08) inset,
+        0 -1px 0 rgba(0,0,0,.4) inset;
+      transition:border-color .2s, box-shadow .2s, transform .18s;
+    }
+    .trophy-card::before {
+      content:''; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+      width:12px; height:12px; border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #e8c060, #a07020);
+      box-shadow:0 2px 6px rgba(0,0,0,.6), 0 0 0 1.5px rgba(255,200,80,.3);
+      z-index:2;
+    }
+    .trophy-card:hover {
+      border-color:rgba(245,166,35,.85);
+      box-shadow:0 10px 28px rgba(0,0,0,.6), 0 0 16px rgba(245,166,35,.2), 0 1px 0 rgba(255,220,100,.1) inset;
+      transform:translateY(-4px);
+    }
+    .trophy-portrait {
+      width:64px; height:64px; border-radius:12px;
+      background:radial-gradient(circle at 40% 35%,#3a2200,#150a00);
+      border:2px solid rgba(245,166,35,.45);
+      box-shadow:0 0 12px rgba(245,166,35,.15), inset 0 1px 2px rgba(255,220,100,.1);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+      position:relative;
+    }
+    .trophy-portrait img { width:82%; height:82%; object-fit:contain; image-rendering:pixelated; }
+    .trophy-portrait::after {
+      content:''; position:absolute; inset:0; border-radius:11px;
+      background:linear-gradient(135deg,rgba(255,220,100,.08) 0%,transparent 60%);
+      pointer-events:none;
+    }
+    .trophy-info { width:100%; text-align:center; }
+    .trophy-name { font-size:.7rem; color:rgba(255,220,130,.9); font-weight:700; margin-bottom:4px; }
+    .trophy-stats { font-size:.58rem; color:rgba(200,168,107,.6); line-height:1.7; }
+    .trophy-date-badge {
+      font-size:.52rem; font-weight:700; letter-spacing:.05em;
+      color:rgba(245,166,35,.8); background:rgba(245,166,35,.1);
+      border:1px solid rgba(245,166,35,.25); border-radius:4px;
+      padding:1px 6px; margin-top:2px; display:inline-block;
+    }
+    .trophy-card { position:relative; }
+    .trophy-del {
+      position:absolute; top:6px; right:6px; width:18px; height:18px;
+      border-radius:50%; border:1px solid rgba(255,80,80,.4); background:none;
+      color:rgba(255,100,100,.5); font-size:.6rem; cursor:pointer; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s, color .15s;
+    }
+    .trophy-card:hover .trophy-del { opacity:1; }
+    .trophy-del:hover { background:rgba(255,60,60,.2); color:rgba(255,120,120,.9); border-color:rgba(255,80,80,.8); }
+
+    /* 삭제 confirm 다이얼로그 */
+    .del-confirm-overlay {
+      display:none; position:fixed; inset:0; z-index:500;
+      background:rgba(0,0,0,.55); align-items:center; justify-content:center;
+    }
+    .del-confirm-overlay.open { display:flex; }
+    .del-confirm-dialog {
+      position:relative;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(120,15,15,.35) 0%, transparent 55%),
+        linear-gradient(160deg, #1c0404, #280608, #1c0404);
+      border-radius:14px; width:min(340px,88vw);
+      box-shadow:
+        0 0 0 2px #6b2e0a,
+        0 0 0 4px #c8922a,
+        0 0 0 6px #5a2508,
+        0 20px 60px rgba(0,0,0,.9);
+      overflow:hidden;
+    }
+    .del-confirm-body {
+      padding:28px 26px 22px;
+      border-bottom:1px solid rgba(200,146,42,.25);
+    }
+    .del-confirm-icon {
+      font-size:1.4rem; text-align:center; margin-bottom:12px;
+    }
+    .del-confirm-msg {
+      font-size:.8rem; color:rgba(255,220,130,.85); line-height:1.6; text-align:center;
+    }
+    .del-confirm-name {
+      color:var(--gold); font-weight:700;
+    }
+    .del-confirm-sub {
+      font-size:.65rem; color:rgba(200,168,107,.45); margin-top:6px; text-align:center;
+    }
+    .del-confirm-actions {
+      display:flex;
+      background:rgba(0,0,0,.25);
+    }
+    .del-confirm-btn {
+      flex:1; padding:14px; border:none; background:none;
+      font-family:inherit; font-size:.78rem; font-weight:600;
+      cursor:pointer; transition:background .15s, color .15s;
+      letter-spacing:.02em;
+    }
+    .del-confirm-btn-cancel {
+      color:rgba(200,168,107,.6); border-right:1px solid rgba(200,146,42,.2);
+    }
+    .del-confirm-btn-cancel:hover { background:rgba(255,255,255,.05); color:rgba(200,168,107,.9); }
+    .del-confirm-btn-del {
+      color:rgba(255,100,100,.7);
+    }
+    .del-confirm-btn-del:hover { background:rgba(200,40,40,.18); color:rgba(255,130,130,.95); }
 
     /* ─ Saves ─ */
     .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:6px; }
@@ -751,6 +945,9 @@
     .result-btn-close:hover { background:rgba(255,255,255,.18); }
     .result-btn-save { background:var(--gold); color:#1a0f00; }
     .result-btn-save:hover { background:#ffbe40; }
+    .result-btn-trophy { background:rgba(245,166,35,.15); color:rgba(245,166,35,.9); border:1.5px solid rgba(245,166,35,.4); }
+    .result-btn-trophy:hover { background:rgba(245,166,35,.25); }
+    .result-btn-trophy:disabled { opacity:.45; cursor:default; }
 
     /* ─ Responsive ─ */
     @media(max-width:640px){
@@ -910,12 +1107,28 @@
 
     <div class="divider"></div>
 
-    <div class="ptitle">몬스터 ID 직접 입력</div>
-    <div class="id-row">
-      <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
-      <button class="btn" onclick="loadById()">불러오기</button>
+    <div class="ptitle">완료 도감작</div>
+    <div class="trophy-open-btn" id="trophy-open-btn" onclick="openTrophyRoom()">
+      <span class="tob-icon">🏅</span>
+      <div class="tob-text">
+        <div class="tob-title" id="trophy-btn-title">진열장 열기</div>
+        <div class="tob-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
+      </div>
+      <span class="tob-arrow">▶</span>
     </div>
-    <div id="load-msg" class="msg"></div>
+
+    <div class="divider"></div>
+
+    <div class="ptitle ptitle-toggle collapsed" id="id-section-toggle" onclick="toggleIdSection()">
+      몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
+    </div>
+    <div class="id-section collapsed" id="id-section-body">
+      <div class="id-row">
+        <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
+        <button class="btn" onclick="loadById()">불러오기</button>
+      </div>
+      <div id="load-msg" class="msg"></div>
+    </div>
   </div>
 
   <!-- ② 체크리스트 탭 -->
@@ -1123,6 +1336,32 @@ const PRESET = [
       {name:"다크 보닌",               id:1472017, rate:"0.004%" },
       {name:"브라운 쥬얼드",           id:1082192, rate:"0.0017%"},
       {name:"브라운 레더크라그",       id:1072300, rate:"0.0012%"},
+    ]
+  },
+  {
+    id:4230103, name:"아이언 호그", level:42, hp:2200,
+    drops:[
+      {name:"아이언 호그의 철발굽",    id:4000039, rate:"40%"   },
+      {name:"하얀 포션",               id:2000002, rate:"1%"    },
+      {name:"파란 포션",               id:2000003, rate:"1%"    },
+      {name:"활전용 화살",             id:2060000, rate:"0.8%"  },
+      {name:"석궁전용 화살",           id:2061000, rate:"0.8%"  },
+      {name:"아다만티움의 원석",       id:4010003, rate:"0.4%"  },
+      {name:"사파이어의 원석",         id:4020005, rate:"0.3%"  },
+      {name:"엘릭서",                  id:2000004, rate:"0.1%"  },
+      {name:"반월 자마다르",           id:1332001, rate:"0.01%" },
+      {name:"당커",                    id:1312006, rate:"0.01%" },
+      {name:"브라운 버글러",           id:1002179, rate:"0.01%" },
+      {name:"블루 피에르슈즈",         id:1072121, rate:"0.008%"},
+      {name:"아다만티움 타워 실드",    id:1092014, rate:"0.008%"},
+      {name:"레드 문슈즈",             id:1072114, rate:"0.008%"},
+      {name:"골드 클리브",             id:1082076, rate:"0.008%"},
+      {name:"브라운 길티언",           id:1002151, rate:"0.008%"},
+      {name:"투구 민첩 주문서 100%",   id:2040027, rate:"0.007%"},
+      {name:"오렌지 칼라프",           id:1051034, rate:"0.005%"},
+      {name:"블러드 슬레인",           id:1472019, rate:"0.005%"},
+      {name:"적선백궁",                id:1050051, rate:"0.005%"},
+      {name:"너클메이스",              id:1322017, rate:"0.005%"},
     ]
   },
 ];
@@ -2140,9 +2379,9 @@ function activateMob(mob) {
   panel.querySelector('.mob-stats').textContent = '';
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
-  // 몬스터 이름 meta 저장
+  // 몬스터 이름/drops meta 저장
   const s = loadS();
-  s[`mob_${mob.id}_meta`] = { name: mob.name, total: mob.drops.length };
+  s[`mob_${mob.id}_meta`] = { name: mob.name, total: mob.drops.length, drops: mob.drops };
   saveS(s);
 
   // 스톱워치 상태 복원 (몹별 저장된 시간)
@@ -2607,6 +2846,7 @@ function onDogamComplete(panel, mob) {
     entry.className = 'sw-log-entry complete fade-in';
     entry.innerHTML = `<span class="lt">${fmtTimeLog(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`;
     list.insertBefore(entry, list.firstChild);
+
   }
 
   // 3. 메소 비
@@ -2775,6 +3015,246 @@ function renderSaves() {
 }
 
 // ══════════════════════════════════════════
+// 17-A. ID 입력 토글
+// ══════════════════════════════════════════
+function toggleIdSection() {
+  const toggle = document.getElementById('id-section-toggle');
+  const body   = document.getElementById('id-section-body');
+  const collapsed = toggle.classList.contains('collapsed');
+  toggle.classList.toggle('collapsed', !collapsed);
+  body.classList.toggle('collapsed', !collapsed);
+  body.classList.toggle('expanded', collapsed);
+}
+
+// ══════════════════════════════════════════
+// 17-B. 완료 진열장
+// ══════════════════════════════════════════
+function saveTrophyFromModal() {
+  const ctx = window._trophyCtx;
+  if (!ctx) return;
+  const { mob, elapsedMs, mobData } = ctx;
+  const store = loadS();
+
+  let kills = 0, bestRate = 0, bestCount = 0;
+  mob.drops.forEach(d => {
+    const cnt = mobData[d.id]?.count || 0;
+    const rate = parseFloat(d.rate) / 100;
+    if (cnt > 0 && rate > 0 && rate > bestRate) { bestRate = rate; bestCount = cnt; }
+  });
+  if (bestRate > 0) kills = Math.round(bestCount / bestRate);
+
+  const completed = (store.completed || []).filter(c => c.mobId !== mob.id);
+  completed.push({
+    mobId:   mob.id,
+    mobName: mob.name,
+    level:   mob.level || 0,
+    elapsed: elapsedMs,
+    kills,
+    date:    new Date().toISOString().slice(0, 10),
+    drops:   mob.drops,
+    mobData: { ...mobData },
+  });
+  store.completed = completed;
+  if (store[`mob_${mob.id}`]) store[`mob_${mob.id}`].completionSaved = true;
+  saveS(store);
+  renderTrophy();
+
+  const btn = document.getElementById('result-btn-trophy');
+  if (btn) { btn.disabled = true; btn.textContent = '✓ 저장됨'; }
+}
+
+function saveCompletion(mob, elapsedMs) {
+  const store = loadS();
+  if (store[`mob_${mob.id}`]?.completionSaved) return;
+  const mobData = store[`mob_${mob.id}`] || {};
+  const excl = new Set(store[`excl_${mob.id}`] || []);
+  const drops = mob.drops.filter(d => !excl.has(d.id));
+
+  let kills = 0, bestRate = 0, bestCount = 0;
+  drops.forEach(d => {
+    const cnt = mobData[d.id]?.count || 0;
+    const rate = parseFloat(d.rate) / 100;
+    if (cnt > 0 && rate > 0 && rate > bestRate) { bestRate = rate; bestCount = cnt; }
+  });
+  if (bestRate > 0) kills = Math.round(bestCount / bestRate);
+
+  // mobId 기준 중복 제거 후 추가
+  const completed = (store.completed || []).filter(c => c.mobId !== mob.id);
+  completed.push({
+    mobId:   mob.id,
+    mobName: mob.name,
+    elapsed: elapsedMs,
+    kills,
+    date:    new Date().toISOString().slice(0, 10),
+    drops:   mob.drops,
+    mobData: { ...mobData },
+  });
+  store.completed = completed;
+  store[`mob_${mob.id}`] = { ...mobData, completionSaved: true };
+  saveS(store);
+  renderTrophy();
+}
+
+function renderTrophy() {
+  const store = loadS();
+  // mobId 기준 dedup (마지막 항목 우선)
+  const seen = new Set();
+  const completed = (store.completed || []).slice().reverse().filter(c => {
+    if (seen.has(c.mobId)) return false;
+    seen.add(c.mobId); return true;
+  });
+
+  const btn = document.getElementById('trophy-open-btn');
+  const btnTitle = document.getElementById('trophy-btn-title');
+  const btnSub = document.getElementById('trophy-btn-sub');
+  if (btnTitle) btnTitle.textContent = `진열장 열기`;
+  if (btnSub) btnSub.textContent = completed.length ? `${completed.length}마리 완료` : '완료한 도감작이 없습니다';
+  if (btn) btn.style.opacity = completed.length ? '1' : '0.5';
+}
+
+let _trophySort = { key: 'date', dir: -1 }; // -1=내림차순(최신/오래/높은), 1=오름차순
+
+function setTrophySort(key) {
+  if (_trophySort.key === key) {
+    _trophySort.dir *= -1;
+  } else {
+    _trophySort = { key, dir: -1 };
+  }
+  renderTrophyGrid();
+  // 버튼 스타일 업데이트
+  ['date','elapsed','kills'/* ,'level' */].forEach(k => {
+    const btn = document.getElementById(`tsort-${k}`);
+    const arrow = document.getElementById(`tsort-${k}-arrow`);
+    if (!btn || !arrow) return;
+    btn.classList.toggle('active', _trophySort.key === k);
+    arrow.textContent = (_trophySort.key === k && _trophySort.dir === 1) ? '↑' : '↓';
+  });
+}
+
+function getTrophyCompleted() {
+  const store = loadS();
+  const seen = new Set();
+  return (store.completed || []).slice().reverse().filter(c => {
+    if (seen.has(c.mobId)) return false;
+    seen.add(c.mobId); return true;
+  });
+}
+
+function renderTrophyGrid() {
+  const completed = getTrophyCompleted();
+  const { key, dir } = _trophySort;
+  const sorted = completed.slice().sort((a, b) => {
+    let av, bv;
+    // const getLevel = c => c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
+    if (key === 'date')    { av = a.date || ''; bv = b.date || ''; }
+    if (key === 'elapsed') { av = a.elapsed || 0; bv = b.elapsed || 0; }
+    if (key === 'kills')   { av = a.kills || 0; bv = b.kills || 0; }
+    // if (key === 'level')   { av = getLevel(a); bv = getLevel(b); }
+    return av < bv ? -dir : av > bv ? dir : 0;
+  });
+
+  const grid = document.getElementById('trophy-grid');
+  if (!grid) return;
+  if (!sorted.length) {
+    grid.innerHTML = '<div style="color:rgba(200,168,107,.5);font-size:.8rem;padding:20px;text-align:center">아직 완료한 도감작이 없습니다</div>';
+    return;
+  }
+  grid.innerHTML = sorted.map(c => {
+    const yymm = c.date ? c.date.slice(2, 7).replace('-', '.') : '';
+    const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
+    const killStr = c.kills > 0 ? `${c.kills.toLocaleString()}마리` : '-';
+    const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
+    const levelStr = lv ? `Lv.${lv}` : '';
+    return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
+      <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
+      <div class="trophy-portrait">
+        <img src="https://maplestory.io/api/kms/284/mob/${c.mobId}/icon"
+             onerror="this.src='https://maplestory.io/api/gms/62/mob/${c.mobId}/icon'"
+             alt="${escHtml(c.mobName)}">
+      </div>
+      <div class="trophy-info">
+        <div class="trophy-name">${escHtml(c.mobName)}</div>
+        <div class="trophy-stats">⏱ ${timeStr}<br>🗡 ${killStr}</div>
+        <div class="trophy-date-badge">${yymm}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTrophyRoom() {
+  const completed = getTrophyCompleted();
+  const sub = document.getElementById('trophy-modal-sub');
+  if (sub) sub.textContent = `총 ${completed.length}마리 완료`;
+  // 정렬 버튼 초기 상태
+  setTrophySort(_trophySort.key);
+  renderTrophyGrid();
+  document.getElementById('trophy-overlay').classList.add('open');
+}
+
+let _pendingDeleteMobId = null;
+
+function deleteTrophy(mobId) {
+  const store = loadS();
+  const c = (store.completed || []).find(x => x.mobId === mobId);
+  if (!c) return;
+  _pendingDeleteMobId = mobId;
+  const nameEl = document.getElementById('del-confirm-mob-name');
+  if (nameEl) nameEl.textContent = `"${c.mobName}"`;
+  document.getElementById('del-confirm-overlay').classList.add('open');
+}
+
+function closeDelConfirm() {
+  _pendingDeleteMobId = null;
+  document.getElementById('del-confirm-overlay').classList.remove('open');
+}
+
+function confirmDeleteTrophy() {
+  const mobId = _pendingDeleteMobId;
+  closeDelConfirm();
+  if (!mobId) return;
+  const store = loadS();
+  store.completed = (store.completed || []).filter(x => x.mobId !== mobId);
+  if (store[`mob_${mobId}`]) delete store[`mob_${mobId}`].completionSaved;
+  saveS(store);
+  renderTrophy();
+  renderTrophyGrid();
+  const sub = document.getElementById('trophy-modal-sub');
+  if (sub) sub.textContent = `총 ${getTrophyCompleted().length}마리 완료`;
+}
+
+function closeTrophyRoom(e) {
+  if (e && e.target !== document.getElementById('trophy-overlay')) return;
+  document.getElementById('trophy-overlay').classList.remove('open');
+}
+
+function openTrophyModal(mobId) {
+  const store = loadS();
+  const seen = new Set();
+  const completed = (store.completed || []).slice().reverse().filter(c => {
+    if (seen.has(c.mobId)) return false;
+    seen.add(c.mobId); return true;
+  });
+  const c = completed.find(x => x.mobId === mobId);
+  if (!c) return;
+
+  // drops: 저장된 스냅샷 → 활성 탭 mob → 프리셋 순으로 fallback
+  const activeTabMob = tabs.find(t => t.mob?.id === mobId)?.mob;
+  const drops = (c.drops && c.drops.length) ? c.drops
+    : activeTabMob?.drops
+    || PRESET.find(p => p.id === mobId)?.drops
+    || [];
+  const mob = { id: c.mobId, name: c.mobName, level: 0, drops };
+
+  // mobData: 스냅샷(completionSaved 외 키 있을 때) → 현재 store 데이터 → 활성 탭 store 데이터
+  const hasSnap = c.mobData && Object.keys(c.mobData).some(k => k !== 'completionSaved');
+  const mobData = hasSnap ? c.mobData : (store[`mob_${mobId}`] || {});
+
+  const fakeStore = { ...store, [`mob_${mobId}`]: mobData };
+  const fakeTab = { sw: { base: c.elapsed || 0, startTs: null } };
+  openResultModal(mob, fakeTab, fakeStore);
+}
+
+// ══════════════════════════════════════════
 // 18. 도감작 결과 카드
 // ══════════════════════════════════════════
 function rarityColor(rateStr) {
@@ -2798,14 +3278,14 @@ function rarityBorderColor(rateStr) {
   return '#9b59b6';
 }
 
-function openResultModal(mob) {
+function openResultModal(mob, _overrideTab, _overrideStore) {
   mob = mob || activeMob;
   if (!mob) return;
-  const s        = loadS();
+  const s        = _overrideStore || loadS();
   const mobData  = s[`mob_${mob.id}`] || {};
   const excl     = new Set(s[`excl_${mob.id}`] || []);
   const tlBaseId = s[`tl_base_${mob.id}`]?.id;
-  const tab      = tabs.find(t => t.mob?.id === mob.id) || activeTab();
+  const tab      = _overrideTab || tabs.find(t => t.mob?.id === mob.id) || activeTab();
   const elapsedMs = swElapsed(tab);
 
   // 진척도
@@ -2892,6 +3372,21 @@ function openResultModal(mob) {
   `;
 
   document.getElementById('result-overlay').style.display = 'flex';
+
+  // 진열장 저장 버튼
+  const trophyBtn = document.getElementById('result-btn-trophy');
+  if (trophyBtn) {
+    const fromTrophy = !!_overrideStore;
+    if (fromTrophy || !isComplete) {
+      trophyBtn.style.display = 'none';
+    } else {
+      const alreadySaved = !!(loadS()[`mob_${mob.id}`]?.completionSaved);
+      trophyBtn.style.display = '';
+      trophyBtn.disabled = alreadySaved;
+      trophyBtn.textContent = alreadySaved ? '✓ 저장됨' : '🏅 진열장에 저장';
+      window._trophyCtx = { mob, elapsedMs, mobData: { ...mobData } };
+    }
+  }
 
   // 마우스 반응형 홀로그래픽 shimmer
   let _tiltRaf = null;
@@ -3021,18 +3516,57 @@ function exportResultImage() {
   renderTabBar();
 })();
 renderSaves();
+renderTrophy();
 </script>
+<div class="del-confirm-overlay" id="del-confirm-overlay">
+  <div class="del-confirm-dialog">
+    <div class="del-confirm-body">
+      <div class="del-confirm-icon">🗑️</div>
+      <div class="del-confirm-msg">
+        <span class="del-confirm-name" id="del-confirm-mob-name"></span><br>완료 기록을 진열장에서 제거할까요?
+      </div>
+      <div class="del-confirm-sub">이 작업은 되돌릴 수 없습니다</div>
+    </div>
+    <div class="del-confirm-actions">
+      <button class="del-confirm-btn del-confirm-btn-cancel" onclick="closeDelConfirm()">취소</button>
+      <button class="del-confirm-btn del-confirm-btn-del" id="del-confirm-btn-ok" onclick="confirmDeleteTrophy()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="trophy-overlay" id="trophy-overlay" onclick="closeTrophyRoom(event)">
+  <div class="trophy-modal" onclick="event.stopPropagation()">
+    <div class="trophy-modal-header">
+      <div>
+        <div class="trophy-modal-title">🏅 완료 도감작 진열장</div>
+        <div class="trophy-modal-sub" id="trophy-modal-sub"></div>
+      </div>
+      <button class="trophy-modal-close" onclick="closeTrophyRoom()">✕</button>
+    </div>
+    <div class="trophy-sort-bar">
+      <button class="trophy-sort-btn active" id="tsort-date" onclick="setTrophySort('date')">날짜 <span class="trophy-sort-arrow" id="tsort-date-arrow">↓</span></button>
+      <button class="trophy-sort-btn" id="tsort-elapsed" onclick="setTrophySort('elapsed')">소요 시간 <span class="trophy-sort-arrow" id="tsort-elapsed-arrow">↓</span></button>
+      <button class="trophy-sort-btn" id="tsort-kills" onclick="setTrophySort('kills')">마릿수 <span class="trophy-sort-arrow" id="tsort-kills-arrow">↓</span></button>
+      <!-- <button class="trophy-sort-btn" id="tsort-level" onclick="setTrophySort('level')">레벨 <span class="trophy-sort-arrow" id="tsort-level-arrow">↓</span></button> -->
+    </div>
+    <div class="trophy-modal-body">
+      <div class="trophy-grid" id="trophy-grid"></div>
+    </div>
+  </div>
+</div>
+
 <div id="result-overlay" class="result-overlay" style="display:none" onclick="closeResultModal(event)">
   <div class="result-modal" id="result-modal-inner">
     <div id="result-card-export" class="result-card"></div>
     <div class="result-actions">
       <button class="result-btn result-btn-close" onclick="closeResultModal()">닫기</button>
+      <button class="result-btn result-btn-trophy" id="result-btn-trophy" onclick="saveTrophyFromModal()" style="display:none">🏅 진열장에 저장</button>
       <button class="result-btn result-btn-save" onclick="exportResultImage()">이미지 저장</button>
     </div>
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.068.6</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.069.9</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
