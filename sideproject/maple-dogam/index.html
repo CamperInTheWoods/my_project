@@ -120,31 +120,38 @@
     #section-checklist { display:none; }
 
     /* ─ Tabs ─ */
+    .tab-bar-wrap { margin-bottom:-1px; }
     .tab-bar {
-      display:flex; gap:6px; margin-bottom:-1px; padding:0 4px;
+      display:flex; gap:5px; padding:0 4px;
+      overflow-x:auto; flex-wrap:nowrap;
+      scrollbar-width:thin; scrollbar-color:rgba(200,146,42,.3) transparent;
     }
+    .tab-bar::-webkit-scrollbar { height:3px; }
+    .tab-bar::-webkit-scrollbar-track { background:transparent; }
+    .tab-bar::-webkit-scrollbar-thumb { background:rgba(200,146,42,.35); border-radius:2px; }
     .tab-btn {
-      display:flex; align-items:center; gap:6px;
-      padding:7px 14px; border-radius:8px 8px 0 0;
+      display:flex; align-items:center; gap:5px;
+      padding:7px 11px; border-radius:8px 8px 0 0;
       border:1px solid var(--border); border-bottom:none;
-      background:#f5e8c8; color:var(--brown); font-size:.78rem;
+      background:#f5e8c8; color:var(--brown); font-size:.76rem;
       cursor:pointer; transition:background .15s;
       font-family:inherit; font-weight:500;
+      flex-shrink:0; white-space:nowrap;
     }
     .tab-btn.active { background:var(--panel); color:var(--dark); font-weight:700; }
     .tab-btn .tab-sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#1a6fa8; margin-left:3px; vertical-align:middle; box-shadow:0 0 0 2px rgba(26,111,168,.25); }
-    .tab-btn img { width:24px; height:24px; object-fit:contain; image-rendering:pixelated; }
+    .tab-btn img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
     .tab-btn .tab-close {
-      margin-left:2px; color:#bbb; font-size:.9rem; line-height:1;
-      padding:0 2px; border-radius:3px;
+      margin-left:2px; color:#bbb; font-size:.85rem; line-height:1;
+      padding:0 2px; border-radius:3px; flex-shrink:0;
     }
     .tab-btn .tab-close:hover { color:var(--red); background:#fee; }
     .tab-add {
-      padding:7px 12px; border-radius:8px 8px 0 0;
+      padding:7px 11px; border-radius:8px 8px 0 0;
       border:1px dashed var(--border); border-bottom:none;
       background:transparent; color:var(--border); font-size:1rem;
       cursor:pointer; transition:color .15s, background .15s;
-      font-family:inherit;
+      font-family:inherit; flex-shrink:0;
     }
     .tab-add:hover { color:var(--brown); background:#f5e8c8; }
     .tab-panel { display:none; }
@@ -600,7 +607,10 @@
     .del-confirm-btn-del:hover { background:rgba(180,30,30,.2); color:rgba(255,120,120,.92); }
 
     /* ─ Saves ─ */
-    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:6px; }
+    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:6px; max-height:260px; overflow-y:auto; padding-right:2px; }
+    .saves-wrap::-webkit-scrollbar { width:4px; }
+    .saves-wrap::-webkit-scrollbar-track { background:transparent; }
+    .saves-wrap::-webkit-scrollbar-thumb { background:rgba(200,146,42,.3); border-radius:2px; }
     .save-card {
       position:relative; background:white; border:2px solid var(--border);
       border-radius:12px; padding:12px 10px 10px; cursor:pointer;
@@ -1166,7 +1176,9 @@
 
   <!-- ② 체크리스트 탭 -->
   <div id="section-checklist">
-    <div class="tab-bar" id="tab-bar"></div>
+    <div class="tab-bar-wrap">
+      <div class="tab-bar" id="tab-bar"></div>
+    </div>
     <div id="tab-panels"></div>
   </div>
 
@@ -1402,7 +1414,7 @@ const PRESET = [
 // ══════════════════════════════════════════
 // 2. 전역 상태 (탭 기반)
 // ══════════════════════════════════════════
-const MAX_TABS = 3;
+const MAX_TABS = 8;
 
 function makeTab(idx) {
   return { idx, mob: null, sw: { base:0, startTs:null, ticker:null }, synced: false };
@@ -2284,7 +2296,7 @@ function renderTabBar() {
     const add = document.createElement('button');
     add.className = 'tab-add';
     add.textContent = '+';
-    add.title = '탭 추가 (최대 3개)';
+    add.title = '탭 추가 (최대 8개)';
     add.onclick = addTab;
     bar.appendChild(add);
   }
@@ -3606,7 +3618,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
