@@ -418,153 +418,186 @@
     }
     .trophy-modal-header {
       display:flex; align-items:center; justify-content:space-between;
-      padding:18px 22px 12px;
-      border-bottom:1px solid rgba(200,146,42,.35);
-      background:linear-gradient(90deg, rgba(200,146,42,.06), transparent, rgba(200,146,42,.06));
-      flex-shrink:0;
-    }
-    .trophy-modal-title { font-size:1rem; font-weight:700; color:var(--gold); letter-spacing:.04em; }
-    .trophy-modal-sub { font-size:.65rem; color:rgba(200,168,107,.6); margin-top:2px; }
-    .trophy-modal-close {
-      width:28px; height:28px; border-radius:50%; border:1.5px solid rgba(245,166,35,.4);
-      background:none; color:rgba(245,166,35,.7); font-size:.8rem; cursor:pointer;
-      display:flex; align-items:center; justify-content:center; transition:all .15s;
-    }
-    .trophy-modal-close:hover { background:rgba(245,166,35,.15); color:var(--gold); }
-    .trophy-sort-bar { display:flex; gap:6px; padding:10px 22px; border-bottom:1px solid rgba(200,146,42,.18); flex-shrink:0; }
-    .trophy-sort-btn {
-      display:flex; align-items:center; gap:4px;
-      padding:4px 10px; border-radius:6px; border:1.5px solid rgba(245,166,35,.2);
-      background:none; color:rgba(200,168,107,.6); font-size:.65rem; font-weight:600;
-      cursor:pointer; font-family:inherit; transition:all .15s;
-    }
-    .trophy-sort-btn:hover { border-color:rgba(245,166,35,.5); color:rgba(245,166,35,.85); }
-    .trophy-sort-btn.active { border-color:rgba(245,166,35,.7); background:rgba(245,166,35,.12); color:rgba(245,166,35,.95); }
-    .trophy-sort-arrow { font-size:.6rem; }
-    .trophy-modal-body {
-      overflow-y:auto; padding:22px 24px;
+      padding:20px 24px 13px;
+      border-bottom:1px solid rgba(200,146,42,.3);
       background:
-        repeating-linear-gradient(0deg,  rgba(255,255,255,.008) 0px, rgba(255,255,255,.008) 1px, transparent 1px, transparent 4px),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.008) 0px, rgba(255,255,255,.008) 1px, transparent 1px, transparent 4px),
-        radial-gradient(ellipse at 50% 0%, rgba(150,20,20,.25) 0%, transparent 65%),
-        linear-gradient(180deg, #1e0508, #250608, #1e0508);
-      box-shadow:inset 0 4px 16px rgba(0,0,0,.4), inset 0 -4px 16px rgba(0,0,0,.4);
-    }
-    .trophy-modal-body::-webkit-scrollbar { width:5px; }
-    .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.2); }
-    .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(200,146,42,.4); border-radius:3px; }
-    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px; }
-    .trophy-card {
-      display:flex; flex-direction:column; align-items:center; gap:8px;
-      background:linear-gradient(170deg, #3a2010, #261408);
-      border:1.5px solid rgba(200,168,107,.35);
-      border-radius:12px;
-      padding:18px 12px 14px; cursor:pointer;
-      box-shadow:
-        0 6px 18px rgba(0,0,0,.55),
-        0 1px 0 rgba(255,220,100,.08) inset,
-        0 -1px 0 rgba(0,0,0,.4) inset;
-      transition:border-color .2s, box-shadow .2s, transform .18s;
-    }
-    .trophy-card::before {
-      content:''; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
-      width:12px; height:12px; border-radius:50%;
-      background:radial-gradient(circle at 35% 35%, #e8c060, #a07020);
-      box-shadow:0 2px 6px rgba(0,0,0,.6), 0 0 0 1.5px rgba(255,200,80,.3);
-      z-index:2;
-    }
-    .trophy-card:hover {
-      border-color:rgba(245,166,35,.85);
-      box-shadow:0 10px 28px rgba(0,0,0,.6), 0 0 16px rgba(245,166,35,.2), 0 1px 0 rgba(255,220,100,.1) inset;
-      transform:translateY(-4px);
-    }
-    .trophy-portrait {
-      width:64px; height:64px; border-radius:12px;
-      background:radial-gradient(circle at 40% 35%,#3a2200,#150a00);
-      border:2px solid rgba(245,166,35,.45);
-      box-shadow:0 0 12px rgba(245,166,35,.15), inset 0 1px 2px rgba(255,220,100,.1);
-      display:flex; align-items:center; justify-content:center; overflow:hidden;
+        linear-gradient(90deg, rgba(200,146,42,.07) 0%, transparent 40%, transparent 60%, rgba(200,146,42,.07) 100%);
+      flex-shrink:0;
       position:relative;
     }
-    .trophy-portrait img { width:82%; height:82%; object-fit:contain; image-rendering:pixelated; }
-    .trophy-portrait::after {
-      content:''; position:absolute; inset:0; border-radius:11px;
-      background:linear-gradient(135deg,rgba(255,220,100,.08) 0%,transparent 60%);
+    .trophy-modal-header::after {
+      content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
+      width:40%; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(245,166,35,.55), transparent);
       pointer-events:none;
     }
-    .trophy-info { width:100%; text-align:center; }
-    .trophy-name { font-size:.7rem; color:rgba(255,220,130,.9); font-weight:700; margin-bottom:4px; }
-    .trophy-stats { font-size:.58rem; color:rgba(200,168,107,.6); line-height:1.7; }
-    .trophy-date-badge {
-      font-size:.52rem; font-weight:700; letter-spacing:.05em;
-      color:rgba(245,166,35,.8); background:rgba(245,166,35,.1);
-      border:1px solid rgba(245,166,35,.25); border-radius:4px;
-      padding:1px 6px; margin-top:2px; display:inline-block;
+    .trophy-modal-title { font-size:1rem; font-weight:700; color:var(--gold); letter-spacing:.05em; text-shadow:0 0 12px rgba(245,166,35,.2); }
+    .trophy-modal-sub { font-size:.63rem; color:rgba(200,168,107,.52); margin-top:3px; letter-spacing:.02em; }
+    .trophy-modal-close {
+      width:27px; height:27px; border-radius:50%;
+      border:1px solid rgba(245,166,35,.35); background:rgba(245,166,35,.04);
+      color:rgba(245,166,35,.6); font-size:.75rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:all .15s;
     }
-    .trophy-card { position:relative; }
+    .trophy-modal-close:hover { background:rgba(245,166,35,.14); color:var(--gold); border-color:rgba(245,166,35,.65); }
+    .trophy-sort-bar {
+      display:flex; gap:6px; padding:10px 24px;
+      border-bottom:1px solid rgba(200,146,42,.14); flex-shrink:0;
+      background:rgba(0,0,0,.12);
+    }
+    .trophy-sort-btn {
+      display:flex; align-items:center; gap:4px;
+      padding:4px 11px; border-radius:6px;
+      border:1px solid rgba(245,166,35,.18);
+      background:none; color:rgba(200,168,107,.55); font-size:.63rem; font-weight:600;
+      cursor:pointer; font-family:inherit; transition:all .15s; letter-spacing:.02em;
+    }
+    .trophy-sort-btn:hover { border-color:rgba(245,166,35,.48); color:rgba(245,166,35,.82); background:rgba(245,166,35,.05); }
+    .trophy-sort-btn.active { border-color:rgba(245,166,35,.65); background:rgba(245,166,35,.1); color:rgba(245,166,35,.92); }
+    .trophy-sort-arrow { font-size:.58rem; }
+    .trophy-modal-body {
+      overflow-y:auto; padding:22px 22px 26px;
+      background:
+        repeating-linear-gradient(0deg,  rgba(255,255,255,.007) 0px, rgba(255,255,255,.007) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.007) 0px, rgba(255,255,255,.007) 1px, transparent 1px, transparent 4px),
+        radial-gradient(ellipse at 50% 0%, rgba(140,18,18,.22) 0%, transparent 62%),
+        radial-gradient(ellipse at 50% 100%, rgba(80,10,10,.2) 0%, transparent 55%),
+        linear-gradient(180deg, #1e0508, #250608, #1e0508);
+      box-shadow:inset 0 6px 20px rgba(0,0,0,.45), inset 0 -6px 20px rgba(0,0,0,.35);
+    }
+    .trophy-modal-body::-webkit-scrollbar { width:4px; }
+    .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.15); }
+    .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(200,146,42,.35); border-radius:2px; }
+    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(152px,1fr)); gap:18px; }
+    .trophy-card {
+      display:flex; flex-direction:column; align-items:center; gap:0;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(255,195,50,.05) 0%, transparent 58%),
+        linear-gradient(185deg, #3d2010 0%, #1e0a03 52%, #351808 100%);
+      border-radius:10px;
+      padding:18px 14px 15px; cursor:pointer;
+      position:relative;
+      box-shadow:
+        0 0 0 1px rgba(160,100,20,.85),
+        0 0 0 3px rgba(12,5,0,.95),
+        0 0 0 4.5px rgba(200,146,42,.28),
+        0 12px 32px rgba(0,0,0,.72),
+        inset 0 1px 0 rgba(255,220,100,.07),
+        inset 0 -1px 0 rgba(0,0,0,.55);
+      transition:box-shadow .25s, transform .22s;
+      overflow:visible;
+    }
+    .trophy-card:hover {
+      box-shadow:
+        0 0 0 1px rgba(245,166,35,.95),
+        0 0 0 3px rgba(12,5,0,.95),
+        0 0 0 5px rgba(200,146,42,.45),
+        0 18px 48px rgba(0,0,0,.8),
+        0 0 22px rgba(245,166,35,.12),
+        inset 0 1px 0 rgba(255,220,100,.1),
+        inset 0 -1px 0 rgba(0,0,0,.55);
+      transform:translateY(-5px);
+    }
+    .trophy-portrait {
+      width:70px; height:70px; border-radius:10px;
+      background:radial-gradient(circle at 38% 30%, #3d2300, #0d0400);
+      box-shadow:
+        0 0 0 2px rgba(200,150,30,.8),
+        0 0 0 3.5px rgba(10,4,0,.9),
+        0 0 0 5.5px rgba(180,130,30,.35),
+        inset 0 2px 10px rgba(0,0,0,.75);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+      position:relative; margin-bottom:11px; flex-shrink:0;
+    }
+    .trophy-portrait img { width:80%; height:80%; object-fit:contain; image-rendering:pixelated; }
+    .trophy-portrait::after {
+      content:''; position:absolute; inset:0; border-radius:9px;
+      background:linear-gradient(140deg,rgba(255,220,100,.12) 0%,transparent 55%);
+      pointer-events:none;
+    }
+    .trophy-sep {
+      width:68%; height:1px; flex-shrink:0;
+      background:linear-gradient(90deg, transparent, rgba(200,146,42,.55), rgba(245,166,35,.38), rgba(200,146,42,.55), transparent);
+      margin:0 auto 9px;
+    }
+    .trophy-info { width:100%; text-align:center; }
+    .trophy-name { font-size:.71rem; color:rgba(255,222,140,.95); font-weight:700; margin-bottom:5px; letter-spacing:.02em; }
+    .trophy-stats { font-size:.57rem; color:rgba(200,168,107,.58); line-height:1.8; }
+    .trophy-date-badge {
+      font-size:.49rem; font-weight:700; letter-spacing:.09em;
+      color:rgba(245,166,35,.72); margin-top:5px; display:inline-block;
+      background:linear-gradient(90deg, transparent, rgba(200,146,42,.12), transparent);
+      padding:2px 10px; border-top:1px solid rgba(200,146,42,.18);
+    }
     .trophy-del {
-      position:absolute; top:6px; right:6px; width:18px; height:18px;
-      border-radius:50%; border:1px solid rgba(255,80,80,.4); background:none;
-      color:rgba(255,100,100,.5); font-size:.6rem; cursor:pointer; line-height:1;
+      position:absolute; top:7px; right:7px; width:17px; height:17px;
+      border-radius:50%; border:1px solid rgba(255,80,80,.3); background:none;
+      color:rgba(255,100,100,.4); font-size:.55rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
-      opacity:0; transition:opacity .15s, background .15s, color .15s;
+      opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-del { opacity:1; }
-    .trophy-del:hover { background:rgba(255,60,60,.2); color:rgba(255,120,120,.9); border-color:rgba(255,80,80,.8); }
+    .trophy-del:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
 
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
       display:none; position:fixed; inset:0; z-index:500;
-      background:rgba(0,0,0,.55); align-items:center; justify-content:center;
+      background:rgba(0,0,0,.6); align-items:center; justify-content:center;
+      backdrop-filter:blur(2px);
     }
     .del-confirm-overlay.open { display:flex; }
     .del-confirm-dialog {
       position:relative;
       background:
-        radial-gradient(ellipse at 30% 20%, rgba(120,15,15,.35) 0%, transparent 55%),
-        linear-gradient(160deg, #1c0404, #280608, #1c0404);
-      border-radius:14px; width:min(340px,88vw);
+        radial-gradient(ellipse at 30% 15%, rgba(120,15,15,.3) 0%, transparent 55%),
+        linear-gradient(165deg, #1e0506, #2a0708, #1e0506);
+      border-radius:14px; width:min(320px,86vw);
       box-shadow:
-        0 0 0 2px #6b2e0a,
-        0 0 0 4px #c8922a,
-        0 0 0 6px #5a2508,
-        0 20px 60px rgba(0,0,0,.9);
+        0 0 0 1.5px #6b2e0a,
+        0 0 0 3.5px #c8922a,
+        0 0 0 5.5px #4a2008,
+        0 24px 70px rgba(0,0,0,.95),
+        inset 0 1px 0 rgba(255,220,130,.05);
       overflow:hidden;
+      animation: delConfirmIn .18s ease-out;
+    }
+    @keyframes delConfirmIn {
+      from { opacity:0; transform:scale(.94) translateY(6px); }
+      to   { opacity:1; transform:scale(1) translateY(0); }
     }
     .del-confirm-body {
-      padding:28px 26px 22px;
-      border-bottom:1px solid rgba(200,146,42,.25);
+      padding:30px 26px 22px;
+      border-bottom:1px solid rgba(200,146,42,.2);
     }
     .del-confirm-icon {
-      font-size:1.4rem; text-align:center; margin-bottom:12px;
+      font-size:1.5rem; text-align:center; margin-bottom:13px; opacity:.8;
     }
     .del-confirm-msg {
-      font-size:.8rem; color:rgba(255,220,130,.85); line-height:1.6; text-align:center;
+      font-size:.78rem; color:rgba(255,218,128,.82); line-height:1.65; text-align:center;
     }
     .del-confirm-name {
-      color:var(--gold); font-weight:700;
+      color:rgba(245,166,35,.95); font-weight:700;
     }
     .del-confirm-sub {
-      font-size:.65rem; color:rgba(200,168,107,.45); margin-top:6px; text-align:center;
+      font-size:.62rem; color:rgba(200,168,107,.38); margin-top:7px; text-align:center;
+      letter-spacing:.02em;
     }
     .del-confirm-actions {
       display:flex;
-      background:rgba(0,0,0,.25);
+      background:rgba(0,0,0,.3);
     }
     .del-confirm-btn {
       flex:1; padding:14px; border:none; background:none;
-      font-family:inherit; font-size:.78rem; font-weight:600;
+      font-family:inherit; font-size:.76rem; font-weight:600;
       cursor:pointer; transition:background .15s, color .15s;
-      letter-spacing:.02em;
+      letter-spacing:.03em;
     }
     .del-confirm-btn-cancel {
-      color:rgba(200,168,107,.6); border-right:1px solid rgba(200,146,42,.2);
+      color:rgba(200,168,107,.55); border-right:1px solid rgba(200,146,42,.18);
     }
-    .del-confirm-btn-cancel:hover { background:rgba(255,255,255,.05); color:rgba(200,168,107,.9); }
-    .del-confirm-btn-del {
-      color:rgba(255,100,100,.7);
-    }
-    .del-confirm-btn-del:hover { background:rgba(200,40,40,.18); color:rgba(255,130,130,.95); }
+    .del-confirm-btn-cancel:hover { background:rgba(255,255,255,.04); color:rgba(200,168,107,.88); }
+    .del-confirm-btn-del { color:rgba(235,90,90,.65); }
+    .del-confirm-btn-del:hover { background:rgba(180,30,30,.2); color:rgba(255,120,120,.92); }
 
     /* ─ Saves ─ */
     .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:6px; }
@@ -3172,9 +3205,10 @@ function renderTrophyGrid() {
              onerror="this.src='https://maplestory.io/api/gms/62/mob/${c.mobId}/icon'"
              alt="${escHtml(c.mobName)}">
       </div>
+      <div class="trophy-sep"></div>
       <div class="trophy-info">
         <div class="trophy-name">${escHtml(c.mobName)}</div>
-        <div class="trophy-stats">⏱ ${timeStr}<br>🗡 ${killStr}</div>
+        <div class="trophy-stats">⏱ ${timeStr} &nbsp;·&nbsp; 🗡 ${killStr}</div>
         <div class="trophy-date-badge">${yymm}</div>
       </div>
     </div>`;
@@ -3185,9 +3219,7 @@ function openTrophyRoom() {
   const completed = getTrophyCompleted();
   const sub = document.getElementById('trophy-modal-sub');
   if (sub) sub.textContent = `총 ${completed.length}마리 완료`;
-  // 정렬 버튼 초기 상태
-  setTrophySort(_trophySort.key);
-  renderTrophyGrid();
+  setTrophySort(_trophySort.key); // renderTrophyGrid 내부에서 호출됨
   document.getElementById('trophy-overlay').classList.add('open');
 }
 
@@ -3207,6 +3239,14 @@ function closeDelConfirm() {
   _pendingDeleteMobId = null;
   document.getElementById('del-confirm-overlay').classList.remove('open');
 }
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('del-confirm-overlay')?.classList.contains('open')) {
+      closeDelConfirm();
+    }
+  }
+});
 
 function confirmDeleteTrophy() {
   const mobId = _pendingDeleteMobId;
@@ -3566,7 +3606,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.069.9</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.0</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
