@@ -637,16 +637,19 @@
     }
     .save-card-pct {
       font-size:1.6rem; font-weight:900; line-height:1;
-      margin-bottom:4px; transition:color .3s;
+      color:var(--gold); margin-bottom:4px;
     }
+    .save-card.complete .save-card-pct { color:#4caf50; }
     .save-card-count { font-size:.65rem; color:var(--gray); margin-bottom:8px; }
     .save-card-bar-bg {
       height:6px; background:#eee; border-radius:3px; overflow:hidden;
     }
     .save-card-bar-fill {
       height:100%; border-radius:3px;
-      transition:width .3s, background .3s;
+      background:linear-gradient(90deg,#f5a623,#e8890a);
+      transition:width .3s;
     }
+    .save-card.complete .save-card-bar-fill { background:linear-gradient(90deg,#66bb6a,#43a047); }
     .save-card-del {
       position:absolute; top:6px; right:8px;
       background:none; border:none; color:#ccc; font-size:.7rem;
@@ -3005,12 +3008,6 @@ function resetChecklist() {
 // ══════════════════════════════════════════
 // 17. 저장된 도감작 칩
 // ══════════════════════════════════════════
-function pctColor(pct) {
-  // 0% = 적색(hsl 0°) → 100% = 청색(hsl 215°)
-  const hue = Math.round(pct * 2.15);
-  return `hsl(${hue}, 72%, 48%)`;
-}
-
 function renderSaves() {
   const store = loadS();
   const el = document.getElementById('saves-list');
@@ -3053,14 +3050,13 @@ function renderSaves() {
     const activeT = tabs.find(t => t.mob && t.mob.id === mobId);
     const elapsedMs = activeT ? swElapsed(activeT) : (swSaved?.base || 0);
     const elapsedStr = elapsedMs >= 1000 ? fmtTimeLog(elapsedMs) : '';
-    const pc = pctColor(pct);
     card.innerHTML = `
       <button class="save-card-del" data-key="${key}" title="삭제">✕</button>
       <div class="save-card-name" title="${escHtml(savedName)}">${escHtml(savedName)}</div>
-      <div class="save-card-pct" style="color:${pc}">${pct}%</div>
+      <div class="save-card-pct">${pct}%</div>
       <div class="save-card-count">${done} / ${total}</div>
       <div class="save-card-bar-bg">
-        <div class="save-card-bar-fill" style="width:${pct}%;background:${pc}"></div>
+        <div class="save-card-bar-fill" style="width:${pct}%"></div>
       </div>
       ${elapsedStr ? `<div style="font-size:.6rem;color:#aaa;margin-top:5px">⏱ ${elapsedStr}</div>` : ''}
     `;
@@ -3644,7 +3640,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
