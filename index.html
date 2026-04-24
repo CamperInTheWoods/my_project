@@ -3006,9 +3006,9 @@ function resetChecklist() {
 // 17. 저장된 도감작 칩
 // ══════════════════════════════════════════
 function pctColor(pct) {
-  // 0% = 적색(hsl 0°) → 100% = 녹색(hsl 120°)
-  const hue = Math.round(pct * 1.2);
-  return `hsl(${hue}, 72%, 44%)`;
+  // 0% = 적색(hsl 0°) → 100% = 청색(hsl 215°)
+  const hue = Math.round(pct * 2.15);
+  return `hsl(${hue}, 72%, 48%)`;
 }
 
 function renderSaves() {
@@ -3644,7 +3644,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.3</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
