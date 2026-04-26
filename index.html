@@ -154,7 +154,24 @@
       flex-shrink:0; white-space:nowrap;
     }
     .tab-btn.active { background:var(--panel); color:var(--dark); font-weight:700; }
-    .tab-btn .tab-sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#1a6fa8; margin-left:3px; vertical-align:middle; box-shadow:0 0 0 2px rgba(26,111,168,.25); }
+    .tab-status-dot {
+      display:inline-block; width:7px; height:7px; border-radius:50%;
+      margin-left:4px; vertical-align:middle; flex-shrink:0;
+    }
+    .tab-status-dot.running {
+      background:#1a6fa8;
+      animation:tabPulse 1.4s ease-in-out infinite;
+    }
+    .tab-status-dot.paused { background:#bbb; }
+    @keyframes tabPulse {
+      0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 0 2px rgba(26,111,168,.2); }
+      50%     { opacity:.7; transform:scale(1.5); box-shadow:0 0 0 4px rgba(26,111,168,.05); }
+    }
+    .tab-sync-ring {
+      display:inline-block; width:7px; height:7px; border-radius:50%;
+      border:1.5px solid rgba(200,146,42,.75); background:rgba(200,146,42,.15);
+      margin-left:2px; vertical-align:middle; flex-shrink:0;
+    }
     .tab-btn img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
     .tab-btn .tab-close {
       margin-left:2px; color:#bbb; font-size:.85rem; line-height:1;
@@ -1513,6 +1530,7 @@ function swToggle() {
       }
     });
   }
+  renderTabBar();
 }
 
 function swReset() {
@@ -1522,6 +1540,7 @@ function swReset() {
   if (tab.synced) {
     tabs.forEach(t => { if (t !== tab && t.synced) _swResetOne(t, getPanelOf(t.idx)); });
   }
+  renderTabBar();
 }
 
 function swSyncToggle() {
@@ -2302,10 +2321,16 @@ function renderTabBar() {
     btn.className = 'tab-btn' + (tab.idx === activeTabIdx ? ' active' : '');
     const name = tab.mob ? tab.mob.name : `탭 ${tab.idx + 1}`;
     const imgSrc = tab.mob ? mobImg(tab.mob.id) : '';
+    const isRunning = tab.sw.startTs !== null;
+    const hasTimer  = tab.sw.base > 0 || isRunning;
+    const statusDot = tab.mob && hasTimer
+      ? `<span class="tab-status-dot ${isRunning ? 'running' : 'paused'}" title="${isRunning ? '타이머 실행 중' : '일시정지'}"></span>`
+      : '';
+    const syncRing = tab.synced ? `<span class="tab-sync-ring" title="동기화 중"></span>` : '';
     btn.innerHTML = `
       ${tab.mob ? `<img src="${imgSrc}" onerror="this.style.display='none'">` : ''}
       <span>${name}</span>
-      ${tab.synced ? `<span class="tab-sync-dot" title="동기화 중"></span>` : ''}
+      ${statusDot}${syncRing}
       ${tabs.length > 1 ? `<span class="tab-close" data-tidx="${tab.idx}" onclick="closeTab(event,${tab.idx})">✕</span>` : ''}
     `;
     btn.addEventListener('click', e => {
@@ -3640,7 +3665,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.5</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
