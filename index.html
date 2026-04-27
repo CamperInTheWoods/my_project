@@ -3256,16 +3256,37 @@ function getTrophyCompleted() {
   });
 }
 
+function _calcTrophyKills(c, store) {
+  const mobData = c.mobData || {};
+  const excl    = new Set((store[`excl_${c.mobId}`] || []));
+  const drops   = (c.drops || []).filter(d => !excl.has(d.id));
+  const tlBase  = store[`tl_base_${c.mobId}`];
+  if (tlBase) {
+    const bd = (c.drops || []).find(d => d.id === tlBase.id);
+    if (bd) {
+      const cnt = mobData[bd.id]?.count || 0;
+      const rate = parseFloat(bd.rate) / 100;
+      if (cnt > 0 && rate > 0) return Math.round(cnt / rate);
+    }
+  }
+  let bestRate = 0, bestCount = 0;
+  drops.forEach(d => {
+    const cnt = mobData[d.id]?.count || 0;
+    const rate = parseFloat(d.rate) / 100;
+    if (cnt > 0 && rate > 0 && rate > bestRate) { bestRate = rate; bestCount = cnt; }
+  });
+  return bestRate > 0 ? Math.round(bestCount / bestRate) : 0;
+}
+
 function renderTrophyGrid() {
   const completed = getTrophyCompleted();
+  const store = loadS();
   const { key, dir } = _trophySort;
   const sorted = completed.slice().sort((a, b) => {
     let av, bv;
-    // const getLevel = c => c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
     if (key === 'date')    { av = a.date || ''; bv = b.date || ''; }
     if (key === 'elapsed') { av = a.elapsed || 0; bv = b.elapsed || 0; }
-    if (key === 'kills')   { av = a.kills || 0; bv = b.kills || 0; }
-    // if (key === 'level')   { av = getLevel(a); bv = getLevel(b); }
+    if (key === 'kills')   { av = _calcTrophyKills(a, store); bv = _calcTrophyKills(b, store); }
     return av < bv ? -dir : av > bv ? dir : 0;
   });
 
@@ -3278,9 +3299,9 @@ function renderTrophyGrid() {
   grid.innerHTML = sorted.map(c => {
     const yymm = c.date ? c.date.slice(2, 7).replace('-', '.') : '';
     const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
-    const killStr = c.kills > 0 ? `${c.kills.toLocaleString()}마리` : '-';
+    const kills   = _calcTrophyKills(c, store);
+    const killPart = kills > 0 ? ` &nbsp;·&nbsp; 🗡 ${kills.toLocaleString()}마리` : '';
     const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
-    const levelStr = lv ? `Lv.${lv}` : '';
     return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
       <div class="trophy-portrait">
@@ -3291,7 +3312,7 @@ function renderTrophyGrid() {
       <div class="trophy-sep"></div>
       <div class="trophy-info">
         <div class="trophy-name">${escHtml(c.mobName)}</div>
-        <div class="trophy-stats">⏱ ${timeStr} &nbsp;·&nbsp; 🗡 ${killStr}</div>
+        <div class="trophy-stats">⏱ ${timeStr}${killPart}</div>
         <div class="trophy-date-badge">${yymm}</div>
       </div>
     </div>`;
@@ -3689,7 +3710,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.071.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.071.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
