@@ -167,10 +167,17 @@
       0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 0 2px rgba(26,111,168,.2); }
       50%     { opacity:.7; transform:scale(1.5); box-shadow:0 0 0 4px rgba(26,111,168,.05); }
     }
-    .tab-sync-ring {
-      display:inline-block; width:7px; height:7px; border-radius:50%;
-      border:1.5px solid rgba(200,146,42,.75); background:rgba(200,146,42,.15);
-      margin-left:2px; vertical-align:middle; flex-shrink:0;
+    .tab-sync-btn {
+      width:14px; height:14px; border-radius:50%; flex-shrink:0;
+      border:1.5px solid rgba(200,146,42,.3); background:none;
+      cursor:pointer; padding:0; margin-left:2px; vertical-align:middle;
+      display:inline-flex; align-items:center; justify-content:center;
+      transition:all .15s; font-size:.5rem; color:transparent;
+    }
+    .tab-sync-btn:hover { border-color:rgba(200,146,42,.65); background:rgba(200,146,42,.1); }
+    .tab-sync-btn.on {
+      border-color:rgba(200,146,42,.85); background:rgba(200,146,42,.22);
+      box-shadow:0 0 0 2px rgba(200,146,42,.12);
     }
     .tab-btn img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
     .tab-btn .tab-close {
@@ -1544,9 +1551,14 @@ function swReset() {
 }
 
 function swSyncToggle() {
-  const tab = activeTab();
+  tabSyncToggle(activeTab().idx);
+}
+
+function tabSyncToggle(tabIdx) {
+  const tab = tabs.find(t => t.idx === tabIdx);
+  if (!tab) return;
   tab.synced = !tab.synced;
-  updateSyncBtn(getActivePanel(), tab);
+  updateSyncBtn(getPanelOf(tabIdx), tab);
   renderTabBar();
 }
 
@@ -2326,11 +2338,13 @@ function renderTabBar() {
     const statusDot = tab.mob && hasTimer
       ? `<span class="tab-status-dot ${isRunning ? 'running' : 'paused'}" title="${isRunning ? '타이머 실행 중' : '일시정지'}"></span>`
       : '';
-    const syncRing = tab.synced ? `<span class="tab-sync-ring" title="동기화 중"></span>` : '';
+    const syncBtn = tabs.length >= 2
+      ? `<button class="tab-sync-btn${tab.synced ? ' on' : ''}" title="${tab.synced ? '동기화 중 (클릭해서 해제)' : '동기화 켜기'}" onclick="event.stopPropagation();tabSyncToggle(${tab.idx})"></button>`
+      : '';
     btn.innerHTML = `
       ${tab.mob ? `<img src="${imgSrc}" onerror="this.style.display='none'">` : ''}
       <span>${name}</span>
-      ${statusDot}${syncRing}
+      ${statusDot}${syncBtn}
       ${tabs.length > 1 ? `<span class="tab-close" data-tidx="${tab.idx}" onclick="closeTab(event,${tab.idx})">✕</span>` : ''}
     `;
     btn.addEventListener('click', e => {
@@ -3665,7 +3679,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.6</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
