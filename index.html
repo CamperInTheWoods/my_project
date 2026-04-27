@@ -157,27 +157,23 @@
     .tab-status-dot {
       display:inline-block; width:7px; height:7px; border-radius:50%;
       margin-left:4px; vertical-align:middle; flex-shrink:0;
+      transition:box-shadow .2s;
     }
-    .tab-status-dot.running {
-      background:#1a6fa8;
-      animation:tabPulse 1.4s ease-in-out infinite;
-    }
-    .tab-status-dot.paused { background:#bbb; }
+    .tab-status-dot.clickable { cursor:pointer; }
+    .tab-status-dot.running { background:#1a6fa8; animation:tabPulse 1.4s ease-in-out infinite; }
+    .tab-status-dot.paused  { background:#bbb; }
+    .tab-status-dot.dim     { background:rgba(180,180,180,.3); }
+    /* 동기화: 바깥 동심원 (주황 링) */
+    .tab-status-dot.synced.paused { box-shadow:0 0 0 2.5px rgba(20,160,140,.75); }
+    .tab-status-dot.synced.dim    { box-shadow:0 0 0 2.5px rgba(20,160,140,.6); }
+    .tab-status-dot.running.synced { animation:tabPulseSynced 1.4s ease-in-out infinite; }
     @keyframes tabPulse {
       0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 0 2px rgba(26,111,168,.2); }
       50%     { opacity:.7; transform:scale(1.5); box-shadow:0 0 0 4px rgba(26,111,168,.05); }
     }
-    .tab-sync-btn {
-      width:14px; height:14px; border-radius:50%; flex-shrink:0;
-      border:1.5px solid rgba(200,146,42,.3); background:none;
-      cursor:pointer; padding:0; margin-left:2px; vertical-align:middle;
-      display:inline-flex; align-items:center; justify-content:center;
-      transition:all .15s; font-size:.5rem; color:transparent;
-    }
-    .tab-sync-btn:hover { border-color:rgba(200,146,42,.65); background:rgba(200,146,42,.1); }
-    .tab-sync-btn.on {
-      border-color:rgba(200,146,42,.85); background:rgba(200,146,42,.22);
-      box-shadow:0 0 0 2px rgba(200,146,42,.12);
+    @keyframes tabPulseSynced {
+      0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 0 2px rgba(26,111,168,.25), 0 0 0 4.5px rgba(20,160,140,.8); }
+      50%     { opacity:.7; transform:scale(1.5); box-shadow:0 0 0 3.5px rgba(26,111,168,.08), 0 0 0 5.5px rgba(20,160,140,.55); }
     }
     .tab-btn img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
     .tab-btn .tab-close {
@@ -2335,16 +2331,17 @@ function renderTabBar() {
     const imgSrc = tab.mob ? mobImg(tab.mob.id) : '';
     const isRunning = tab.sw.startTs !== null;
     const hasTimer  = tab.sw.base > 0 || isRunning;
-    const statusDot = tab.mob && hasTimer
-      ? `<span class="tab-status-dot ${isRunning ? 'running' : 'paused'}" title="${isRunning ? '타이머 실행 중' : '일시정지'}"></span>`
-      : '';
-    const syncBtn = tabs.length >= 2
-      ? `<button class="tab-sync-btn${tab.synced ? ' on' : ''}" title="${tab.synced ? '동기화 중 (클릭해서 해제)' : '동기화 켜기'}" onclick="event.stopPropagation();tabSyncToggle(${tab.idx})"></button>`
+    const canSync   = tabs.length >= 2;
+    const dotState  = !tab.mob ? '' : isRunning ? 'running' : hasTimer ? 'paused' : canSync ? 'dim' : '';
+    const dotTitle  = isRunning ? '타이머 실행 중' : hasTimer ? '일시정지' : canSync ? '동기화 클릭' : '';
+    const dotClick  = canSync ? `event.stopPropagation();tabSyncToggle(${tab.idx})` : '';
+    const statusDot = dotState
+      ? `<span class="tab-status-dot ${dotState}${tab.synced ? ' synced' : ''}${canSync ? ' clickable' : ''}" title="${dotTitle}"${dotClick ? ` onclick="${dotClick}"` : ''}></span>`
       : '';
     btn.innerHTML = `
       ${tab.mob ? `<img src="${imgSrc}" onerror="this.style.display='none'">` : ''}
       <span>${name}</span>
-      ${statusDot}${syncBtn}
+      ${statusDot}
       ${tabs.length > 1 ? `<span class="tab-close" data-tidx="${tab.idx}" onclick="closeTab(event,${tab.idx})">✕</span>` : ''}
     `;
     btn.addEventListener('click', e => {
@@ -2959,13 +2956,16 @@ function onDogamComplete(panel, mob) {
   mesoRain();
 }
 
-let _mesoRafId = null, _mesoTimeout = null;
+let _mesoRafId = null, _mesoTimeout = null, _mesoFadeId = null;
 function mesoRain() {
   // 이전 애니메이션 중단
   if (_mesoRafId)   { cancelAnimationFrame(_mesoRafId); _mesoRafId = null; }
   if (_mesoTimeout) { clearTimeout(_mesoTimeout); _mesoTimeout = null; }
+  if (_mesoFadeId)  { clearTimeout(_mesoFadeId); _mesoFadeId = null; }
 
   const canvas = document.getElementById('meso-rain');
+  canvas.style.transition = '';
+  canvas.style.opacity = '1';
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
   const ctx = canvas.getContext('2d');
@@ -3026,10 +3026,20 @@ function mesoRain() {
   }
   loop();
 
+  // 9.5s 후 서서히 투명해짐 (2.5s 페이드)
+  _mesoFadeId = setTimeout(() => {
+    canvas.style.transition = 'opacity 2.5s ease-out';
+    canvas.style.opacity = '0';
+    _mesoFadeId = null;
+  }, 9500);
+
+  // 12.5s 후 완전 정리
   _mesoTimeout = setTimeout(() => {
     if (_mesoRafId) { cancelAnimationFrame(_mesoRafId); _mesoRafId = null; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }, 12000);
+    canvas.style.transition = '';
+    canvas.style.opacity = '1';
+  }, 12500);
 }
 
 // ══════════════════════════════════════════
@@ -3679,7 +3689,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.070.6</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.071.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
