@@ -74,6 +74,14 @@
     .search-row input:focus, .id-row input:focus { border-color:var(--gold); }
     .search-row input::placeholder, .id-row input::placeholder { color:var(--gray); }
     .id-row { display:flex; gap:8px; margin-top:8px; }
+    .backup-inline { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; align-items:center; gap:5px; }
+    .backup-toggle-btn { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--gray); font-family:inherit; cursor:pointer; transition:all .15s; }
+    .backup-toggle-btn:hover { border-color:var(--gold); color:var(--brown); }
+    .backup-toggle-btn.open { border-color:var(--brown); color:#fff; background:var(--brown); }
+    .backup-inline-btns { display:none; gap:4px; }
+    .backup-inline-btns.open { display:flex; }
+    .backup-inline-btns button { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:#fdf6e8; color:var(--brown); font-family:inherit; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .backup-inline-btns button:hover { border-color:var(--gold); background:#f5e8c8; }
     .id-section { overflow:hidden; transition:max-height .3s ease, opacity .3s ease; }
     .id-section.collapsed { max-height:0; opacity:0; pointer-events:none; }
     .id-section.expanded  { max-height:80px; opacity:1; }
@@ -388,9 +396,13 @@
       font-family:'Courier New',monospace;
       font-size:1.5rem; font-weight:700; color:var(--dark);
       text-align:center; letter-spacing:-.5px;
-      padding:10px 0 14px;
+      padding:10px 0 8px;
       font-variant-numeric:tabular-nums;
     }
+    .sw-ch-elapsed { font-size:.72rem; color:#1a6fa8; margin:-6px 0 4px; display:flex; align-items:center; gap:5px; }
+    .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; }
+    .sw-ch-elapsed .sw-ch-hide { background:none; border:none; color:#a0c4e0; font-size:.65rem; cursor:pointer; padding:0 2px; line-height:1; }
+    .sw-ch-elapsed .sw-ch-hide:hover { color:#e55; }
     .sw-btns { display:flex; flex-direction:column; gap:8px; }
     .sw-btn {
       padding:9px; border:none; border-radius:8px;
@@ -1036,7 +1048,7 @@
 
     /* ─ Misc ─ */
     .search-hint { font-size:.78rem; color:var(--gray); padding:8px 0; }
-    .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:14px 0; }
+    .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:10px 0; }
     .fade-in { animation:fadeIn .3s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
     .found-flash { animation:flash .4s ease; }
@@ -1178,7 +1190,17 @@
 
     <div class="divider"></div>
 
-    <div class="ptitle">저장된 도감작</div>
+    <div class="ptitle" style="position:relative">
+      저장된 도감작
+      <div class="backup-inline">
+        <div class="backup-inline-btns" id="backup-inline-btns">
+          <button onclick="exportData()">⬇ 내보내기</button>
+          <button onclick="document.getElementById('import-file').click()">⬆ 가져오기</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+        </div>
+        <button class="backup-toggle-btn" onclick="toggleBackup()">백업</button>
+      </div>
+    </div>
     <div id="saves-list" class="saves-wrap"></div>
 
     <div class="divider"></div>
@@ -1204,6 +1226,7 @@
         <button class="btn" onclick="loadById()">불러오기</button>
       </div>
     </div>
+
   </div>
 
   <!-- ② 체크리스트 탭 -->
@@ -1512,6 +1535,8 @@ function _swResetOne(tab, panel) {
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
     panel.querySelector('.sw-log-list').innerHTML = '';
+    const chEl = panel.querySelector('.sw-ch-elapsed');
+    if (chEl) { chEl.style.display = 'none'; chEl.style.visibility = ''; delete chEl.dataset.hidden; }
     const tl = panel.querySelector('.tl-section'); if (tl) tl.style.display='none';
     swTickPanel(panel, tab);
   }
@@ -1594,6 +1619,17 @@ function restoreSwState(tab, mob) {
 function swTickPanel(panel, tab) {
   const el = panel?.querySelector('.sw-display');
   if (el) el.textContent = fmtTime(swElapsed(tab));
+  // 채널 경과 업데이트
+  const chEl = panel?.querySelector('.sw-ch-elapsed');
+  if (chEl) {
+    const lastChEntry = panel?.querySelector('.sw-log-entry.sw-log-channel');
+    if (lastChEntry) {
+      const lastChMs = parseFloat(lastChEntry.dataset.chMs) || 0;
+      const sinceMs  = Math.max(0, swElapsed(tab) - lastChMs);
+      chEl.querySelector('.sw-ch-val').textContent = fmtTimeLog(sinceMs);
+      if (chEl.style.display === 'none') chEl.style.display = '';
+    }
+  }
   if (!tab.mob) return;
   const totalMs = swElapsed(tab);
   if (totalMs < 1000) return;
@@ -1879,6 +1915,9 @@ function _swChannelMarkOne(tab, panel) {
   entry.dataset.chMs = ms;
   entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
   list.insertBefore(entry, list.firstChild);
+  // 채널 경과 표시 초기화 (숨겼어도 다시 보여줌)
+  const chEl = panel?.querySelector('.sw-ch-elapsed');
+  if (chEl) { delete chEl.dataset.hidden; chEl.style.visibility = ''; if (chEl.style.display === 'none') chEl.style.display = ''; }
   if (tab.mob) renderTimeline(panel, tab.mob, tab);
 }
 
@@ -2292,6 +2331,10 @@ function buildTabPanel(tab) {
         </div>
         <div class="ptitle">⏱ 스톱워치</div>
         <div class="sw-display">00:00:00.00</div>
+        <div class="sw-ch-elapsed" style="display:none">
+          <span class="sw-ch-val">00:00:00</span>
+          <button class="sw-ch-hide" onclick="this.closest('.sw-ch-elapsed').dataset.hidden='1';this.closest('.sw-ch-elapsed').style.visibility='hidden'">✕</button>
+        </div>
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
           <button class="sw-btn sw-channel" onclick="swChannelMark()">📡 채널변경</button>
@@ -3057,6 +3100,47 @@ function resetChecklist() {
 // ══════════════════════════════════════════
 // 17. 저장된 도감작 칩
 // ══════════════════════════════════════════
+// 데이터 내보내기 / 가져오기
+// ══════════════════════════════════════════
+function toggleBackup() {
+  const btn  = document.querySelector('.backup-toggle-btn');
+  const btns = document.getElementById('backup-inline-btns');
+  const open = btns.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+function exportData() {
+  const data = localStorage.getItem(S_KEY) || '{}';
+  const blob = new Blob([data], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href     = url;
+  a.download = `maple_dogam_backup_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (typeof parsed !== 'object' || parsed === null) throw new Error();
+      if (!confirm('기존 데이터가 모두 교체됩니다.\n계속하시겠습니까?')) return;
+      localStorage.setItem(S_KEY, JSON.stringify(parsed));
+      location.reload();
+    } catch {
+      alert('올바른 백업 파일이 아닙니다.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════
 function renderSaves() {
   const store = loadS();
   const el = document.getElementById('saves-list');
@@ -3710,7 +3794,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.071.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.073.3</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
