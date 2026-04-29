@@ -41,6 +41,8 @@
     header h1 { color: var(--gold); font-size:1.4rem; font-weight:700; text-shadow:1px 1px 3px rgba(0,0,0,.6); }
     header .sub { color:#d4b483; font-size:.75rem; margin-top:2px; }
     .char-status { margin-left:auto; display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .overlay-open-btn { background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.35); color:rgba(245,166,35,.8); font-size:.58rem; padding:3px 9px; border-radius:6px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .overlay-open-btn:hover { background:rgba(245,166,35,.22); color:var(--gold); }
     .char-label { font-size:.58rem; color:#e8c97a; letter-spacing:.03em; text-shadow:0 1px 3px rgba(0,0,0,.7); font-weight:600; }
     .char-mobs { display:flex; gap:8px; align-items:center; }
     .char-mob-img { width:40px; height:40px; object-fit:contain; image-rendering:pixelated; border:2px solid var(--gold); border-radius:8px; background:rgba(0,0,0,.25); padding:2px; box-shadow:0 0 6px rgba(245,166,35,.4); transition:transform .15s,box-shadow .15s; }
@@ -1208,6 +1210,7 @@
     <div class="char-mobs" id="char-mobs"></div>
     <div class="char-label">허규복 ing</div>
   </div>
+  <button class="overlay-open-btn" onclick="openOverlay()" title="게임 위에 올려두는 미니 오버레이 창">📺 오버레이</button>
 </header>
 
 <canvas id="meso-rain"></canvas>
@@ -3953,7 +3956,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.0</div>
 
 <div id="fw" style="right:16px;bottom:80px">
   <div id="fw-header">
@@ -3961,7 +3964,7 @@ renderTrophy();
       <div id="fw-time">--:--:--</div>
       <div id="fw-mob">-</div>
     </div>
-    <button class="fw-hdr-btn" onclick="fwPopout()" title="별도 창으로 열기">↗</button>
+    <button class="fw-hdr-btn" onclick="openOverlay()" title="오버레이 창 열기">↗</button>
     <button class="fw-hdr-btn" id="fw-collapse-btn" onclick="fwCollapseToggle()">▾</button>
   </div>
   <div id="fw-body">
@@ -4126,82 +4129,118 @@ function fwUpdate() {
   document.addEventListener('mouseup', () => { drag=null; });
 })();
 
-// 팝업 창으로 분리
-function fwPopout() {
-  const pop = window.open('', 'maple-fw',
-    'width=200,height=420,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no');
-  if (!pop) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.'); return; }
-  pop.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>도감작 위젯</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:rgba(18,6,2,.95);color:#e8c97a;font-family:'Noto Sans KR',sans-serif;font-size:13px;width:200px;overflow:hidden}
-#pw-time{font-size:1.1rem;font-weight:700;font-family:'Courier New',monospace;color:#f5a623;padding:10px 12px 2px;letter-spacing:.05em}
-#pw-mob{font-size:.65rem;color:rgba(200,168,107,.55);padding:0 12px 8px;border-bottom:1px solid rgba(200,146,42,.2)}
-#pw-kills{font-size:.68rem;color:rgba(200,168,107,.7);padding:8px 12px 4px}
-#pw-btns{display:flex;gap:6px;padding:0 8px 8px}
-.pb{flex:1;padding:6px 4px;border:none;border-radius:7px;font-size:.65rem;font-weight:700;cursor:pointer}
-#pb-sw{background:#4caf50;color:#fff}
-#pb-sw.pause{background:#f5a623}
-#pb-ch{background:rgba(232,244,253,.1);color:#7ec8f0;border:1px solid rgba(168,212,240,.2)}
-#pw-items{display:flex;flex-wrap:wrap;gap:4px;padding:0 8px 10px;max-height:200px;overflow-y:auto}
-.pi{width:36px;height:36px;position:relative;border:1px solid rgba(200,146,42,.25);border-radius:6px;background:rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center}
-.pi:hover{border-color:rgba(200,146,42,.7)}
-.pi.done{border-color:rgba(76,175,80,.55);background:rgba(76,175,80,.1)}
-.pi img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated}
-.pi span{position:absolute;bottom:-3px;right:-3px;background:rgba(26,111,168,.9);color:#fff;font-size:.5rem;font-weight:700;padding:1px 3px;border-radius:3px;line-height:1.3}
-</style></head><body>
-<div id="pw-time">--:--:--</div>
-<div id="pw-mob">-</div>
-<div id="pw-kills">🗡 -</div>
-<div id="pw-btns">
-  <button class="pb" id="pb-sw" onclick="act('toggle')">▶ 시작</button>
-  <button class="pb" id="pb-ch" onclick="act('ch')">📡 채널</button>
-</div>
-<div id="pw-items"></div>
-<script>
-function act(type) {
-  try {
-    if (type==='toggle') window.opener.swToggle();
-    if (type==='ch')     window.opener.swChannelMark();
-  } catch(e) {}
-}
-function inc(id) { try { window.opener.incrementItem(id); } catch(e) {} }
-function tick() {
-  try {
-    const o = window.opener;
-    if (!o || o.closed) { document.body.innerHTML='<p style="padding:20px;color:#f5a623">메인 창이 닫혔습니다</p>'; return; }
-    const tab = o.tabs[o.activeTabIdx];
-    const ms  = o.swElapsed(tab);
-    const h=Math.floor(ms/3600000),mi=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
-    const pad=n=>String(n).padStart(2,'0');
-    document.getElementById('pw-time').textContent=pad(h)+':'+pad(mi)+':'+pad(s);
-    document.getElementById('pw-mob').textContent=tab.mob?tab.mob.name:'-';
-    const running=tab.sw.startTs!==null;
-    const sw=document.getElementById('pb-sw');
-    sw.textContent=running?'⏸ 일시정지':'▶ 시작';
-    sw.className='pb'+(running?' pause':'');
-    const { kills, refDrop } = o._fwCalcKills(tab, o.loadS());
-    document.getElementById('pw-kills').textContent=kills>0?'🗡 '+kills.toLocaleString()+' 마리 ⚑ '+(refDrop?refDrop.name:''):'🗡 -';
-    if (tab.mob) {
-      const store=o.loadS();
-      const mobData=store['mob_'+tab.mob.id]||{};
-      const excl=new Set(store['excl_'+tab.mob.id]||[]);
-      const tlBaseId=store['tl_base_'+tab.mob.id]?.id;
-      const drops=tab.mob.drops.filter(d=>!excl.has(d.id)&&d.id!==tlBaseId);
-      document.getElementById('pw-items').innerHTML=drops.map(d=>{
-        const cnt=mobData[d.id]?.count||0;
-        return '<button class="pi'+(cnt>0?' done':'')+'" onclick="inc('+d.id+')" title="'+d.name+'"><img src="'+o.itemImg(d.id)+'" onerror="this.src=\\''+o.BLANK+'\\'">'+( cnt>0?'<span>'+cnt+'</span>':'' )+'</button>';
-      }).join('');
-    }
-  } catch(e) {}
-}
-setInterval(tick, 150);
-<\/script></body></html>`);
-  pop.document.close();
+// ── 오버레이 팝업 (localStorage 기반 동기화) ──
+const OL_STATE = 'maple_overlay_state';
+const OL_CMD   = 'maple_overlay_cmd';
+let _overlayWin = null;
+
+function openOverlay() {
+  if (_overlayWin && !_overlayWin.closed) { _overlayWin.focus(); return; }
+  _overlayWin = window.open('', 'maple-overlay',
+    'width=300,height=250,resizable=yes,toolbar=no,menubar=no,scrollbars=no,location=no,status=no');
+  if (!_overlayWin) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.'); return; }
+  _overlayWin.document.write(_overlayHTML());
+  _overlayWin.document.close();
 }
 
-setInterval(fwUpdate, 150);
+function _olWriteState() {
+  if (!_overlayWin || _overlayWin.closed) return;
+  const tab = activeTab();
+  const store = loadS();
+  const { kills, refDrop } = _fwCalcKills(tab, store);
+  localStorage.setItem(OL_STATE, JSON.stringify({
+    mobId:       tab.mob?.id    || null,
+    mobName:     tab.mob?.name  || '-',
+    elapsed:     swElapsed(tab),
+    isRunning:   tab.sw.startTs !== null,
+    kills,
+    refDropName: refDrop?.name || '',
+    refItemId:   refDrop?.id   || null,
+    ts:          Date.now()
+  }));
+}
+
+function _olReadCmd() {
+  const raw = localStorage.getItem(OL_CMD);
+  if (!raw) return;
+  localStorage.removeItem(OL_CMD);
+  try {
+    const cmd = JSON.parse(raw);
+    if (cmd.type === 'toggle') swToggle();
+    else if (cmd.type === 'ch')  swChannelMark();
+    else if (cmd.type === 'inc' && cmd.itemId) incrementItem(cmd.itemId);
+  } catch(e) {}
+}
+
+function _overlayHTML() {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>도감작 오버레이</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e8c97a;font-family:sans-serif;width:300px;height:250px;display:flex;flex-direction:column;overflow:hidden;user-select:none}
+#ol-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(0,0,0,.35);border-bottom:1px solid rgba(200,146,42,.22);flex-shrink:0}
+#ol-hd img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated}
+#ol-mob{font-size:.72rem;color:rgba(200,168,107,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ol-time{text-align:center;font-size:2.1rem;font-weight:700;font-family:'Courier New',monospace;color:#f5a623;padding:16px 0 4px;letter-spacing:.04em;flex-shrink:0}
+#ol-kills{display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 12px 10px;font-size:.72rem;color:rgba(200,168,107,.7);flex-shrink:0}
+#ol-inc{padding:3px 11px;border:1px solid rgba(200,146,42,.4);border-radius:5px;background:rgba(200,146,42,.1);color:#e8c97a;font-size:.65rem;font-weight:700;cursor:pointer}
+#ol-inc:hover{background:rgba(200,146,42,.25)}
+#ol-inc:disabled{opacity:.3;cursor:default}
+#ol-btns{display:flex;gap:8px;padding:0 12px 14px;margin-top:auto}
+.ob{flex:1;padding:9px 4px;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:sans-serif}
+#ob-sw{background:#4caf50;color:#fff}
+#ob-sw.pause{background:#f5a623}
+#ob-ch{background:rgba(232,244,253,.08);color:#7ec8f0;border:1px solid rgba(168,212,240,.18)}
+#ol-off{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);align-items:center;justify-content:center;flex-direction:column;gap:6px}
+#ol-off.show{display:flex}
+</style></head><body>
+<div id="ol-hd"><img id="ol-img" src="" onerror="this.style.display='none'"><span id="ol-mob">-</span></div>
+<div id="ol-time">--:--:--</div>
+<div id="ol-kills"><span id="ol-kills-txt">🗡 -</span><button id="ol-inc" disabled onclick="cmd('inc')">+1</button></div>
+<div id="ol-btns">
+  <button class="ob" id="ob-sw" onclick="cmd('toggle')">▶ 시작</button>
+  <button class="ob" id="ob-ch" onclick="cmd('ch')">📡 채널변경</button>
+</div>
+<div id="ol-off"><div style="font-size:1.4rem">⚠️</div><div style="font-size:.75rem;color:#f5a623">메인 창이 닫혔습니다</div></div>
+<script>
+const OL_STATE='maple_overlay_state', OL_CMD='maple_overlay_cmd';
+let _rid=null;
+function cmd(type){const c={type,ts:Date.now()};if(type==='inc'&&_rid)c.itemId=_rid;localStorage.setItem(OL_CMD,JSON.stringify(c));}
+function pad(n){return String(n).padStart(2,'0');}
+function tick(){
+  const raw=localStorage.getItem(OL_STATE);
+  const off=document.getElementById('ol-off');
+  if(!raw){off.classList.add('show');return;}
+  try{
+    const s=JSON.parse(raw);
+    if(Date.now()-s.ts>3000){off.classList.add('show');return;}
+    off.classList.remove('show');
+    const ms=s.elapsed,h=Math.floor(ms/3600000),mi=Math.floor((ms%3600000)/60000),sc=Math.floor((ms%60000)/1000);
+    document.getElementById('ol-time').textContent=pad(h)+':'+pad(mi)+':'+pad(sc);
+    document.getElementById('ol-mob').textContent=s.mobName||'-';
+    const img=document.getElementById('ol-img');
+    if(s.mobId){img.style.display='';img.src='https://maplestory.io/api/kms/284/mob/'+s.mobId+'/icon';}
+    else{img.style.display='none';}
+    _rid=s.refItemId||null;
+    document.getElementById('ol-kills-txt').textContent=s.kills>0?'🗡 '+s.kills.toLocaleString()+' 마리'+(s.refDropName?' ⚑ '+s.refDropName:''):'🗡 -';
+    document.getElementById('ol-inc').disabled=!_rid;
+    const sw=document.getElementById('ob-sw');
+    sw.textContent=s.isRunning?'⏸ 일시정지':'▶ 시작';
+    sw.className='ob'+(s.isRunning?' pause':'');
+    sw.id='ob-sw';
+  }catch(e){}
+}
+setInterval(tick,200);
+window.addEventListener('beforeunload',()=>localStorage.removeItem(OL_CMD));
+<\/script></body></html>`;
+}
+
+setInterval(() => { fwUpdate(); _olWriteState(); _olReadCmd(); }, 150);
+
+window.addEventListener('beforeunload', () => {
+  if (_overlayWin && !_overlayWin.closed) _overlayWin.close();
+  localStorage.removeItem(OL_STATE);
+  localStorage.removeItem(OL_CMD);
+});
 </script>
 </body>
 </html>
