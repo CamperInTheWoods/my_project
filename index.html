@@ -3953,7 +3953,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.2</div>
 
 <div id="fw" style="right:16px;bottom:80px">
   <div id="fw-header">
@@ -4087,7 +4087,7 @@ function fwUpdate() {
   const { kills, refDrop } = _fwCalcKills(tab, store);
   const killsEl = document.getElementById('fw-kills');
   if (kills > 0 && refDrop) {
-    killsEl.innerHTML = `🗡 ${kills.toLocaleString()} 마리 <span style="color:rgba(200,168,107,.45);font-size:.55rem">(${refDrop.name} 기준)</span>`;
+    killsEl.innerHTML = `🗡 ${kills.toLocaleString()} 마리 <span style="color:rgba(200,168,107,.45);font-size:.55rem">⚑ ${refDrop.name}</span>`;
   } else {
     killsEl.textContent = '🗡 -';
   }
@@ -4182,7 +4182,7 @@ function tick() {
     sw.textContent=running?'⏸ 일시정지':'▶ 시작';
     sw.className='pb'+(running?' pause':'');
     const { kills, refDrop } = o._fwCalcKills(tab, o.loadS());
-    document.getElementById('pw-kills').textContent=kills>0?'🗡 '+kills.toLocaleString()+' 마리 ('+(refDrop?refDrop.name:'?')+' 기준)':'🗡 -';
+    document.getElementById('pw-kills').textContent=kills>0?'🗡 '+kills.toLocaleString()+' 마리 ⚑ '+(refDrop?refDrop.name:''):'🗡 -';
     if (tab.mob) {
       const store=o.loadS();
       const mobData=store['mob_'+tab.mob.id]||{};
