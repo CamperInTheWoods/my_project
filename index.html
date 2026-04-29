@@ -2436,12 +2436,15 @@ function renderTabBar() {
   updateCharStatus();
 }
 
+const CHAR_MOBS = [
+  { id: 1130100, name: '엑스텀프' },
+  { id: 2130100, name: '다크 엑스텀프' },
+];
 function updateCharStatus() {
   const el = document.getElementById('char-mobs');
   if (!el) return;
-  const mobTabs = tabs.filter(t => t.mob).slice(0, 2);
-  el.innerHTML = mobTabs.map(t =>
-    `<img class="char-mob-img" src="${mobImg(t.mob.id)}" alt="${t.mob.name}" title="${t.mob.name}" onerror="this.style.display='none'">`
+  el.innerHTML = CHAR_MOBS.map(m =>
+    `<img class="char-mob-img" src="${mobImg(m.id)}" alt="${m.name}" title="${m.name} 클릭하여 도감작 시작" onclick="fetchMobDrops(${m.id},'${m.name}',0)" style="cursor:pointer" onerror="this.style.display='none'">`
   ).join('');
 }
 
@@ -3854,7 +3857,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
