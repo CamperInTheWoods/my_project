@@ -1147,7 +1147,7 @@
 
     /* ─ Floating Widget ─ */
     #fw {
-      position:fixed; right:16px; bottom:80px; z-index:9999;
+      position:fixed; z-index:9999;
       width:170px; border-radius:12px; overflow:hidden;
       background:rgba(18,6,2,.88); border:1px solid rgba(200,146,42,.5);
       box-shadow:0 4px 24px rgba(0,0,0,.75); backdrop-filter:blur(4px);
@@ -1161,8 +1161,8 @@
     #fw-header:active { cursor:grabbing; }
     #fw-time { font-size:.82rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; line-height:1.1; }
     #fw-mob  { font-size:.52rem; color:rgba(200,168,107,.55); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px; }
-    #fw-collapse-btn { margin-left:auto; background:none; border:none; color:rgba(200,146,42,.55); font-size:.72rem; cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0; }
-    #fw-collapse-btn:hover { color:var(--gold); }
+    .fw-hdr-btn { background:none; border:none; color:rgba(200,146,42,.55); font-size:.7rem; cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0; }
+    .fw-hdr-btn:hover { color:var(--gold); }
     #fw-body { padding:8px; display:flex; flex-direction:column; gap:7px; }
     #fw-kills { font-size:.62rem; color:rgba(200,168,107,.65); }
     #fw-action-btns { display:flex; gap:5px; }
@@ -3953,15 +3953,16 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.1</div>
 
-<div id="fw">
+<div id="fw" style="right:16px;bottom:80px">
   <div id="fw-header">
     <div style="flex:1;min-width:0">
       <div id="fw-time">--:--:--</div>
       <div id="fw-mob">-</div>
     </div>
-    <button id="fw-collapse-btn" onclick="fwCollapseToggle()">▾</button>
+    <button class="fw-hdr-btn" onclick="fwPopout()" title="별도 창으로 열기">↗</button>
+    <button class="fw-hdr-btn" id="fw-collapse-btn" onclick="fwCollapseToggle()">▾</button>
   </div>
   <div id="fw-body">
     <div id="fw-kills">🗡 -</div>
@@ -4042,8 +4043,28 @@ function fwCollapseToggle() {
   document.getElementById('fw-collapse-btn').textContent = _fwCollapsed ? '▸' : '▾';
 }
 
+function _fwCalcKills(tab, store) {
+  if (!tab.mob) return { kills: 0, refDrop: null };
+  const mobData = store[`mob_${tab.mob.id}`] || {};
+  const excl    = new Set(store[`excl_${tab.mob.id}`] || []);
+  const tlBase  = store[`tl_base_${tab.mob.id}`] || null;
+  let bestRate = 0, bestCount = 0, refDrop = null;
+  if (tlBase) {
+    const d = tab.mob.drops.find(x => x.id === tlBase.id);
+    if (d) { const c = mobData[d.id]?.count||0, r = parseFloat(d.rate)/100; if(c>0&&r>0){bestCount=c;bestRate=r;refDrop=d;} }
+  } else {
+    tab.mob.drops.forEach(d => {
+      if (excl.has(d.id)) return;
+      const c = mobData[d.id]?.count||0; if (!c) return;
+      const r = parseFloat(d.rate)/100; if (!r) return;
+      if (r > bestRate) { bestRate=r; bestCount=c; refDrop=d; }
+    });
+  }
+  return { kills: bestRate > 0 ? Math.round(bestCount/bestRate) : 0, refDrop };
+}
+
 function fwUpdate() {
-  const tab = activeTab();
+  const tab    = activeTab();
   const timeEl = document.getElementById('fw-time');
   if (!timeEl) return;
 
@@ -4056,56 +4077,41 @@ function fwUpdate() {
   const swBtn = document.getElementById('fw-sw-btn');
   if (swBtn) {
     swBtn.textContent = running ? '⏸ 일시정지' : '▶ 시작';
-    swBtn.className = 'fw-action-btn' + (running ? ' fw-sw-pause' : '');
+    swBtn.className   = 'fw-action-btn' + (running ? ' fw-sw-pause' : '');
     swBtn.id = 'fw-sw-btn';
   }
 
   if (_fwCollapsed) return;
 
-  // 킬수 계산
   const store = loadS();
-  let kills = 0;
-  if (tab.mob) {
-    const mobData = store[`mob_${tab.mob.id}`] || {};
-    const excl = new Set(store[`excl_${tab.mob.id}`] || []);
-    const tlBase = store[`tl_base_${tab.mob.id}`] || null;
-    let bestRate = 0, bestCount = 0;
-    if (tlBase) {
-      const d = tab.mob.drops.find(x => x.id === tlBase.id);
-      if (d) { const c = mobData[d.id]?.count||0, r = parseFloat(d.rate)/100; if(c>0&&r>0){bestCount=c;bestRate=r;} }
-    } else {
-      tab.mob.drops.forEach(d => {
-        if (excl.has(d.id)) return;
-        const c = mobData[d.id]?.count||0; if (!c) return;
-        const r = parseFloat(d.rate)/100; if (!r) return;
-        if (r > bestRate) { bestRate=r; bestCount=c; }
-      });
-    }
-    kills = bestRate > 0 ? Math.round(bestCount/bestRate) : 0;
+  const { kills, refDrop } = _fwCalcKills(tab, store);
+  const killsEl = document.getElementById('fw-kills');
+  if (kills > 0 && refDrop) {
+    killsEl.innerHTML = `🗡 ${kills.toLocaleString()} 마리 <span style="color:rgba(200,168,107,.45);font-size:.55rem">(${refDrop.name} 기준)</span>`;
+  } else {
+    killsEl.textContent = '🗡 -';
   }
-  document.getElementById('fw-kills').textContent = kills > 0 ? `🗡 ${kills.toLocaleString()} 마리` : '🗡 -';
 
-  // 아이템 카드
   const itemsEl = document.getElementById('fw-items');
   if (!itemsEl) return;
   if (!tab.mob) { itemsEl.innerHTML = ''; return; }
-  const mobData = store[`mob_${tab.mob.id}`] || {};
-  const excl = new Set(store[`excl_${tab.mob.id}`] || []);
+  const mobData  = store[`mob_${tab.mob.id}`] || {};
+  const excl     = new Set(store[`excl_${tab.mob.id}`] || []);
   const tlBaseId = store[`tl_base_${tab.mob.id}`]?.id;
-  const drops = tab.mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
-  const newHtml = drops.map(d => {
+  const drops    = tab.mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+  const newHtml  = drops.map(d => {
     const cnt = mobData[d.id]?.count || 0;
     return `<button class="fw-item-btn${cnt>0?' fw-item-done':''}" onclick="incrementItem(${d.id})" title="${d.name}"><img src="${itemImg(d.id)}" onerror="this.src='${BLANK}'" style="width:26px;height:26px;object-fit:contain;image-rendering:pixelated">${cnt>0?`<span class="fw-item-cnt">${cnt}</span>`:''}</button>`;
   }).join('');
   if (itemsEl.innerHTML !== newHtml) itemsEl.innerHTML = newHtml;
 }
 
-// 드래그
+// 드래그 (top/left만 사용, right/bottom 초기값은 HTML 인라인에만)
 (function() {
   let drag = null;
   const fw = document.getElementById('fw');
   document.getElementById('fw-header').addEventListener('mousedown', e => {
-    if (e.target.id === 'fw-collapse-btn') return;
+    if (e.target.classList.contains('fw-hdr-btn')) return;
     const r = fw.getBoundingClientRect();
     fw.style.right=''; fw.style.bottom='';
     fw.style.left=r.left+'px'; fw.style.top=r.top+'px';
@@ -4119,6 +4125,81 @@ function fwUpdate() {
   });
   document.addEventListener('mouseup', () => { drag=null; });
 })();
+
+// 팝업 창으로 분리
+function fwPopout() {
+  const pop = window.open('', 'maple-fw',
+    'width=200,height=420,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no');
+  if (!pop) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.'); return; }
+  pop.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>도감작 위젯</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:rgba(18,6,2,.95);color:#e8c97a;font-family:'Noto Sans KR',sans-serif;font-size:13px;width:200px;overflow:hidden}
+#pw-time{font-size:1.1rem;font-weight:700;font-family:'Courier New',monospace;color:#f5a623;padding:10px 12px 2px;letter-spacing:.05em}
+#pw-mob{font-size:.65rem;color:rgba(200,168,107,.55);padding:0 12px 8px;border-bottom:1px solid rgba(200,146,42,.2)}
+#pw-kills{font-size:.68rem;color:rgba(200,168,107,.7);padding:8px 12px 4px}
+#pw-btns{display:flex;gap:6px;padding:0 8px 8px}
+.pb{flex:1;padding:6px 4px;border:none;border-radius:7px;font-size:.65rem;font-weight:700;cursor:pointer}
+#pb-sw{background:#4caf50;color:#fff}
+#pb-sw.pause{background:#f5a623}
+#pb-ch{background:rgba(232,244,253,.1);color:#7ec8f0;border:1px solid rgba(168,212,240,.2)}
+#pw-items{display:flex;flex-wrap:wrap;gap:4px;padding:0 8px 10px;max-height:200px;overflow-y:auto}
+.pi{width:36px;height:36px;position:relative;border:1px solid rgba(200,146,42,.25);border-radius:6px;background:rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pi:hover{border-color:rgba(200,146,42,.7)}
+.pi.done{border-color:rgba(76,175,80,.55);background:rgba(76,175,80,.1)}
+.pi img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated}
+.pi span{position:absolute;bottom:-3px;right:-3px;background:rgba(26,111,168,.9);color:#fff;font-size:.5rem;font-weight:700;padding:1px 3px;border-radius:3px;line-height:1.3}
+</style></head><body>
+<div id="pw-time">--:--:--</div>
+<div id="pw-mob">-</div>
+<div id="pw-kills">🗡 -</div>
+<div id="pw-btns">
+  <button class="pb" id="pb-sw" onclick="act('toggle')">▶ 시작</button>
+  <button class="pb" id="pb-ch" onclick="act('ch')">📡 채널</button>
+</div>
+<div id="pw-items"></div>
+<script>
+function act(type) {
+  try {
+    if (type==='toggle') window.opener.swToggle();
+    if (type==='ch')     window.opener.swChannelMark();
+  } catch(e) {}
+}
+function inc(id) { try { window.opener.incrementItem(id); } catch(e) {} }
+function tick() {
+  try {
+    const o = window.opener;
+    if (!o || o.closed) { document.body.innerHTML='<p style="padding:20px;color:#f5a623">메인 창이 닫혔습니다</p>'; return; }
+    const tab = o.tabs[o.activeTabIdx];
+    const ms  = o.swElapsed(tab);
+    const h=Math.floor(ms/3600000),mi=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+    const pad=n=>String(n).padStart(2,'0');
+    document.getElementById('pw-time').textContent=pad(h)+':'+pad(mi)+':'+pad(s);
+    document.getElementById('pw-mob').textContent=tab.mob?tab.mob.name:'-';
+    const running=tab.sw.startTs!==null;
+    const sw=document.getElementById('pb-sw');
+    sw.textContent=running?'⏸ 일시정지':'▶ 시작';
+    sw.className='pb'+(running?' pause':'');
+    const { kills, refDrop } = o._fwCalcKills(tab, o.loadS());
+    document.getElementById('pw-kills').textContent=kills>0?'🗡 '+kills.toLocaleString()+' 마리 ('+(refDrop?refDrop.name:'?')+' 기준)':'🗡 -';
+    if (tab.mob) {
+      const store=o.loadS();
+      const mobData=store['mob_'+tab.mob.id]||{};
+      const excl=new Set(store['excl_'+tab.mob.id]||[]);
+      const tlBaseId=store['tl_base_'+tab.mob.id]?.id;
+      const drops=tab.mob.drops.filter(d=>!excl.has(d.id)&&d.id!==tlBaseId);
+      document.getElementById('pw-items').innerHTML=drops.map(d=>{
+        const cnt=mobData[d.id]?.count||0;
+        return '<button class="pi'+(cnt>0?' done':'')+'" onclick="inc('+d.id+')" title="'+d.name+'"><img src="'+o.itemImg(d.id)+'" onerror="this.src=\\''+o.BLANK+'\\'">'+( cnt>0?'<span>'+cnt+'</span>':'' )+'</button>';
+      }).join('');
+    }
+  } catch(e) {}
+}
+setInterval(tick, 150);
+<\/script></body></html>`);
+  pop.document.close();
+}
 
 setInterval(fwUpdate, 150);
 </script>
