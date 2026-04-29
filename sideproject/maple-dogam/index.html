@@ -530,6 +530,12 @@
     .trophy-modal-body::-webkit-scrollbar { width:4px; }
     .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.15); }
     .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(200,146,42,.35); border-radius:2px; }
+    .trophy-stats-bar { display:flex; flex-shrink:0; border-bottom:1px solid rgba(200,146,42,.18); background:rgba(0,0,0,.18); }
+    .trophy-stat-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 8px; gap:3px; border-right:1px solid rgba(200,146,42,.1); }
+    .trophy-stat-item:last-child { border-right:none; }
+    .trophy-stat-icon { font-size:.78rem; opacity:.65; }
+    .trophy-stat-num { font-size:1.05rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; }
+    .trophy-stat-label { font-size:.54rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
     .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(152px,1fr)); gap:18px; }
     .trophy-card {
       display:flex; flex-direction:column; align-items:center; gap:0;
@@ -3404,6 +3410,29 @@ function getTrophyCompleted() {
   });
 }
 
+function fmtAvgElapsed(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0 && m > 0) return `${h}시간 ${m}분`;
+  if (h > 0) return `${h}시간`;
+  return m > 0 ? `${m}분` : '-';
+}
+
+function updateTrophyStats(completed, store) {
+  const cEl = document.getElementById('tstat-count');
+  const kEl = document.getElementById('tstat-kills');
+  const aEl = document.getElementById('tstat-avg');
+  if (!cEl) return;
+  const count = completed.length;
+  const totalKills = completed.reduce((s, c) => s + _calcTrophyKills(c, store), 0);
+  const withTime = completed.filter(c => c.elapsed > 0);
+  const avgMs = withTime.length ? withTime.reduce((s, c) => s + c.elapsed, 0) / withTime.length : 0;
+  cEl.textContent = count || '-';
+  kEl.textContent = totalKills > 0 ? totalKills.toLocaleString() : '-';
+  aEl.textContent = avgMs > 0 ? fmtAvgElapsed(avgMs) : '-';
+}
+
 function _calcTrophyKills(c, store) {
   const mobData = c.mobData || {};
   const excl    = new Set((store[`excl_${c.mobId}`] || []));
@@ -3441,9 +3470,11 @@ function renderTrophyGrid() {
   const grid = document.getElementById('trophy-grid');
   if (!grid) return;
   if (!sorted.length) {
+    updateTrophyStats([], store);
     grid.innerHTML = '<div style="color:rgba(200,168,107,.5);font-size:.8rem;padding:20px;text-align:center">아직 완료한 도감작이 없습니다</div>';
     return;
   }
+  updateTrophyStats(completed, store);
   grid.innerHTML = sorted.map(c => {
     const yymm = c.date ? c.date.slice(2, 7).replace('-', '.') : '';
     const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
@@ -3839,7 +3870,23 @@ renderTrophy();
       <button class="trophy-sort-btn active" id="tsort-date" onclick="setTrophySort('date')">날짜 <span class="trophy-sort-arrow" id="tsort-date-arrow">↓</span></button>
       <button class="trophy-sort-btn" id="tsort-elapsed" onclick="setTrophySort('elapsed')">소요 시간 <span class="trophy-sort-arrow" id="tsort-elapsed-arrow">↓</span></button>
       <button class="trophy-sort-btn" id="tsort-kills" onclick="setTrophySort('kills')">마릿수 <span class="trophy-sort-arrow" id="tsort-kills-arrow">↓</span></button>
-      <!-- <button class="trophy-sort-btn" id="tsort-level" onclick="setTrophySort('level')">레벨 <span class="trophy-sort-arrow" id="tsort-level-arrow">↓</span></button> -->
+    </div>
+    <div class="trophy-stats-bar">
+      <div class="trophy-stat-item">
+        <div class="trophy-stat-icon">🏆</div>
+        <div class="trophy-stat-num" id="tstat-count">-</div>
+        <div class="trophy-stat-label">완료한 몹</div>
+      </div>
+      <div class="trophy-stat-item">
+        <div class="trophy-stat-icon">🗡</div>
+        <div class="trophy-stat-num" id="tstat-kills">-</div>
+        <div class="trophy-stat-label">총 마릿수</div>
+      </div>
+      <div class="trophy-stat-item">
+        <div class="trophy-stat-icon">⏱</div>
+        <div class="trophy-stat-num" id="tstat-avg">-</div>
+        <div class="trophy-stat-label">평균 소요시간</div>
+      </div>
     </div>
     <div class="trophy-modal-body">
       <div class="trophy-grid" id="trophy-grid"></div>
@@ -3858,7 +3905,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.0</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
