@@ -40,10 +40,11 @@
     }
     header h1 { color: var(--gold); font-size:1.4rem; font-weight:700; text-shadow:1px 1px 3px rgba(0,0,0,.6); }
     header .sub { color:#d4b483; font-size:.75rem; margin-top:2px; }
-    .char-status { margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
-    .char-label { font-size:.52rem; color:rgba(255,255,255,.45); letter-spacing:.02em; }
-    .char-mobs { display:flex; gap:4px; align-items:center; }
-    .char-mob-img { width:38px; height:38px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+    .char-status { margin-left:auto; display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .char-label { font-size:.58rem; color:#e8c97a; letter-spacing:.03em; text-shadow:0 1px 3px rgba(0,0,0,.7); font-weight:600; }
+    .char-mobs { display:flex; gap:8px; align-items:center; }
+    .char-mob-img { width:40px; height:40px; object-fit:contain; image-rendering:pixelated; border:2px solid var(--gold); border-radius:8px; background:rgba(0,0,0,.25); padding:2px; box-shadow:0 0 6px rgba(245,166,35,.4); transition:transform .15s,box-shadow .15s; }
+    .char-mob-img:hover { transform:scale(1.12); box-shadow:0 0 10px rgba(245,166,35,.7); }
 
     /* ─ Layout ─ */
     .container { max-width:980px; margin:0 auto; padding:20px 16px; }
@@ -1150,8 +1151,8 @@
     <div class="sub">도감길드 파이팅</div>
   </div>
   <div class="char-status" id="char-status">
-    <div class="char-label">허규복 진행중인 도감작</div>
     <div class="char-mobs" id="char-mobs"></div>
+    <div class="char-label">허규복의 진행중인 도감작</div>
   </div>
 </header>
 
@@ -3857,7 +3858,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
