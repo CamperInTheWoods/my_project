@@ -1481,6 +1481,7 @@ function makeTab(idx) {
 let tabs = [makeTab(0)];
 let activeTabIdx = 0;
 let _dragTabIdx = -1;
+let _restoringPanel = false;
 
 function activeTab() { return tabs[activeTabIdx]; }
 // 하위 호환: activeMob getter/setter
@@ -2509,7 +2510,6 @@ function reorderTab(fromIdx, toIdx) {
   activeTabIdx = moved.idx;
   switchTab(activeTabIdx);
   updateAllSyncBtns();
-  saveState();
 }
 
 function restorePanelForTab(tab) {
@@ -2522,7 +2522,9 @@ function restorePanelForTab(tab) {
   panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
   // 아이템 그리드 복원
   renderItemGridInPanel(panel, mob);
+  _restoringPanel = true;
   updateProgressInPanel(panel, mob);
+  _restoringPanel = false;
   updateHuntEstimateInPanel(panel, mob);
   // 획득 기록 복원
   restoreLogEntries(panel, mob);
@@ -2962,8 +2964,8 @@ function updateProgressInPanel(panel, mob) {
   const wasComplete = badge.style.display === 'block';
   badge.style.display = justCompleted ? 'block' : 'none';
 
-  // 방금 완료된 경우 (이전에 안 완료 상태였을 때만)
-  if (justCompleted && !wasComplete) {
+  // 방금 완료된 경우 (이전에 안 완료 상태였을 때만, 패널 복원 중엔 제외)
+  if (justCompleted && !wasComplete && !_restoringPanel) {
     onDogamComplete(panel, mob);
   }
 
@@ -3841,7 +3843,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.074.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.074.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
