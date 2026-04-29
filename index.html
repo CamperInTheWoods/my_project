@@ -77,7 +77,7 @@
     .backup-inline { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; align-items:center; gap:5px; }
     .backup-toggle-btn { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--gray); font-family:inherit; cursor:pointer; transition:all .15s; }
     .backup-toggle-btn:hover { border-color:var(--gold); color:var(--brown); }
-    .backup-toggle-btn.open { border-color:var(--brown); color:#fff; background:var(--brown); }
+    .backup-toggle-btn.open { border-color:rgba(210,140,20,.7); color:#7a4500; background:rgba(220,155,15,.14); }
     .backup-inline-btns { display:none; gap:4px; }
     .backup-inline-btns.open { display:flex; }
     .backup-inline-btns button { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:#fdf6e8; color:var(--brown); font-family:inherit; cursor:pointer; transition:all .15s; white-space:nowrap; }
@@ -189,6 +189,8 @@
       padding:0 2px; border-radius:3px; flex-shrink:0;
     }
     .tab-btn .tab-close:hover { color:var(--red); background:#fee; }
+    .tab-btn.dragging { opacity:.35; }
+    .tab-btn.drag-over { border-color:var(--gold); background:#fff8e8; }
     .tab-add {
       padding:7px 11px; border-radius:8px 8px 0 0;
       border:1px dashed var(--border); border-bottom:none;
@@ -412,7 +414,8 @@
     .sw-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
     .sw-start { background:#4caf50; color:white; }
     .sw-pause { background:#f5a623; color:white; }
-    .sw-reset { background:#e0e0e0; color:#555; }
+    .sw-reset { background:transparent; color:#ccc; border:1px solid #ddd; font-size:.62rem; padding:3px 10px; font-weight:400; }
+    .sw-reset:hover { background:#fff0f0; color:#c62828; border-color:#ffcdd2; filter:none; transform:none; }
     .sw-channel { background:#e8f4fd; color:#1a6fa8; font-size:.8rem; }
     .sw-sync { background:#e8f4fd; color:#1a6fa8; border:1px solid #a8d4f0; font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
     .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
@@ -1477,6 +1480,7 @@ function makeTab(idx) {
 
 let tabs = [makeTab(0)];
 let activeTabIdx = 0;
+let _dragTabIdx = -1;
 
 function activeTab() { return tabs[activeTabIdx]; }
 // 하위 호환: activeMob getter/setter
@@ -2338,10 +2342,10 @@ function buildTabPanel(tab) {
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
           <button class="sw-btn sw-channel" onclick="swChannelMark()">📡 채널변경</button>
-          <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
         </div>
-        <div style="text-align:center;margin-top:6px">
+        <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px">
           <button class="sw-sync" onclick="swSyncToggle()">🔗 동기화</button>
+          <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
         </div>
         <div class="sw-log">
           <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
@@ -2390,6 +2394,26 @@ function renderTabBar() {
     btn.addEventListener('click', e => {
       if (e.target.classList.contains('tab-close')) return;
       switchTab(tab.idx);
+    });
+    btn.draggable = true;
+    btn.addEventListener('dragstart', e => {
+      _dragTabIdx = tab.idx;
+      setTimeout(() => btn.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    btn.addEventListener('dragend', () => {
+      btn.classList.remove('dragging');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('drag-over'));
+    });
+    btn.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (_dragTabIdx !== tab.idx) btn.classList.add('drag-over');
+    });
+    btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
+    btn.addEventListener('drop', e => {
+      e.preventDefault();
+      if (_dragTabIdx >= 0 && _dragTabIdx !== tab.idx) reorderTab(_dragTabIdx, tab.idx);
     });
     bar.appendChild(btn);
   });
@@ -2463,6 +2487,29 @@ function closeTab(e, idx) {
   activeTabIdx = Math.min(activeTabIdx, tabs.length - 1);
   switchTab(activeTabIdx);
   updateAllSyncBtns();
+}
+
+function reorderTab(fromIdx, toIdx) {
+  _dragTabIdx = -1;
+  const moved = tabs.splice(fromIdx, 1)[0];
+  tabs.splice(toIdx, 0, moved);
+  tabs.forEach((t, i) => { t.idx = i; });
+  const panelsEl = document.getElementById('tab-panels');
+  panelsEl.innerHTML = '';
+  tabs.forEach(t => {
+    const p = buildTabPanel(t);
+    panelsEl.appendChild(p);
+    if (t.mob) restorePanelForTab(t);
+    if (t.sw.startTs !== null) {
+      clearInterval(t.sw.ticker);
+      const tabRef = t;
+      t.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabRef.idx), tabRef), 50);
+    }
+  });
+  activeTabIdx = moved.idx;
+  switchTab(activeTabIdx);
+  updateAllSyncBtns();
+  saveState();
 }
 
 function restorePanelForTab(tab) {
@@ -3794,7 +3841,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.073.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.074.0</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
