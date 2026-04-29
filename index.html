@@ -40,6 +40,10 @@
     }
     header h1 { color: var(--gold); font-size:1.4rem; font-weight:700; text-shadow:1px 1px 3px rgba(0,0,0,.6); }
     header .sub { color:#d4b483; font-size:.75rem; margin-top:2px; }
+    .char-status { margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+    .char-label { font-size:.52rem; color:rgba(255,255,255,.45); letter-spacing:.02em; }
+    .char-mobs { display:flex; gap:4px; align-items:center; }
+    .char-mob-img { width:38px; height:38px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
 
     /* ─ Layout ─ */
     .container { max-width:980px; margin:0 auto; padding:20px 16px; }
@@ -1144,6 +1148,10 @@
   <div>
     <h1>메이플랜드 도감작 체크리스트</h1>
     <div class="sub">도감길드 파이팅</div>
+  </div>
+  <div class="char-status" id="char-status">
+    <div class="char-label">허규복 진행중인 도감작</div>
+    <div class="char-mobs" id="char-mobs"></div>
   </div>
 </header>
 
@@ -2425,6 +2433,16 @@ function renderTabBar() {
     add.onclick = addTab;
     bar.appendChild(add);
   }
+  updateCharStatus();
+}
+
+function updateCharStatus() {
+  const el = document.getElementById('char-mobs');
+  if (!el) return;
+  const mobTabs = tabs.filter(t => t.mob).slice(0, 2);
+  el.innerHTML = mobTabs.map(t =>
+    `<img class="char-mob-img" src="${mobImg(t.mob.id)}" alt="${t.mob.name}" title="${t.mob.name}" onerror="this.style.display='none'">`
+  ).join('');
 }
 
 function switchTab(idx) {
@@ -3836,7 +3854,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.074.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.075.0</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
