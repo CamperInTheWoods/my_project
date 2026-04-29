@@ -1145,6 +1145,54 @@
       background:#ccc; box-shadow:none; cursor:default;
     }
 
+    /* ─ Floating Widget ─ */
+    #fw {
+      position:fixed; right:16px; bottom:80px; z-index:9999;
+      width:170px; border-radius:12px; overflow:hidden;
+      background:rgba(18,6,2,.88); border:1px solid rgba(200,146,42,.5);
+      box-shadow:0 4px 24px rgba(0,0,0,.75); backdrop-filter:blur(4px);
+      font-family:'Noto Sans KR',sans-serif; user-select:none;
+    }
+    #fw-header {
+      display:flex; align-items:center; gap:6px; padding:7px 10px;
+      cursor:grab; border-bottom:1px solid rgba(200,146,42,.22);
+      background:rgba(0,0,0,.25);
+    }
+    #fw-header:active { cursor:grabbing; }
+    #fw-time { font-size:.82rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; line-height:1.1; }
+    #fw-mob  { font-size:.52rem; color:rgba(200,168,107,.55); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px; }
+    #fw-collapse-btn { margin-left:auto; background:none; border:none; color:rgba(200,146,42,.55); font-size:.72rem; cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0; }
+    #fw-collapse-btn:hover { color:var(--gold); }
+    #fw-body { padding:8px; display:flex; flex-direction:column; gap:7px; }
+    #fw-kills { font-size:.62rem; color:rgba(200,168,107,.65); }
+    #fw-action-btns { display:flex; gap:5px; }
+    .fw-action-btn {
+      flex:1; padding:5px 4px; border:none; border-radius:7px;
+      font-size:.62rem; font-weight:700; font-family:inherit; cursor:pointer; transition:all .12s;
+    }
+    #fw-sw-btn { background:#4caf50; color:#fff; }
+    #fw-sw-btn.fw-sw-pause { background:#f5a623; color:#fff; }
+    #fw-ch-btn { background:rgba(232,244,253,.12); color:#7ec8f0; border:1px solid rgba(168,212,240,.25); }
+    #fw-ch-btn:hover { background:rgba(232,244,253,.22); }
+    #fw-items { display:flex; flex-wrap:wrap; gap:4px; max-height:120px; overflow-y:auto; }
+    #fw-items::-webkit-scrollbar { width:3px; }
+    #fw-items::-webkit-scrollbar-thumb { background:rgba(200,146,42,.35); border-radius:2px; }
+    .fw-item-btn {
+      width:34px; height:34px; position:relative; padding:0;
+      border:1px solid rgba(200,146,42,.25); border-radius:6px;
+      background:rgba(0,0,0,.3); cursor:pointer; overflow:visible;
+      display:flex; align-items:center; justify-content:center;
+      transition:border-color .12s, background .12s;
+    }
+    .fw-item-btn:hover { border-color:rgba(200,146,42,.7); background:rgba(200,146,42,.1); }
+    .fw-item-btn.fw-item-done { border-color:rgba(76,175,80,.55); background:rgba(76,175,80,.1); }
+    .fw-item-cnt {
+      position:absolute; bottom:-3px; right:-3px;
+      background:rgba(26,111,168,.92); color:#fff;
+      font-size:.48rem; font-weight:700; padding:1px 3px;
+      border-radius:3px; line-height:1.3; pointer-events:none;
+    }
+
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.4.0/dom-to-image-more.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
@@ -3905,7 +3953,25 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.0</div>
+
+<div id="fw">
+  <div id="fw-header">
+    <div style="flex:1;min-width:0">
+      <div id="fw-time">--:--:--</div>
+      <div id="fw-mob">-</div>
+    </div>
+    <button id="fw-collapse-btn" onclick="fwCollapseToggle()">▾</button>
+  </div>
+  <div id="fw-body">
+    <div id="fw-kills">🗡 -</div>
+    <div id="fw-action-btns">
+      <button class="fw-action-btn" id="fw-sw-btn" onclick="swToggle()">▶ 시작</button>
+      <button class="fw-action-btn" id="fw-ch-btn" onclick="swChannelMark()">📡 채널</button>
+    </div>
+    <div id="fw-items"></div>
+  </div>
+</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
@@ -3966,6 +4032,95 @@ function adminApplyTime() {
   // 모달 새로고침
   openResultModal(tab.mob);
 }
+
+// ── Floating Widget ──
+let _fwCollapsed = false;
+
+function fwCollapseToggle() {
+  _fwCollapsed = !_fwCollapsed;
+  document.getElementById('fw-body').style.display = _fwCollapsed ? 'none' : '';
+  document.getElementById('fw-collapse-btn').textContent = _fwCollapsed ? '▸' : '▾';
+}
+
+function fwUpdate() {
+  const tab = activeTab();
+  const timeEl = document.getElementById('fw-time');
+  if (!timeEl) return;
+
+  const ms = swElapsed(tab);
+  const h = Math.floor(ms/3600000), mi = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+  timeEl.textContent = `${pad(h)}:${pad(mi)}:${pad(s)}`;
+  document.getElementById('fw-mob').textContent = tab.mob ? tab.mob.name : '-';
+
+  const running = tab.sw.startTs !== null;
+  const swBtn = document.getElementById('fw-sw-btn');
+  if (swBtn) {
+    swBtn.textContent = running ? '⏸ 일시정지' : '▶ 시작';
+    swBtn.className = 'fw-action-btn' + (running ? ' fw-sw-pause' : '');
+    swBtn.id = 'fw-sw-btn';
+  }
+
+  if (_fwCollapsed) return;
+
+  // 킬수 계산
+  const store = loadS();
+  let kills = 0;
+  if (tab.mob) {
+    const mobData = store[`mob_${tab.mob.id}`] || {};
+    const excl = new Set(store[`excl_${tab.mob.id}`] || []);
+    const tlBase = store[`tl_base_${tab.mob.id}`] || null;
+    let bestRate = 0, bestCount = 0;
+    if (tlBase) {
+      const d = tab.mob.drops.find(x => x.id === tlBase.id);
+      if (d) { const c = mobData[d.id]?.count||0, r = parseFloat(d.rate)/100; if(c>0&&r>0){bestCount=c;bestRate=r;} }
+    } else {
+      tab.mob.drops.forEach(d => {
+        if (excl.has(d.id)) return;
+        const c = mobData[d.id]?.count||0; if (!c) return;
+        const r = parseFloat(d.rate)/100; if (!r) return;
+        if (r > bestRate) { bestRate=r; bestCount=c; }
+      });
+    }
+    kills = bestRate > 0 ? Math.round(bestCount/bestRate) : 0;
+  }
+  document.getElementById('fw-kills').textContent = kills > 0 ? `🗡 ${kills.toLocaleString()} 마리` : '🗡 -';
+
+  // 아이템 카드
+  const itemsEl = document.getElementById('fw-items');
+  if (!itemsEl) return;
+  if (!tab.mob) { itemsEl.innerHTML = ''; return; }
+  const mobData = store[`mob_${tab.mob.id}`] || {};
+  const excl = new Set(store[`excl_${tab.mob.id}`] || []);
+  const tlBaseId = store[`tl_base_${tab.mob.id}`]?.id;
+  const drops = tab.mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+  const newHtml = drops.map(d => {
+    const cnt = mobData[d.id]?.count || 0;
+    return `<button class="fw-item-btn${cnt>0?' fw-item-done':''}" onclick="incrementItem(${d.id})" title="${d.name}"><img src="${itemImg(d.id)}" onerror="this.src='${BLANK}'" style="width:26px;height:26px;object-fit:contain;image-rendering:pixelated">${cnt>0?`<span class="fw-item-cnt">${cnt}</span>`:''}</button>`;
+  }).join('');
+  if (itemsEl.innerHTML !== newHtml) itemsEl.innerHTML = newHtml;
+}
+
+// 드래그
+(function() {
+  let drag = null;
+  const fw = document.getElementById('fw');
+  document.getElementById('fw-header').addEventListener('mousedown', e => {
+    if (e.target.id === 'fw-collapse-btn') return;
+    const r = fw.getBoundingClientRect();
+    fw.style.right=''; fw.style.bottom='';
+    fw.style.left=r.left+'px'; fw.style.top=r.top+'px';
+    drag = { ox: e.clientX-r.left, oy: e.clientY-r.top };
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    fw.style.left=(e.clientX-drag.ox)+'px';
+    fw.style.top=(e.clientY-drag.oy)+'px';
+  });
+  document.addEventListener('mouseup', () => { drag=null; });
+})();
+
+setInterval(fwUpdate, 150);
 </script>
 </body>
 </html>
