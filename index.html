@@ -225,7 +225,26 @@
     .prog-label .pct { font-size:.78rem; color:var(--gray); }
     .prog-bg { height:14px; background:#e8d9b8; border-radius:7px; overflow:hidden; border:1px solid var(--border); }
     .prog-fill { height:100%; background:linear-gradient(90deg,#f5a623,#4caf50); border-radius:7px; transition:width .4s ease; }
-    .complete-badge { display:none; text-align:center; padding:10px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border:2px solid #4caf50; border-radius:8px; color:#2e7d32; font-weight:700; font-size:.9rem; margin-top:10px; }
+    .prog-fill.complete {
+      background: linear-gradient(90deg, #7c4dff, #448aff, #80d8ff, #b388ff, #7c4dff);
+      background-size: 300% 100%;
+      animation: progBlueFlow 5s linear infinite;
+      box-shadow: 0 0 10px rgba(124,77,255,.6), 0 0 4px rgba(180,136,255,.5) inset;
+    }
+    @keyframes progBlueFlow {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+    .complete-badge {
+      display:none; text-align:center; padding:10px 14px;
+      background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 35%, #e8eaf6 65%, #c5cae9 100%);
+      border: 1.5px solid #7c4dff;
+      border-radius: 8px;
+      color: #4527a0;
+      font-weight: 700; font-size:.9rem; margin-top:10px;
+      box-shadow: 0 0 16px rgba(124,77,255,.3), 0 2px 8px rgba(69,39,160,.12);
+      text-shadow: 0 0 8px rgba(124,77,255,.45);
+    }
 
     /* ─ 메소 비 ─ */
     #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
@@ -2987,7 +3006,9 @@ function updateProgressInPanel(panel, mob) {
 
   panel.querySelector('.prog-cnt').textContent  = `${done} / ${total} 완료${exclCnt ? `  (제외 ${exclCnt}개)` : ''}`;
   panel.querySelector('.prog-pct').textContent  = `${pct}%`;
-  panel.querySelector('.prog-fill').style.width = `${pct}%`;
+  const fill = panel.querySelector('.prog-fill');
+  fill.style.width = `${pct}%`;
+  fill.classList.toggle('complete', done === total && total > 0);
 
   const justCompleted = done === total && total > 0;
   const badge = panel.querySelector('.complete-badge');
@@ -3914,7 +3935,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
