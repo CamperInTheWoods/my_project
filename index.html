@@ -2622,18 +2622,25 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 // 12. 아이템 그리드 렌더
 // ══════════════════════════════════════════
-const showExcludedByTab = {}; // 탭별 제외 아이템 보기 상태
+const EXCL_SHOW_KEY = 'maple_excl_show';
+let showExcludedByTab = (() => { try { return JSON.parse(localStorage.getItem(EXCL_SHOW_KEY)) || {}; } catch { return {}; } })();
 function getShowExcluded() { return showExcludedByTab[activeTabIdx] !== false; }
-function setShowExcluded(v) { showExcludedByTab[activeTabIdx] = v; }
+function setShowExcluded(v) { showExcludedByTab[activeTabIdx] = v; try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {} }
+
+function _applyExclToggleBtn(panel) {
+  const show = getShowExcluded();
+  const btn = panel?.querySelector('.excl-toggle');
+  if (!btn) return;
+  btn.textContent = show ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
+  btn.className   = show ? 'excl-toggle' : 'excl-toggle hide-excl';
+}
 
 function toggleExclView() {
   setShowExcluded(!getShowExcluded());
   const show = getShowExcluded();
   const panel = getActivePanel();
   if (!panel) return;
-  const btn = panel.querySelector('.excl-toggle');
-  btn.textContent = show ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
-  btn.className   = show ? 'excl-toggle' : 'excl-toggle hide-excl';
+  _applyExclToggleBtn(panel);
   panel.querySelectorAll('.item-card.excl').forEach(c => {
     c.style.display = show ? '' : 'none';
   });
@@ -2683,6 +2690,7 @@ function renderItemGrid() {
   const panel = getActivePanel();
   if (!panel || !activeMob) return;
   renderItemGridInPanel(panel, activeMob);
+  _applyExclToggleBtn(panel);
   updateProgress();
 }
 
@@ -3905,7 +3913,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.076.1</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
