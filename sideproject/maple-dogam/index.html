@@ -3091,149 +3091,87 @@ function mesoRain() {
   canvas.height = window.innerHeight;
   const ctx = canvas.getContext('2d');
 
-  // type: 0=동전, 1=돈뭉치(동전더미), 2=돈다발(지폐묶음)
+  const COLORS = [
+    '#ffd700','#ffec4f','#f5a623','#ffa000', // 골드
+    '#fff8dc','#ffe082','#ffb300',            // 연금
+    '#ff6b35','#e64a19',                      // 오렌지 포인트
+    '#4fc3f7','#81d4fa',                      // 하늘 포인트
+    '#ce93d8','#f48fb1',                      // 핑크/보라 포인트
+    '#a5d6a7','#69f0ae',                      // 초록 포인트
+  ];
+
   const pieces = [];
-  const COUNT  = 210;
+  const COUNT  = 300;
   for (let i = 0; i < COUNT; i++) {
-    const t = Math.random() < 0.4 ? 0 : Math.random() < 0.55 ? 1 : 2;
+    // 0=얇은 직사각형, 1=정사각형, 2=원, 3=긴 리본
+    const shape = [0,0,0,1,1,2,3,3][Math.floor(Math.random()*8)];
+    const sz    = 5 + Math.random() * 7;
     pieces.push({
-      t,
+      shape,
       x:     Math.random() * canvas.width,
-      y:     -30 - Math.random() * canvas.height * 1.2,
-      size:  t === 0 ? (4 + Math.random() * 5) : t === 1 ? (5 + Math.random() * 5) : (5 + Math.random() * 6),
-      vx:    (Math.random() - 0.5) * 1.4,
-      vy:    0.7 + Math.random() * 1.8,
+      y:     -sz - Math.random() * canvas.height * 0.5,
+      w:     shape === 3 ? sz * 0.4 : sz,
+      h:     shape === 3 ? sz * 3.5 : shape === 0 ? sz * 0.45 : sz,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      vx:    (Math.random() - 0.5) * 2.5,
+      vy:    1.5 + Math.random() * 2.5,
       rot:   Math.random() * Math.PI * 2,
-      rotV:  (Math.random() - 0.5) * (t === 0 ? 0.07 : 0.09),
-      swing: Math.random() * Math.PI * 2,
-      swS:   t === 0 ? (0.07 + Math.random() * 0.08) : (0.03 + Math.random() * 0.03),
-      alpha: 0.82 + Math.random() * 0.18,
+      rotV:  (Math.random() - 0.5) * 0.22,
+      phase: Math.random() * Math.PI * 2,  // twist 위상
+      freq:  0.08 + Math.random() * 0.08,  // twist 주파수
+      sway:  0.3 + Math.random() * 0.5,    // 좌우 흔들림 폭
+      swayF: 0.015 + Math.random() * 0.02, // 흔들림 주파수
+      swayP: Math.random() * Math.PI * 2,
+      alpha: 1,
     });
   }
 
-  function drawCoin(r, swing) {
-    const ca = Math.cos(swing), sa = Math.abs(Math.sin(swing));
-    const thick = r * 0.45;
-    const rx = r * Math.abs(ca);   // 면의 x반경 (회전에 따라 변함)
-    const thH = thick * sa;        // 보이는 두께 높이
-    const front = ca >= 0;
-    const faceY = front ? 0 : -thH;
-
-    // 옆면 (rim)
-    if (thH > 0.5) {
-      const y0 = front ? 0 : -thH;
-      ctx.fillStyle = front ? '#9a7000' : '#7a5200';
-      ctx.shadowBlur = 0;
-      ctx.fillRect(-r, y0, r * 2, thH);
-      // 먼쪽 엣지 타원
-      if (rx > 0.3) {
-        ctx.beginPath();
-        ctx.ellipse(0, front ? thH : -thH, r, Math.max(0.4, rx * 0.38), 0, 0, Math.PI * 2);
-        ctx.fillStyle = front ? '#806000' : '#604400';
-        ctx.fill();
-      }
-    }
-
-    // 앞/뒷면
-    if (rx > 0.3) {
-      ctx.beginPath();
-      ctx.ellipse(0, faceY, rx, r, 0, 0, Math.PI * 2);
-      ctx.fillStyle = front ? '#ffd700' : '#c8a000';
-      ctx.shadowColor = '#ffc800';
-      ctx.shadowBlur = 6;
-      ctx.fill();
-      // 광택
-      if (front && rx > r * 0.3) {
-        ctx.beginPath();
-        ctx.ellipse(-rx*.22, faceY - r*.26, rx*.18, r*.16, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,200,.5)';
-        ctx.shadowBlur = 0;
-        ctx.fill();
-      }
-    } else {
-      // 완전 옆면
-      ctx.fillStyle = '#9a7200';
-      ctx.shadowBlur = 0;
-      ctx.fillRect(-r, -thick * .5, r * 2, thick);
-    }
-  }
-
-  function drawWad(sz) {
-    // 동전 3개 쌓인 더미 — 위에서 본 시점
-    const r = sz * 0.95;
-    for (let i = 2; i >= 0; i--) {
-      const oy = -i * sz * 0.55;
-      const bright = 0.72 + i * 0.1;
-      ctx.beginPath();
-      ctx.ellipse(0, oy, r, r * 0.38, 0, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${Math.round(255*bright)},${Math.round(195*bright)},0,.95)`;
-      ctx.shadowColor = '#ffd000';
-      ctx.shadowBlur = i === 0 ? 6 : 0;
-      ctx.fill();
-      if (i < 2) {
-        // 동전 옆면 라인
-        ctx.beginPath();
-        ctx.ellipse(0, oy + sz*0.55, r, r * 0.38, 0, 0, Math.PI);
-        ctx.strokeStyle = `rgba(140,100,0,${0.5 - i*0.1})`;
-        ctx.lineWidth = sz * 0.55;
-        ctx.shadowBlur = 0;
-        ctx.stroke();
-      }
-    }
-  }
-
-  function drawBundle(sz) {
-    // 지폐 묶음 — 여러 장 겹친 느낌
-    const w = sz * 2.6, h = sz * 1.05;
-    for (let i = 4; i >= 0; i--) {
-      const oy = -i * sz * 0.28;
-      const bright = 0.68 + i * 0.065;
-      ctx.beginPath();
-      ctx.roundRect(-w/2, -h/2 + oy, w, h, 2);
-      ctx.fillStyle = `rgba(${Math.round(245*bright)},${Math.round(195*bright)},${Math.round(40*bright)},.9)`;
-      ctx.shadowColor = '#e8c400';
-      ctx.shadowBlur = i === 0 ? 5 : 0;
-      ctx.fill();
-    }
-    // 묶음 띠
-    ctx.beginPath();
-    ctx.roundRect(-w/2, -h*0.14, w, h*0.28, 1);
-    ctx.fillStyle = 'rgba(175,95,15,.8)';
-    ctx.shadowBlur = 0;
-    ctx.fill();
-  }
-
-  function drawPiece(p) {
-    ctx.save();
-    ctx.globalAlpha = p.alpha;
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rot);
-    if (p.t === 0) {
-      drawCoin(p.size, p.swing);
-    } else if (p.t === 1) {
-      const flip = Math.cos(p.swing * 0.5);
-      ctx.scale(flip, 1);
-      drawWad(p.size);
-    } else {
-      const flip = Math.cos(p.swing * 0.38);
-      ctx.scale(flip, 1);
-      drawBundle(p.size);
-    }
-    ctx.restore();
-  }
+  let frame = 0;
+  const GRAVITY = 0.18;
 
   function loop() {
+    frame++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = 0;
     for (const p of pieces) {
       if (p.y > canvas.height + 30) continue;
       alive++;
-      p.swing += p.swS;
-      p.x += p.vx + Math.sin(p.swing) * 0.65;
-      p.y += p.vy;
+      p.vy  += GRAVITY;
+      p.swayP += p.swayF;
+      p.x   += p.vx + Math.sin(p.swayP) * p.sway;
+      p.y   += p.vy;
       p.rot += p.rotV;
-      drawPiece(p);
+      p.phase += p.freq;
+
+      const twist = Math.cos(p.phase); // -1~1 (리본/사각형 뒤집힘)
+
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur  = 4;
+
+      if (p.shape === 2) {
+        // 원 — twist 없이 그냥 크기만 살짝 변화
+        const r = p.w / 2 * (0.7 + 0.3 * Math.abs(twist));
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // 사각형/리본 — scaleX로 뒤집힘 표현
+        ctx.scale(twist, 1);
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        // 뒤집힐 때 약간 어두운 뒷면 힌트
+        if (twist < 0) {
+          ctx.fillStyle = 'rgba(0,0,0,.18)';
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        }
+      }
+      ctx.restore();
     }
+
     if (alive > 0) _mesoRafId = requestAnimationFrame(loop);
     else { _mesoRafId = null; ctx.clearRect(0, 0, canvas.width, canvas.height); }
   }
@@ -3243,15 +3181,16 @@ function mesoRain() {
     canvas.style.transition = 'opacity 2.5s ease-out';
     canvas.style.opacity = '0';
     _mesoFadeId = null;
-  }, 9500);
+  }, 8000);
 
   _mesoTimeout = setTimeout(() => {
     if (_mesoRafId) { cancelAnimationFrame(_mesoRafId); _mesoRafId = null; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.style.transition = '';
     canvas.style.opacity = '1';
-  }, 12500);
+  }, 11000);
 }
+
 
 // ══════════════════════════════════════════
 // 16. 초기화
@@ -4003,7 +3942,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.3</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
