@@ -3111,19 +3111,50 @@ function mesoRain() {
     });
   }
 
-  function drawCoin(r, flipAbs) {
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fillStyle = flipAbs < 0.12 ? '#9a7000' : '#ffd700';
-    ctx.shadowColor = '#ffc800';
-    ctx.shadowBlur = 6;
-    ctx.fill();
-    if (flipAbs > 0.4) {
-      ctx.beginPath();
-      ctx.arc(-r*.22, -r*.27, r*.18, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(255,255,210,.52)';
+  function drawCoin(r, swing) {
+    const ca = Math.cos(swing), sa = Math.abs(Math.sin(swing));
+    const thick = r * 0.45;
+    const rx = r * Math.abs(ca);   // 면의 x반경 (회전에 따라 변함)
+    const thH = thick * sa;        // 보이는 두께 높이
+    const front = ca >= 0;
+    const faceY = front ? 0 : -thH;
+
+    // 옆면 (rim)
+    if (thH > 0.5) {
+      const y0 = front ? 0 : -thH;
+      ctx.fillStyle = front ? '#9a7000' : '#7a5200';
       ctx.shadowBlur = 0;
+      ctx.fillRect(-r, y0, r * 2, thH);
+      // 먼쪽 엣지 타원
+      if (rx > 0.3) {
+        ctx.beginPath();
+        ctx.ellipse(0, front ? thH : -thH, r, Math.max(0.4, rx * 0.38), 0, 0, Math.PI * 2);
+        ctx.fillStyle = front ? '#806000' : '#604400';
+        ctx.fill();
+      }
+    }
+
+    // 앞/뒷면
+    if (rx > 0.3) {
+      ctx.beginPath();
+      ctx.ellipse(0, faceY, rx, r, 0, 0, Math.PI * 2);
+      ctx.fillStyle = front ? '#ffd700' : '#c8a000';
+      ctx.shadowColor = '#ffc800';
+      ctx.shadowBlur = 6;
       ctx.fill();
+      // 광택
+      if (front && rx > r * 0.3) {
+        ctx.beginPath();
+        ctx.ellipse(-rx*.22, faceY - r*.26, rx*.18, r*.16, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,200,.5)';
+        ctx.shadowBlur = 0;
+        ctx.fill();
+      }
+    } else {
+      // 완전 옆면
+      ctx.fillStyle = '#9a7200';
+      ctx.shadowBlur = 0;
+      ctx.fillRect(-r, -thick * .5, r * 2, thick);
     }
   }
 
@@ -3178,9 +3209,7 @@ function mesoRain() {
     ctx.translate(p.x, p.y);
     ctx.rotate(p.rot);
     if (p.t === 0) {
-      const flip = Math.cos(p.swing);
-      ctx.scale(flip, 1);
-      drawCoin(p.size, Math.abs(flip));
+      drawCoin(p.size, p.swing);
     } else if (p.t === 1) {
       const flip = Math.cos(p.swing * 0.5);
       ctx.scale(flip, 1);
@@ -3974,7 +4003,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.2</div>
 
 <!-- 관리자: 소요시간 수정 패널 (result-modal 내부에 삽입됨) -->
 <div id="admin-time-panel" style="display:none;background:rgba(30,20,5,.95);border:1px solid rgba(245,166,35,.4);border-radius:12px;padding:14px 16px;margin-top:8px;">
