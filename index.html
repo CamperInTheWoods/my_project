@@ -2475,6 +2475,7 @@ function switchTab(idx) {
     swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle');
   }
   swTickPanel(swPanel, tab);
+  _applyExclToggleBtn(swPanel);
 }
 
 function addTab() {
@@ -2624,8 +2625,8 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 const EXCL_SHOW_KEY = 'maple_excl_show';
 let showExcludedByTab = (() => { try { return JSON.parse(localStorage.getItem(EXCL_SHOW_KEY)) || {}; } catch { return {}; } })();
-function getShowExcluded() { return showExcludedByTab[activeTabIdx] !== false; }
-function setShowExcluded(v) { showExcludedByTab[activeTabIdx] = v; try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {} }
+function getShowExcluded() { return showExcludedByTab[String(activeTabIdx)] !== false; }
+function setShowExcluded(v) { showExcludedByTab[String(activeTabIdx)] = v; try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {} }
 
 function _applyExclToggleBtn(panel) {
   const show = getShowExcluded();
