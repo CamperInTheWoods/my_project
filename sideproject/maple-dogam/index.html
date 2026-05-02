@@ -1069,6 +1069,36 @@
     .result-btn-trophy:hover { background:rgba(245,166,35,.25); }
     .result-btn-trophy:disabled { opacity:.45; cursor:default; }
 
+    /* ─ 확률 계산기 ─ */
+    .pc-kills { font-size:.72rem; color:rgba(180,150,80,.7); text-align:center; margin-bottom:12px; }
+    .pc-kills strong { color:rgba(245,210,100,.9); font-size:.88rem; }
+    .pc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:14px; max-height:220px; overflow-y:auto; }
+    .pc-grid::-webkit-scrollbar { width:4px; }
+    .pc-grid::-webkit-scrollbar-track { background:rgba(255,255,255,.03); border-radius:2px; }
+    .pc-grid::-webkit-scrollbar-thumb { background:rgba(245,166,35,.35); border-radius:2px; }
+    .pc-grid::-webkit-scrollbar-thumb:hover { background:rgba(245,166,35,.6); }
+    .pc-card {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:7px 4px 5px; border-radius:8px; cursor:pointer;
+      background:rgba(255,255,255,.04); border:1.5px solid rgba(245,166,35,.12);
+      transition:background .15s, border-color .15s;
+    }
+    .pc-card:hover { background:rgba(245,166,35,.08); border-color:rgba(245,166,35,.3); }
+    .pc-card.selected { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.6); }
+    .pc-card.pc-found { opacity:.3; }
+    .pc-card.pc-found img { filter:brightness(.5) saturate(0); }
+    .pc-card img { width:38px; height:38px; object-fit:contain; image-rendering:pixelated; }
+    .pc-card .pc-name { font-size:.56rem; color:rgba(220,195,140,.8); text-align:center; line-height:1.3; word-break:keep-all; }
+    .pc-card .pc-rate { font-size:.55rem; color:rgba(180,150,80,.6); }
+    .pc-result {
+      border-top:1px solid rgba(245,166,35,.12); padding-top:12px; text-align:center;
+      min-height:70px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    }
+    .pc-result .pc-item-name { font-size:.7rem; color:rgba(200,170,100,.7); margin-bottom:2px; }
+    .pc-result .pc-prob { font-size:2rem; font-weight:800; letter-spacing:-.5px; }
+    .pc-result .pc-sub { font-size:.65rem; color:rgba(180,150,80,.6); }
+    .pc-no-kills { font-size:.72rem; color:rgba(180,150,80,.5); text-align:center; padding:20px 0; }
+
     /* ─ 패치노트 ─ */
     .pn-version { margin-bottom:20px; }
     .pn-version:last-child { margin-bottom:0; }
@@ -2373,7 +2403,10 @@ function buildTabPanel(tab) {
       </div>
       <div class="sw-section panel">
         <div class="hunt-estimate" style="display:none">
-          <div class="ptitle">🗡 예상 사냥 마릿수</div>
+          <div class="ptitle" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>🗡 예상 사냥 마릿수</span>
+            <button onclick="openProbCalc()" title="운 계산기" style="background:none;border:none;cursor:pointer;font-size:.85rem;color:rgba(120,90,40,.55);padding:0 2px;line-height:1;transition:color .15s;" onmouseenter="this.style.color='rgba(200,150,50,.9)'" onmouseleave="this.style.color='rgba(120,90,40,.55)'">🎲</button>
+          </div>
           <div class="hunt-count"></div>
           <div class="hunt-reason"></div>
           <div class="divider" style="margin:10px 0 12px"></div>
@@ -3946,7 +3979,20 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.077.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.0</div>
+
+<!-- 확률 계산기 모달 -->
+<div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:linear-gradient(160deg,#1e1408 0%,#2d1f0a 60%,#1a1005 100%);border:1px solid rgba(245,166,35,.25);border-radius:16px;max-width:320px;width:100%;padding:20px 20px 18px;position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(245,166,35,.15);padding-bottom:12px;">
+      <span style="font-size:.95rem;font-weight:700;color:rgba(245,210,120,.9);">🎲 운 계산기</span>
+      <button onclick="closeProbCalc()" style="background:none;border:none;color:rgba(180,150,80,.6);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;" onmouseenter="this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.color='rgba(180,150,80,.6)'">&times;</button>
+    </div>
+    <div id="prob-kills" class="pc-kills"></div>
+    <div id="prob-grid" class="pc-grid"></div>
+    <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span></div>
+  </div>
+</div>
 
 <!-- 패치노트 버튼 -->
 <button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
@@ -4023,9 +4069,108 @@ function adminApplyTime() {
 }
 
 // ══════════════════════════════════════════
+// 확률 계산기
+// ══════════════════════════════════════════
+function _getProbKills() {
+  if (!activeMob) return 0;
+  const store   = loadS();
+  const mobData = store[`mob_${activeMob.id}`] || {};
+  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+  const tlBase  = store[`tl_base_${activeMob.id}`] || null;
+  let bestRate = 0, bestCount = 0;
+  if (tlBase) {
+    const d = activeMob.drops.find(d => d.id === tlBase.id);
+    if (d) { const c = mobData[d.id]?.count || 0; const r = parseFloat(d.rate) / 100; if (c > 0 && r > 0) { bestRate = r; bestCount = c; } }
+  } else {
+    activeMob.drops.forEach(d => {
+      if (excl.has(d.id)) return;
+      const c = mobData[d.id]?.count || 0; if (c <= 0) return;
+      const r = parseFloat(d.rate) / 100; if (!r || r <= 0) return;
+      if (r > bestRate) { bestRate = r; bestCount = c; }
+    });
+  }
+  return bestRate > 0 ? Math.round(bestCount / bestRate) : 0;
+}
+
+function openProbCalc() {
+  if (!activeMob) return;
+  const kills = _getProbKills();
+  const killsEl = document.getElementById('prob-kills');
+  if (kills === 0) {
+    killsEl.innerHTML = '<div class="pc-no-kills">아직 획득 기록이 없어요</div>';
+    document.getElementById('prob-grid').innerHTML = '';
+    document.getElementById('prob-result').innerHTML = '';
+    document.getElementById('prob-modal').style.display = 'flex';
+    return;
+  }
+  killsEl.innerHTML = `현재 추정 킬수 <strong>${kills.toLocaleString()}마리</strong> 기준`;
+
+  const store   = loadS();
+  const mobData = store[`mob_${activeMob.id}`] || {};
+  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+
+  const grid = document.getElementById('prob-grid');
+  grid.innerHTML = '';
+  activeMob.drops.forEach(drop => {
+    if (excl.has(drop.id)) return;
+    const found = (mobData[drop.id]?.count || 0) > 0;
+    const card = document.createElement('div');
+    card.className = 'pc-card' + (found ? ' pc-found' : '');
+    card.innerHTML = `
+      <img src="${itemImg(drop.id)}" alt="${escHtml(drop.name)}" onerror="onItemImgError(this,${drop.id})">
+      <div class="pc-name">${escHtml(drop.name)}</div>
+      <div class="pc-rate">${drop.rate}</div>
+    `;
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.pc-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      _showProbResult(drop, kills);
+    });
+    grid.appendChild(card);
+  });
+
+  document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span>';
+  document.getElementById('prob-modal').style.display = 'flex';
+}
+
+function _showProbResult(drop, kills) {
+  const rate = parseFloat(drop.rate) / 100;
+  if (!rate || rate <= 0) {
+    document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:rgba(180,150,80,.4);">확률 데이터 없음</span>';
+    return;
+  }
+  const probNone = Math.pow(1 - rate, kills);
+  const probPct  = (probNone * 100).toFixed(1);
+  const expected = (kills * rate).toFixed(2);
+  // 낮을수록 빨강(0°), 높을수록 파랑(220°)
+  const hue   = Math.round(probNone * 220);
+  const color = `hsl(${hue}, 88%, 62%)`;
+  document.getElementById('prob-result').innerHTML = `
+    <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
+    <div class="pc-prob" style="color:${color}">${probPct}%</div>
+    <div class="pc-sub">${kills.toLocaleString()}마리에서 아직 안 나왔을 확률</div>
+    <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:rgba(245,210,100,.8);">${expected}개</strong></div>
+  `;
+}
+
+function closeProbCalc() {
+  document.getElementById('prob-modal').style.display = 'none';
+}
+
+// ══════════════════════════════════════════
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.078', date: '26.05.02',
+    feat: [
+      '🎲 운 계산기 추가 — 예상 사냥 마릿수 옆 주사위 버튼 클릭',
+      '현재 추정 킬수 기준으로 아이템별 미획득 확률 + 기대 획득수 계산',
+      '확률 낮을수록 빨강, 높을수록 파랑 그라데이션',
+      '미획득 아이템 밝게, 획득 완료 아이템 어둡게 표시',
+    ],
+    fix: [],
+  },
   {
     ver: '1.077', date: '26.05.01',
     feat: [
@@ -4065,14 +4210,6 @@ const PATCH_NOTES = [
       '드래그 후 완성 탭으로 이동 시 꽃비가 재발동되던 문제 수정',
       '탭 재정렬 시 패널 재생성 → DOM 이동으로 성능 개선',
     ],
-  },
-  {
-    ver: '1.073', date: '26.04.28',
-    feat: [
-      '데이터 백업 기능 추가 (JSON 파일로 내보내기)',
-      '스탑워치 채널 경과 시간 표시',
-    ],
-    fix: [],
   },
 ];
 
