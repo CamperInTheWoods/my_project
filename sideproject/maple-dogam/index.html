@@ -1907,6 +1907,7 @@ function tlToggleCluster(e, el) {
   allWraps.forEach(w => { w.querySelector('.tl-dup-badge')?.remove(); w.style.display = ''; });
 
   if (isOpen) {
+    el.style.zIndex = '100'; // 펼쳐진 클러스터가 다른 아이템 위로
     // 같은 아이템 ID는 첫 번째만 표시, 나머지 숨김
     const seen = {};
     const visibleWraps = [];
@@ -1937,6 +1938,7 @@ function tlToggleCluster(e, el) {
     });
     allWraps.forEach(w => { if (!visibleSet.has(w)) { w.style.transform = 'rotate(0deg)'; w.style.zIndex = ''; } });
   } else {
+    el.style.zIndex = '';
     const visibles = allWraps.filter(w => !w.classList.contains('tl-extra'));
     const vc = visibles.length;
     allWraps.forEach((w, i) => {
@@ -2943,7 +2945,9 @@ function incrementItem(itemId) {
   saveS(store);
 
   updateCardUI(itemId, state, drop);
-  if (isFirst) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, itemId);
+  const _tlBase = getTlBase(activeMob.id);
+  const _isHiddenBase = _tlBase?.id === itemId && _tlBase.hidden;
+  if (!_isHiddenBase && (isFirst || tlShowAll())) addSwLogToPanel(getActivePanel(), drop.name, t, itemId);
   updateProgress();
   updateHuntEstimate();
   renderSaves();
@@ -2962,7 +2966,13 @@ function decrementItem(e, itemId) {
   if (!state || state.count <= 0) return;
   state.count--;
   if (state.times) state.times.pop();
-  if (state.count === 0) { state.firstTime = null; state.times = []; removeItemLog(getActivePanel(), itemId); }
+  if (state.count === 0) {
+    state.firstTime = null; state.times = [];
+    removeItemLog(getActivePanel(), itemId);
+  } else if (tlShowAll()) {
+    const entries = [...(getActivePanel()?.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`) || [])];
+    if (entries.length > 0) entries[0].remove();
+  }
   store[key][itemId] = state;
   saveS(store);
 
@@ -2979,7 +2989,9 @@ function updateCardUI(itemId, state, drop) {
   if (!card) return;
 
   const found = state.count > 0;
-  card.className = `item-card ${found ? 'fd' : 'nf'}`;
+  const tlBase = activeMob ? getTlBase(activeMob.id) : null;
+  const baseCls = tlBase?.id === itemId ? (tlBase.hidden ? ' tl-base-hidden' : ' tl-base') : '';
+  card.className = `item-card ${found ? 'fd' : 'nf'}${baseCls}`;
 
   if (found) card.classList.add('found-flash');
   setTimeout(() => card.classList.remove('found-flash'), 500);
@@ -3058,6 +3070,11 @@ function updateProgressInPanel(panel, mob) {
   const badge = panel.querySelector('.complete-badge');
   const wasComplete = badge.style.display === 'block';
   badge.style.display = justCompleted ? 'block' : 'none';
+
+  // 완료 → 미완료로 바뀐 경우 ★ 완료 로그 제거
+  if (wasComplete && !justCompleted) {
+    panel.querySelectorAll('.sw-log-entry.complete').forEach(el => el.remove());
+  }
 
   // 방금 완료된 경우 (이전에 안 완료 상태였을 때만)
   if (justCompleted && !wasComplete) {
@@ -3979,7 +3996,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.1</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4162,14 +4179,19 @@ function closeProbCalc() {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
-    ver: '1.078', date: '26.05.02',
+    ver: '1.078', date: '26.05.03',
     feat: [
       '🎲 운 계산기 추가 — 예상 사냥 마릿수 옆 주사위 버튼 클릭',
       '현재 추정 킬수 기준으로 아이템별 미획득 확률 + 기대 획득수 계산',
       '확률 낮을수록 빨강, 높을수록 파랑 그라데이션',
       '미획득 아이템 밝게, 획득 완료 아이템 어둡게 표시',
     ],
-    fix: [],
+    fix: [
+      '타임라인 클러스터 펼쳤을 때 다른 아이템 위로 올라오도록 z-index 수정',
+      '실수로 도감작 완료 시 카운트 줄이면 ★ 완료 로그도 함께 제거',
+      '전체 모드에서 아이템 획득 시 로그에 실시간 추가되지 않던 버그 수정',
+      '사냥횟수 기준 아이템 숨김 설정 후 카드 클릭 시 설정 유지되지 않던 버그 수정',
+    ],
   },
   {
     ver: '1.077', date: '26.05.01',
