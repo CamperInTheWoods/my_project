@@ -4024,7 +4024,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.1</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4210,6 +4210,7 @@ const PATCH_NOTES = [
     ver: '1.079', date: '26.05.04',
     feat: [
       '도감작 몹 추가: 스티지 (lv.20) — 드랍 23종',
+      '패치노트 "더보기" 버튼 추가 — 이전 버전 기록 전부 확인 가능',
     ],
     fix: [],
   },
@@ -4258,11 +4259,32 @@ const PATCH_NOTES = [
       '헤더 상태 문구 변경',
     ],
   },
+  {
+    ver: '1.074', date: '26.04.29',
+    feat: [
+      '탭 드래그로 순서 변경 가능',
+    ],
+    fix: [
+      '드래그 후 완성 탭으로 이동 시 꽃비가 재발동되던 문제 수정',
+      '탭 재정렬 시 패널 재생성 → DOM 이동으로 성능 개선',
+    ],
+  },
+  {
+    ver: '1.073', date: '26.04.28',
+    feat: [
+      '데이터 백업 기능 추가 (JSON 파일로 내보내기)',
+      '스탑워치 채널 경과 시간 표시',
+    ],
+    fix: [],
+  },
 ];
 
-function openPatchNotes() {
-  const content = document.getElementById('patch-content');
-  content.innerHTML = PATCH_NOTES.map((p, i) => `
+const PN_DEFAULT = 5;
+
+function _renderPatchNotes(count) {
+  const list = PATCH_NOTES.slice(0, count);
+  const hasMore = PATCH_NOTES.length > count;
+  return list.map((p, i) => `
     ${i > 0 ? '<hr class="pn-divider">' : ''}
     <div class="pn-version">
       <h1>${p.ver}</h1>
@@ -4270,9 +4292,21 @@ function openPatchNotes() {
       ${p.feat.length ? `<h2>기능 추가</h2><ul>${p.feat.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
       ${p.fix.length  ? `<h2>버그 픽스</h2><ul>${p.fix.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
     </div>
-  `).join('');
-  const modal = document.getElementById('patch-modal');
-  modal.style.display = 'flex';
+  `).join('') + (hasMore ? `
+    <hr class="pn-divider">
+    <div style="text-align:center;padding:4px 0 2px">
+      <button onclick="_expandPatchNotes()" style="background:none;border:none;color:rgba(180,150,80,.55);font-size:.72rem;cursor:pointer;padding:4px 10px;border-radius:6px;transition:color .15s;" onmouseenter="this.style.color='rgba(245,210,100,.9)'" onmouseleave="this.style.color='rgba(180,150,80,.55)'">▼ 이전 패치노트 더보기</button>
+    </div>
+  ` : '');
+}
+
+function _expandPatchNotes() {
+  document.getElementById('patch-content').innerHTML = _renderPatchNotes(Infinity);
+}
+
+function openPatchNotes() {
+  document.getElementById('patch-content').innerHTML = _renderPatchNotes(PN_DEFAULT);
+  document.getElementById('patch-modal').style.display = 'flex';
 }
 
 function closePatchNotes() {
