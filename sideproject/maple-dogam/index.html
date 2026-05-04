@@ -1460,6 +1460,38 @@ const PRESET = [
     ]
   },
   {
+    id:3210100, name:"파이어보어", level:32, hp:1000,
+    drops:[
+      {name:"파이어보어의 송곳니", id:4000024, rate:"40%"    },
+      {name:"동물의 가죽",         id:4000021, rate:"7%"     },
+      {name:"주황 포션",           id:2000001, rate:"2%"     },
+      {name:"파란 포션",           id:2000003, rate:"2%"     },
+      {name:"하얀 포션",           id:2000002, rate:"1%"     },
+      {name:"미스릴의 원석",       id:4010002, rate:"0.6%"   },
+      {name:"강철의 원석",         id:4010001, rate:"0.3%"   },
+      {name:"가넷의 원석",         id:4020000, rate:"0.2%"   },
+      {name:"다이아몬드의 원석",   id:4020007, rate:"0.1%"   },
+      {name:"아르웬의 유리구두",   id:4001000, rate:"0.01%"  },
+      {name:"블루 루티아",         id:1082052, rate:"0.01%"  },
+      {name:"레드 헌터부츠",       id:1072079, rate:"0.01%"  },
+      {name:"골드 실비아",         id:1082044, rate:"0.01%"  },
+      {name:"황무 바지",           id:1060019, rate:"0.01%"  },
+      {name:"지천의",              id:1040026, rate:"0.01%"  },
+      {name:"레드 매티",           id:1002141, rate:"0.01%"  },
+      {name:"미스릴 완드",         id:1372003, rate:"0.01%"  },
+      {name:"태극부채",            id:1332020, rate:"0.01%"  },
+      {name:"라이덴",              id:1452005, rate:"0.008%"  },
+      {name:"월비 표창",           id:2070001, rate:"0.008%"  },
+      {name:"실버 가디언",         id:1472012, rate:"0.008%"  },
+      {name:"블랙 솔트 슈즈",      id:1072091, rate:"0.007%"  },
+      {name:"그린 버글러",         id:1002178, rate:"0.007%"  },
+      {name:"레드 실키부츠",       id:1072103, rate:"0.007%"  },
+      {name:"헤클러",              id:1462005, rate:"0.005%"  },
+      {name:"크리스탈 완드",       id:1372012, rate:"0.005%"  },
+      {name:"브라운 폴라아드",     id:1052107, rate:"0.0017%" },
+    ]
+  },
+  {
     id:3230101, name:"주니어 레이스", level:35, hp:1500,
     drops:[
       {name:"식탁보",                id:4000035, rate:"50%"   },
@@ -1540,6 +1572,35 @@ const PRESET = [
       {name:"블러드 슬레인",           id:1472019, rate:"0.005%"},
       {name:"적선백궁",                id:1050051, rate:"0.005%"},
       {name:"너클메이스",              id:1322017, rate:"0.005%"},
+    ]
+  },
+  {
+    id:4130100, name:"카파 드레이크", level:45, hp:2700,
+    drops:[
+      {name:"드레이크의 머리뼈",         id:4000014, rate:"50%"    },
+      {name:"용의 가죽",                 id:4000030, rate:"3%"     },
+      {name:"질긴 용의 가죽",            id:4001077, rate:"2%"     },
+      {name:"하얀 포션",                 id:2000002, rate:"1%"     },
+      {name:"파란 포션",                 id:2000003, rate:"1%"     },
+      {name:"오리할콘의 원석",           id:4010005, rate:"0.2%"   },
+      {name:"엘릭서",                    id:2000004, rate:"0.1%"   },
+      {name:"흑수정의 원석",             id:4020008, rate:"0.09%"  },
+      {name:"소환의 돌",                 id:4006001, rate:"0.08%"  },
+      {name:"브라운 피에뜨 바지",        id:1060069, rate:"0.01%"  },
+      {name:"브라운 피에뜨",             id:1040079, rate:"0.01%"  },
+      {name:"다크 아르텐",               id:1082064, rate:"0.01%"  },
+      {name:"젝커",                      id:1322016, rate:"0.01%"  },
+      {name:"블루 폴레패더햇",           id:1002138, rate:"0.01%"  },
+      {name:"다크 크로스 체인메일",      id:1050022, rate:"0.01%"  },
+      {name:"블루 본 헬름",              id:1002045, rate:"0.008%" },
+      {name:"아크 스태프",               id:1382001, rate:"0.007%" },
+      {name:"레드 칼라스",               id:1050046, rate:"0.007%" },
+      {name:"쥬얼 쿠아다라",             id:1302010, rate:"0.006%" },
+      {name:"차",                        id:1332016, rate:"0.006%" },
+      {name:"미스릴 힐던부츠",           id:1072133, rate:"0.006%" },
+      {name:"퍼플 네일슈즈",             id:1072125, rate:"0.006%" },
+      {name:"투구 지력 주문서 60%",      id:2040025, rate:"0.006%" },
+      {name:"레드 바르베이",             id:1052113, rate:"0.002%" },
     ]
   },
 ];
@@ -3996,7 +4057,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.2</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4178,6 +4239,15 @@ function closeProbCalc() {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.078.2', date: '26.05.04',
+    feat: [
+      '도감작 몹 추가: 파이어보어 (lv.32), 카파 드레이크 (lv.45)',
+    ],
+    fix: [
+      'MapleDB 폴백으로 오염된 _meta 데이터 복구 — PRESET 추가로 올바른 드랍 목록 사용',
+    ],
+  },
   {
     ver: '1.078', date: '26.05.03',
     feat: [
