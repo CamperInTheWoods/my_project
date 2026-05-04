@@ -1404,6 +1404,34 @@ const PRESET = [
     ]
   },
   {
+    id:2300100, name:"스티지", level:20, hp:300,
+    drops:[
+      {name:"스티지의 날개",              id:4000042, rate:"40%"    },
+      {name:"주황 포션",                  id:2000001, rate:"7%"     },
+      {name:"파란 포션",                  id:2000003, rate:"7%"     },
+      {name:"뻣뻣한 깃털",               id:4003004, rate:"4%"     },
+      {name:"레몬",                       id:2010004, rate:"1%"     },
+      {name:"활전용 화살",                id:2060000, rate:"0.8%"   },
+      {name:"석궁전용 화살",             id:2061000, rate:"0.8%"   },
+      {name:"강철의 원석",                id:4010001, rate:"0.3%"   },
+      {name:"가넷의 원석",                id:4020000, rate:"0.2%"   },
+      {name:"스틸 코퍼럴",               id:1040009, rate:"0.01%"  },
+      {name:"스틸 코퍼럴 바지",          id:1060009, rate:"0.01%"  },
+      {name:"노가다 목장갑",             id:1082002, rate:"0.01%"  },
+      {name:"빨간색 파오",               id:1040043, rate:"0.008%" },
+      {name:"라이덴",                     id:1452005, rate:"0.008%" },
+      {name:"펫장비 점프력 주문서 60%",  id:2048004, rate:"0.008%" },
+      {name:"보라색 친파오 치마",        id:1061041, rate:"0.008%" },
+      {name:"분홍색 친파오",             id:1041039, rate:"0.008%" },
+      {name:"빨간색 파오 바지",          id:1060032, rate:"0.008%" },
+      {name:"그린 페더윙햇",             id:1002119, rate:"0.007%" },
+      {name:"투구 지력 주문서 100%",     id:2040024, rate:"0.007%" },
+      {name:"망토 마법 방어력 주문서 10%",id:2041002, rate:"0.006%"},
+      {name:"브라운 코튼래거",           id:1052098, rate:"0.002%" },
+      {name:"베이지 카리브어",           id:1052101, rate:"0.0015%"},
+    ]
+  },
+  {
     id:2230101, name:"좀비버섯", level:24, hp:500,
     drops:[
       {name:"죽은 자의 부적",        id:4000008, rate:"40%"   },
@@ -4064,7 +4092,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.4</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4247,6 +4275,12 @@ function closeProbCalc() {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.078.4', date: '26.05.04',
+    feat: [
+      '도감작 몹 추가: 스티지 (lv.20) PRESET 등록',
+    ],
+  },
+  {
     ver: '1.078.3', date: '26.05.04',
     feat: [
       '메이플노트 로드 성공 시 드랍 목록 로컬 캐시 저장 — 이후 오프라인에서도 사용 가능',
@@ -4286,39 +4320,6 @@ const PATCH_NOTES = [
       '좌하단 i 버튼 → 패치노트 모달 추가',
     ],
     fix: [],
-  },
-  {
-    ver: '1.076', date: '26.04.30',
-    feat: [
-      '도감작 100% 완성 시 진행 게이지 보라→파랑→하늘 흐르는 빛 애니메이션',
-      '완성 뱃지 🎉 색상을 라벤더/보라 계열 + 은은한 글로우로 변경',
-      '진열장 상단 통계 요약 바 추가 (완료 몹 수 / 총 킬수 / 평균 소요시간)',
-    ],
-    fix: [
-      '제외 아이템 보기/숨기기 설정이 앱 재시작 후에도 유지되지 않던 문제 수정',
-      '탭 전환 시 제외 아이템 토글 버튼 텍스트가 이전 탭 상태로 남아있던 문제 수정',
-    ],
-  },
-  {
-    ver: '1.075', date: '26.04.29',
-    feat: [
-      '헤더 우측에 허규복이 진행 중인 도감작 몹 초상화 표시',
-      '초상화 클릭 시 해당 도감작 탭으로 바로 이동',
-    ],
-    fix: [
-      '초상화 금색 테두리 + 하단 문구 배치 디자인 개선',
-      '헤더 상태 문구 변경',
-    ],
-  },
-  {
-    ver: '1.074', date: '26.04.29',
-    feat: [
-      '탭 드래그로 순서 변경 가능',
-    ],
-    fix: [
-      '드래그 후 완성 탭으로 이동 시 꽃비가 재발동되던 문제 수정',
-      '탭 재정렬 시 패널 재생성 → DOM 이동으로 성능 개선',
-    ],
   },
 ];
 
