@@ -4417,8 +4417,13 @@ function _showProbResult(drop, kills, count = 0) {
   const expected = (kills * rate).toFixed(2);
   const hue   = Math.round(probNone * 220);
   const color = `hsl(${hue}, 88%, 62%)`;
+  const countColor = count > parseFloat(expected)
+    ? 'rgba(100,180,255,.9)'
+    : count === parseFloat(expected)
+    ? 'rgba(245,210,100,.9)'
+    : 'rgba(255,100,100,.9)';
   const countLabel = count > 0
-    ? ` <span style="color:rgba(180,220,140,.8);">/ 실제 ${count}개</span>`
+    ? ` <span style="color:${countColor};">획득 ${count}개</span>`
     : '';
   document.getElementById('prob-result').innerHTML = `
     <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
