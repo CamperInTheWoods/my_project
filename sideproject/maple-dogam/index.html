@@ -4252,7 +4252,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.3</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4397,7 +4397,7 @@ function openProbCalc() {
     card.addEventListener('click', () => {
       grid.querySelectorAll('.pc-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-      _showProbResult(drop, kills);
+      _showProbResult(drop, kills, mobData[drop.id]?.count || 0);
     });
     grid.appendChild(card);
   });
@@ -4406,7 +4406,7 @@ function openProbCalc() {
   document.getElementById('prob-modal').style.display = 'flex';
 }
 
-function _showProbResult(drop, kills) {
+function _showProbResult(drop, kills, count = 0) {
   const rate = parseFloat(drop.rate) / 100;
   if (!rate || rate <= 0) {
     document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:rgba(180,150,80,.4);">확률 데이터 없음</span>';
@@ -4415,14 +4415,16 @@ function _showProbResult(drop, kills) {
   const probNone = Math.pow(1 - rate, kills);
   const probPct  = (probNone * 100).toFixed(1);
   const expected = (kills * rate).toFixed(2);
-  // 낮을수록 빨강(0°), 높을수록 파랑(220°)
   const hue   = Math.round(probNone * 220);
   const color = `hsl(${hue}, 88%, 62%)`;
+  const countLabel = count > 0
+    ? ` <span style="color:rgba(180,220,140,.8);">/ 실제 ${count}개</span>`
+    : '';
   document.getElementById('prob-result').innerHTML = `
     <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
     <div class="pc-prob" style="color:${color}">${probPct}%</div>
     <div class="pc-sub">${kills.toLocaleString()}마리에서 아직 안 나왔을 확률</div>
-    <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:rgba(245,210,100,.8);">${expected}개</strong></div>
+    <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:rgba(245,210,100,.8);">${expected}개</strong>${countLabel}</div>
   `;
 }
 
@@ -4434,6 +4436,13 @@ function closeProbCalc() {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.079.3', date: '26.05.06',
+    feat: [
+      '운 계산기 기대 획득수 옆에 실제 수집 수량 표시 (미획득 시 숨김)',
+    ],
+    fix: [],
+  },
   {
     ver: '1.079.2', date: '26.05.06',
     feat: [
