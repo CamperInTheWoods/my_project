@@ -420,6 +420,11 @@
       line-height:1.4; padding-bottom:2px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
+    .hunt-dogam-exp {
+      font-size:.62rem; color:rgba(180,150,80,.55); text-align:center;
+      margin-top:5px; padding-bottom:2px;
+    }
+    .hunt-dogam-exp strong { color:rgba(200,165,80,.8); }
 
     /* ─ Stopwatch ─ */
     .sw-display {
@@ -1102,6 +1107,9 @@
     .pc-result .pc-prob { font-size:2rem; font-weight:800; letter-spacing:-.5px; }
     .pc-result .pc-sub { font-size:.65rem; color:rgba(180,150,80,.6); }
     .pc-no-kills { font-size:.72rem; color:rgba(180,150,80,.5); text-align:center; padding:20px 0; }
+    .pc-all-exp { font-size:.68rem; color:rgba(180,150,80,.65); text-align:center; margin:-4px 0 12px; padding:6px 10px; background:rgba(245,166,35,.05); border:1px solid rgba(245,166,35,.1); border-radius:8px; }
+    .pc-all-exp strong { color:rgba(245,210,100,.9); font-size:.8rem; }
+    .pc-all-exp .pc-all-done { color:rgba(100,220,150,.8); font-size:.75rem; }
 
     /* ─ 패치노트 ─ */
     .pn-version { margin-bottom:20px; }
@@ -2608,6 +2616,7 @@ function buildTabPanel(tab) {
           </div>
           <div class="hunt-count"></div>
           <div class="hunt-reason"></div>
+          <div class="hunt-dogam-exp"></div>
           <div class="divider" style="margin:10px 0 12px"></div>
         </div>
         <div class="ptitle">⏱ 스톱워치</div>
@@ -3381,6 +3390,18 @@ function updateHuntEstimateInPanel(panel, mob) {
   panel.querySelector('.hunt-count').innerHTML = `${estimated.toLocaleString()}마리`;
   const label = `${bestDrop.name} ${bestCount}개 / ${bestDrop.rate}`;
   panel.querySelector('.hunt-reason').textContent = label;
+
+  const activeRates = mob.drops
+    .filter(d => !excl.has(d.id))
+    .map(d => parseFloat(d.rate) / 100)
+    .filter(r => r > 0);
+  const dogamEl = panel.querySelector('.hunt-dogam-exp');
+  if (activeRates.length) {
+    const exp = _calcExpectedAll(activeRates);
+    dogamEl.innerHTML = `도감작 완료 기댓값<br>약 <strong>${exp.toLocaleString('ko-KR')}마리</strong>`;
+  } else {
+    dogamEl.innerHTML = '';
+  }
 }
 
 
@@ -4252,7 +4273,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.4</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4434,6 +4455,44 @@ function _showProbResult(drop, kills, count = 0) {
   `;
 }
 
+function _calcExpectedAll(rates) {
+  if (!rates.length) return 0;
+  const pMin = Math.min(...rates);
+  if (pMin <= 0) return 0;
+  const step = Math.max(1, Math.floor(1 / (100 * pMin)));
+  const maxK = Math.ceil(30 / pMin);
+  let sum = 0;
+  for (let k = 0; k <= maxK; k += step) {
+    let prod = 1;
+    for (const p of rates) prod *= (1 - Math.pow(1 - p, k));
+    const pNotDone = 1 - prod;
+    sum += pNotDone * step;
+    if (pNotDone < 1e-8) break;
+  }
+  return Math.round(sum);
+}
+
+function _updateProbAllExp() {
+  const el = document.getElementById('prob-all-exp');
+  if (!el || !activeMob) return;
+  const store   = loadS();
+  const mobData = store[`mob_${activeMob.id}`] || {};
+  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+  const activeDrops = activeMob.drops.filter(d => !excl.has(d.id));
+  if (!activeDrops.length) { el.style.display = 'none'; return; }
+  const rates = activeDrops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
+  if (!rates.length) { el.style.display = 'none'; return; }
+  const exp = _calcExpectedAll(rates);
+  const fmt = n => Number(n).toLocaleString('ko-KR');
+  const allFound = activeDrops.every(d => mobData[d.id]?.count > 0);
+  el.style.display = '';
+  if (allFound) {
+    el.innerHTML = `전체 수집 기댓값 약 <strong>${fmt(exp)}마리</strong> <span class="pc-all-done">✓ 완료</span>`;
+  } else {
+    el.innerHTML = `전체 수집 기댓값 약 <strong>${fmt(exp)}마리</strong>`;
+  }
+}
+
 function closeProbCalc() {
   document.getElementById('prob-modal').style.display = 'none';
 }
@@ -4442,6 +4501,13 @@ function closeProbCalc() {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.079.4', date: '26.05.06',
+    feat: [
+      '예상 사냥 마릿수에 도감작 완료 기댓값 표시 — 활성화된 아이템 전부 수집하는 데 필요한 평균 킬수 (각 아이템 확률 개별 적용)',
+    ],
+    fix: [],
+  },
   {
     ver: '1.079.3', date: '26.05.06',
     feat: [
