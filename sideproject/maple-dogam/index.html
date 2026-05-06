@@ -4422,13 +4422,14 @@ function _showProbResult(drop, kills, count = 0) {
     : count === parseFloat(expected)
     ? 'rgba(245,210,100,.9)'
     : 'rgba(255,100,100,.9)';
+  const fmt = n => Number(n).toLocaleString('ko-KR');
   const countLabel = count > 0
-    ? ` <span style="color:${countColor};">획득 ${count}개</span>`
+    ? ` / <span style="color:${countColor};">획득 ${fmt(count)}개</span>`
     : '';
   document.getElementById('prob-result').innerHTML = `
     <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
     <div class="pc-prob" style="color:${color}">${probPct}%</div>
-    <div class="pc-sub">${kills.toLocaleString()}마리에서 아직 안 나왔을 확률</div>
+    <div class="pc-sub">${fmt(kills)}마리에서 아직 안 나왔을 확률</div>
     <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:rgba(245,210,100,.8);">${expected}개</strong>${countLabel}</div>
   `;
 }
