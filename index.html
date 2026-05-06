@@ -4475,8 +4475,8 @@ function openPatchNotes() {
     <div class="pn-version">
       <h1>${p.ver}</h1>
       <div class="pn-date">${p.date}</div>
-      ${p.feat.length ? `<h2>기능 추가</h2><ul>${p.feat.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
-      ${p.fix.length  ? `<h2>버그 픽스</h2><ul>${p.fix.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+      ${p.feat?.length ? `<h2>기능 추가</h2><ul>${p.feat.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+      ${p.fix?.length  ? `<h2>버그 픽스</h2><ul>${p.fix.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
     </div>
   `).join('');
   const modal = document.getElementById('patch-modal');
