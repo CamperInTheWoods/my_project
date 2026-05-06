@@ -771,6 +771,12 @@
     .tl-cluster.open .tl-cluster-badge { opacity:0; }
     .tl-dup-badge { position:absolute; top:-4px; right:-4px; background:#333; color:#fff; font-size:.45rem; font-weight:700; border-radius:5px; padding:1px 3px; line-height:1.3; pointer-events:none; z-index:5; }
     .tl-ch-mark { position:absolute; top:0; width:2px; height:8px; background:rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.2); transform:translateX(-50%); pointer-events:none; border-radius:1px; z-index:2; }
+    #tl-modal-rows .tl-callout-box { width:22px; height:22px; border-width:1.5px; border-radius:4px; }
+    #tl-modal-rows .tl-callout-box img { width:18px; height:18px; margin:1px auto; }
+    #tl-modal-rows .tl-cluster { width:22px; height:30px; }
+    #tl-modal-rows .tl-cluster-badge { font-size:.42rem; min-width:12px; height:12px; top:-4px; right:-5px; }
+    #tl-modal-rows .tl-arrow { border-top-width:3px; border-left-width:3px; border-right-width:3px; }
+    #tl-modal-rows .tl-arrow-spacer { height:3px; }
     .sw-log-entry.sw-log-channel { background:#e8f4fd; border-left:3px solid #3498db; color:#1a6fa8; }
 
     /* ─ Rate badges ─ */
@@ -1934,8 +1940,9 @@ function swTickPanel(panel, tab) {
 // ══════════════════════════════════════════
 // 5. 타임라인
 // ══════════════════════════════════════════
-const TL_ROW_MS = 1 * 3600 * 1000;   // 1시간 = 한 줄
-const TL_MAX_MS = 100 * 3600 * 1000; // 100시간 = 빨강 기준
+const TL_ROW_MS = 1 * 3600 * 1000;        // 1시간 = 한 줄 (사이드바)
+const TL_MODAL_ROW_MS = 10 * 3600 * 1000; // 10시간 = 한 줄 (모달)
+const TL_MAX_MS = 100 * 3600 * 1000;      // 100시간 = 빨강 기준
 
 const TL_RARITY = [
   { min:1,     cls:'tl-r0', color:'#3498db'  }, // 파랑  (1%~100%)
@@ -1959,16 +1966,21 @@ function tlColor(ms) {
   const l = Math.round(50 - p * 10);
   return `hsl(${h},${s}%,${l}%)`;
 }
-const tlShowAllByTab = {};
-function tlShowAll() { return tlShowAllByTab[activeTabIdx] || false; }
+let _tlShowAll = !!loadS().tl_show_all;
+function tlShowAll() { return _tlShowAll; }
 function tlToggleShowAll() {
-  tlShowAllByTab[activeTabIdx] = !tlShowAll();
+  _tlShowAll = !_tlShowAll;
+  const s = loadS(); s.tl_show_all = _tlShowAll; saveS(s);
   const panel = getActivePanel();
   const tab = activeTab();
   if (panel && tab?.mob) {
     renderTimeline(panel, tab.mob, tab);
     const list = panel.querySelector('.sw-log-list');
     if (list) { list.innerHTML = ''; restoreLogEntries(panel, tab.mob); }
+  }
+  if (document.getElementById('tl-modal')?.style.display === 'flex' && tab?.mob) {
+    _renderTlModalRows(tab.mob, tab);
+    _updateTlModalToggle();
   }
 }
 
@@ -2079,9 +2091,10 @@ function renderTimeline(panel, mob, tab) {
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
-  const ptitleEl = section.querySelector('.ptitle');
-  if (ptitleEl) {
-    ptitleEl.innerHTML = `타임라인<button class="tl-toggle-btn${tlShowAll()?' on':''}" onclick="tlToggleShowAll()">${tlShowAll() ? '전체' : '최초만'}</button>`;
+  const toggleBtn = panel?.querySelector('.tl-toggle-btn');
+  if (toggleBtn) {
+    toggleBtn.className = 'tl-toggle-btn' + (tlShowAll() ? ' on' : '');
+    toggleBtn.textContent = tlShowAll() ? '전체' : '최초만';
   }
 }
 function deleteChannelEntry(btn) {
@@ -2634,11 +2647,14 @@ function buildTabPanel(tab) {
           <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
         </div>
         <div class="sw-log">
-          <div class="ptitle" style="margin-top:14px;font-size:.65rem">📋 획득 기록</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+            <div class="ptitle" style="font-size:.65rem">📋 획득 기록</div>
+            <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
+          </div>
           <div class="sw-log-list"></div>
         </div>
         <div class="tl-section" style="display:none">
-          <div class="ptitle" style="margin-top:14px;font-size:.65rem">타임라인</div>
+          <div class="ptitle" style="margin-top:14px;font-size:.65rem;cursor:pointer;user-select:none;" onclick="openTlModal()" title="크게 보기">타임라인 ↗</div>
           <div class="tl-rows"></div>
         </div>
       </div>
@@ -3396,11 +3412,13 @@ function updateHuntEstimateInPanel(panel, mob) {
     .map(d => parseFloat(d.rate) / 100)
     .filter(r => r > 0);
   const dogamEl = panel.querySelector('.hunt-dogam-exp');
-  if (activeRates.length) {
-    const exp = _calcExpectedAll(activeRates);
-    dogamEl.innerHTML = `도감작 완료 기댓값<br>약 <strong>${exp.toLocaleString('ko-KR')}마리</strong>`;
-  } else {
-    dogamEl.innerHTML = '';
+  if (dogamEl) {
+    if (activeRates.length) {
+      const exp = _calcExpectedAll(activeRates);
+      dogamEl.innerHTML = `도감작 완료 기댓값<br>약 <strong>${exp.toLocaleString('ko-KR')}마리</strong>`;
+    } else {
+      dogamEl.innerHTML = '';
+    }
   }
 }
 
@@ -4273,7 +4291,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.5</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4285,6 +4303,20 @@ renderTrophy();
     <div id="prob-kills" class="pc-kills"></div>
     <div id="prob-grid" class="pc-grid"></div>
     <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span></div>
+  </div>
+</div>
+
+<!-- 타임라인 모달 -->
+<div id="tl-modal" onclick="if(event.target===this)closeTlModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#f5f0e8;border:1px solid #d4a843;border-radius:14px;width:min(92vw,960px);height:82vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px 10px;border-bottom:1px solid #e0c878;flex-shrink:0;">
+      <span id="tl-modal-title" style="font-size:.9rem;font-weight:700;color:#5a3a0a;"></span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="tl-modal-toggle" class="tl-toggle-btn" onclick="tlToggleShowAll()" style="font-size:.62rem;">최초만</button>
+        <button onclick="closeTlModal()" style="background:none;border:none;color:#9a7a40;font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">×</button>
+      </div>
+    </div>
+    <div id="tl-modal-rows" style="overflow-y:auto;padding:12px 16px;flex:1;"></div>
   </div>
 </div>
 
@@ -4497,10 +4529,141 @@ function closeProbCalc() {
   document.getElementById('prob-modal').style.display = 'none';
 }
 
+// ── 타임라인 모달 ──
+function openTlModal() {
+  const tab = activeTab();
+  if (!tab?.mob) return;
+  const totalMs = swElapsed(tab);
+  if (totalMs < 1000) return;
+  document.getElementById('tl-modal-title').textContent = tab.mob.name + ' 타임라인';
+  _renderTlModalRows(tab.mob, tab);
+  _updateTlModalToggle();
+  document.getElementById('tl-modal').style.display = 'flex';
+}
+
+function closeTlModal() {
+  document.getElementById('tl-modal').style.display = 'none';
+}
+
+function _updateTlModalToggle() {
+  const btn = document.getElementById('tl-modal-toggle');
+  if (!btn) return;
+  btn.className = 'tl-toggle-btn' + (tlShowAll() ? ' on' : '');
+  btn.textContent = tlShowAll() ? '전체' : '최초만';
+}
+
+function _renderTlModalRows(mob, tab) {
+  const el = document.getElementById('tl-modal-rows');
+  if (!el) return;
+  const s = loadS();
+  const store   = s[`mob_${mob.id}`] || {};
+  const excl    = new Set(s[`excl_${mob.id}`] || []);
+  const tlBase  = s[`tl_base_${mob.id}`] || null;
+  const chMarks = s[`sw_ch_${mob.id}`] || [];
+  const totalMs = swElapsed(tab);
+  const ROW_MS  = TL_MODAL_ROW_MS;
+  const OVERLAP = 1; // 25h 기준 ~15분
+
+  const items = [];
+  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id)).forEach(d => {
+    const st = store[d.id];
+    if (!st || st.firstTime == null) return;
+    if (tlShowAll()) {
+      const allTimes = st.times?.length ? st.times : [st.firstTime];
+      allTimes.forEach(t => items.push({ ...d, firstTime: t }));
+    } else {
+      items.push({ ...d, firstTime: st.firstTime });
+    }
+  });
+  items.sort((a, b) => a.firstTime - b.firstTime);
+
+  const totalRows = Math.max(1, Math.ceil(totalMs / ROW_MS));
+  let html = '';
+  for (let row = 0; row < totalRows; row++) {
+    const rStart = row * ROW_MS, rEnd = rStart + ROW_MS;
+    const fillPct = totalMs >= rEnd ? 100 : ((totalMs - rStart) / ROW_MS * 100).toFixed(1);
+    const rowItems = items.filter(d => d.firstTime >= rStart && d.firstTime < rEnd);
+
+    const clusters = [];
+    rowItems.forEach(d => {
+      const xPct = (d.firstTime - rStart) / ROW_MS * 100;
+      const hit = clusters.find(c => Math.abs(c.xPct - xPct) < OVERLAP);
+      if (hit) hit.items.push(d);
+      else clusters.push({ xPct, items: [d] });
+    });
+    const calloutsH = rowItems.length > 0 ? 27 : 0;
+
+    let callHtml = '';
+    clusters.forEach(({ xPct, items: cItems }) => {
+      const cx = Math.min(Math.max(xPct, 2), 98).toFixed(1);
+      if (cItems.length === 1) {
+        const d = cItems[0]; const rar = tlRarity(d.rate);
+        callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
+          <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
+          </div>
+          <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
+        </div>`;
+      } else {
+        const seenIds = new Set();
+        const uniqueItems = [], dupItems = [];
+        cItems.forEach(d => { if (!seenIds.has(d.id)) { seenIds.add(d.id); uniqueItems.push(d); } else dupItems.push(d); });
+        const orderedItems = [...uniqueItems, ...dupItems];
+        const MAX_VIS = 3;
+        const visCount = Math.min(uniqueItems.length, MAX_VIS);
+        const arrowIdx = visCount > 1 ? 1 : 0;
+        let wrapsHtml = '';
+        orderedItems.forEach((d, i) => {
+          const rar = tlRarity(d.rate);
+          const rot = i < visCount ? (i - (visCount - 1) / 2) * 6 : 0;
+          const isExtra = i >= MAX_VIS;
+          const showArrow = i === arrowIdx;
+          wrapsHtml += `<div class="tl-callout-wrap${isExtra ? ' tl-extra' : ''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
+            <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+              <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
+            </div>
+            ${showArrow ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
+          </div>`;
+        });
+        callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
+          ${wrapsHtml}
+          <div class="tl-cluster-badge">+${cItems.length}</div>
+        </div>`;
+      }
+    });
+
+    let chHtml = '';
+    chMarks.filter(ms => ms >= rStart && ms < rEnd).forEach(ms => {
+      const xPct = ((ms - rStart) / ROW_MS * 100).toFixed(1);
+      chHtml += `<div class="tl-ch-mark" style="left:${xPct}%"></div>`;
+    });
+
+    const grad = `linear-gradient(90deg,${tlColor(rStart)},${tlColor(rEnd)})`;
+    html += `<div class="tl-row" data-row="${row}">
+      ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
+      <div class="tl-bar-zone">
+        <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${grad}"></div></div>
+        ${chHtml}
+      </div>
+      <div class="tl-time-labels"><span>${row * 10}h</span><span>${(row + 1) * 10}h</span></div>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
 // ══════════════════════════════════════════
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.079.5', date: '26.05.06',
+    feat: [
+      '타임라인 모달 추가 — "타임라인 ↗" 클릭 시 큰 창으로 보기, 한 줄에 10시간 표시',
+      '전체/최초만 토글 위치를 획득 기록 상단으로 이동',
+      '전체/최초만 설정 앱 재시작 후에도 유지',
+    ],
+    fix: [],
+  },
   {
     ver: '1.079.4', date: '26.05.06',
     feat: [
