@@ -194,8 +194,12 @@
       padding:0 2px; border-radius:3px; flex-shrink:0;
     }
     .tab-btn .tab-close:hover { color:var(--red); background:#fee; }
-    .tab-btn.dragging { opacity:.35; }
-    .tab-btn.drag-over { border-color:var(--gold); background:#fff8e8; }
+    .tab-btn.drag-source { opacity:0; pointer-events:none; }
+    .tab-drag-ghost {
+      position:fixed !important; z-index:9999; pointer-events:none;
+      box-shadow:0 8px 28px rgba(0,0,0,.22);
+      margin:0 !important; transition:none !important;
+    }
     .tab-add {
       padding:7px 11px; border-radius:8px 8px 0 0;
       border:1px dashed var(--border); border-bottom:none;
@@ -1735,7 +1739,8 @@ function makeTab(idx) {
 
 let tabs = [makeTab(0)];
 let activeTabIdx = 0;
-let _dragTabIdx = -1;
+let _dragTabIdx  = -1;
+let _tabDragDone = false;
 
 function activeTab() { return tabs[activeTabIdx]; }
 // 하위 호환: activeMob getter/setter
@@ -2660,28 +2665,10 @@ function renderTabBar() {
     `;
     btn.addEventListener('click', e => {
       if (e.target.classList.contains('tab-close')) return;
+      if (_tabDragDone) { _tabDragDone = false; return; }
       switchTab(tab.idx);
     });
-    btn.draggable = true;
-    btn.addEventListener('dragstart', e => {
-      _dragTabIdx = tab.idx;
-      setTimeout(() => btn.classList.add('dragging'), 0);
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    btn.addEventListener('dragend', () => {
-      btn.classList.remove('dragging');
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('drag-over'));
-    });
-    btn.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (_dragTabIdx !== tab.idx) btn.classList.add('drag-over');
-    });
-    btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
-    btn.addEventListener('drop', e => {
-      e.preventDefault();
-      if (_dragTabIdx >= 0 && _dragTabIdx !== tab.idx) reorderTab(_dragTabIdx, tab.idx);
-    });
+    attachTabDrag(btn, tab);
     bar.appendChild(btn);
   });
   if (tabs.length < MAX_TABS) {
@@ -2786,6 +2773,83 @@ function reorderTab(fromIdx, toIdx) {
   activeTabIdx = moved.idx;
   switchTab(activeTabIdx);
   updateAllSyncBtns();
+}
+
+function attachTabDrag(btn, tab) {
+  btn.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    if (e.target.closest('.tab-close, .tab-status-dot')) return;
+
+    const startX  = e.clientX;
+    const rect0   = btn.getBoundingClientRect();
+    const grabX   = e.clientX - rect0.left;
+    const tabW    = rect0.width;
+    let dragging  = false;
+    let ghost     = null;
+    let origRects = null;
+    let insertIdx = tab.idx;
+
+    function cleanup(reorder) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup',   onUp);
+      document.removeEventListener('pointercancel', onCancel);
+      document.body.style.cursor = '';
+      if (!dragging) return;
+      ghost.remove();
+      document.querySelectorAll('#tab-bar .tab-btn').forEach(b => {
+        b.classList.remove('drag-source');
+        b.style.transform = '';
+        b.style.transition = '';
+      });
+      if (reorder && insertIdx !== tab.idx) reorderTab(tab.idx, insertIdx);
+    }
+
+    function onMove(ev) {
+      if (!dragging) {
+        if (Math.abs(ev.clientX - startX) < 5) return;
+        dragging = true;
+        origRects = Array.from(document.querySelectorAll('#tab-bar .tab-btn'))
+          .map(b => b.getBoundingClientRect());
+        ghost = btn.cloneNode(true);
+        ghost.classList.add('tab-drag-ghost');
+        ghost.style.left      = rect0.left + 'px';
+        ghost.style.top       = rect0.top  + 'px';
+        ghost.style.width     = tabW + 'px';
+        ghost.style.transform = 'rotate(-2deg) scale(1.04)';
+        document.body.appendChild(ghost);
+        btn.classList.add('drag-source');
+        document.body.style.cursor = 'grabbing';
+      }
+
+      ghost.style.left = (ev.clientX - grabX) + 'px';
+
+      const ghostCx = (ev.clientX - grabX) + tabW * 0.5;
+      let newInsert = tab.idx;
+      for (let i = 0; i < origRects.length; i++) {
+        if (i === tab.idx) continue;
+        const mid = origRects[i].left + origRects[i].width * 0.5;
+        if (i < tab.idx && ghostCx < mid) { newInsert = i; break; }
+        if (i > tab.idx && ghostCx > mid)   newInsert = i;
+      }
+      insertIdx = newInsert;
+
+      document.querySelectorAll('#tab-bar .tab-btn').forEach((b, i) => {
+        if (i === tab.idx) return;
+        let tx = 0;
+        if (insertIdx < tab.idx && i >= insertIdx && i < tab.idx) tx =  (tabW + 5);
+        if (insertIdx > tab.idx && i > tab.idx && i <= insertIdx) tx = -(tabW + 5);
+        b.style.transform  = tx ? `translateX(${tx}px)` : '';
+        b.style.transition = 'transform .12s ease';
+      });
+    }
+
+    function onUp()     { _tabDragDone = dragging; cleanup(true); }
+    function onCancel() { cleanup(false); }
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup',   onUp);
+    document.addEventListener('pointercancel', onCancel);
+  });
 }
 
 function restorePanelForTab(tab) {
@@ -4183,7 +4247,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.078.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4366,6 +4430,12 @@ function closeProbCalc() {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.079', date: '26.05.06',
+    feat: [
+      '탭 드래그 재구현 — 마우스 따라 자연스럽게 움직이는 ghost + 옆 탭 자동으로 비켜주는 효과',
+    ],
+  },
+  {
     ver: '1.078.5', date: '26.05.04',
     feat: [
       '도감작 몹 추가: 검은/붉은/푸른 켄타우로스 (lv.88) PRESET 등록',
@@ -4394,21 +4464,6 @@ const PATCH_NOTES = [
     ],
     fix: [
       'MapleDB 폴백으로 오염된 _meta 데이터 복구 — PRESET 추가로 올바른 드랍 목록 사용',
-    ],
-  },
-  {
-    ver: '1.078', date: '26.05.03',
-    feat: [
-      '🎲 운 계산기 추가 — 예상 사냥 마릿수 옆 주사위 버튼 클릭',
-      '현재 추정 킬수 기준으로 아이템별 미획득 확률 + 기대 획득수 계산',
-      '확률 낮을수록 빨강, 높을수록 파랑 그라데이션',
-      '미획득 아이템 밝게, 획득 완료 아이템 어둡게 표시',
-    ],
-    fix: [
-      '타임라인 클러스터 펼쳤을 때 다른 아이템 위로 올라오도록 z-index 수정',
-      '실수로 도감작 완료 시 카운트 줄이면 ★ 완료 로그도 함께 제거',
-      '전체 모드에서 아이템 획득 시 로그에 실시간 추가되지 않던 버그 수정',
-      '사냥횟수 기준 아이템 숨김 설정 후 카드 클릭 시 설정 유지되지 않던 버그 수정',
     ],
   },
 ];
