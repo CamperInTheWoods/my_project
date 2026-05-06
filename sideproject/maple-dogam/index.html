@@ -4424,7 +4424,7 @@ function _showProbResult(drop, kills, count = 0) {
     : 'rgba(255,100,100,.9)';
   const fmt = n => Number(n).toLocaleString('ko-KR');
   const countLabel = count > 0
-    ? ` / <span style="color:${countColor};">획득 ${fmt(count)}개</span>`
+    ? ` / 획득 <span style="color:${countColor};">${fmt(count)}개</span>`
     : '';
   document.getElementById('prob-result').innerHTML = `
     <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
