@@ -74,7 +74,7 @@
       --header-bg:     linear-gradient(180deg,#1a130e 0%,#100a07 100%);
       --header-border: #3a2a1f;
       --header-title:  #e8c887;
-      --header-sub:    #8a7860;
+      --header-sub:    #a89878;
       --char-label:    #c8a86a;
       --btn-grad:      linear-gradient(135deg,#a8854a,#c89a55);
       --btn-shad:      rgba(168,133,74,.3);
@@ -304,7 +304,7 @@
     /* ─ Progress ─ */
     .prog-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
     .prog-label .cnt { font-size:.95rem; font-weight:700; color:var(--brown); }
-    .prog-label .pct { font-size:.78rem; color:var(--gray); }
+    .prog-label .pct { font-size:.78rem; color:var(--gray); font-feature-settings:"tnum"; letter-spacing:-0.02em; }
     .prog-bg { height:14px; background:var(--bg-prog); border-radius:7px; overflow:hidden; border:1px solid var(--border); }
     .prog-fill { height:100%; background:linear-gradient(90deg,#f5a623,#4caf50); border-radius:7px; transition:width .4s ease; }
     .prog-fill.complete {
@@ -1201,6 +1201,11 @@
     .pc-all-exp .pc-all-done { color:rgba(100,220,150,.8); font-size:.75rem; }
 
     /* ─ 다크 테마 오버라이드 ─ */
+    [data-theme="dark"] .sw-start { background:#5a8a62; }
+    [data-theme="dark"] .sw-pause { background:#b88a30; }
+    [data-theme="dark"] .prog-fill { background:linear-gradient(90deg,#c89030,#4a7a52); }
+    [data-theme="dark"] .prog-fill.complete { background:linear-gradient(90deg,#4a3880,#6858b0,#8878d0,#4a3880); background-size:300% 100%; box-shadow:0 0 8px rgba(90,70,180,.4), 0 0 3px rgba(140,120,220,.3) inset; }
+    [data-theme="dark"] .item-card.fd .ccnt { color:#7abf82; }
     [data-theme="dark"] .sw-log-entry.complete { background:#1f1508; color:#d4af6e; border-color:#3a2a10; }
     [data-theme="dark"] .sw-log-entry.sw-log-channel { background:#0a1520; color:#5aa8e8; border-color:#1a3050; }
     [data-theme="dark"] .sw-reset { color:#6a5a42; border-color:#2a1e15; }
@@ -4500,7 +4505,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.081.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.081.3</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4937,6 +4942,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.081.3', date: '26.05.07',
+    feat: [
+      '다크 테마 가독성 개선 — 헤더 서브텍스트 밝기 보정, 시작/일시정지 버튼 채도 조정, 진행바 다크 팔레트 적용',
+    ],
+    fix: [],
+  },
   {
     ver: '1.081.2', date: '26.05.07',
     feat: [
