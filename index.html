@@ -4500,7 +4500,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.079.6</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_...</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4559,6 +4559,12 @@ renderTrophy();
 </div>
 
 <script>
+// ── 버전 레이블 자동 동기화 ──
+(function() {
+  const el = document.getElementById('ver-label');
+  if (el && PATCH_NOTES?.length) el.textContent = '똘레로_' + PATCH_NOTES[0].ver;
+})();
+
 // ── 관리자 히든 버튼 ──
 let _verClickCount = 0, _verClickTimer = null;
 document.getElementById('ver-label').addEventListener('click', () => {
@@ -4604,6 +4610,48 @@ function adminApplyTime() {
   // 모달 새로고침
   openResultModal(tab.mob);
 }
+
+// ══════════════════════════════════════════
+// 토스트 알림
+// ══════════════════════════════════════════
+function showToast(msg) {
+  let el = document.getElementById('_toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_toast';
+    el.style.cssText = 'position:fixed;top:64px;left:50%;transform:translateX(-50%);background:rgba(20,12,4,.96);border:1px solid rgba(245,166,35,.4);color:#d4af6e;padding:9px 18px;border-radius:10px;font-size:.82rem;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5);';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
+
+// ══════════════════════════════════════════
+// 30분 무활동 자동 정지
+// ══════════════════════════════════════════
+let _lastActivity = Date.now();
+let _actThrottled = false;
+function _onActivity() {
+  if (_actThrottled) return;
+  _lastActivity = Date.now();
+  _actThrottled = true;
+  setTimeout(() => { _actThrottled = false; }, 60000);
+}
+document.addEventListener('mousemove', _onActivity);
+document.addEventListener('click', _onActivity);
+document.addEventListener('keydown', _onActivity);
+
+setInterval(() => {
+  if (Date.now() - _lastActivity < 30 * 60 * 1000) return;
+  let stopped = false;
+  tabs.forEach(t => {
+    if (t.sw.startTs !== null) { _swPauseOne(t, getPanelOf(t.idx)); stopped = true; }
+  });
+  if (stopped) { renderTabBar(); showToast('30분 동안 활동이 없어 타이머가 정지됐습니다.'); }
+  _lastActivity = Date.now(); // 재발동 방지
+}, 60000);
 
 // ══════════════════════════════════════════
 // 확률 계산기
@@ -4879,6 +4927,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.081.0', date: '26.05.07',
+    feat: [
+      '30분 동안 활동이 없으면 타이머 자동 정지 — 모든 탭 동시 적용, 알림 표시',
+    ],
+    fix: [
+      '우하단 버전 표시가 최신 버전과 다르게 나오던 문제 수정',
+    ],
+  },
   {
     ver: '1.080.2', date: '26.05.07',
     feat: [
