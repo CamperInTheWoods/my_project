@@ -4500,7 +4500,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.081.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.081.2</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4510,6 +4510,7 @@ renderTrophy();
       <button onclick="closeProbCalc()" style="background:none;border:none;color:rgba(180,150,80,.6);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;" onmouseenter="this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.color='rgba(180,150,80,.6)'">&times;</button>
     </div>
     <div id="prob-kills" class="pc-kills"></div>
+    <div id="prob-complete" style="font-size:.68rem;color:rgba(180,150,80,.55);text-align:center;margin:-4px 0 8px;min-height:1em;"></div>
     <div id="prob-grid" class="pc-grid"></div>
     <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span></div>
   </div>
@@ -4677,6 +4678,7 @@ function openProbCalc() {
   const killsEl = document.getElementById('prob-kills');
   if (kills === 0) {
     killsEl.innerHTML = '<div class="pc-no-kills">아직 획득 기록이 없어요</div>';
+    document.getElementById('prob-complete').innerHTML = '';
     document.getElementById('prob-grid').innerHTML = '';
     document.getElementById('prob-result').innerHTML = '';
     document.getElementById('prob-modal').style.display = 'flex';
@@ -4687,6 +4689,20 @@ function openProbCalc() {
   const store   = loadS();
   const mobData = store[`mob_${activeMob.id}`] || {};
   const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+
+  // 기댓값 >= 1인 미획득 아이템만 (kills * rate >= 1)
+  const uncollectedRates = activeMob.drops
+    .filter(d => !excl.has(d.id) && !(mobData[d.id]?.count > 0))
+    .map(d => parseFloat(d.rate) / 100)
+    .filter(r => r > 0 && kills * r >= 1);
+  const completeEl = document.getElementById('prob-complete');
+  if (uncollectedRates.length) {
+    const completeProb = uncollectedRates.reduce((acc, p) => acc * (1 - Math.pow(1 - p, kills)), 1);
+    const pct = ((1 - completeProb) * 100).toFixed(1);
+    completeEl.innerHTML = `도감작 미완료 확률 약 <strong style="color:rgba(200,165,80,.85);">${pct}%</strong>`;
+  } else {
+    completeEl.innerHTML = '';
+  }
 
   const grid = document.getElementById('prob-grid');
   grid.innerHTML = '';
@@ -4921,6 +4937,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.081.2', date: '26.05.07',
+    feat: [
+      '운 계산기에 도감작 미완료 확률 표시 — 현재 추정 킬수 기준, 기댓값 1개 이상인 미획득 아이템 대상',
+    ],
+    fix: [],
+  },
   {
     ver: '1.081.1', date: '26.05.07',
     feat: [],
