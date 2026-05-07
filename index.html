@@ -4500,7 +4500,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_...</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.081.0</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4559,12 +4559,6 @@ renderTrophy();
 </div>
 
 <script>
-// ── 버전 레이블 자동 동기화 ──
-(function() {
-  const el = document.getElementById('ver-label');
-  if (el && PATCH_NOTES?.length) el.textContent = '똘레로_' + PATCH_NOTES[0].ver;
-})();
-
 // ── 관리자 히든 버튼 ──
 let _verClickCount = 0, _verClickTimer = null;
 document.getElementById('ver-label').addEventListener('click', () => {
