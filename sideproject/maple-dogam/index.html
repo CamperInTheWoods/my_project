@@ -895,53 +895,53 @@
     }
     .result-modal {
       max-width:520px; width:100%; overflow: visible;
-      border-radius:20px; box-shadow:0 16px 60px rgba(0,0,0,.5);
+      border-radius:20px; box-shadow:var(--shadow-card);
       margin:auto;
     }
-    /* 카드 본체 — 다크 배경 */
+    /* 카드 본체 — 테마 연동 */
     .result-card {
-      background:linear-gradient(160deg,#1e1408 0%,#2d1f0a 60%,#1a1005 100%);
+      background:var(--bg-card);
       border-radius:20px; padding:28px 24px 24px;
       display:flex; flex-direction:column; gap:20px;
-      border:1px solid rgba(216,148,38,.25);
+      border:1px solid var(--border);
+      position:relative;
     }
     /* 상단 히어로 — 좌측 이미지+이름 / 우측 스탯 */
     .result-hero { display:flex; align-items:center; gap:16px; }
     .result-hero-left { display:flex; flex-direction:column; align-items:center; gap:7px; flex-shrink:0; }
     .result-mob-img-wrap {
       width:88px; height:88px;
-      background:rgba(255,255,255,.06); border-radius:14px;
-      border:2px solid rgba(216,148,38,.3);
+      background:var(--bg-prog); border-radius:14px;
+      border:2px solid var(--border);
       display:flex; align-items:center; justify-content:center;
     }
     .result-mob-img { width:74px; height:74px; object-fit:contain; }
     .result-mob-name {
-      font-size:.9rem; font-weight:800; color:#fff; line-height:1.2;
-      text-shadow:0 2px 8px rgba(0,0,0,.6);
+      font-size:.9rem; font-weight:800; color:var(--dark); line-height:1.2;
       text-align:center; word-break:keep-all; max-width:96px;
     }
     /* 스탯 — 우측 2열 그리드, 진척도 전체폭 */
     .result-hero-right { flex:1; min-width:0; }
     .result-hero-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .result-stat-block {
-      background:rgba(255,255,255,.07); border:1px solid rgba(216,148,38,.2);
+      background:var(--bg-tl-toggle); border:1px solid var(--border);
       border-radius:10px; padding:8px 12px; display:flex; flex-direction:column; gap:2px;
     }
     .result-stat-block.full { grid-column:1 / -1; }
-    .rsb-label { font-size:.55rem; color:rgba(255,255,255,.45); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .rsb-label { font-size:.55rem; color:var(--gray); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
     .rsb-value { font-size:1.05rem; font-weight:800; color:var(--gold); line-height:1.2; white-space:nowrap; }
-    .rsb-value.small { font-size:.85rem; color:rgba(255,255,255,.7); white-space:nowrap; }
+    .rsb-value.small { font-size:.85rem; color:var(--dark); white-space:nowrap; }
     /* 구분선 */
-    .result-divider { height:1px; background:rgba(216,148,38,.18); }
+    .result-divider { height:1px; background:var(--border); }
     /* 아이템 섹션 */
     .result-section-title {
-      font-size:.58rem; color:rgba(255,255,255,.4); margin-bottom:8px;
+      font-size:.58rem; color:var(--gray); margin-bottom:8px;
       font-weight:700; letter-spacing:.1em; text-transform:uppercase;
     }
     .result-items-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
     .ri-cell {
-      position:relative; border-radius:8px; border:3px solid rgba(80,80,80,.6);
-      background:rgba(255,255,255,.05); aspect-ratio:1;
+      position:relative; border-radius:8px; border:3px solid var(--border);
+      background:var(--bg-prog); aspect-ratio:1;
       display:flex; align-items:center; justify-content:center;
       cursor:default; overflow:visible;
     }
@@ -980,7 +980,7 @@
       100% { transform: translateX(250%)  skewX(-20deg); }
     }
     .result-card.complete {
-      background: linear-gradient(160deg,#1a0e00 0%,#2a1800 35%,#1e1200 60%,#2e1a00 100%);
+      background: linear-gradient(160deg,#120c20 0%,#1a1030 35%,#100c18 60%,#1e1428 100%);
       border: 1.5px solid transparent;
       border-radius: 20px;
       position: relative;
@@ -1002,7 +1002,7 @@
       padding: 1.5px;
       opacity: .85;
     }
-    .result-card.complete > * { position:relative; z-index:1; }
+    .result-card > * { position:relative; z-index:1; }
     .result-card.complete::after {
       content:'';
       position:absolute; inset:0; border-radius:20px; z-index:0; pointer-events:none;
@@ -1020,75 +1020,90 @@
     /* 틸트 — 완료/미완료 공통 */
     .result-card {
       transform: perspective(700px) rotateX(0deg) rotateY(0deg);
-      transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+      transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
     .result-card.tilt {
       transform: perspective(700px)
-        rotateX(calc((var(--my, 0.5) - 0.5) * -12deg))
-        rotateY(calc((var(--mx, 0.5) - 0.5) * 12deg));
+        rotateX(calc((var(--my, 0.5) - 0.5) * -16deg))
+        rotateY(calc((var(--mx, 0.5) - 0.5) * 16deg));
     }
-    /* 미완료 — 단색 하이라이트만 */
+    /* 미완료 — 빛이 오는 방향에서 specular 하이라이트 */
     .result-card:not(.complete) .mouse-glow {
       position:absolute; inset:0; border-radius:20px; z-index:3; pointer-events:none;
       overflow:hidden;
-      mix-blend-mode: color-dodge;
-      opacity:0; transition:opacity 0.9s ease;
+      opacity:0; transition:opacity 0.6s ease;
     }
-    .result-card:not(.complete).tilt .mouse-glow { opacity:0.28; }
+    .result-card:not(.complete).tilt .mouse-glow { opacity:1; }
     .result-card:not(.complete) .mouse-glow::before {
-      content:'';
-      position:absolute; inset:-20%;
-      background: radial-gradient(
-        ellipse at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
-        rgba(220,210,190,.9) 0%, transparent 65%
-      );
-      filter: blur(28px);
-    }
-    .result-card.complete .gold-shimmer {
-      position:absolute; inset:0; border-radius:20px; z-index:2; pointer-events:none; overflow:hidden;
-      mix-blend-mode: color-dodge;
-      opacity:0; transition: opacity 0.9s ease;
-    }
-    .result-card.complete.tilt .gold-shimmer { opacity:0.55; }
-    /* 배경 전체를 물들이는 넓은 무지개 */
-    .result-card.complete .gold-shimmer::before {
-      content:'';
-      position:absolute; inset:-40%;
-      background: conic-gradient(
-        from calc(var(--mx, 0.5) * 270deg + 180deg)
-        at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
-        rgba(255,80,80,.22),
-        rgba(255,200,50,.22),
-        rgba(60,255,140,.22),
-        rgba(40,190,255,.22),
-        rgba(180,60,255,.22),
-        rgba(255,80,80,.22)
-      );
-      filter: blur(38px);
-    }
-    /* 마우스 위치 중심 specular */
-    .result-card.complete .gold-shimmer::after {
       content:'';
       position:absolute; inset:0;
       background: radial-gradient(
-        ellipse 55% 45% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
-        rgba(255,255,255,.08) 0%,
+        ellipse 55% 50% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+        rgba(255,248,220,.38) 0%,
+        rgba(255,220,140,.12) 35%,
         transparent 65%
       );
+    }
+    .result-card:not(.complete) .mouse-glow::after {
+      content:'';
+      position:absolute; inset:0;
+      background: radial-gradient(
+        circle 28% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+        rgba(255,255,255,.22) 0%,
+        transparent 70%
+      );
+      mix-blend-mode: overlay;
+    }
+    /* 완료 카드 — 포켓몬 카드식 foil: background-position이 틸트에 따라 흐름 */
+    .result-card.complete .gold-shimmer {
+      position:absolute; inset:0; border-radius:20px; z-index:2; pointer-events:none; overflow:hidden;
+      opacity:0; transition: opacity 0.6s ease;
+    }
+    .result-card.complete.tilt .gold-shimmer { opacity:1; }
+    /* 무지개 밴드 — 기울임에 따라 배경 위치가 이동해 빛이 흐르는 효과 */
+    .result-card.complete .gold-shimmer::before {
+      content:'';
+      position:absolute; inset:0;
+      background: repeating-linear-gradient(
+        -55deg,
+        transparent                0%,  transparent              6%,
+        rgba(255, 0,  80, .55)     8%,  rgba(255,140,  0, .55)  11%,
+        rgba(255,230,  0, .55)    14%,  rgba(  0,240,100, .55)  17%,
+        rgba(  0,180,255, .55)    20%,  rgba(120,  0,255, .55)  23%,
+        rgba(255,  0,160, .55)    26%,  transparent             28%,
+        transparent               34%
+      );
+      background-size: 300% 300%;
+      background-position: calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%);
+      mix-blend-mode: color-dodge;
+      filter: blur(0.5px);
+    }
+    /* specular 하이라이트 — 빛이 오는 지점 */
+    .result-card.complete .gold-shimmer::after {
+      content:'';
+      position:absolute; inset:0;
+      background:
+        radial-gradient(
+          ellipse 60% 50% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+          rgba(255,255,255,.20) 0%,
+          rgba(255,255,255,.05) 35%,
+          transparent 65%
+        );
+      mix-blend-mode: overlay;
     }
     .result-card.complete .mouse-glow {
       position:absolute; inset:0; border-radius:20px; z-index:3; pointer-events:none;
       background: radial-gradient(
-        ellipse 50% 40% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
-        rgba(255,255,255,.08) 0%, transparent 70%);
+        circle 35% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+        rgba(255,255,255,.14) 0%, transparent 65%);
       mix-blend-mode: overlay;
-      opacity:0; transition:opacity 0.9s ease;
+      opacity:0; transition:opacity 0.6s ease;
     }
     .result-card.complete.tilt .mouse-glow { opacity:1; }
     .result-card.complete .result-mob-img-wrap {
       border: 2px solid transparent;
       background:
-        linear-gradient(#1a0e00,#1a0e00) padding-box,
+        linear-gradient(#120c20,#120c20) padding-box,
         linear-gradient(135deg,#f5a623,#c8f0ff,#b388ff,#f5a623) border-box;
       box-shadow: 0 0 24px rgba(216,148,38,.5), 0 0 8px rgba(180,80,255,.3);
       animation: borderGlow 4s ease-in-out infinite;
@@ -1153,20 +1168,20 @@
     }
     .ri-tooltip {
       display:none; position:absolute; bottom:calc(100% + 6px); left:50%;
-      transform:translateX(-50%); background:#1a1008; color:#fff;
+      transform:translateX(-50%); background:var(--panel); color:var(--dark);
       font-size:.6rem; padding:5px 9px; border-radius:7px; white-space:nowrap;
       z-index:10; pointer-events:none; line-height:1.6;
-      border:1px solid rgba(216,148,38,.3);
+      border:1px solid var(--border); box-shadow:var(--shadow-card);
     }
     .ri-tooltip::after {
       content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
-      border:4px solid transparent; border-top-color:#1a1008;
+      border:4px solid transparent; border-top-color:var(--panel);
     }
     .ri-cell:hover .ri-tooltip { display:block; }
     /* 액션 버튼 */
     .result-actions {
       display:flex; gap:8px; margin-top:4px; justify-content:flex-end;
-      padding-top:16px; border-top:1px solid rgba(216,148,38,.15);
+      padding-top:16px; border-top:1px solid var(--border);
       border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
       overflow: hidden;
     }
@@ -1174,46 +1189,46 @@
       padding:8px 18px; border-radius:9px; border:none; cursor:pointer;
       font-family:inherit; font-size:.8rem; font-weight:700; transition:all .15s;
     }
-    .result-btn-close { background:rgba(255,255,255,.1); color:rgba(255,255,255,.6); }
-    .result-btn-close:hover { background:rgba(255,255,255,.18); }
+    .result-btn-close { background:var(--bg-btn-sec); color:var(--gray); border:1px solid var(--border); }
+    .result-btn-close:hover { background:var(--bg-tab-hover); }
     .result-btn-save { background:var(--gold); color:#1a0f00; }
     .result-btn-save:hover { background:#ffbe40; }
-    .result-btn-trophy { background:rgba(216,148,38,.15); color:rgba(216,148,38,.9); border:1.5px solid rgba(216,148,38,.4); }
-    .result-btn-trophy:hover { background:rgba(216,148,38,.25); }
+    .result-btn-trophy { background:var(--bg-tl-toggle); color:var(--gold); border:1.5px solid var(--border); }
+    .result-btn-trophy:hover { background:var(--bg-tab-hover); }
     .result-btn-trophy:disabled { opacity:.45; cursor:default; }
 
     /* ─ 확률 계산기 ─ */
-    .pc-kills { font-size:.72rem; color:rgba(180,150,80,.7); text-align:center; margin-bottom:12px; }
-    .pc-kills strong { color:rgba(245,210,100,.9); font-size:.88rem; }
+    .pc-kills { font-size:.72rem; color:var(--gray); text-align:center; margin-bottom:12px; }
+    .pc-kills strong { color:var(--gold); font-size:.88rem; }
     .pc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:14px; max-height:220px; overflow-y:auto; }
     .pc-grid::-webkit-scrollbar { width:4px; }
-    .pc-grid::-webkit-scrollbar-track { background:rgba(255,255,255,.03); border-radius:2px; }
+    .pc-grid::-webkit-scrollbar-track { background:var(--bg-prog); border-radius:2px; }
     .pc-grid::-webkit-scrollbar-thumb { background:rgba(216,148,38,.35); border-radius:2px; }
     .pc-grid::-webkit-scrollbar-thumb:hover { background:rgba(216,148,38,.6); }
     .pc-card {
       display:flex; flex-direction:column; align-items:center; gap:3px;
       padding:7px 4px 5px; border-radius:8px; cursor:pointer;
-      background:rgba(255,255,255,.04); border:1.5px solid rgba(216,148,38,.12);
+      background:var(--bg-card); border:1.5px solid var(--border);
       transition:background .15s, border-color .15s;
     }
-    .pc-card:hover { background:rgba(216,148,38,.08); border-color:rgba(216,148,38,.3); }
-    .pc-card.selected { background:rgba(216,148,38,.15); border-color:rgba(216,148,38,.6); }
+    .pc-card:hover { background:var(--bg-tab-hover); border-color:var(--gold); }
+    .pc-card.selected { background:var(--bg-card-sel); border-color:var(--gold); }
     .pc-card.pc-found { opacity:.3; }
     .pc-card.pc-found img { filter:brightness(.5) saturate(0); }
     .pc-card img { width:38px; height:38px; object-fit:contain; image-rendering:pixelated; }
-    .pc-card .pc-name { font-size:.56rem; color:rgba(220,195,140,.8); text-align:center; line-height:1.3; word-break:keep-all; }
-    .pc-card .pc-rate { font-size:.55rem; color:rgba(180,150,80,.6); }
+    .pc-card .pc-name { font-size:.56rem; color:var(--dark); text-align:center; line-height:1.3; word-break:keep-all; }
+    .pc-card .pc-rate { font-size:.55rem; color:var(--gray); }
     .pc-result {
-      border-top:1px solid rgba(216,148,38,.12); padding-top:12px; text-align:center;
+      border-top:1px solid var(--border); padding-top:12px; text-align:center;
       min-height:70px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
     }
-    .pc-result .pc-item-name { font-size:.7rem; color:rgba(200,170,100,.7); margin-bottom:2px; }
+    .pc-result .pc-item-name { font-size:.7rem; color:var(--char-label); margin-bottom:2px; }
     .pc-result .pc-prob { font-size:2rem; font-weight:800; letter-spacing:-.5px; }
-    .pc-result .pc-sub { font-size:.65rem; color:rgba(180,150,80,.6); }
-    .pc-no-kills { font-size:.72rem; color:rgba(180,150,80,.5); text-align:center; padding:20px 0; }
-    .pc-all-exp { font-size:.68rem; color:rgba(180,150,80,.65); text-align:center; margin:-4px 0 12px; padding:6px 10px; background:rgba(216,148,38,.05); border:1px solid rgba(216,148,38,.1); border-radius:8px; }
-    .pc-all-exp strong { color:rgba(245,210,100,.9); font-size:.8rem; }
-    .pc-all-exp .pc-all-done { color:rgba(100,220,150,.8); font-size:.75rem; }
+    .pc-result .pc-sub { font-size:.65rem; color:var(--gray); }
+    .pc-no-kills { font-size:.72rem; color:var(--gray); text-align:center; padding:20px 0; }
+    .pc-all-exp { font-size:.68rem; color:var(--gray); text-align:center; margin:-4px 0 12px; padding:6px 10px; background:var(--bg-tl-toggle); border:1px solid var(--border); border-radius:8px; }
+    .pc-all-exp strong { color:var(--gold); font-size:.8rem; }
+    .pc-all-exp .pc-all-done { color:var(--green); font-size:.75rem; }
 
     /* ─ 통계 테이블 ─ */
     .stat-col { flex:1; min-width:0; }
@@ -4527,19 +4542,19 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.083.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.0</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:linear-gradient(160deg,#1e1408 0%,#2d1f0a 60%,#1a1005 100%);border:1px solid rgba(216,148,38,.25);border-radius:16px;max-width:320px;width:100%;padding:20px 20px 18px;position:relative;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(216,148,38,.15);padding-bottom:12px;">
-      <span style="font-size:.95rem;font-weight:700;color:rgba(245,210,120,.9);">🎲 운 계산기</span>
-      <button onclick="closeProbCalc()" style="background:none;border:none;color:rgba(180,150,80,.6);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;" onmouseenter="this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.color='rgba(180,150,80,.6)'">&times;</button>
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:320px;width:100%;padding:20px 20px 18px;position:relative;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+      <span style="font-size:.95rem;font-weight:700;color:var(--dark);">🎲 운 계산기</span>
+      <button onclick="closeProbCalc()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
     </div>
     <div id="prob-kills" class="pc-kills"></div>
-    <div id="prob-complete" style="font-size:.68rem;color:rgba(180,150,80,.55);text-align:center;margin:-4px 0 8px;min-height:1em;"></div>
+    <div id="prob-complete" style="font-size:.68rem;color:var(--gray);text-align:center;margin:-4px 0 8px;min-height:1em;"></div>
     <div id="prob-grid" class="pc-grid"></div>
-    <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span></div>
+    <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:var(--gray);">아이템을 선택하세요</span></div>
   </div>
 </div>
 
@@ -4773,14 +4788,14 @@ function openProbCalc() {
     grid.appendChild(card);
   });
 
-  document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span>';
+  document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:var(--gray);">아이템을 선택하세요</span>';
   document.getElementById('prob-modal').style.display = 'flex';
 }
 
 function _showProbResult(drop, kills, count = 0) {
   const rate = parseFloat(drop.rate) / 100;
   if (!rate || rate <= 0) {
-    document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:rgba(180,150,80,.4);">확률 데이터 없음</span>';
+    document.getElementById('prob-result').innerHTML = '<span style="font-size:.7rem;color:var(--gray);">확률 데이터 없음</span>';
     return;
   }
   const probNone = Math.pow(1 - rate, kills);
@@ -4789,10 +4804,10 @@ function _showProbResult(drop, kills, count = 0) {
   const hue   = Math.round(probNone * 220);
   const color = `hsl(${hue}, 88%, 62%)`;
   const countColor = count > parseFloat(expected)
-    ? 'rgba(100,180,255,.9)'
+    ? 'var(--sw-ch-col)'
     : count === parseFloat(expected)
-    ? 'rgba(245,210,100,.9)'
-    : 'rgba(255,100,100,.9)';
+    ? 'var(--gold)'
+    : 'var(--red)';
   const fmt = n => Number(n).toLocaleString('ko-KR');
   const countLabel = count > 0
     ? ` / 획득 <span style="color:${countColor};">${fmt(count)}개</span>`
@@ -4801,7 +4816,7 @@ function _showProbResult(drop, kills, count = 0) {
     <div class="pc-item-name">${escHtml(drop.name)} (${drop.rate})</div>
     <div class="pc-prob" style="color:${color}">${probPct}%</div>
     <div class="pc-sub">${fmt(kills)}마리에서 아직 안 나왔을 확률</div>
-    <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:rgba(245,210,100,.8);">${expected}개</strong>${countLabel}</div>
+    <div class="pc-sub" style="margin-top:2px;">기대 획득수 <strong style="color:var(--gold);">${expected}개</strong>${countLabel}</div>
   `;
 }
 
@@ -5069,6 +5084,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.084', date: '26.05.12',
+    feat: [
+      '결과 카드 홀로그래픽 개선 — 포켓몬 카드식 foil(기울임에 따라 무지개 밴드 흐름), specular 하이라이트 추가',
+      '결과 카드 화이트 테마 연동 — 라이트 모드에서 흰 카드, 다크 모드에서 다크 카드',
+      '완료 카드 배경 딥 네이비 계열로 변경 — 기존 어두운 갈색 대비 더 풍부한 색감',
+      '운 계산기·드롭 통계 모달 CSS 전체 테마 변수 적용',
+    ],
+    fix: [],
+  },
   {
     ver: '1.083', date: '26.05.07',
     feat: [
