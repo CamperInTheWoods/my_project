@@ -556,19 +556,41 @@
     .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
 
     /* sw log */
-    .sw-log { margin-top:14px; }
-    .sw-log-list { max-height:220px; overflow-y:auto; margin-top:6px; }
+    .sw-log { margin-top:14px; position:relative; }
+    .sw-log-list { max-height:96px; overflow-y:auto; margin-top:6px; }
     .sw-log-entry {
       display:flex; align-items:baseline; gap:6px;
-      font-size:.68rem; padding:4px 6px; border-radius:6px;
-      background:var(--bg-log); margin-bottom:4px; border:1px solid var(--bg-log-border);
+      font-size:.68rem; padding:3px 6px; border-radius:6px;
+      background:var(--bg-log); margin-bottom:3px; border:1px solid var(--bg-log-border);
+      cursor:pointer; transition:background .1s;
     }
+    .sw-log-entry:hover { background:var(--bg-tab-hover); }
     .sw-log-entry .lt { color:var(--gold); font-weight:700; font-family:'Courier New',monospace; flex-shrink:0; }
     .sw-log-entry .ln { color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
     .sw-log-entry .ldel { margin-left:auto; flex-shrink:0; background:none; border:none; cursor:pointer; color:#bbb; font-size:.75rem; padding:0 2px; line-height:1; }
     .sw-log-entry .ldel:hover { color:#e55; }
+    .sw-log-entry.log-collapsed .lt,
+    .sw-log-entry.log-collapsed .ldel { display:none; }
+    .sw-log-entry.log-collapsed { padding:2px 6px; background:var(--bg-tab); }
     .sw-log-list::-webkit-scrollbar { width:4px; }
     .sw-log-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+    /* ↓ 스크롤 복귀 버튼 */
+    .sw-log-down {
+      display:none; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%);
+      width:26px; height:26px; border-radius:50%; z-index:6;
+      background:var(--sw-ch-col); border:none; cursor:pointer;
+      align-items:center; justify-content:center;
+      box-shadow:0 2px 8px rgba(0,0,0,.28);
+      transition:opacity .2s;
+    }
+    .sw-log-down.visible { display:flex; }
+    .sw-log-down svg { width:13px; height:13px; }
+    /* 타임라인 섹션 접기 토글 */
+    .tl-sec-toggle {
+      background:none; border:none; cursor:pointer; color:var(--gray);
+      font-size:.68rem; padding:0 3px; line-height:1; transition:color .15s; flex-shrink:0;
+    }
+    .tl-sec-toggle:hover { color:var(--dark); }
 
     /* ─ 완료 진열장 ─ */
     .trophy-open-btn {
@@ -2456,21 +2478,20 @@ function restoreLogEntries(panel, mob) {
     itemEntries = drops.map(d => ({ ms: mobStore[d.id].firstTime, isCh: false, id: d.id, name: d.name }));
   }
   const chEntries = (s[`sw_ch_${mob.id}`] || []).map(ms => ({ ms, isCh: true }));
-  const all = [...itemEntries, ...chEntries].sort((a,b) => b.ms - a.ms);
+  const all = [...itemEntries, ...chEntries].sort((a,b) => a.ms - b.ms); // 오름차순: 아래가 최신
   const list = panel.querySelector('.sw-log-list');
   all.forEach(e => {
-    const el = document.createElement('div');
+    let el;
     if (e.isCh) {
-      el.className = 'sw-log-entry sw-log-channel';
+      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`, 'sw-log-entry sw-log-channel');
       el.dataset.chMs = e.ms;
-      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
     } else {
-      el.className = 'sw-log-entry';
+      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`, 'sw-log-entry');
       el.dataset.dropId = e.id;
-      el.innerHTML = `<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
     }
     list.appendChild(el);
   });
+  _swLogAutoScroll(list);
 }
 
 function _swChannelMarkOne(tab, panel) {
@@ -2483,11 +2504,11 @@ function _swChannelMarkOne(tab, panel) {
   }
   const list = panel?.querySelector('.sw-log-list');
   if (!list) return;
-  const entry = document.createElement('div');
-  entry.className = 'sw-log-entry sw-log-channel fade-in';
+  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+  const entry = _makeLogEntry(html, 'sw-log-entry sw-log-channel fade-in');
   entry.dataset.chMs = ms;
-  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
-  list.insertBefore(entry, list.firstChild);
+  list.appendChild(entry);
+  _swLogAutoScroll(list);
   // 채널 경과 표시 초기화 (숨겼어도 다시 보여줌)
   const chEl = panel?.querySelector('.sw-ch-elapsed');
   if (chEl) { delete chEl.dataset.hidden; chEl.style.visibility = ''; if (chEl.style.display === 'none') chEl.style.display = ''; }
@@ -2937,14 +2958,28 @@ function buildTabPanel(tab) {
             <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
           </div>
           <div class="sw-log-list"></div>
+          <button class="sw-log-down" onclick="_swLogGoBottom(this)" title="최신으로">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
         <div class="tl-section" style="display:none">
-          <div class="ptitle" style="margin-top:14px;font-size:.65rem;cursor:pointer;user-select:none;" onclick="openTlModal()" title="크게 보기">타임라인 ↗</div>
+          <div class="ptitle" style="margin-top:14px;font-size:.65rem;display:flex;align-items:center;justify-content:space-between;">
+            <span style="cursor:pointer;user-select:none;" onclick="openTlModal()" title="크게 보기">타임라인 ↗</span>
+            <button class="tl-sec-toggle" onclick="_tlSecToggle(this)" title="접기/펴기">▼</button>
+          </div>
           <div class="tl-rows"></div>
         </div>
       </div>
     </div>`;
+  _initSwLogScroll(div);
   return div;
+}
+
+function _tlSecToggle(btn) {
+  const rows = btn.closest('.tl-section').querySelector('.tl-rows');
+  const collapsed = rows.style.display === 'none';
+  rows.style.display = collapsed ? '' : 'none';
+  btn.textContent = collapsed ? '▼' : '▶';
 }
 
 function getActivePanel() {
@@ -3579,14 +3614,45 @@ function removeItemLog(panel, itemId) {
   panel.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`).forEach(el => el.remove());
 }
 
+function _makeLogEntry(html, cls) {
+  const entry = document.createElement('div');
+  entry.className = cls;
+  entry.innerHTML = html;
+  entry.addEventListener('click', function(e) {
+    if (e.target.classList.contains('ldel')) return;
+    this.classList.toggle('log-collapsed');
+  });
+  return entry;
+}
+function _swLogAutoScroll(list) {
+  if (list._autoFollow === false) return;
+  list.scrollTop = list.scrollHeight;
+}
+function _swLogGoBottom(btn) {
+  const list = btn.closest('.sw-log').querySelector('.sw-log-list');
+  list._autoFollow = true;
+  list.scrollTop = list.scrollHeight;
+  btn.classList.remove('visible');
+}
+function _initSwLogScroll(panel) {
+  const list = panel.querySelector('.sw-log-list');
+  const btn  = panel.querySelector('.sw-log-down');
+  if (!list || !btn) return;
+  list._autoFollow = true;
+  list.addEventListener('scroll', function() {
+    const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 24;
+    list._autoFollow = atBottom;
+    btn.classList.toggle('visible', !atBottom);
+  });
+}
 function addSwLogToPanel(panel, name, ms, dropId) {
   if (!panel) return;
   const list = panel.querySelector('.sw-log-list');
-  const entry = document.createElement('div');
-  entry.className = 'sw-log-entry fade-in';
+  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${escHtml(name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+  const entry = _makeLogEntry(html, 'sw-log-entry fade-in');
   if (dropId != null) entry.dataset.dropId = dropId;
-  entry.innerHTML = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${escHtml(name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
-  list.insertBefore(entry, list.firstChild);
+  list.appendChild(entry);
+  _swLogAutoScroll(list);
 }
 function deleteLogEntry(btn) {
   const entry = btn.closest('.sw-log-entry');
@@ -3729,10 +3795,9 @@ function onDogamComplete(panel, mob) {
 
     // 2. 획득 기록에 완료 항목 추가
     const list = panel.querySelector('.sw-log-list');
-    const entry = document.createElement('div');
-    entry.className = 'sw-log-entry complete fade-in';
-    entry.innerHTML = `<span class="lt">${fmtTimeLog(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`;
-    list.insertBefore(entry, list.firstChild);
+    const entry = _makeLogEntry(`<span class="lt">${fmtTimeLog(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`, 'sw-log-entry complete fade-in');
+    list.appendChild(entry);
+    _swLogAutoScroll(list);
 
   }
 
@@ -4595,7 +4660,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.8</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.0</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
