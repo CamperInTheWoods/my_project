@@ -1151,9 +1151,36 @@
       background-clip: text;
     }
     .result-card.complete .ri-cell.ri-found {
-      background: rgba(255,240,180,.1);
-      border-color: rgba(216,148,38,.55);
-      box-shadow: 0 0 6px rgba(216,148,38,.25), inset 0 0 5px rgba(255,255,255,.04);
+      background: rgba(255,240,180,.07);
+      box-shadow: 0 0 8px var(--ri-color, rgba(216,148,38,.5)), inset 0 0 5px rgba(255,255,255,.04);
+    }
+    /* 라이트 테마 — 완료 카드 override */
+    html:not([data-theme="dark"]) .result-card.complete {
+      background: linear-gradient(160deg, #faf6ff 0%, #fff8f2 40%, #f4f6ff 100%);
+    }
+    html:not([data-theme="dark"]) .result-card.complete .result-mob-img-wrap {
+      background:
+        linear-gradient(#faf6ff, #faf6ff) padding-box,
+        linear-gradient(135deg,#f5a623,#c8f0ff,#b388ff,#f5a623) border-box;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .result-stat-block {
+      background:
+        linear-gradient(90deg,rgba(255,210,80,.14) 0%,rgba(120,230,255,.10) 35%,rgba(190,100,255,.12) 65%,rgba(255,210,80,.14) 100%) padding-box,
+        linear-gradient(135deg,rgba(216,148,38,.4),rgba(180,80,255,.35),rgba(80,200,255,.4)) border-box;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .rsb-label { color: rgba(80,50,20,.55); }
+    html:not([data-theme="dark"]) .result-card.complete .ri-cell.ri-found {
+      background: rgba(255,240,180,.18);
+    }
+    /* 라이트에서 foil: color-dodge → multiply (밝은 배경 대응) */
+    html:not([data-theme="dark"]) .result-card.complete .gold-shimmer::before {
+      mix-blend-mode: multiply;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .gold-shimmer::after {
+      mix-blend-mode: soft-light;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .mouse-glow {
+      mix-blend-mode: soft-light;
     }
     .ri-cell img { width:76%; height:76%; object-fit:contain; }
     .ri-cnt {
@@ -4542,7 +4569,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.1</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -5088,9 +5115,10 @@ const PATCH_NOTES = [
     ver: '1.084', date: '26.05.12',
     feat: [
       '결과 카드 홀로그래픽 개선 — 포켓몬 카드식 foil(기울임에 따라 무지개 밴드 흐름), specular 하이라이트 추가',
-      '결과 카드 화이트 테마 연동 — 라이트 모드에서 흰 카드, 다크 모드에서 다크 카드',
+      '결과 카드 테마 연동 — 미완료/완료 모두 라이트/다크 테마 적용, 완료 카드 라이트 모드 배경 추가',
       '완료 카드 배경 딥 네이비 계열로 변경 — 기존 어두운 갈색 대비 더 풍부한 색감',
       '운 계산기·드롭 통계 모달 CSS 전체 테마 변수 적용',
+      '결과 카드 아이템 셀 glow 색상 희귀도별 개별 적용 — 완료 카드에서도 파/초/노/주/빨/보 구분',
     ],
     fix: [],
   },
