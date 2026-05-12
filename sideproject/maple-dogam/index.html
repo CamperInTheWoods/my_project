@@ -2914,7 +2914,10 @@ function buildTabPanel(tab) {
           <div class="hunt-dogam-exp"></div>
           <div class="divider" style="margin:10px 0 12px"></div>
         </div>
-        <div class="ptitle">⏱ 스톱워치</div>
+        <div class="ptitle" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>⏱ 스톱워치</span>
+          <button onclick="openSwHelp()" title="단축키 안내" style="background:none;border:none;cursor:pointer;font-size:.78rem;font-weight:700;color:var(--gray);padding:0 3px;line-height:1;transition:color .15s;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">?</button>
+        </div>
         <div class="sw-display">00:00:00.00</div>
         <div class="sw-ch-elapsed" style="display:none">
           <span class="sw-ch-val">00:00:00</span>
@@ -4196,6 +4199,9 @@ document.addEventListener('keydown', function(e) {
     if (document.getElementById('del-confirm-overlay')?.classList.contains('open')) {
       closeDelConfirm();
     }
+    if (document.getElementById('sw-help-modal')?.style.display === 'flex') {
+      closeSwHelp();
+    }
   }
   if (e.code === 'Space') {
     const tag = document.activeElement?.tagName;
@@ -4589,7 +4595,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.7</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.8</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4645,6 +4651,30 @@ renderTrophy();
 <button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
 <!-- 테마 토글 버튼 -->
 <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">🌙</button>
+
+<!-- 스톱워치 단축키 안내 모달 -->
+<div id="sw-help-modal" onclick="if(event.target===this)closeSwHelp()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:320px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <span style="font-size:.9rem;font-weight:700;color:var(--dark);">⌨️ 단축키 안내</span>
+      <button onclick="closeSwHelp()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--bg-tl-toggle);border-radius:10px;border:1px solid var(--border);">
+        <kbd style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:6px;padding:3px 10px;font-size:.78rem;font-weight:700;color:var(--dark);font-family:inherit;box-shadow:0 2px 0 var(--border);white-space:nowrap;">Space</kbd>
+        <span style="font-size:.78rem;color:var(--dark);">타이머 시작 / 일시정지</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--bg-tl-toggle);border-radius:10px;border:1px solid var(--border);">
+        <kbd style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:6px;padding:3px 14px;font-size:.78rem;font-weight:700;color:var(--dark);font-family:inherit;box-shadow:0 2px 0 var(--border);white-space:nowrap;">C</kbd>
+        <span style="font-size:.78rem;color:var(--dark);">채널변경 기록</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 10px;background:var(--bg-tl-toggle);border-radius:10px;border:1px solid var(--border);">
+        <span style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:6px;padding:3px 7px;font-size:.72rem;font-weight:700;color:var(--sw-syn-col);font-family:inherit;box-shadow:0 2px 0 var(--border);white-space:nowrap;flex-shrink:0;">🔗 동기화</span>
+        <span style="font-size:.78rem;color:var(--dark);line-height:1.5;">탭이 2개 이상일 때 표시 — 다른 몬스터와 타이머·채널변경을 함께 기록</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 패치노트 모달 -->
 <div id="patch-modal" onclick="if(event.target===this)closePatchNotes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -5353,6 +5383,13 @@ function _renderPatchNotes(count) {
 
 function _expandPatchNotes() {
   document.getElementById('patch-content').innerHTML = _renderPatchNotes(Infinity);
+}
+
+function openSwHelp() {
+  document.getElementById('sw-help-modal').style.display = 'flex';
+}
+function closeSwHelp() {
+  document.getElementById('sw-help-modal').style.display = 'none';
 }
 
 function openPatchNotes() {
