@@ -268,7 +268,12 @@
       margin-left:4px; vertical-align:middle; flex-shrink:0;
       transition:box-shadow .2s;
     }
-    .tab-status-dot.clickable { cursor:pointer; }
+    .tab-status-dot.clickable {
+      cursor:pointer;
+      padding:5px;
+      margin:-5px -5px -5px -1px;
+      background-clip:content-box;
+    }
     .tab-status-dot.running { background:#1a6fa8; animation:tabPulse 1.4s ease-in-out infinite; }
     .tab-status-dot.paused  { background:#bbb; }
     .tab-status-dot.dim     { background:rgba(180,180,180,.3); }
@@ -547,7 +552,7 @@
     .sw-reset { background:transparent; color:#ccc; border:1px solid #ddd; font-size:.62rem; padding:3px 10px; font-weight:400; }
     .sw-reset:hover { background:var(--sw-ch-bg); color:var(--sw-ch-col); border-color:var(--sw-syn-bdr); filter:none; transform:none; }
     .sw-channel { background:var(--sw-ch-bg); color:var(--sw-ch-col); font-size:.8rem; }
-    .sw-sync { background:var(--sw-syn-bg); color:var(--sw-syn-col); border:1px solid var(--sw-syn-bdr); font-size:.78rem; padding:9px 14px; border-radius:8px; cursor:pointer; display:none; font-family:inherit; font-weight:500; width:100%; }
+    .sw-sync { background:var(--sw-syn-bg); color:var(--sw-syn-col); border:1px solid var(--sw-syn-bdr); font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
     .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
 
     /* sw log */
@@ -4573,7 +4578,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.4</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
