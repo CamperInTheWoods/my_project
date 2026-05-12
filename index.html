@@ -1027,79 +1027,78 @@
         rotateX(calc((var(--my, 0.5) - 0.5) * -16deg))
         rotateY(calc((var(--mx, 0.5) - 0.5) * 16deg));
     }
-    /* 미완료 — 빛이 오는 방향에서 specular 하이라이트 */
+    /* 미완료 — 항상 은은한 ambient + 틸트 시 강화 */
     .result-card:not(.complete) .mouse-glow {
       position:absolute; inset:0; border-radius:20px; z-index:3; pointer-events:none;
       overflow:hidden;
-      opacity:0; transition:opacity 0.6s ease;
+      opacity:0.18; transition:opacity 1.0s ease;
     }
-    .result-card:not(.complete).tilt .mouse-glow { opacity:1; }
+    .result-card:not(.complete).tilt .mouse-glow { opacity:0.7; }
     .result-card:not(.complete) .mouse-glow::before {
       content:'';
       position:absolute; inset:0;
       background: radial-gradient(
-        ellipse 55% 50% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
-        rgba(255,248,220,.38) 0%,
-        rgba(255,220,140,.12) 35%,
-        transparent 65%
+        ellipse 60% 55% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+        rgba(255,248,220,.45) 0%,
+        rgba(255,220,140,.10) 45%,
+        transparent 70%
       );
     }
     .result-card:not(.complete) .mouse-glow::after {
       content:'';
       position:absolute; inset:0;
       background: radial-gradient(
-        circle 28% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
-        rgba(255,255,255,.22) 0%,
+        circle 22% at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+        rgba(255,255,255,.18) 0%,
         transparent 70%
       );
       mix-blend-mode: overlay;
     }
-    /* 완료 카드 — 포켓몬 카드식 foil: background-position이 틸트에 따라 흐름 */
+    /* 완료 카드 — 항상 은은한 foil, 틸트 시 강화 */
     .result-card.complete .gold-shimmer {
       position:absolute; inset:0; border-radius:20px; z-index:2; pointer-events:none; overflow:hidden;
-      opacity:0; transition: opacity 0.6s ease;
+      opacity:0.22; transition: opacity 1.0s ease;
     }
-    .result-card.complete.tilt .gold-shimmer { opacity:1; }
-    /* 무지개 밴드 — 기울임에 따라 배경 위치가 이동해 빛이 흐르는 효과 */
+    .result-card.complete.tilt .gold-shimmer { opacity:0.65; }
+    /* 무지개 foil — 넓고 부드럽게, 강도 낮춤 */
     .result-card.complete .gold-shimmer::before {
       content:'';
       position:absolute; inset:0;
       background: repeating-linear-gradient(
         -55deg,
-        transparent                0%,  transparent              6%,
-        rgba(255, 0,  80, .55)     8%,  rgba(255,140,  0, .55)  11%,
-        rgba(255,230,  0, .55)    14%,  rgba(  0,240,100, .55)  17%,
-        rgba(  0,180,255, .55)    20%,  rgba(120,  0,255, .55)  23%,
-        rgba(255,  0,160, .55)    26%,  transparent             28%,
-        transparent               34%
+        transparent                 0%,  transparent              12%,
+        rgba(255, 60, 100, .18)    15%,  rgba(255,160,  0, .18)  19%,
+        rgba(220,230,  0, .18)     23%,  rgba(  0,220, 90, .18)  27%,
+        rgba(  0,170,255, .18)     31%,  rgba(140,  0,240, .18)  35%,
+        rgba(255,  0,140, .18)     39%,  transparent             42%,
+        transparent                54%
       );
-      background-size: 300% 300%;
+      background-size: 500% 500%;
       background-position: calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%);
       mix-blend-mode: color-dodge;
-      filter: blur(0.5px);
+      filter: blur(2px);
     }
-    /* specular 하이라이트 — 빛이 오는 지점 */
+    /* specular — 넓고 부드러운 빛 */
     .result-card.complete .gold-shimmer::after {
       content:'';
       position:absolute; inset:0;
-      background:
-        radial-gradient(
-          ellipse 60% 50% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
-          rgba(255,255,255,.20) 0%,
-          rgba(255,255,255,.05) 35%,
-          transparent 65%
-        );
+      background: radial-gradient(
+        ellipse 70% 60% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+        rgba(255,255,255,.12) 0%,
+        rgba(255,255,255,.03) 40%,
+        transparent 70%
+      );
       mix-blend-mode: overlay;
     }
     .result-card.complete .mouse-glow {
       position:absolute; inset:0; border-radius:20px; z-index:3; pointer-events:none;
       background: radial-gradient(
-        circle 35% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
-        rgba(255,255,255,.14) 0%, transparent 65%);
+        circle 40% at calc(var(--mx, 0.5)*100%) calc(var(--my, 0.5)*100%),
+        rgba(255,255,255,.09) 0%, transparent 65%);
       mix-blend-mode: overlay;
-      opacity:0; transition:opacity 0.6s ease;
+      opacity:0.3; transition:opacity 1.0s ease;
     }
-    .result-card.complete.tilt .mouse-glow { opacity:1; }
+    .result-card.complete.tilt .mouse-glow { opacity:0.9; }
     .result-card.complete .result-mob-img-wrap {
       border: 2px solid transparent;
       background:
@@ -1175,9 +1174,10 @@
     /* 라이트에서 foil: color-dodge → multiply (밝은 배경 대응) */
     html:not([data-theme="dark"]) .result-card.complete .gold-shimmer::before {
       mix-blend-mode: multiply;
+      filter: blur(3px);
     }
     html:not([data-theme="dark"]) .result-card.complete .gold-shimmer::after {
-      mix-blend-mode: soft-light;
+      mix-blend-mode: multiply;
     }
     html:not([data-theme="dark"]) .result-card.complete .mouse-glow {
       mix-blend-mode: soft-light;
@@ -4569,7 +4569,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.084.2</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
