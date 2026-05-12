@@ -1215,6 +1215,16 @@
     .pc-all-exp strong { color:rgba(245,210,100,.9); font-size:.8rem; }
     .pc-all-exp .pc-all-done { color:rgba(100,220,150,.8); font-size:.75rem; }
 
+    /* ─ 통계 테이블 ─ */
+    .stat-col { flex:1; min-width:0; }
+    .stat-row { display:flex; align-items:center; gap:5px; padding:3px 0; border-bottom:1px solid rgba(216,148,38,.07); }
+    .stat-row:last-child { border-bottom:none; }
+    .stat-img { width:26px; height:26px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+    .stat-name { flex:1; font-size:.62rem; color:var(--dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .stat-rate { font-size:.6rem; color:var(--gray); flex-shrink:0; min-width:38px; text-align:right; }
+    .stat-my { font-size:.6rem; font-weight:700; flex-shrink:0; min-width:44px; text-align:right; }
+    .stat-divider { width:1px; background:rgba(216,148,38,.12); align-self:stretch; flex-shrink:0; margin:0 4px; }
+
     /* ─ 다크 테마 오버라이드 ─ */
     [data-theme="dark"] .prog-fill.complete { background:linear-gradient(90deg,#4a3880,#6858b0,#8878d0,#4a3880); background-size:300% 100%; box-shadow:0 0 8px rgba(90,70,180,.4), 0 0 3px rgba(140,120,220,.3) inset; }
     [data-theme="dark"] .sw-log-entry.complete { background:#1f1508; color:var(--gold); border-color:var(--border); }
@@ -2825,6 +2835,7 @@ function buildTabPanel(tab) {
       </div>
       <div class="actions">
 <button class="btn sm" onclick="openResultModal()" title="도감작 결과 카드">📋 결과</button>
+<button class="btn sm" onclick="openStatTable()" title="드롭 통계" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">통계</button>
 <button class="btn sm danger" onclick="resetChecklist()">초기화</button>
       </div>
     </div>
@@ -4516,7 +4527,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.082.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.083.0</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -4529,6 +4540,28 @@ renderTrophy();
     <div id="prob-complete" style="font-size:.68rem;color:rgba(180,150,80,.55);text-align:center;margin:-4px 0 8px;min-height:1em;"></div>
     <div id="prob-grid" class="pc-grid"></div>
     <div id="prob-result" class="pc-result"><span style="font-size:.7rem;color:rgba(180,150,80,.4);">아이템을 선택하세요</span></div>
+  </div>
+</div>
+
+<!-- 드롭 통계 모달 -->
+<div id="stat-modal" onclick="if(event.target===this)closeStatTable()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:480px;width:100%;padding:18px 18px 16px;position:relative;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+      <div>
+        <span style="font-size:.95rem;font-weight:700;color:var(--dark);">드롭 통계</span>
+        <div id="stat-kills" style="font-size:.62rem;color:var(--gray);margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:.58rem;color:var(--gray);">
+          <span style="color:#5aa8e8;">■</span> 행운 &nbsp;
+          <span style="color:var(--gold);">■</span> 보통 &nbsp;
+          <span style="color:var(--red);">■</span> 불운
+        </span>
+        <button id="stat-mode-btn" onclick="toggleStatMode()" style="font-size:.58rem;padding:2px 0;width:34px;text-align:center;border-radius:5px;border:1px solid var(--border);background:var(--bg-btn-sec);color:var(--gray);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;">확률</button>
+        <button onclick="closeStatTable()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
+      </div>
+    </div>
+    <div id="stat-body" style="display:flex;gap:0;"></div>
   </div>
 </div>
 
@@ -4814,6 +4847,89 @@ function closeProbCalc() {
   document.getElementById('prob-modal').style.display = 'none';
 }
 
+let _statMode = 'rate'; // 'rate' | 'count'
+
+function toggleStatMode() {
+  _statMode = _statMode === 'rate' ? 'count' : 'rate';
+  document.getElementById('stat-mode-btn').textContent = _statMode === 'rate' ? '확률' : '획득수';
+  _renderStatBody();
+}
+
+function openStatTable() {
+  if (!activeMob) return;
+  _statMode = 'rate';
+  document.getElementById('stat-mode-btn').textContent = '확률';
+  document.getElementById('stat-modal').style.display = 'flex';
+  _renderStatBody();
+}
+
+function _renderStatBody() {
+  const kills   = _getProbKills();
+  const store   = loadS();
+  const mobData = store[`mob_${activeMob.id}`] || {};
+  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+
+  document.getElementById('stat-kills').textContent =
+    kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음 — 수치 미표시';
+
+  const drops = activeMob.drops
+    .filter(d => !excl.has(d.id))
+    .sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate))
+    .slice(0, 20);
+
+  function statColor(count, rate) {
+    if (kills === 0) return 'var(--gray)';
+    const r = parseFloat(rate) / 100;
+    if (kills * r < 0.5) return 'var(--gray)';
+    const ratio = r > 0 ? (count / kills) / r : 0;
+    if (ratio >= 1.25) return '#5aa8e8';
+    if (ratio >= 0.75) return 'rgba(216,148,38,.85)';
+    return '#e06060';
+  }
+
+  function fmtExpected(rate) {
+    if (kills === 0) return '-';
+    const v = kills * parseFloat(rate) / 100;
+    return v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  }
+
+  function makeRows(items) {
+    return items.map(d => {
+      const count = mobData[d.id]?.count || 0;
+      const color = statColor(count, d.rate);
+      const left  = _statMode === 'rate' ? d.rate
+                                         : `<span style="color:var(--gray)">${fmtExpected(d.rate)}</span>`;
+      const right = _statMode === 'rate'
+        ? (() => {
+            if (kills === 0) return '-';
+            const val = count / kills * 100;
+            if (val === 0) return '0%';
+            if (val >= 0.1) return val.toFixed(2) + '%';
+            if (val >= 0.001) return val.toFixed(4) + '%';
+            return val.toExponential(1) + '%';
+          })()
+        : count;
+      return `<div class="stat-row">
+        <img class="stat-img" src="${itemImg(d.id)}" onerror="onItemImgError(this,${d.id})">
+        <span class="stat-name" title="${escHtml(d.name)}">${escHtml(d.name)}</span>
+        <span class="stat-rate">${left}</span>
+        <span class="stat-my" style="color:${color}">${right}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const left  = drops.slice(0, 10);
+  const right = drops.slice(10, 20);
+  document.getElementById('stat-body').innerHTML = `
+    <div class="stat-col">${makeRows(left)}</div>
+    ${right.length ? `<div class="stat-divider"></div><div class="stat-col">${makeRows(right)}</div>` : ''}
+  `;
+}
+
+function closeStatTable() {
+  document.getElementById('stat-modal').style.display = 'none';
+}
+
 function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   if (isDark) {
@@ -4953,6 +5069,21 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.083', date: '26.05.07',
+    feat: [
+      '드롭 통계 기능 추가 — 결과·통계·초기화 버튼 중 통계 클릭, 확률/획득수 모드 토글, 라이트/다크 테마 자동 연동',
+    ],
+    fix: [
+      '채널변경 버튼 클릭 시 하얘지던 버그 수정',
+      '헤더 영역 글자 그림자 제거',
+    ],
+  },
+  {
+    ver: '1.082', date: '26.05.07',
+    feat: ['타이틀 변경 — 도감길드 도감작 체크리스트'],
+    fix: [],
+  },
   {
     ver: '1.081', date: '26.05.07',
     feat: [
