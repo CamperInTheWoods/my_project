@@ -2394,6 +2394,7 @@ function renderTimeline(panel, mob, tab) {
     </div>`;
   }
   section.querySelector('.tl-rows').innerHTML = rowsHtml;
+  _tlApplyCollapse(panel);
   const toggleBtn = panel?.querySelector('.tl-toggle-btn');
   if (toggleBtn) {
     toggleBtn.className = 'tl-toggle-btn' + (tlShowAll() ? ' on' : '');
@@ -2483,7 +2484,7 @@ function restoreLogEntries(panel, mob) {
   all.forEach(e => {
     let el;
     if (e.isCh) {
-      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`, 'sw-log-entry sw-log-channel');
+      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`, 'sw-log-entry sw-log-channel');
       el.dataset.chMs = e.ms;
     } else {
       el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`, 'sw-log-entry');
@@ -2504,7 +2505,7 @@ function _swChannelMarkOne(tab, panel) {
   }
   const list = panel?.querySelector('.sw-log-list');
   if (!list) return;
-  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">📡 채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
   const entry = _makeLogEntry(html, 'sw-log-entry sw-log-channel fade-in');
   entry.dataset.chMs = ms;
   list.appendChild(entry);
@@ -2550,8 +2551,7 @@ function fmtTimeLog(ms) {
   if (ms < 0) ms = 0;
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
-  const s = Math.floor((ms % 60000) / 1000);
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  return `${pad(h)}:${pad(m)}`;
 }
 function pad(n) { return String(n).padStart(2,'0'); }
 
@@ -2946,7 +2946,7 @@ function buildTabPanel(tab) {
         </div>
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
-          <button class="sw-btn sw-channel" onclick="swChannelMark()">📡 채널변경</button>
+          <button class="sw-btn sw-channel" onclick="swChannelMark()">채널변경</button>
         </div>
         <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px">
           <button class="sw-sync" onclick="swSyncToggle()">🔗 동기화</button>
@@ -2954,7 +2954,7 @@ function buildTabPanel(tab) {
         </div>
         <div class="sw-log">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
-            <div class="ptitle" style="font-size:.65rem">📋 획득 기록</div>
+            <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
             <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
           </div>
           <div class="sw-log-list"></div>
@@ -2963,9 +2963,12 @@ function buildTabPanel(tab) {
           </button>
         </div>
         <div class="tl-section" style="display:none">
-          <div class="ptitle" style="margin-top:14px;font-size:.65rem;display:flex;align-items:center;justify-content:space-between;">
-            <span style="cursor:pointer;user-select:none;" onclick="openTlModal()" title="크게 보기">타임라인 ↗</span>
-            <button class="tl-sec-toggle" onclick="_tlSecToggle(this)" title="접기/펴기">▼</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+            <div style="display:flex;align-items:center;gap:3px;">
+              <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
+              <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
+            </div>
+            <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal()" title="크게 보기">↗</button>
           </div>
           <div class="tl-rows"></div>
         </div>
@@ -2975,12 +2978,6 @@ function buildTabPanel(tab) {
   return div;
 }
 
-function _tlSecToggle(btn) {
-  const rows = btn.closest('.tl-section').querySelector('.tl-rows');
-  const collapsed = rows.style.display === 'none';
-  rows.style.display = collapsed ? '' : 'none';
-  btn.textContent = collapsed ? '▼' : '▶';
-}
 
 function getActivePanel() {
   return document.querySelector(`.tab-panel[data-tab-idx="${activeTabIdx}"]`);
@@ -3623,6 +3620,22 @@ function _makeLogEntry(html, cls) {
     this.classList.toggle('log-collapsed');
   });
   return entry;
+}
+const TL_COLLAPSE_ROWS = 5;
+function _tlApplyCollapse(panel) {
+  const section = panel?.querySelector('.tl-section');
+  if (!section) return;
+  const rows = section.querySelectorAll('.tl-row');
+  const expanded = section._tlExpanded === true;
+  rows.forEach((r, i) => {
+    r.style.display = (expanded || i >= rows.length - TL_COLLAPSE_ROWS) ? '' : 'none';
+  });
+}
+function _tlToggleExpand(btn) {
+  const section = btn.closest('.tl-section');
+  section._tlExpanded = section._tlExpanded !== true;
+  btn.textContent = section._tlExpanded ? '▶' : '▼';
+  _tlApplyCollapse(section.closest('.tab-panel') || section.parentElement);
 }
 function _swLogAutoScroll(list) {
   if (list._autoFollow === false) return;
@@ -4660,7 +4673,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.7</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
