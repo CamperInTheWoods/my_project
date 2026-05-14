@@ -2484,10 +2484,10 @@ function restoreLogEntries(panel, mob) {
   all.forEach(e => {
     let el;
     if (e.isCh) {
-      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`, 'sw-log-entry sw-log-channel');
+      el = _makeLogEntry(`<span class="lt">${fmtTimeLogShort(e.ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`, 'sw-log-entry sw-log-channel');
       el.dataset.chMs = e.ms;
     } else {
-      el = _makeLogEntry(`<span class="lt">${fmtTimeLog(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`, 'sw-log-entry');
+      el = _makeLogEntry(`<span class="lt">${fmtTimeLogShort(e.ms)}</span><span class="ln">${escHtml(e.name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`, 'sw-log-entry');
       el.dataset.dropId = e.id;
     }
     list.appendChild(el);
@@ -2505,7 +2505,7 @@ function _swChannelMarkOne(tab, panel) {
   }
   const list = panel?.querySelector('.sw-log-list');
   if (!list) return;
-  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
+  const html = `<span class="lt">${fmtTimeLogShort(ms)}</span><span class="ln">채널변경</span><button class="ldel" title="삭제" onclick="deleteChannelEntry(this)">✕</button>`;
   const entry = _makeLogEntry(html, 'sw-log-entry sw-log-channel fade-in');
   entry.dataset.chMs = ms;
   list.appendChild(entry);
@@ -2548,6 +2548,13 @@ function fmtTime(ms) {
   return `${pad(h)}:${pad(m)}:${pad(s)}.${pad(cs)}`;
 }
 function fmtTimeLog(ms) {
+  if (ms < 0) ms = 0;
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+function fmtTimeLogShort(ms) {
   if (ms < 0) ms = 0;
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
@@ -3660,7 +3667,7 @@ function _initSwLogScroll(panel) {
 function addSwLogToPanel(panel, name, ms, dropId) {
   if (!panel) return;
   const list = panel.querySelector('.sw-log-list');
-  const html = `<span class="lt">${fmtTimeLog(ms)}</span><span class="ln">${escHtml(name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
+  const html = `<span class="lt">${fmtTimeLogShort(ms)}</span><span class="ln">${escHtml(name)}</span><button class="ldel" title="삭제" onclick="deleteLogEntry(this)">✕</button>`;
   const entry = _makeLogEntry(html, 'sw-log-entry fade-in');
   if (dropId != null) entry.dataset.dropId = dropId;
   list.appendChild(entry);
@@ -3807,7 +3814,7 @@ function onDogamComplete(panel, mob) {
 
     // 2. 획득 기록에 완료 항목 추가
     const list = panel.querySelector('.sw-log-list');
-    const entry = _makeLogEntry(`<span class="lt">${fmtTimeLog(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`, 'sw-log-entry complete fade-in');
+    const entry = _makeLogEntry(`<span class="lt">${fmtTimeLogShort(elapsed)}</span><span class="ln">★ 도감작 완료!</span>`, 'sw-log-entry complete fade-in');
     list.appendChild(entry);
     _swLogAutoScroll(list);
 
@@ -4672,7 +4679,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.8</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.9</div>
 
 <!-- 확률 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
