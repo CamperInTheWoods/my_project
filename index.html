@@ -2373,7 +2373,7 @@ function renderTimeline(panel, mob, tab) {
         });
         callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
           ${wrapsHtml}
-          <div class="tl-cluster-badge">+${items.length}</div>
+          <div class="tl-cluster-badge">+${items.length - 1}</div>
         </div>`;
       }
     });
@@ -2916,6 +2916,7 @@ function buildTabPanel(tab) {
       <div class="actions">
 <button class="btn sm" onclick="openResultModal()" title="도감작 결과 카드">📋 결과</button>
 <button class="btn sm" onclick="openStatTable()" title="드롭 통계" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">통계</button>
+<button class="btn sm" onclick="openProbCalc()" title="운 계산기" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">운계산기</button>
 <button class="btn sm danger" onclick="resetChecklist()">초기화</button>
       </div>
     </div>
@@ -2934,10 +2935,7 @@ function buildTabPanel(tab) {
       </div>
       <div class="sw-section panel">
         <div class="hunt-estimate" style="display:none">
-          <div class="ptitle" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>🗡 예상 사냥 마릿수</span>
-            <button onclick="openProbCalc()" title="운 계산기" style="background:none;border:none;cursor:pointer;font-size:.85rem;color:rgba(120,90,40,.55);padding:0 2px;line-height:1;transition:color .15s;" onmouseenter="this.style.color='rgba(200,150,50,.9)'" onmouseleave="this.style.color='rgba(120,90,40,.55)'">🎲</button>
-          </div>
+          <div class="ptitle">🗡 예상 사냥 마릿수</div>
           <div class="hunt-count"></div>
           <div class="hunt-reason"></div>
           <div class="hunt-dogam-exp"></div>
@@ -4680,9 +4678,10 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.085.10</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.086.2</div>
 
 <!-- 확률 계산기 모달 -->
+<!-- 운 계산기 모달 -->
 <div id="prob-modal" onclick="if(event.target===this)closeProbCalc()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:320px;width:100%;padding:20px 20px 18px;position:relative;box-shadow:var(--shadow-card);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px;">
@@ -5070,6 +5069,14 @@ function _renderStatBody() {
     return v >= 10 ? v.toFixed(1) : v.toFixed(2);
   }
 
+  function fmtMissProb(rate, count) {
+    if (kills === 0 || count > 0) return '';
+    const r = parseFloat(rate) / 100;
+    if (r <= 0) return '';
+    const p = Math.pow(1 - r, kills) * 100;
+    return p.toFixed(1) + '%';
+  }
+
   function makeRows(items) {
     return items.map(d => {
       const count = mobData[d.id]?.count || 0;
@@ -5086,9 +5093,11 @@ function _renderStatBody() {
             return val.toExponential(1) + '%';
           })()
         : count;
+      const missProb = fmtMissProb(d.rate, count);
+      const missHtml = missProb ? `<span style="font-size:.5rem;color:#e06060;margin-left:2px;" title="이 킬수에서 안 나왔을 확률">${missProb}</span>` : '';
       return `<div class="stat-row">
         <img class="stat-img" src="${itemImg(d.id)}" onerror="onItemImgError(this,${d.id})">
-        <span class="stat-name" title="${escHtml(d.name)}">${escHtml(d.name)}</span>
+        <span class="stat-name" title="${escHtml(d.name)}">${escHtml(d.name)}${missHtml}</span>
         <span class="stat-rate">${left}</span>
         <span class="stat-my" style="color:${color}">${right}</span>
       </div>`;
