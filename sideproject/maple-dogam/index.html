@@ -685,7 +685,7 @@
     .trophy-stats-bar { display:flex; flex-shrink:0; border-bottom:1px solid rgba(216,148,38,.18); background:rgba(0,0,0,.18); }
     .trophy-stat-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 8px; gap:3px; border-right:1px solid rgba(216,148,38,.1); }
     .trophy-stat-item:last-child { border-right:none; }
-    .trophy-stat-icon { font-size:.78rem; opacity:.65; }
+    .trophy-stat-icon { font-size:.78rem; opacity:.65; color:rgba(255,220,130,.9); }
     .trophy-stat-num { font-size:1.05rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; }
     .trophy-stat-label { font-size:.54rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
     .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(152px,1fr)); gap:18px; }
@@ -4686,7 +4686,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.087.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.087.7</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -4740,9 +4740,9 @@ renderTrophy();
 </div>
 
 <!-- 패치노트 버튼 -->
-<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
+<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
 <!-- 테마 토글 버튼 -->
-<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">🌙</button>
+<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">🌙</button>
 
 <!-- 스톱워치 단축키 안내 모달 -->
 <div id="sw-help-modal" onclick="if(event.target===this)closeSwHelp()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
