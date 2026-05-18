@@ -758,6 +758,15 @@
     }
     .trophy-card:hover .trophy-del { opacity:1; }
     .trophy-del:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
+    .trophy-stat-btn {
+      position:absolute; top:7px; right:28px; width:17px; height:17px;
+      border-radius:50%; border:1px solid rgba(255,80,80,.3); background:none;
+      color:rgba(255,100,100,.4); font-size:.55rem; cursor:pointer; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
+    }
+    .trophy-card:hover .trophy-stat-btn { opacity:1; }
+    .trophy-stat-btn:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
 
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
@@ -4180,11 +4189,10 @@ function updateTrophyStats(completed, store) {
   if (!cEl) return;
   const count = completed.length;
   const totalKills = completed.reduce((s, c) => s + _calcTrophyKills(c, store), 0);
-  const withTime = completed.filter(c => c.elapsed > 0);
-  const avgMs = withTime.length ? withTime.reduce((s, c) => s + c.elapsed, 0) / withTime.length : 0;
+  const totalMs = completed.reduce((s, c) => s + (c.elapsed || 0), 0);
   cEl.textContent = count || '-';
   kEl.textContent = totalKills > 0 ? totalKills.toLocaleString() : '-';
-  aEl.textContent = avgMs > 0 ? fmtAvgElapsed(avgMs) : '-';
+  aEl.textContent = totalMs > 0 ? fmtAvgElapsed(totalMs) : '-';
 }
 
 function _calcTrophyKills(c, store) {
@@ -4230,12 +4238,13 @@ function renderTrophyGrid() {
   }
   updateTrophyStats(completed, store);
   grid.innerHTML = sorted.map(c => {
-    const yymm = c.date ? c.date.slice(2, 7).replace('-', '.') : '';
+    const yymm = c.date ? c.date.slice(2).replace(/-/g, '.') : '';
     const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
     const kills   = _calcTrophyKills(c, store);
     const killPart = kills > 0 ? ` &nbsp;·&nbsp; 🗡 ${kills.toLocaleString()}마리` : '';
     const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
     return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
+      <button class="trophy-stat-btn" onclick="event.stopPropagation();openTrophyStatTable(${c.mobId})" title="통계 보기">S</button>
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
       <div class="trophy-portrait">
         <img src="https://maplestory.io/api/kms/284/mob/${c.mobId}/icon"
@@ -4635,7 +4644,6 @@ renderTrophy();
     <div class="trophy-modal-header">
       <div>
         <div class="trophy-modal-title">🏅 완료 도감작 진열장</div>
-        <div class="trophy-modal-sub" id="trophy-modal-sub"></div>
       </div>
       <button class="trophy-modal-close" onclick="closeTrophyRoom()">✕</button>
     </div>
@@ -4658,7 +4666,7 @@ renderTrophy();
       <div class="trophy-stat-item">
         <div class="trophy-stat-icon">⏱</div>
         <div class="trophy-stat-num" id="tstat-avg">-</div>
-        <div class="trophy-stat-label">평균 소요시간</div>
+        <div class="trophy-stat-label">누적 소요시간</div>
       </div>
     </div>
     <div class="trophy-modal-body">
@@ -4678,7 +4686,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.086.6</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.087.5</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5033,16 +5041,17 @@ function openStatTable() {
   _renderStatBody();
 }
 
-function _renderStatBody() {
-  const kills   = _getProbKills();
+function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
+  const mob     = overrideMob || activeMob;
+  const kills   = overrideKills != null ? overrideKills : _getProbKills();
   const store   = loadS();
-  const mobData = store[`mob_${activeMob.id}`] || {};
-  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+  const mobData = overrideMobData || store[`mob_${mob.id}`] || {};
+  const excl    = overrideMob ? new Set() : new Set(store[`excl_${mob.id}`] || []);
 
   document.getElementById('stat-kills').textContent =
     kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음 — 수치 미표시';
 
-  const drops = activeMob.drops
+  const drops = mob.drops
     .filter(d => !excl.has(d.id))
     .sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate))
     .slice(0, 20);
@@ -5106,6 +5115,25 @@ function _renderStatBody() {
   `;
 }
 
+function openTrophyStatTable(mobId) {
+  const store = loadS();
+  const seen = new Set();
+  const completed = (store.completed || []).slice().reverse().filter(c => {
+    if (seen.has(c.mobId)) return false; seen.add(c.mobId); return true;
+  });
+  const c = completed.find(x => x.mobId === mobId);
+  if (!c) return;
+  const drops = (c.drops && c.drops.length) ? c.drops
+    : PRESET.find(p => p.id === mobId)?.drops || [];
+  const mob = { id: c.mobId, name: c.mobName, level: c.level || 0, drops };
+  const mobData = (c.mobData && Object.keys(c.mobData).some(k => k !== 'completionSaved'))
+    ? c.mobData : (store[`mob_${mobId}`] || {});
+  const kills = c.kills || 0;
+  _statMode = 'rate';
+  document.getElementById('stat-mode-btn').textContent = '확률';
+  document.getElementById('stat-modal').style.display = 'flex';
+  _renderStatBody(mob, mobData, kills);
+}
 function closeStatTable() {
   document.getElementById('stat-modal').style.display = 'none';
 }
