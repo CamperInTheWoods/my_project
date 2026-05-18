@@ -535,8 +535,8 @@
       padding:10px 0 8px;
       font-variant-numeric:tabular-nums;
     }
-    .sw-ch-elapsed { font-size:.72rem; color:#1a6fa8; margin:-6px 0 4px; display:flex; align-items:center; gap:5px; }
-    .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; }
+    .sw-ch-elapsed { font-size:.85rem; color:#1a6fa8; margin:-6px 0 4px; display:flex; align-items:center; gap:5px; }
+    .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:1rem; }
     .sw-ch-elapsed .sw-ch-hide { background:none; border:none; color:#a0c4e0; font-size:.65rem; cursor:pointer; padding:0 2px; line-height:1; }
     .sw-ch-elapsed .sw-ch-hide:hover { color:#e55; }
     .sw-btns { display:flex; flex-direction:column; gap:8px; }
@@ -2213,7 +2213,7 @@ function swTickPanel(panel, tab) {
     if (lastChEntry) {
       const lastChMs = parseFloat(lastChEntry.dataset.chMs) || 0;
       const sinceMs  = Math.max(0, swElapsed(tab) - lastChMs);
-      chEl.querySelector('.sw-ch-val').textContent = fmtTimeLog(sinceMs);
+      chEl.querySelector('.sw-ch-val').textContent = fmtTime(sinceMs);
       if (chEl.style.display === 'none') chEl.style.display = '';
     }
   }
@@ -2947,7 +2947,7 @@ function buildTabPanel(tab) {
         </div>
         <div class="sw-display">00:00:00.00</div>
         <div class="sw-ch-elapsed" style="display:none">
-          <span class="sw-ch-val">00:00:00</span>
+          <span class="sw-ch-val">00:00:00.00</span>
           <button class="sw-ch-hide" onclick="this.closest('.sw-ch-elapsed').dataset.hidden='1';this.closest('.sw-ch-elapsed').style.visibility='hidden'">✕</button>
         </div>
         <div class="sw-btns">
@@ -4678,7 +4678,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.086.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.086.6</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -4901,15 +4901,9 @@ function openProbCalc() {
   if (!activeMob) return;
   const kills = _getProbKills();
   const killsEl = document.getElementById('prob-kills');
-  if (kills === 0) {
-    killsEl.innerHTML = '<div class="pc-no-kills">아직 획득 기록이 없어요</div>';
-    document.getElementById('prob-complete').innerHTML = '';
-    document.getElementById('prob-grid').innerHTML = '';
-    document.getElementById('prob-result').innerHTML = '';
-    document.getElementById('prob-modal').style.display = 'flex';
-    return;
-  }
-  killsEl.innerHTML = `현재 추정 킬수 <strong>${kills.toLocaleString()}마리</strong> 기준`;
+  killsEl.innerHTML = kills > 0
+    ? `현재 추정 킬수 <strong>${kills.toLocaleString()}마리</strong> 기준`
+    : '<div class="pc-no-kills">아직 획득 기록이 없어요 — 확률 계산 불가</div>';
 
   const store   = loadS();
   const mobData = store[`mob_${activeMob.id}`] || {};
@@ -5227,7 +5221,7 @@ function _renderTlModalRows(mob, tab) {
         });
         callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
           ${wrapsHtml}
-          <div class="tl-cluster-badge">+${cItems.length}</div>
+          <div class="tl-cluster-badge">+${cItems.length - 1}</div>
         </div>`;
       }
     });
