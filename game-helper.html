@@ -1,0 +1,1318 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도감길드 길대 도우미</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><path fill='%23c89432' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round' d='M36 20.917c0-.688-2.895-.5-3.125-1s3.208-4.584 2.708-5.5-5.086 1.167-5.375.708c-.288-.458.292-3.5-.208-3.875s-5.25 4.916-5.917 4.292c-.666-.625 1.542-10.5 1.086-10.698-.456-.198-3.419 1.365-3.793 1.282C21.002 6.042 18.682 0 18 0s-3.002 6.042-3.376 6.125c-.374.083-3.337-1.48-3.793-1.282-.456.198 1.752 10.073 1.085 10.698C11.25 16.166 6.5 10.875 6 11.25s.08 3.417-.208 3.875c-.289.458-4.875-1.625-5.375-.708s2.939 5 2.708 5.5-3.125.312-3.125 1 8.438 5.235 9 5.771c.562.535-2.914 2.802-2.417 3.229.576.496 3.839-.83 10.417-.957V35c0 .553.448 1 1 1 .553 0 1-.447 1-1v-6.04c6.577.127 9.841 1.453 10.417.957.496-.428-2.979-2.694-2.417-3.229.562-.536 9-5.084 9-5.771z'/></svg>">
+<style>
+:root {
+  --brown:         #e8d8b4;
+  --gold:          #c89432;
+  --green:         #7dc97e;
+  --red:           #e06060;
+  --gray:          #a08868;
+  --dark:          #ecdcbe;
+  --bg-app:        #1a0e08;
+  --bg-panel:      #22140c;
+  --bg-panel-inner:#281810;
+  --bg-input:      #170c06;
+  --border:        #3a2418;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-input); }
+::-webkit-scrollbar-thumb { background: #3a2818; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+* { scrollbar-color: #3a2818 var(--bg-input); scrollbar-width: thin; }
+
+body {
+  font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--bg-app);
+  color: var(--dark);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.container { width: 100%; max-width: 560px; }
+
+h1 {
+  text-align: center;
+  color: var(--brown);
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--gray);
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
+
+/* ── Stats Bar ── */
+.stats {
+  display: flex;
+  justify-content: space-around;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.stat { text-align: center; }
+.stat-val { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+.stat-lbl { font-size: 0.72rem; color: var(--gray); margin-top: 1px; }
+
+/* ── Element Badges ── */
+.el { display:inline-flex; align-items:center; justify-content:center;
+      width:34px; height:34px; border-radius:8px; font-weight:700; font-size:0.95rem; }
+.el-0 { background:#3b5c2f; color:#c8e6c0; }
+.el-1 { background:#22c55e; color:#fff; }
+.el-2 { background:#eab308; color:#1a1a1a; }
+.el-3 { background:#f0f4f0; color:#1a1a1a; }
+
+/* ── History ── */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 0.72rem;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.history-empty { text-align:center; color:var(--border); font-size:0.85rem; padding:10px 0; }
+
+.h-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.h-num { width:18px; font-size:0.72rem; color:var(--gray); flex-shrink:0; }
+.h-poss { font-size:0.72rem; color:var(--border); margin-left:auto; flex-shrink:0; }
+.h-els { display:flex; gap:4px; }
+.h-fbs { display:flex; gap:4px; margin-left:8px; }
+
+.fb { padding:2px 9px; border-radius:20px; font-size:0.78rem; font-weight:700; }
+.fb-ol   { background:#2d5a2d; color:var(--green); border:1px solid #3a7a3a; }
+.fb-teul { background:#4a3010; color:var(--gold);  border:1px solid #6a4818; }
+.fb-mol  { background:#2a1a10; color:var(--gray);  border:1px solid var(--border); }
+
+.game-msg { text-align:center; font-size:1rem; font-weight:700; padding-top:8px; }
+.game-win  { color:var(--green); }
+.game-lose { color:var(--red); }
+
+/* ── Suggestion ── */
+.suggest-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* ── Picker Grid ── */
+.picker-grid {
+  display: grid;
+  grid-template-columns: 22px repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.pg-corner { }
+.pg-header {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--gray);
+  padding-bottom: 2px;
+}
+.pg-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+}
+.pg-btn {
+  height: 38px;
+  border: 2px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  color: var(--gray);
+  transition: all 0.1s;
+}
+.pg-btn:hover { border-color: var(--gray); color: var(--brown); }
+.pg-btn.sel-0 { background:#3b5c2f; color:#c8e6c0; border-color:#3b5c2f; }
+.pg-btn.sel-1 { background:#22c55e; color:#fff; border-color:#22c55e; }
+.pg-btn.sel-2 { background:#eab308; color:#1a1a1a; border-color:#eab308; }
+.pg-btn.sel-3 { background:#f0f4f0; color:#1a1a1a; border-color:#f0f4f0; }
+
+/* ── Feedback Input ── */
+.fb-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.fb-grp { display:flex; align-items:center; gap:8px; }
+.fb-grp label { font-size:0.85rem; font-weight:700; width:24px; flex-shrink:0; }
+.lbl-ol   { color:var(--green); }
+.lbl-teul { color:var(--gold); }
+.lbl-mol  { color:var(--gray); }
+.num-row { display:flex; gap:5px; }
+.num-btn {
+  width:36px; height:36px;
+  border:2px solid var(--border); border-radius:7px;
+  background:var(--bg-input); color:var(--gray);
+  cursor:pointer; font-size:0.95rem; font-weight:700;
+  transition: all 0.1s;
+}
+.num-btn:hover { border-color:var(--gray); color:var(--brown); }
+.num-btn.active-ol   { background:#2d5a2d; border-color:var(--green); color:var(--green); }
+.num-btn.active-teul { background:#4a3010; border-color:var(--gold);  color:var(--gold); }
+.mol-display { font-size:1rem; font-weight:700; color:var(--gray); width:36px; text-align:center; }
+.mol-eq  { font-size:0.75rem; color:var(--gray); }
+
+.submit-btn {
+  width:100%; padding:11px;
+  background: linear-gradient(135deg, var(--gold), #a87820);
+  color: var(--bg-app);
+  border:none; border-radius:9px;
+  font-size:1rem; font-weight:700;
+  cursor:pointer; transition:opacity 0.15s;
+  margin-bottom:8px;
+  box-shadow: 0 2px 8px rgba(168,120,32,.3);
+}
+.submit-btn:hover { opacity: 0.88; }
+.submit-btn:disabled { background:var(--bg-panel); color:var(--border); box-shadow:none; cursor:not-allowed; }
+
+.btn-row { display:flex; gap:8px; }
+.undo-btn {
+  flex:1; padding:8px;
+  background:transparent; color:var(--gold);
+  border:1px solid #4a3010; border-radius:9px;
+  font-size:0.85rem; cursor:pointer;
+  transition:all 0.15s;
+}
+.undo-btn:hover { color:var(--brown); border-color:var(--gold); }
+.undo-btn:disabled { color:var(--border); border-color:var(--bg-panel); cursor:not-allowed; }
+.reset-btn {
+  flex:1; padding:8px;
+  background:transparent; color:var(--gray);
+  border:1px solid var(--border); border-radius:9px;
+  font-size:0.85rem; cursor:pointer;
+  transition:all 0.15s;
+}
+.reset-btn:hover { color:var(--brown); border-color:var(--gray); }
+
+.no-sol { color:var(--red); font-size:0.85rem; }
+
+.guess-type-badge {
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 0.74rem; font-weight: 700;
+}
+.type-answer { background:#3a2a08; color:var(--gold); border:1px solid #6a4818; }
+.type-info   { background:#2a1a10; color:var(--gray); border:1px solid #4a2e1a; }
+
+.suggest-info { font-size:0.78rem; color:var(--gray); }
+
+/* ── Tabs ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--brown); background: var(--bg-panel-inner); }
+.tab-btn.active { background: var(--bg-input); color: var(--gold); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Reward Distributor ── */
+.container-wide { max-width: 900px; }
+.reward-wrap { display: flex; flex-direction: column; gap: 12px; }
+
+.reward-top-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.reward-count-label { font-size: 0.8rem; color: var(--gray); }
+.reward-count-select {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--dark);
+  font-size: 0.85rem; padding: 4px 8px;
+  cursor: pointer; outline: none; font-family: inherit;
+}
+.reward-count-select:focus { border-color: var(--gold); }
+.reward-img-btn {
+  padding: 4px 10px;
+  background: transparent; color: var(--gray);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.78rem; cursor: pointer; transition: all 0.15s;
+}
+.reward-img-btn:hover { border-color: var(--gray); color: var(--brown); }
+
+.reward-map-container {
+  position: relative; width: 100%; aspect-ratio: 850/182;
+  background: var(--bg-input);
+  border-radius: 8px; overflow: hidden;
+  background-size: 100% 100%; background-repeat: no-repeat;
+}
+.rmap-zone {
+  position: absolute;
+  border: 2px solid rgba(200,148,50,0.35);
+  background: rgba(26,14,8,0.5);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: default; overflow: hidden;
+  transition: background 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+.rmap-zone.has-name {
+  background: rgba(42,30,8,0.7);
+  border-color: rgba(200,148,50,0.85);
+}
+.rmap-zone.drag-over {
+  background: rgba(200,148,50,0.25);
+  border-color: var(--gold);
+}
+.rmap-zone-num { font-size: 0.6rem; color: rgba(160,136,104,0.9); line-height: 1.2; }
+.rmap-zone-names {
+  font-size: 0.75rem; color: var(--gold);
+  font-weight: 700; text-align: center; line-height: 1.3;
+}
+
+.reward-bottom-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; align-items: start;
+}
+
+.reward-add-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.reward-name-input {
+  flex: 1; min-width: 0;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--dark);
+  font-size: 0.85rem; padding: 5px 8px;
+  outline: none; font-family: inherit;
+}
+.reward-name-input:focus { border-color: var(--gold); }
+.reward-add-btn {
+  padding: 5px 10px;
+  background: linear-gradient(135deg, var(--gold), #a87820);
+  color: var(--bg-app); border: none; border-radius: 6px;
+  font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+}
+.reward-add-btn:hover { opacity: 0.85; }
+
+.name-pool {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  min-height: 44px; padding: 6px;
+  border: 1px dashed var(--border); border-radius: 8px;
+  transition: all 0.15s;
+}
+.name-pool.drag-over { border-color: var(--gold); background: #2a1e08; }
+
+.name-card {
+  padding: 4px 10px;
+  background: var(--bg-panel-inner); border: 1px solid var(--border);
+  border-radius: 6px; font-size: 0.82rem; color: var(--dark);
+  cursor: grab; user-select: none; transition: all 0.1s;
+}
+.name-card:hover { border-color: var(--gold); color: var(--gold); }
+.name-card.dragging { opacity: 0.35; }
+
+.zone-slot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg-input);
+  margin-bottom: 5px; min-height: 36px; transition: all 0.15s;
+}
+.zone-slot.drag-over { border-color: var(--gold); background: #2a1e08; }
+.zone-slot-num { font-size: 0.72rem; color: var(--gray); width: 16px; flex-shrink: 0; font-weight: 700; }
+.zone-slot-names { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+
+.assign-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.assign-name { font-size: 0.8rem; font-weight: 700; color: var(--gold); flex-shrink: 0; padding-top: 2px; }
+.assign-zone-lbl { font-size: 0.68rem; color: var(--gray); flex-shrink: 0; padding-top: 4px; }
+.assign-boxes { display: flex; flex-wrap: wrap; gap: 3px; }
+.assign-box {
+  padding: 1px 6px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 4px;
+  font-size: 0.75rem; color: var(--dark);
+}
+
+.version-label {
+  position: fixed;
+  bottom: 10px; right: 12px;
+  font-size: .6rem;
+  color: rgba(200,148,50,.35);
+  cursor: default;
+  user-select: none;
+  letter-spacing: .03em;
+}
+
+.auto-sim-btn {
+  padding: 5px 12px;
+  background: #3a2408; color: var(--gold);
+  border: 1px solid #6a4818; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  margin-top: 8px;
+}
+.auto-sim-btn:hover { background: var(--gold); color: var(--bg-app); }
+.auto-sim-btn:disabled { background: var(--bg-panel); color: var(--border); border-color:var(--bg-panel); cursor:not-allowed; }
+
+.apply-btn {
+  padding:3px 10px;
+  background:#3a2408; color:var(--gold);
+  border:1px solid #6a4818; border-radius:6px;
+  font-size:0.75rem; cursor:pointer;
+  transition:all 0.15s;
+}
+.apply-btn:hover { background:var(--gold); color:var(--bg-app); }
+.apply-btn:disabled { background:var(--bg-panel); color:var(--border); border-color:var(--bg-panel); cursor:not-allowed; }
+
+/* ── Test Mode ── */
+.test-card {
+  background: var(--bg-panel);
+  border: 1px solid #6a4818;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.test-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.test-title {
+  font-size: 0.72rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.test-toggle {
+  font-size: 0.75rem;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid #6a4818;
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.test-toggle:hover { border-color: var(--gold); color: var(--brown); }
+.test-body { margin-top: 10px; }
+.test-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.test-label { font-size: 0.8rem; color: var(--gold); }
+.test-set-btn {
+  padding: 5px 14px;
+  background: linear-gradient(135deg, var(--gold), #a87820);
+  color: var(--bg-app);
+  border: none;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.test-set-btn:hover { opacity: 0.85; }
+.test-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin-top: 6px;
+}
+/* Picker reused inside test with a different class */
+.test-picker { display: flex; gap: 6px; }
+.tp-grp { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.tp-lbl { font-size: 0.68rem; color: var(--gray); }
+.tp-sel {
+  width: 44px; height: 36px;
+  border: 2px solid var(--border); border-radius: 7px;
+  background: var(--bg-input); color: var(--gray);
+  font-weight: 700; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.1s;
+}
+.tp-sel:hover { border-color: var(--gray); }
+.tp-active-0 { background:#3b5c2f; color:#c8e6c0; border-color:#3b5c2f; }
+.tp-active-1 { background:#22c55e; color:#fff; border-color:#22c55e; }
+.tp-active-2 { background:#eab308; color:#1a1a1a; border-color:#eab308; }
+.tp-active-3 { background:#f0f4f0; color:#1a1a1a; border-color:#f0f4f0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>길드 대항전 도우미</h1>
+  <p class="subtitle" style="margin-bottom:4px;">도감길드 파이팅!</p>
+  <p class="subtitle">마북 나오면 좋겠다!</p>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('gildae')">퍼즐 도우미</button>
+    <button class="tab-btn" onclick="switchTab('reward')">보상방 분배기</button>
+  </div>
+
+  <div class="tab-content active" id="tab-gildae">
+  <!-- Test Mode -->
+  <div class="test-card">
+    <div class="test-header" onclick="toggleTestPanel()">
+      <span class="test-title">🧪 테스트 모드</span>
+      <button class="test-toggle" id="test-toggle-btn">열기</button>
+    </div>
+    <div class="test-body" id="test-body" style="display:none">
+      <div class="test-row">
+        <span class="test-label">정답 설정:</span>
+        <div class="test-picker" id="test-picker"></div>
+        <button class="test-set-btn" onclick="activateTestMode()">적용</button>
+      </div>
+      <div id="test-active-info"></div>
+      <button class="auto-sim-btn" id="auto-sim-btn" onclick="autoSimulate()" disabled>▶ 자동 시뮬레이션</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val" id="stat-left">7</div>
+      <div class="stat-lbl">남은 시도</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-poss">256</div>
+      <div class="stat-lbl">가능한 경우의 수</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-used">0</div>
+      <div class="stat-lbl">사용한 시도</div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card" id="history-card">
+    <div class="card-title">입력 기록</div>
+    <div class="history-empty" id="hist-empty">아직 입력된 시도가 없습니다</div>
+  </div>
+
+  <!-- Suggestion -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>추천 다음 추측</span>
+      <button class="apply-btn" id="apply-btn" onclick="applyRecommendation()">↓ 입력칸에 넣기</button>
+    </div>
+    <div class="suggest-row" id="suggest-row">
+      <span style="color:var(--gray);font-size:0.85rem">계산 중...</span>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="card" id="input-card">
+    <div class="card-title">내 추측 입력</div>
+
+    <div class="picker-grid" id="picker-grid"></div>
+
+    <div class="fb-input-row">
+      <div class="fb-grp">
+        <label class="lbl-ol">올</label>
+        <div class="num-row" id="ol-row"></div>
+      </div>
+      <div class="fb-grp">
+        <label class="lbl-teul">틀</label>
+        <div class="num-row" id="teul-row"></div>
+      </div>
+      <div class="fb-grp">
+        <label class="lbl-mol">몰</label>
+        <span class="mol-display" id="v-mol">4</span>
+        <span class="mol-eq">= 4 − 올 − 틀</span>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitGuess()">입력</button>
+    <div class="btn-row">
+      <button class="undo-btn" id="undo-btn" onclick="undoLast()" disabled>마지막 취소</button>
+      <button class="reset-btn" onclick="resetGame()">처음부터 다시</button>
+    </div>
+  </div>
+  </div><!-- /tab-gildae -->
+
+  <div class="tab-content" id="tab-reward">
+    <div class="reward-wrap">
+
+      <!-- 상단: 구역 지도 -->
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span>보상방 구역 지도</span>
+          <div class="reward-top-bar" style="margin-bottom:0">
+            <span class="reward-count-label">인원수</span>
+            <select class="reward-count-select" id="reward-count-select" onchange="rewardSetCount(+this.value)">
+              <option value="6" selected>6명</option>
+              <option value="7">7명</option>
+              <option value="8">8명</option>
+              <option value="9">9명</option>
+            </select>
+            <button class="reward-img-btn" onclick="document.getElementById('reward-img-file').click()">🖼 이미지 선택</button>
+            <input type="file" id="reward-img-file" accept="image/*" style="display:none" onchange="rewardLoadImage(this)">
+          </div>
+        </div>
+        <div class="reward-map-container" id="reward-map-container"></div>
+      </div>
+
+      <!-- 하단: 3분할 -->
+      <div class="reward-bottom-row">
+
+        <!-- 좌: 이름 풀 -->
+        <div class="card">
+          <div class="card-title">참가자</div>
+          <div class="reward-add-row">
+            <input class="reward-name-input" id="reward-name-input" placeholder="이름 입력"
+              onkeydown="if(event.key==='Enter')rewardAddName()">
+            <button class="reward-add-btn" onclick="rewardAddName()">추가</button>
+          </div>
+          <div class="name-pool" id="reward-name-pool"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="rewardDropToPool(event)">
+          </div>
+        </div>
+
+        <!-- 중: 구역 슬롯 -->
+        <div class="card">
+          <div class="card-title">자리 배정</div>
+          <div id="reward-slots"></div>
+        </div>
+
+        <!-- 우: 상자 배정 결과 -->
+        <div class="card">
+          <div class="card-title">깨야 할 상자</div>
+          <div id="reward-assignments">
+            <p style="color:var(--gray);font-size:0.8rem">자리를 배정하면 표시됩니다.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /tab-reward -->
+
+</div>
+
+<div class="version-label">똘레로_1.001.0</div>
+
+<script>
+const EL = ['음', '술', '훈', '두'];
+const EC = ['sel-0','sel-1','sel-2','sel-3']; // selected class names
+
+// Generate all 4^4 = 256 codes
+const ALL = [];
+for (let a=0;a<4;a++) for (let b=0;b<4;b++) for (let c=0;c<4;c++) for (let d=0;d<4;d++)
+  ALL.push([a,b,c,d]);
+
+// State
+let poss = ALL.slice();
+let history = [];
+let sel = [0,0,0,0]; // current selected elements per position
+let ol = 0, teul = 0;
+let used = 0;
+let over = false;
+
+// Current recommendation
+let lastRecommendation = null;
+
+// Test mode
+let testSecret = null;   // null = off, array = secret answer
+let testSel = [0,0,0,0]; // selection in test picker
+
+// ── Mastermind feedback calculation ──
+function feedback(guess, secret) {
+  let blacks = 0;
+  for (let i=0;i<4;i++) if (guess[i]===secret[i]) blacks++;
+  let total = 0;
+  for (let e=0;e<4;e++) {
+    total += Math.min(guess.filter(x=>x===e).length, secret.filter(x=>x===e).length);
+  }
+  return { ol: blacks, teul: total - blacks };
+}
+
+function filterPoss(possibilities, guess, expOl, expTeul) {
+  return possibilities.filter(s => {
+    const f = feedback(guess, s);
+    return f.ol === expOl && f.teul === expTeul;
+  });
+}
+
+// Minimax: find guess that minimises worst-case remaining possibilities
+function bestGuess(possibilities) {
+  if (possibilities.length === 0) return null;
+  if (possibilities.length === 1) return possibilities[0];
+
+  const possSet = new Set(possibilities.map(p=>p.join()));
+  let best = possibilities[0];
+  let bestScore = Infinity;
+
+  for (const g of ALL) {
+    const parts = {};
+    for (const s of possibilities) {
+      const f = feedback(g, s);
+      const k = f.ol*10 + f.teul;
+      parts[k] = (parts[k]||0) + 1;
+    }
+    const worst = Math.max(...Object.values(parts));
+    // Prefer guesses that are themselves still possible (tiebreak)
+    const score = worst * 2 - (possSet.has(g.join()) ? 1 : 0);
+    if (score < bestScore) { bestScore = score; best = g; }
+  }
+  return best;
+}
+
+// ── Test mode ──
+function toggleTestPanel() {
+  const body = document.getElementById('test-body');
+  const btn = document.getElementById('test-toggle-btn');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '닫기' : '열기';
+}
+
+function buildTestPicker() {
+  const picker = document.getElementById('test-picker');
+  picker.innerHTML = '';
+  for (let pos = 0; pos < 4; pos++) {
+    const grp = document.createElement('div');
+    grp.className = 'tp-grp';
+    const lbl = document.createElement('div');
+    lbl.className = 'tp-lbl';
+    lbl.textContent = (pos+1)+'번';
+    grp.appendChild(lbl);
+    const btn = document.createElement('button');
+    btn.className = 'tp-sel tp-active-'+testSel[pos];
+    btn.textContent = EL[testSel[pos]];
+    btn.onclick = () => cycleTestSel(pos, btn);
+    grp.appendChild(btn);
+    picker.appendChild(grp);
+  }
+}
+
+function cycleTestSel(pos, btn) {
+  testSel[pos] = (testSel[pos] + 1) % 4;
+  btn.className = 'tp-sel tp-active-'+testSel[pos];
+  btn.textContent = EL[testSel[pos]];
+}
+
+function activateTestMode() {
+  testSecret = testSel.slice();
+  const info = document.getElementById('test-active-info');
+  const wrap = document.createElement('div');
+  wrap.className = 'test-active-badge';
+  wrap.innerHTML = '정답: ';
+  testSecret.forEach(e => {
+    const s = document.createElement('span');
+    s.className = 'el el-'+e;
+    s.style.cssText = 'width:26px;height:26px;font-size:0.8rem;border-radius:5px;';
+    s.textContent = EL[e];
+    wrap.appendChild(s);
+  });
+  info.innerHTML = '';
+  info.appendChild(wrap);
+  resetGame();
+  document.getElementById('auto-sim-btn').disabled = false;
+}
+
+async function autoSimulate() {
+  if (!testSecret || over) return;
+  const btn = document.getElementById('auto-sim-btn');
+  btn.disabled = true;
+  btn.textContent = '실행 중...';
+
+  // Step through until solved or 7 attempts
+  while (!over) {
+    // Apply recommendation
+    if (!lastRecommendation) break;
+    lastRecommendation.forEach((e, pos) => pick(pos, e));
+
+    // Calculate feedback from secret
+    const f = feedback(sel, testSecret);
+    ol = f.ol; teul = f.teul;
+    updateFbDisplay();
+
+    // Submit
+    const isWin = (ol === 4);
+    const mol = 4 - ol - teul;
+    history.push({ guess: sel.slice(), ol, teul, mol, possCount: poss.length });
+    used++;
+    if (!isWin) poss = filterPoss(poss, sel, ol, teul);
+    if (isWin || used >= 7) over = true;
+
+    ol = 0; teul = 0;
+    updateFbDisplay();
+    if (over) {
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('input-card').style.opacity = '0.5';
+    }
+    updateStats();
+    renderHistory();
+    if (!over) renderSuggestion();
+
+    // Short delay so user can see each step
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  btn.textContent = '▶ 자동 시뮬레이션';
+  if (over) btn.disabled = true;
+}
+
+// ── Render helpers ──
+function elBadge(e) {
+  const s = document.createElement('span');
+  s.className = 'el el-'+e;
+  s.textContent = EL[e];
+  return s;
+}
+
+function buildPicker() {
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+
+  // Top-left corner
+  const corner = document.createElement('div');
+  corner.className = 'pg-corner';
+  grid.appendChild(corner);
+
+  // Column headers (positions)
+  for (let pos=0;pos<4;pos++) {
+    const h = document.createElement('div');
+    h.className = 'pg-header';
+    h.textContent = (pos+1)+'번';
+    grid.appendChild(h);
+  }
+
+  // Rows (elements)
+  for (let e=0;e<4;e++) {
+    // Row label
+    const lbl = document.createElement('div');
+    lbl.className = 'pg-label';
+    lbl.appendChild(elBadge(e));
+    lbl.style.width = '22px';
+    lbl.style.height = '38px';
+    lbl.style.padding = '0';
+    lbl.firstChild.style.width = '22px';
+    lbl.firstChild.style.height = '22px';
+    lbl.firstChild.style.fontSize = '0.72rem';
+    lbl.firstChild.style.borderRadius = '5px';
+    grid.appendChild(lbl);
+
+    // Buttons for each position
+    for (let pos=0;pos<4;pos++) {
+      const btn = document.createElement('button');
+      btn.className = 'pg-btn' + (sel[pos]===e ? ' '+EC[e] : '');
+      btn.textContent = EL[e];
+      btn.dataset.pos = pos;
+      btn.dataset.el = e;
+      btn.onclick = () => pick(pos, e);
+      grid.appendChild(btn);
+    }
+  }
+}
+
+function pick(pos, e) {
+  sel[pos] = e;
+  // Update buttons in that column
+  const btns = document.querySelectorAll(`.pg-btn[data-pos="${pos}"]`);
+  btns.forEach(b => {
+    const be = parseInt(b.dataset.el);
+    b.className = 'pg-btn' + (be===e ? ' '+EC[be] : '');
+  });
+}
+
+function buildNumRows() {
+  ['ol','teul'].forEach(type => {
+    const row = document.getElementById(type+'-row');
+    row.innerHTML = '';
+    for (let n=0;n<=4;n++) {
+      const btn = document.createElement('button');
+      btn.className = 'num-btn';
+      btn.textContent = n;
+      btn.dataset.val = n;
+      btn.onclick = () => setVal(type, n);
+      row.appendChild(btn);
+    }
+  });
+  updateFbDisplay();
+}
+
+function updateFbDisplay() {
+  // Highlight active buttons
+  document.querySelectorAll('#ol-row .num-btn').forEach(b => {
+    b.className = 'num-btn' + (parseInt(b.dataset.val)===ol ? ' active-ol' : '');
+  });
+  document.querySelectorAll('#teul-row .num-btn').forEach(b => {
+    b.className = 'num-btn' + (parseInt(b.dataset.val)===teul ? ' active-teul' : '');
+  });
+  document.getElementById('v-mol').textContent = 4-ol-teul;
+}
+
+function setVal(type, n) {
+  if (type==='ol') {
+    ol = Math.min(n, 4-teul);
+  } else {
+    teul = Math.min(n, 4-ol);
+  }
+  updateFbDisplay();
+}
+
+function renderSuggestion() {
+  const row = document.getElementById('suggest-row');
+  row.innerHTML = '';
+
+  if (poss.length === 0) {
+    const s = document.createElement('span');
+    s.className = 'no-sol';
+    s.textContent = '가능한 경우가 없습니다. 입력 내용을 확인하고 처음부터 다시 시작하세요.';
+    row.appendChild(s);
+    return;
+  }
+
+  const g = bestGuess(poss);
+  lastRecommendation = g;
+  g.forEach(e => row.appendChild(elBadge(e)));
+
+  const inPoss = poss.some(p=>p.join()===g.join());
+
+  const badge = document.createElement('span');
+  badge.className = inPoss ? 'guess-type-badge type-answer' : 'guess-type-badge type-info';
+  badge.textContent = inPoss ? '정답 후보' : '정보 수집용';
+  row.appendChild(badge);
+
+  const info = document.createElement('span');
+  info.className = 'suggest-info';
+  info.textContent = `${poss.length}가지 중 최적`;
+  row.appendChild(info);
+}
+
+function applyRecommendation() {
+  if (!lastRecommendation) return;
+  lastRecommendation.forEach((e, pos) => pick(pos, e));
+}
+
+function renderHistory() {
+  const card = document.getElementById('history-card');
+  // Remove old rows
+  card.querySelectorAll('.h-row, .game-msg').forEach(r=>r.remove());
+
+  const empty = document.getElementById('hist-empty');
+  empty.style.display = history.length ? 'none' : 'block';
+
+  history.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'h-row';
+
+    const num = document.createElement('span');
+    num.className = 'h-num';
+    num.textContent = i+1;
+    row.appendChild(num);
+
+    const els = document.createElement('div');
+    els.className = 'h-els';
+    entry.guess.forEach(e => els.appendChild(elBadge(e)));
+    row.appendChild(els);
+
+    const fbs = document.createElement('div');
+    fbs.className = 'h-fbs';
+    if (entry.ol)   { const b=document.createElement('span'); b.className='fb fb-ol';   b.textContent=entry.ol+'올';   fbs.appendChild(b); }
+    if (entry.teul) { const b=document.createElement('span'); b.className='fb fb-teul'; b.textContent=entry.teul+'틀'; fbs.appendChild(b); }
+    if (entry.mol)  { const b=document.createElement('span'); b.className='fb fb-mol';  b.textContent=entry.mol+'몰';  fbs.appendChild(b); }
+    row.appendChild(fbs);
+
+    if (entry.possCount != null) {
+      const pc = document.createElement('span');
+      pc.className = 'h-poss';
+      pc.textContent = entry.possCount+'개 중';
+      row.appendChild(pc);
+    }
+
+    card.appendChild(row);
+  });
+
+  if (over) {
+    const msg = document.createElement('div');
+    const last = history[history.length-1];
+    if (last.ol === 4) {
+      msg.className = 'game-msg game-win';
+      msg.textContent = `${used}번 만에 정답!`;
+    } else {
+      msg.className = 'game-msg game-lose';
+      msg.textContent = `7번을 모두 사용했습니다.`;
+    }
+    card.appendChild(msg);
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-left').textContent = Math.max(0, 7-used);
+  document.getElementById('stat-used').textContent = used;
+  document.getElementById('stat-poss').textContent = poss.length;
+}
+
+function recomputePoss() {
+  poss = ALL.slice();
+  for (const e of history) {
+    if (e.ol < 4) poss = filterPoss(poss, e.guess, e.ol, e.teul);
+  }
+}
+
+function undoLast() {
+  if (history.length === 0) return;
+  history.pop();
+  used--;
+  over = false;
+  recomputePoss();
+
+  ol = 0; teul = 0;
+  updateFbDisplay();
+  updateStats();
+  renderHistory();
+  renderSuggestion();
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('input-card').style.opacity = '1';
+  document.getElementById('undo-btn').disabled = (history.length === 0);
+}
+
+function submitGuess() {
+  if (over) return;
+
+  // Test mode: auto-calculate feedback
+  if (testSecret) {
+    const f = feedback(sel, testSecret);
+    ol = f.ol; teul = f.teul;
+    updateFbDisplay();
+  }
+
+  const isWin = (ol === 4);
+  const mol = 4 - ol - teul;
+
+  history.push({ guess: sel.slice(), ol, teul, mol, possCount: poss.length });
+  used++;
+
+  if (!isWin) {
+    poss = filterPoss(poss, sel, ol, teul);
+  }
+
+  if (isWin || used >= 7) over = true;
+
+  ol = 0; teul = 0;
+  updateFbDisplay();
+  document.getElementById('undo-btn').disabled = false;
+
+  if (over) {
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('input-card').style.opacity = '0.5';
+  }
+
+  updateStats();
+  renderHistory();
+  if (!over) renderSuggestion();
+  else {
+    // Show remaining possibilities after game over (if loss)
+    const row = document.getElementById('suggest-row');
+    row.innerHTML = '';
+    const last = history[history.length-1];
+    if (last.ol !== 4 && poss.length > 0) {
+      const lbl = document.createElement('span');
+      lbl.className = 'suggest-info';
+      lbl.textContent = '남은 가능한 답: ';
+      row.appendChild(lbl);
+      poss.slice(0,6).forEach((p,i) => {
+        if (i) { const sep=document.createElement('span'); sep.style.cssText='margin:0 4px;color:var(--border)'; sep.textContent='|'; row.appendChild(sep); }
+        const wrap=document.createElement('span'); wrap.style.display='inline-flex'; wrap.style.gap='3px';
+        p.forEach(e=>wrap.appendChild(elBadge(e)));
+        row.appendChild(wrap);
+      });
+      if (poss.length > 6) {
+        const m=document.createElement('span'); m.className='suggest-info'; m.style.marginLeft='6px';
+        m.textContent=`외 ${poss.length-6}가지`; row.appendChild(m);
+      }
+    }
+  }
+}
+
+function resetGame() {
+  poss = ALL.slice();
+  history = [];
+  sel = [0,0,0,0];
+  ol = 0; teul = 0;
+  used = 0; over = false;
+
+  updateFbDisplay();
+  updateStats();
+  renderHistory();
+  buildPicker();
+  renderSuggestion();
+
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('input-card').style.opacity = '1';
+  document.getElementById('undo-btn').disabled = true;
+  // Don't clear testSecret on reset so you can replay the same secret
+}
+
+// ── Tab switching ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.querySelector('.container').classList.toggle('container-wide', name === 'reward');
+}
+
+// ── Reward Distributor ──
+// 인원수별 구역 설정 (위치: 지도 컨테이너 기준 %, 상자: 추정값 - 확인 후 조정 가능)
+// ZONE_CONFIGS: 위치는 SVG(850×182) 기준 % — left/top/w/h 모두 백분율
+const ZONE_CONFIGS = {
+  6: [
+    { id:1, left:1,  top:9,  w:16, h:40, boxes:[1,2,3,4] },
+    { id:2, left:0,  top:61, w:34, h:30, boxes:[5,6,7,8] },
+    { id:3, left:25, top:0,  w:25, h:33, boxes:[9,10,11,12] },
+    { id:4, left:28, top:41, w:36, h:42, boxes:[13,14,15,16] },
+    { id:5, left:61, top:2,  w:28, h:81, boxes:[17,18,19,20,21] },
+    { id:6, left:90, top:4,  w:8,  h:79, boxes:[22,23,24,25] },
+  ],
+  7: [
+    { id:1, left:1,  top:9,  w:16, h:40, boxes:[1,2,3,4] },
+    { id:2, left:0,  top:61, w:20, h:30, boxes:[5,6,7] },
+    { id:3, left:25, top:0,  w:25, h:33, boxes:[9,10,11,12] },
+    { id:4, left:28, top:41, w:15, h:48, boxes:[8,13,14,15] },
+    { id:5, left:61, top:2,  w:19, h:37, boxes:[17,18,19] },
+    { id:6, left:60, top:64, w:36, h:19, boxes:[16,20,21,22] },
+    { id:7, left:90, top:4,  w:8,  h:41, boxes:[23,24,25] },
+  ],
+  8: [
+    { id:1, left:1,  top:9,  w:16, h:40, boxes:[1,2,3,4] },
+    { id:2, left:0,  top:61, w:20, h:30, boxes:[5,6,7] },
+    { id:3, left:32, top:0,  w:18, h:33, boxes:[10,11,12] },
+    { id:4, left:25, top:16, w:16, h:43, boxes:[9,13,14] },
+    { id:5, left:31, top:64, w:33, h:25, boxes:[8,15,16] },
+    { id:6, left:61, top:2,  w:19, h:37, boxes:[17,18,19] },
+    { id:7, left:75, top:65, w:21, h:18, boxes:[20,21,22] },
+    { id:8, left:90, top:4,  w:8,  h:41, boxes:[23,24,25] },
+  ],
+  9: [
+    { id:1, left:1,  top:9,  w:9,  h:23, boxes:[1,2] },
+    { id:2, left:6,  top:30, w:11, h:19, boxes:[3,4] },
+    { id:3, left:0,  top:61, w:20, h:30, boxes:[5,6,7] },
+    { id:4, left:32, top:0,  w:18, h:33, boxes:[10,11,12] },
+    { id:5, left:25, top:16, w:16, h:43, boxes:[9,13,14] },
+    { id:6, left:31, top:64, w:33, h:25, boxes:[8,15,16] },
+    { id:7, left:61, top:2,  w:19, h:37, boxes:[17,18,19] },
+    { id:8, left:75, top:65, w:21, h:18, boxes:[20,21,22] },
+    { id:9, left:90, top:4,  w:8,  h:41, boxes:[23,24,25] },
+  ],
+};
+
+let rewardCount = 6;
+let rewardNames = [];
+let zoneAssign = {};
+let rDraggingName = null;
+let rDraggingFrom = null;
+
+function rewardSetCount(n) {
+  rewardCount = n;
+  // 기존 배정 중 유효하지 않은 구역의 이름은 풀로 반환
+  const newZones = ZONE_CONFIGS[n].map(z => z.id);
+  Object.keys(zoneAssign).forEach(z => {
+    if (!newZones.includes(+z)) {
+      zoneAssign[z] = []; // 사라지는 구역 → 풀로 자동 반환됨
+    }
+  });
+  // 새 구역 초기화
+  const next = {};
+  newZones.forEach(z => { next[z] = zoneAssign[z] || []; });
+  zoneAssign = next;
+  rewardRender();
+}
+
+function rewardLoadImage(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('reward-map-container').style.backgroundImage = `url('${e.target.result}')`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function rewardAddName() {
+  const input = document.getElementById('reward-name-input');
+  const name = input.value.trim();
+  if (!name || rewardNames.includes(name)) return;
+  rewardNames.push(name);
+  input.value = '';
+  rewardRender();
+}
+
+function rDragStart(e, name, from) {
+  rDraggingName = name; rDraggingFrom = from;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => e.target.classList.add('dragging'), 0);
+}
+function rDragEnd(e) { e.target.classList.remove('dragging'); }
+
+function rewardDropToZone(e, zone) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!rDraggingName) return;
+  if (rDraggingFrom !== 'pool') {
+    zoneAssign[rDraggingFrom] = zoneAssign[rDraggingFrom].filter(n => n !== rDraggingName);
+  }
+  if (!zoneAssign[zone]) zoneAssign[zone] = [];
+  if (!zoneAssign[zone].includes(rDraggingName)) zoneAssign[zone].push(rDraggingName);
+  rDraggingName = null; rDraggingFrom = null;
+  rewardRender();
+}
+
+function rewardDropToPool(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!rDraggingName) return;
+  if (rDraggingFrom !== 'pool') {
+    zoneAssign[rDraggingFrom] = zoneAssign[rDraggingFrom].filter(n => n !== rDraggingName);
+  }
+  rDraggingName = null; rDraggingFrom = null;
+  rewardRender();
+}
+
+function rewardMakeCard(name, from) {
+  const card = document.createElement('div');
+  card.className = 'name-card';
+  card.textContent = name;
+  card.draggable = true;
+  card.ondragstart = e => rDragStart(e, name, from);
+  card.ondragend = rDragEnd;
+  return card;
+}
+
+function rewardRender() {
+  const config = ZONE_CONFIGS[rewardCount];
+  const assigned = new Set(Object.values(zoneAssign).flat());
+
+  // 풀
+  const pool = document.getElementById('reward-name-pool');
+  pool.innerHTML = '';
+  rewardNames.filter(n => !assigned.has(n)).forEach(n => pool.appendChild(rewardMakeCard(n, 'pool')));
+
+  // 지도 오버레이
+  const mapEl = document.getElementById('reward-map-container');
+  mapEl.querySelectorAll('.rmap-zone').forEach(el => el.remove());
+  config.forEach(({ id, left, top, w, h }) => {
+    const zone = document.createElement('div');
+    zone.className = 'rmap-zone';
+    zone.dataset.zone = id;
+    zone.style.cssText = `left:${left}%;top:${top}%;width:${w}%;height:${h}%`;
+    const names = zoneAssign[id] || [];
+    if (names.length) zone.classList.add('has-name');
+    zone.innerHTML = `<div class="rmap-zone-num">${id}구역</div><div class="rmap-zone-names">${names.join('<br>')}</div>`;
+    zone.ondragover = e => { e.preventDefault(); zone.classList.add('drag-over'); };
+    zone.ondragleave = () => zone.classList.remove('drag-over');
+    zone.ondrop = e => rewardDropToZone(e, id);
+    mapEl.appendChild(zone);
+  });
+
+  // 구역 슬롯
+  const slots = document.getElementById('reward-slots');
+  slots.innerHTML = '';
+  config.forEach(({ id }) => {
+    const slot = document.createElement('div');
+    slot.className = 'zone-slot';
+    slot.ondragover = e => { e.preventDefault(); slot.classList.add('drag-over'); };
+    slot.ondragleave = () => slot.classList.remove('drag-over');
+    slot.ondrop = e => rewardDropToZone(e, id);
+    const num = document.createElement('span');
+    num.className = 'zone-slot-num';
+    num.textContent = id;
+    slot.appendChild(num);
+    const namesDiv = document.createElement('div');
+    namesDiv.className = 'zone-slot-names';
+    (zoneAssign[id] || []).forEach(n => namesDiv.appendChild(rewardMakeCard(n, id)));
+    slot.appendChild(namesDiv);
+    slots.appendChild(slot);
+  });
+
+  // 상자 배정 결과
+  const container = document.getElementById('reward-assignments');
+  const results = [];
+  config.forEach(({ id, boxes }) => {
+    const people = zoneAssign[id] || [];
+    people.forEach((name, idx) => {
+      const share = boxes.filter((_, i) => i % people.length === idx);
+      results.push({ name, zone: id, boxes: share });
+    });
+  });
+
+  if (results.length === 0) {
+    container.innerHTML = '<p style="color:var(--gray);font-size:0.8rem">자리를 배정하면 표시됩니다.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  results.forEach(({ name, zone, boxes }) => {
+    const row = document.createElement('div');
+    row.className = 'assign-row';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'assign-name';
+    nameEl.textContent = name;
+    const zoneLbl = document.createElement('div');
+    zoneLbl.className = 'assign-zone-lbl';
+    zoneLbl.textContent = zone + '구역';
+    const boxesEl = document.createElement('div');
+    boxesEl.className = 'assign-boxes';
+    if (boxes.length === 0) {
+      const span = document.createElement('span');
+      span.style.cssText = 'font-size:0.75rem;color:var(--gray)';
+      span.textContent = '없음';
+      boxesEl.appendChild(span);
+    } else {
+      boxes.forEach(b => {
+        const span = document.createElement('span');
+        span.className = 'assign-box';
+        span.textContent = b + '번';
+        boxesEl.appendChild(span);
+      });
+    }
+    row.append(nameEl, zoneLbl, boxesEl);
+    container.appendChild(row);
+  });
+}
+
+// 보상맵 배경 자동 로드
+document.getElementById('reward-map-container').style.backgroundImage = "url('./SVG.svg')";
+
+// 초기 구역 세팅
+rewardSetCount(6);
+
+// Init
+buildPicker();
+buildNumRows();
+buildTestPicker();
+renderSuggestion();
+</script>
+</body>
+</html>
