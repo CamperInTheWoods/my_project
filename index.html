@@ -2087,6 +2087,67 @@ const S_KEY = 'maple_dogam_v2';
 
 function loadS()    { try{return JSON.parse(localStorage.getItem(S_KEY))||{};}catch{return{};} }
 function saveS(d)   { try{localStorage.setItem(S_KEY, JSON.stringify(d));}catch(e){console.warn('저장 실패(용량 초과?):',e);} }
+
+function saveTabsState() {
+  const s = loadS();
+  s['tabs_state'] = {
+    tabs: tabs.map(t => ({ mobId: t.mob?.id ?? null, synced: t.synced })),
+    active: activeTabIdx,
+  };
+  saveS(s);
+}
+
+function restoreTabsState() {
+  const s = loadS();
+  const saved = s['tabs_state'];
+  if (!saved?.tabs?.length) return false;
+
+  // 복원 도중 에러 시 DOM/tabs 상태를 원래대로 되돌리기 위해 try/catch
+  const panelsEl = document.getElementById('tab-panels');
+  const prevPanelsHtml = panelsEl.innerHTML;
+  const prevTabs = tabs.slice();
+  const prevActiveIdx = activeTabIdx;
+
+  try {
+    panelsEl.innerHTML = '';
+    tabs = [];
+
+    let anyMob = false;
+    saved.tabs.forEach((t, i) => {
+      const tab = makeTab(i);
+      tab.synced = t.synced || false;
+      if (t.mobId) {
+        const meta = s[`mob_${t.mobId}_meta`];
+        if (meta?.drops?.length) {
+          tab.mob = { id: t.mobId, name: meta.name, level: meta.level || 0, hp: meta.hp || 0, drops: meta.drops };
+          restoreSwState(tab, tab.mob); // sw.base 복원, startTs=null 보장 (항상 정지)
+          anyMob = true;
+        }
+      }
+      tabs.push(tab);
+      const panel = buildTabPanel(tab);
+      panelsEl.appendChild(panel);
+      if (tab.mob) restorePanelForTab(tab);
+    });
+
+    activeTabIdx = Math.min(saved.active || 0, tabs.length - 1);
+    if (anyMob) {
+      const sec = document.getElementById('section-checklist');
+      sec.style.display = 'block';
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    switchTab(activeTabIdx);
+    updateAllSyncBtns();
+    return true;
+  } catch(e) {
+    // 복원 실패 시 원래 상태로 롤백
+    console.warn('탭 복원 중 오류:', e);
+    panelsEl.innerHTML = prevPanelsHtml;
+    tabs = prevTabs;
+    activeTabIdx = prevActiveIdx;
+    return false;
+  }
+}
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ══════════════════════════════════════════
@@ -2176,6 +2237,7 @@ function tabSyncToggle(tabIdx) {
   tab.synced = !tab.synced;
   updateSyncBtn(getPanelOf(tabIdx), tab);
   renderTabBar();
+  saveTabsState();
 }
 
 function updateSyncBtn(panel, tab) {
@@ -3076,6 +3138,7 @@ function switchTab(idx) {
   }
   swTickPanel(swPanel, tab);
   _applyExclToggleBtn(swPanel);
+  saveTabsState();
 }
 
 function addTab() {
@@ -3088,6 +3151,7 @@ function addTab() {
   document.getElementById('section-checklist').style.display = 'block';
   switchTab(idx);
   updateAllSyncBtns();
+  // switchTab에서 saveTabsState 호출됨
 }
 
 function closeTab(e, idx) {
@@ -3116,6 +3180,7 @@ function closeTab(e, idx) {
   activeTabIdx = Math.min(activeTabIdx, tabs.length - 1);
   switchTab(activeTabIdx);
   updateAllSyncBtns();
+  // switchTab에서 saveTabsState 호출됨
 }
 
 function reorderTab(fromIdx, toIdx) {
@@ -3134,6 +3199,7 @@ function reorderTab(fromIdx, toIdx) {
   activeTabIdx = moved.idx;
   switchTab(activeTabIdx);
   updateAllSyncBtns();
+  // switchTab에서 saveTabsState 호출됨
 }
 
 function attachTabDrag(btn, tab) {
@@ -3295,6 +3361,7 @@ function activateMob(mob) {
   sec.style.display = 'block';
   renderTabBar();
   sec.scrollIntoView({ behavior:'smooth', block:'start' });
+  saveTabsState();
 }
 
 // ══════════════════════════════════════════
@@ -4605,16 +4672,6 @@ function exportResultImage() {
     .catch(() => { cleanup(); alert('이미지 저장 실패. 브라우저 설정을 확인해주세요.'); });
 }
 
-// ══════════════════════════════════════════
-// 19. 초기 실행
-// ══════════════════════════════════════════
-// 첫 번째 탭 패널 생성 (몹은 아직 없음, 섹션은 숨김)
-(function() {
-  const panel = buildTabPanel(tabs[0]);
-  document.getElementById('tab-panels').appendChild(panel);
-  panel.classList.add('active');
-  renderTabBar();
-})();
 renderSaves();
 renderTrophy();
 // 테마 토글 아이콘 초기 동기화
@@ -4686,7 +4743,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.087.8</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.088.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5280,6 +5337,13 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.088', date: '26.05.21',
+    feat: [
+      '탭 복원 — 껐다 켜도 이전에 열었던 탭과 동기화 상태가 그대로 복원됨 (타이머는 일시정지 상태로)',
+    ],
+    fix: [],
+  },
+  {
     ver: '1.084', date: '26.05.12',
     feat: [
       '키보드 단축키 추가 — Space: 타이머 시작/일시정지, C: 채널변경 기록',
@@ -5317,30 +5381,6 @@ const PATCH_NOTES = [
     fix: [
       '패치노트 버튼을 눌러도 열리지 않던 버그 수정',
       '우하단 버전 표시 누락 수정',
-    ],
-  },
-  {
-    ver: '1.080', date: '26.05.06',
-    feat: [
-      '다크 테마 추가 (Espresso Gold) — 왼쪽 하단 🌙 버튼으로 전환, 설정 유지',
-      '메인 스크롤바 골드 테마 적용 — 라이트/다크 모드 자동 전환',
-      '몹 추가 — 다크 엑스텀프 (lv.22)',
-    ],
-    fix: [],
-  },
-  {
-    ver: '1.079', date: '26.05.06',
-    feat: [
-      '탭 드래그 재구현 — ghost 이동 + 옆 탭 자동으로 비켜주는 효과',
-      '타임라인 모달 추가 — "타임라인 ↗" 클릭 시 큰 창으로 보기, 한 줄에 10시간 표시',
-      '전체/최초만 토글 획득 기록 상단으로 이동 + 설정 유지',
-      '예상 사냥 마릿수에 도감작 완료 기댓값 표시',
-      '운 계산기 기대 획득수 옆에 실제 수집 수량 표시 (미획득 시 숨김)',
-      '몹 추가 — 마스터 크로노스 (lv.46), 바이킹 (lv.93)',
-    ],
-    fix: [
-      '패치노트 더보기 기능 복구',
-      '패치노트 모달이 열리지 않던 버그 수정',
     ],
   },
   {
@@ -5517,6 +5557,22 @@ function openPatchNotes() {
 
 function closePatchNotes() {
   document.getElementById('patch-modal').style.display = 'none';
+}
+
+// ══════════════════════════════════════════
+// 초기 실행 (모든 스크립트 로드 완료 후)
+// ══════════════════════════════════════════
+let _tabsRestored = false;
+try {
+  _tabsRestored = restoreTabsState();
+} catch(e) {
+  console.warn('탭 복원 실패, 기본 상태로 시작합니다:', e);
+}
+if (!_tabsRestored) {
+  const panel = buildTabPanel(tabs[0]);
+  document.getElementById('tab-panels').appendChild(panel);
+  panel.classList.add('active');
+  renderTabBar();
 }
 </script>
 </body>
