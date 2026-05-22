@@ -311,6 +311,16 @@
     .tab-add:hover { color:var(--brown); background:var(--bg-tab-hover); }
     .tab-panel { display:none; }
     .tab-panel.active { display:block; }
+    /* 분할 뷰 */
+    body.split-active .container { max-width:100%; padding-left:8px; padding-right:8px; }
+    #tab-panels.split { display:flex; gap:8px; align-items:flex-start; }
+    #tab-panels.split .tab-panel.active,
+    #tab-panels.split .tab-panel.split-b { display:block; flex:1; min-width:0; overflow:hidden; }
+    .tab-btn.split-pick-mode { opacity:.55; }
+    .tab-btn.split-b-active { outline:2px solid var(--brown); outline-offset:-2px; }
+    .split-view-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:.72rem; color:var(--gray); cursor:pointer; font-family:inherit; transition:background .15s,color .15s; white-space:nowrap; flex-shrink:0; align-self:center; margin-left:4px; }
+    .split-view-btn.active { color:var(--brown); border-color:var(--brown); background:var(--bg-tab); }
+    .split-view-btn.picking { color:var(--gold); border-color:var(--gold); }
 
     /* ─ Monster bar ─ */
     .mob-bar {
@@ -2107,6 +2117,8 @@ let tabs = [makeTab(0)];
 let activeTabIdx = 0;
 let _dragTabIdx  = -1;
 let _tabDragDone = false;
+let splitBIdx    = -1;   // -1: 분할 미활성, >=0: 우측 탭 인덱스
+let splitPicking = false; // 분할 상대 선택 모드
 
 function activeTab() { return tabs[activeTabIdx]; }
 // 하위 호환: activeMob getter/setter
@@ -3099,12 +3111,57 @@ function getPanelOf(tabIdx) {
   return document.querySelector(`.tab-panel[data-tab-idx="${tabIdx}"]`);
 }
 
+function exitSplit() {
+  splitBIdx = -1;
+  splitPicking = false;
+  const panelsEl = document.getElementById('tab-panels');
+  panelsEl.classList.remove('split');
+  panelsEl.querySelectorAll('.split-b').forEach(p => p.classList.remove('split-b'));
+  document.body.classList.remove('split-active');
+}
+
+function applySplit(bIdx) {
+  splitBIdx = bIdx;
+  splitPicking = false;
+  const panelsEl = document.getElementById('tab-panels');
+  panelsEl.classList.add('split');
+  document.body.classList.add('split-active');
+  panelsEl.querySelectorAll('.split-b').forEach(p => p.classList.remove('split-b'));
+  const bPanel = getPanelOf(bIdx);
+  if (bPanel) {
+    bPanel.classList.add('split-b');
+    // 일시정지 상태라도 현재 시각 한 번 그려줌
+    swTickPanel(bPanel, tabs[bIdx]);
+    // 실행 중이면 ticker 재등록
+    const bTab = tabs[bIdx];
+    if (bTab.sw.startTs !== null) {
+      clearInterval(bTab.sw.ticker);
+      bTab.sw.ticker = setInterval(() => swTickPanel(getPanelOf(bTab.idx), bTab), 50);
+    }
+  }
+  renderTabBar();
+}
+
+function toggleSplit() {
+  if (splitBIdx >= 0) { exitSplit(); renderTabBar(); return; }
+  if (splitPicking) { splitPicking = false; renderTabBar(); return; }
+  if (tabs.length < 2) return;
+  // 현재 탭 외에 탭이 1개뿐이면 바로 분할
+  const others = tabs.filter(t => t.idx !== activeTabIdx);
+  if (others.length === 1) { applySplit(others[0].idx); return; }
+  splitPicking = true;
+  renderTabBar();
+}
+
 function renderTabBar() {
   const bar = document.getElementById('tab-bar');
   bar.innerHTML = '';
   tabs.forEach(tab => {
     const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (tab.idx === activeTabIdx ? ' active' : '');
+    let cls = 'tab-btn' + (tab.idx === activeTabIdx ? ' active' : '');
+    if (splitPicking && tab.idx !== activeTabIdx) cls += ' split-pick-mode';
+    if (splitBIdx >= 0 && tab.idx === splitBIdx) cls += ' split-b-active';
+    btn.className = cls;
     const name = tab.mob ? tab.mob.name : `탭 ${tab.idx + 1}`;
     const imgSrc = tab.mob ? mobImg(tab.mob.id) : '';
     const isRunning = tab.sw.startTs !== null;
@@ -3125,6 +3182,7 @@ function renderTabBar() {
     btn.addEventListener('click', e => {
       if (e.target.classList.contains('tab-close')) return;
       if (_tabDragDone) { _tabDragDone = false; return; }
+      if (splitPicking && tab.idx !== activeTabIdx) { applySplit(tab.idx); return; }
       switchTab(tab.idx);
     });
     attachTabDrag(btn, tab);
@@ -3137,6 +3195,14 @@ function renderTabBar() {
     add.title = '탭 추가 (최대 8개)';
     add.onclick = addTab;
     bar.appendChild(add);
+  }
+  if (tabs.length >= 2) {
+    const splitBtn = document.createElement('button');
+    splitBtn.className = 'split-view-btn' + (splitBIdx >= 0 ? ' active' : splitPicking ? ' picking' : '');
+    splitBtn.textContent = splitBIdx >= 0 ? '⊟ 분할 해제' : splitPicking ? '탭 선택...' : '⊟ 분할 뷰';
+    splitBtn.title = splitBIdx >= 0 ? '분할 뷰 해제' : '두 탭을 나란히 표시';
+    splitBtn.onclick = toggleSplit;
+    bar.appendChild(splitBtn);
   }
   updateCharStatus();
 }
@@ -3154,8 +3220,15 @@ function updateCharStatus() {
 
 function switchTab(idx) {
   activeTabIdx = idx;
+  // 분할 모드: 새 activeTab이 split-b와 같으면 split-b를 해제하고 swap
+  if (splitBIdx >= 0 && splitBIdx === idx) {
+    exitSplit();
+  }
   document.querySelectorAll('.tab-panel').forEach(p => {
-    p.classList.toggle('active', parseInt(p.dataset.tabIdx) === idx);
+    const pIdx = parseInt(p.dataset.tabIdx);
+    p.classList.toggle('active', pIdx === idx);
+    if (splitBIdx >= 0) p.classList.toggle('split-b', pIdx === splitBIdx);
+    else p.classList.remove('split-b');
   });
   renderTabBar();
   // 전환된 탭 스톱워치 tick 재시작
@@ -3178,6 +3251,7 @@ function switchTab(idx) {
 
 function addTab() {
   if (tabs.length >= MAX_TABS) return;
+  exitSplit();
   const idx = tabs.length;
   const tab = makeTab(idx);
   tabs.push(tab);
@@ -3192,6 +3266,7 @@ function addTab() {
 function closeTab(e, idx) {
   e.stopPropagation();
   if (tabs.length <= 1) return;
+  exitSplit();
   // 스톱워치 상태 저장 후 정지
   saveSwState(tabs[idx]);
   clearInterval(tabs[idx].sw.ticker);
@@ -4778,7 +4853,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.088.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.089.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5372,6 +5447,13 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.089', date: '26.05.22',
+    feat: [
+      '분할 뷰 — 탭 바의 "⊟ 분할 뷰" 버튼으로 두 탭을 나란히 표시',
+    ],
+    fix: [],
+  },
+  {
     ver: '1.088', date: '26.05.21',
     feat: [
       '탭 복원 — 껐다 켜도 이전에 열었던 탭과 동기화 상태가 그대로 복원됨 (타이머는 일시정지 상태로)',
@@ -5535,21 +5617,6 @@ const PATCH_NOTES = [
     fix: [
       '타임라인 1시간 이후 새 줄 생성 안 되던 버그 수정',
       '★ 첫 획득 뱃지 제거',
-    ],
-  },
-  {
-    ver: '1.061', date: '26.04.15',
-    feat: [
-      '사냥 타임라인 — 시간대별 아이템 획득 시각화, 1h 줄바꿈, 그라데이션 + 덱 쌓기',
-      '채널변경 체크포인트 — 스톱워치에 채널변경 버튼 + 타임라인 파란 세로선',
-      '희귀도 색상 시스템 6단계 — 파랑(≥1%) → 보라(극희귀)',
-      '저장된 도감작 카드 개편 — 퍼센트 + 프로그레스 바 표시',
-      '스톱워치 동기화 버튼 — 탭 2개 이상 시 표시',
-    ],
-    fix: [
-      '저장된 도감작 완료율 계산 오류 수정 (제외 아이템 반영)',
-      '획득기록 삭제 시 카드 시간 표시 안 지워지던 버그 수정',
-      '탭 없을 때 제외 토글 클릭 시 크래시 방지',
     ],
   },
 ];
