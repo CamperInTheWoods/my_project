@@ -312,10 +312,11 @@
     .tab-panel { display:none; }
     .tab-panel.active { display:block; }
     /* 분할 뷰 */
-    body.split-active .container { max-width:100%; padding-left:8px; padding-right:8px; }
+    body.split-active .container { max-width:100%; padding-left:20px; padding-right:20px; }
     #tab-panels.split { display:flex; gap:8px; align-items:flex-start; }
     #tab-panels.split .tab-panel.active,
     #tab-panels.split .tab-panel.split-b { display:block; flex:1; min-width:0; overflow:hidden; }
+    #tab-panels.split .tab-panel.split-right .main-layout { flex-direction:row-reverse; }
     .tab-btn.split-pick-mode { opacity:.55; }
     .tab-btn.split-b-active { outline:2px solid var(--brown); outline-offset:-2px; }
     .split-view-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:.72rem; color:var(--gray); cursor:pointer; font-family:inherit; transition:background .15s,color .15s; white-space:nowrap; flex-shrink:0; align-self:center; margin-left:4px; }
@@ -2246,9 +2247,17 @@ function _swResetOne(tab, panel) {
   if (tab.mob) { const s = loadS(); delete s[`sw_mob_${tab.mob.id}`]; delete s[`sw_ch_${tab.mob.id}`]; saveS(s); }
 }
 
-function swToggle() {
-  const tab = activeTab();
-  const panel = getActivePanel();
+function _tabFromEvent(e) {
+  const panel = e?.target?.closest('.tab-panel');
+  if (panel) {
+    const idx = parseInt(panel.dataset.tabIdx);
+    return { tab: tabs[idx], panel };
+  }
+  return { tab: activeTab(), panel: getActivePanel() };
+}
+
+function swToggle(e) {
+  const { tab, panel } = _tabFromEvent(e);
   const isRunning = tab.sw.startTs !== null;
   if (isRunning) _swPauseOne(tab, panel);
   else _swStartOne(tab, panel);
@@ -2264,18 +2273,19 @@ function swToggle() {
   renderTabBar();
 }
 
-function swReset() {
+function swReset(e) {
   if (!confirm('스톱워치와 획득 기록을 리셋할까요?')) return;
-  const tab = activeTab();
-  _swResetOne(tab, getActivePanel());
+  const { tab, panel } = _tabFromEvent(e);
+  _swResetOne(tab, panel);
   if (tab.synced) {
     tabs.forEach(t => { if (t !== tab && t.synced) _swResetOne(t, getPanelOf(t.idx)); });
   }
   renderTabBar();
 }
 
-function swSyncToggle() {
-  tabSyncToggle(activeTab().idx);
+function swSyncToggle(e) {
+  const { tab } = _tabFromEvent(e);
+  tabSyncToggle(tab.idx);
 }
 
 function tabSyncToggle(tabIdx) {
@@ -2635,9 +2645,8 @@ function _swChannelMarkOne(tab, panel) {
   if (tab.mob) renderTimeline(panel, tab.mob, tab);
 }
 
-function swChannelMark() {
-  const tab = activeTab();
-  const panel = getActivePanel();
+function swChannelMark(e) {
+  const { tab, panel } = _tabFromEvent(e);
   _swChannelMarkOne(tab, panel);
   if (tab.synced) {
     tabs.forEach(t => {
@@ -3029,13 +3038,12 @@ function buildTabPanel(tab) {
       <div class="info">
         <h2 class="mob-name">-</h2>
         <div class="mob-stats stats"></div>
-        <a class="mob-link" href="#" target="_blank">mapledb.kr에서 보기 ↗</a>
       </div>
       <div class="actions">
-<button class="btn sm" onclick="openResultModal()" title="도감작 결과 카드">📋 결과</button>
-<button class="btn sm" onclick="openStatTable()" title="드롭 통계" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">통계</button>
-<button class="btn sm" onclick="openProbCalc()" title="운 계산기" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">운계산기</button>
-<button class="btn sm danger" onclick="resetChecklist()">초기화</button>
+<button class="btn sm" onclick="openResultModal(_tabFromEvent(event).tab?.mob)" title="도감작 결과 카드">📋 결과</button>
+<button class="btn sm" onclick="openStatTable(event)" title="드롭 통계" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">통계</button>
+<button class="btn sm" onclick="openProbCalc(event)" title="운 계산기" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">운계산기</button>
+<button class="btn sm danger" onclick="resetChecklist(event)">초기화</button>
       </div>
     </div>
     <div class="panel" style="padding:14px 18px">
@@ -3048,7 +3056,7 @@ function buildTabPanel(tab) {
     </div>
     <div class="main-layout">
       <div class="items-section panel" style="padding:14px">
-        <button class="excl-toggle" onclick="toggleExclView()">👁 제외된 아이템 보기</button>
+        <button class="excl-toggle" onclick="toggleExclView(event)">👁 제외된 아이템 보기</button>
         <div class="item-grid"></div>
       </div>
       <div class="sw-section panel">
@@ -3069,12 +3077,12 @@ function buildTabPanel(tab) {
           <button class="sw-ch-hide" onclick="this.closest('.sw-ch-elapsed').dataset.hidden='1';this.closest('.sw-ch-elapsed').style.visibility='hidden'">✕</button>
         </div>
         <div class="sw-btns">
-          <button class="sw-btn sw-start sw-toggle" onclick="swToggle()">▶ 시작</button>
-          <button class="sw-btn sw-channel" onclick="swChannelMark()">채널변경</button>
+          <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
+          <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
         </div>
         <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px">
-          <button class="sw-sync" onclick="swSyncToggle()">🔗 동기화</button>
-          <button class="sw-btn sw-reset" onclick="swReset()">↺ 리셋</button>
+          <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
+          <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
         </div>
         <div class="sw-log">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
@@ -3117,6 +3125,7 @@ function exitSplit() {
   const panelsEl = document.getElementById('tab-panels');
   panelsEl.classList.remove('split');
   panelsEl.querySelectorAll('.split-b').forEach(p => p.classList.remove('split-b'));
+  panelsEl.querySelectorAll('.split-right').forEach(p => p.classList.remove('split-right'));
   document.body.classList.remove('split-active');
 }
 
@@ -3126,7 +3135,10 @@ function applySplit(bIdx) {
   const panelsEl = document.getElementById('tab-panels');
   panelsEl.classList.add('split');
   document.body.classList.add('split-active');
-  panelsEl.querySelectorAll('.split-b').forEach(p => p.classList.remove('split-b'));
+  panelsEl.querySelectorAll('.split-b,.split-right').forEach(p => { p.classList.remove('split-b'); p.classList.remove('split-right'); });
+  // DOM 순서 기준 오른쪽 패널(인덱스가 큰 쪽)의 타이머를 안쪽(왼쪽)으로
+  const rightIdx = activeTabIdx > bIdx ? activeTabIdx : bIdx;
+  getPanelOf(rightIdx)?.classList.add('split-right');
   const bPanel = getPanelOf(bIdx);
   if (bPanel) {
     bPanel.classList.add('split-b');
@@ -3199,7 +3211,7 @@ function renderTabBar() {
   if (tabs.length >= 2) {
     const splitBtn = document.createElement('button');
     splitBtn.className = 'split-view-btn' + (splitBIdx >= 0 ? ' active' : splitPicking ? ' picking' : '');
-    splitBtn.textContent = splitBIdx >= 0 ? '⊟ 분할 해제' : splitPicking ? '탭 선택...' : '⊟ 분할 뷰';
+    splitBtn.textContent = splitBIdx >= 0 ? '◫ 분할 해제' : splitPicking ? '탭 선택...' : '◫ 분할 뷰';
     splitBtn.title = splitBIdx >= 0 ? '분할 뷰 해제' : '두 탭을 나란히 표시';
     splitBtn.onclick = toggleSplit;
     bar.appendChild(splitBtn);
@@ -3396,7 +3408,6 @@ function restorePanelForTab(tab) {
   panel.querySelector('.mob-img').src = mobImg(mob.id);
   panel.querySelector('.mob-name').textContent = mob.name;
   panel.querySelector('.mob-stats').textContent = '';
-  panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
   // 아이템 그리드 복원
   renderItemGridInPanel(panel, mob);
   updateProgressInPanel(panel, mob);
@@ -3447,7 +3458,6 @@ function activateMob(mob) {
   panel.querySelector('.mob-img').src = mobImg(mob.id);
   panel.querySelector('.mob-name').textContent = mob.name;
   panel.querySelector('.mob-stats').textContent = '';
-  panel.querySelector('.mob-link').href = `https://mapledb.kr/search.php?q=${mob.id}&t=mob`;
 
   // 몬스터 이름/drops meta 저장 (level, hp 포함 → 로컬 캐시로 재사용)
   const s = loadS();
@@ -3490,10 +3500,10 @@ function _applyExclToggleBtn(panel) {
   btn.className   = show ? 'excl-toggle' : 'excl-toggle hide-excl';
 }
 
-function toggleExclView() {
+function toggleExclView(e) {
   setShowExcluded(!getShowExcluded());
   const show = getShowExcluded();
-  const panel = getActivePanel();
+  const { panel } = _tabFromEvent(e);
   if (!panel) return;
   _applyExclToggleBtn(panel);
   panel.querySelectorAll('.item-card.excl').forEach(c => {
@@ -3523,22 +3533,24 @@ function setTlBase(mobId, val) {
 }
 function toggleTlBase(e, itemId) {
   e.stopPropagation();
-  const mobId = activeMob.id;
+  const { tab, panel } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const mobId = mob.id;
   const cur = getTlBase(mobId);
   if (!cur || cur.id !== itemId) {
-    setTlBase(mobId, { id: itemId, hidden: false }); // 다른 아이템 → 기준 지정 (타임라인 표시)
+    setTlBase(mobId, { id: itemId, hidden: false });
   } else if (!cur.hidden) {
-    setTlBase(mobId, { id: itemId, hidden: true });  // 같은 아이템 재클릭 → 타임라인 숨김
+    setTlBase(mobId, { id: itemId, hidden: true });
   } else {
-    setTlBase(mobId, null);                           // 한 번 더 → 해제
+    setTlBase(mobId, null);
   }
-  renderItemGrid();
-  const panel = getActivePanel();
-  renderTimeline(panel, activeMob, activeTab());
+  renderItemGridInPanel(panel, mob);
+  renderTimeline(panel, mob, tab);
   const list = panel?.querySelector('.sw-log-list');
-  if (list) { list.innerHTML = ''; restoreLogEntries(panel, activeMob); }
-  updateProgress();
-  updateHuntEstimate();
+  if (list) { list.innerHTML = ''; restoreLogEntries(panel, mob); }
+  updateProgressInPanel(panel, mob);
+  updateHuntEstimateInPanel(panel, mob);
 }
 
 function renderItemGrid() {
@@ -3599,17 +3611,22 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
     ${!isExcl ? `<button class="bulk-btn" title="수량 일괄 조정" onclick="bulkBtnClick(event,${drop.id})">≡</button>` : ''}
   `;
 
-  if (!isExcl) card.addEventListener('click', () => incrementItem(drop.id));
+  if (!isExcl) card.addEventListener('click', (e) => incrementItem(drop.id, e));
   return card;
 }
 
 function toggleExclude(e, itemId) {
   e.stopPropagation();
-  const excl = getExcluded();
+  const { tab, panel } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const store = loadS();
+  const excl = new Set(store[`excl_${mob.id}`] || []);
   if (excl.has(itemId)) excl.delete(itemId);
   else                   excl.add(itemId);
-  setExcluded(excl);
-  renderItemGrid();
+  store[`excl_${mob.id}`] = [...excl];
+  saveS(store);
+  renderItemGridInPanel(panel, mob);
   renderSaves();
 }
 
@@ -3619,21 +3636,26 @@ function toggleExclude(e, itemId) {
 
 // ── Bulk popup ──
 let _bpItemId = null;
+let _bpTabIdx = -1;
 let _bpPendingDelta = 0;
 let _bpOrigCount = 0;
 
 function bulkBtnClick(e, itemId) {
   e.stopPropagation();
-  openBulkPopup(itemId);
+  const { tab } = _tabFromEvent(e);
+  openBulkPopup(itemId, tab?.idx ?? activeTabIdx);
 }
 
-function openBulkPopup(itemId) {
-  if (!activeMob) return;
-  const drop = activeMob.drops.find(d => d.id === itemId);
+function openBulkPopup(itemId, tabIdx) {
+  const tab = tabs[tabIdx ?? activeTabIdx];
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const drop = mob.drops.find(d => d.id === itemId);
   if (!drop) return;
   const store = loadS();
-  const state = store[`mob_${activeMob.id}`]?.[itemId] || { count:0 };
+  const state = store[`mob_${mob.id}`]?.[itemId] || { count:0 };
   _bpItemId = itemId;
+  _bpTabIdx = tab?.idx ?? activeTabIdx;
   _bpPendingDelta = 0;
   _bpOrigCount = state.count;
 
@@ -3674,35 +3696,36 @@ function bulkAdjust(delta) {
 }
 
 function applyBulk() {
-  if (!activeMob || _bpItemId == null || _bpPendingDelta === 0) { closeBulkPopup(); return; }
-  const drop = activeMob.drops.find(d => d.id === _bpItemId);
+  const tab = tabs[_bpTabIdx] ?? activeTab();
+  const mob = tab?.mob || activeMob;
+  if (!mob || _bpItemId == null || _bpPendingDelta === 0) { closeBulkPopup(); return; }
+  const panel = getPanelOf(tab.idx);
+  const drop = mob.drops.find(d => d.id === _bpItemId);
   if (!drop) { closeBulkPopup(); return; }
   const store = loadS();
-  const key = `mob_${activeMob.id}`;
+  const key = `mob_${mob.id}`;
   if (!store[key]) store[key] = {};
   const state = store[key][_bpItemId] || { count:0, firstTime:null, times:[] };
   if (!state.times) state.times = state.firstTime ? [state.firstTime] : [];
   const newCount = Math.max(0, state.count + _bpPendingDelta);
-  const t = swElapsed(activeTab());
+  const t = swElapsed(tab);
   if (newCount > state.count) {
-    // adding items: record times for each added
     const wasZero = state.count === 0;
     if (wasZero && newCount > 0) state.firstTime = t;
     for (let i = state.count; i < newCount; i++) state.times.push(t);
-    if (wasZero && newCount > 0) addSwLogToPanel(getActivePanel(), drop.name, state.firstTime, _bpItemId);
+    if (wasZero && newCount > 0) addSwLogToPanel(panel, drop.name, state.firstTime, _bpItemId);
   } else if (newCount < state.count) {
-    // removing items: pop from times
     for (let i = state.count; i > newCount; i--) state.times.pop();
-    if (newCount === 0) { state.firstTime = null; state.times = []; removeItemLog(getActivePanel(), _bpItemId); }
+    if (newCount === 0) { state.firstTime = null; state.times = []; removeItemLog(panel, _bpItemId); }
   }
   state.count = newCount;
   store[key][_bpItemId] = state;
   saveS(store);
-  updateCardUI(_bpItemId, state, drop);
-  updateProgress();
-  updateHuntEstimate();
+  updateCardUI(_bpItemId, state, drop, panel, mob);
+  updateProgressInPanel(panel, mob);
+  updateHuntEstimateInPanel(panel, mob);
   renderSaves();
-  renderTimeline(getActivePanel(), activeMob, activeTab());
+  renderTimeline(panel, mob, tab);
   closeBulkPopup();
 }
 
@@ -3715,70 +3738,75 @@ function bulkOverlayClick(e) {
   if (e.target === document.getElementById('bulk-overlay')) closeBulkPopup();
 }
 
-function incrementItem(itemId) {
-  if (!activeMob) return;
-  const drop = activeMob.drops.find(d => d.id === itemId);
+function incrementItem(itemId, e) {
+  const { tab, panel } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const drop = mob.drops.find(d => d.id === itemId);
   if (!drop) return;
 
   const store = loadS();
-  const key = `mob_${activeMob.id}`;
+  const key = `mob_${mob.id}`;
   if (!store[key]) store[key] = {};
   const state = store[key][itemId] || { count:0, firstTime:null, times:[] };
   if (!state.times) state.times = state.firstTime ? [state.firstTime] : [];
   const isFirst = state.count === 0;
-  const t = swElapsed(activeTab());
+  const t = swElapsed(tab);
   if (isFirst) state.firstTime = t;
   state.times.push(t);
   state.count++;
   store[key][itemId] = state;
   saveS(store);
 
-  updateCardUI(itemId, state, drop);
-  const _tlBase = getTlBase(activeMob.id);
+  updateCardUI(itemId, state, drop, panel, mob);
+  const _tlBase = getTlBase(mob.id);
   const _isHiddenBase = _tlBase?.id === itemId && _tlBase.hidden;
-  if (!_isHiddenBase && (isFirst || tlShowAll())) addSwLogToPanel(getActivePanel(), drop.name, t, itemId);
-  updateProgress();
-  updateHuntEstimate();
+  if (!_isHiddenBase && (isFirst || tlShowAll())) addSwLogToPanel(panel, drop.name, t, itemId);
+  updateProgressInPanel(panel, mob);
+  updateHuntEstimateInPanel(panel, mob);
   renderSaves();
-  renderTimeline(getActivePanel(), activeMob, activeTab());
+  renderTimeline(panel, mob, tab);
 }
 
 function decrementItem(e, itemId) {
   e.stopPropagation();
-  if (!activeMob) return;
-  const drop = activeMob.drops.find(d => d.id === itemId);
+  const { tab, panel } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const drop = mob.drops.find(d => d.id === itemId);
   if (!drop) return;
 
   const store = loadS();
-  const key = `mob_${activeMob.id}`;
+  const key = `mob_${mob.id}`;
   const state = store[key]?.[itemId];
   if (!state || state.count <= 0) return;
   state.count--;
   if (state.times) state.times.pop();
   if (state.count === 0) {
     state.firstTime = null; state.times = [];
-    removeItemLog(getActivePanel(), itemId);
+    removeItemLog(panel, itemId);
   } else if (tlShowAll()) {
-    const entries = [...(getActivePanel()?.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`) || [])];
+    const entries = [...(panel?.querySelectorAll(`.sw-log-entry[data-drop-id="${itemId}"]`) || [])];
     if (entries.length > 0) entries[0].remove();
   }
   store[key][itemId] = state;
   saveS(store);
 
-  updateCardUI(itemId, state, drop);
-  updateProgress();
-  updateHuntEstimate();
+  updateCardUI(itemId, state, drop, panel, mob);
+  updateProgressInPanel(panel, mob);
+  updateHuntEstimateInPanel(panel, mob);
   renderSaves();
-  renderTimeline(getActivePanel(), activeMob, activeTab());
+  renderTimeline(panel, mob, tab);
 }
 
-function updateCardUI(itemId, state, drop) {
-  const panel = getActivePanel();
+function updateCardUI(itemId, state, drop, panel, mob) {
+  panel = panel || getActivePanel();
+  mob = mob || activeMob;
   const card = panel ? panel.querySelector(`[data-item-id="${itemId}"]`) : document.querySelector(`[data-item-id="${itemId}"]`);
   if (!card) return;
 
   const found = state.count > 0;
-  const tlBase = activeMob ? getTlBase(activeMob.id) : null;
+  const tlBase = mob ? getTlBase(mob.id) : null;
   const baseCls = tlBase?.id === itemId ? (tlBase.hidden ? ' tl-base-hidden' : ' tl-base') : '';
   card.className = `item-card ${found ? 'fd' : 'nf'}${baseCls}`;
 
@@ -4098,12 +4126,14 @@ function mesoRain() {
 // ══════════════════════════════════════════
 // 16. 초기화
 // ══════════════════════════════════════════
-function resetChecklist() {
-  if (!activeMob || !confirm(`"${activeMob.name}" 진행도를 초기화할까요?`)) return;
+function resetChecklist(e) {
+  const { tab, panel } = _tabFromEvent(e);
+  const mob = tab?.mob;
+  if (!mob || !confirm(`"${mob.name}" 진행도를 초기화할까요?`)) return;
   const store = loadS();
-  delete store[`mob_${activeMob.id}`];
+  delete store[`mob_${mob.id}`];
   saveS(store);
-  renderItemGrid();
+  renderItemGridInPanel(panel, mob);
   renderSaves();
 }
 
@@ -5051,18 +5081,19 @@ setInterval(() => {
 // ══════════════════════════════════════════
 // 확률 계산기
 // ══════════════════════════════════════════
-function _getProbKills() {
-  if (!activeMob) return 0;
+function _getProbKills(mob) {
+  mob = mob || activeMob;
+  if (!mob) return 0;
   const store   = loadS();
-  const mobData = store[`mob_${activeMob.id}`] || {};
-  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
-  const tlBase  = store[`tl_base_${activeMob.id}`] || null;
+  const mobData = store[`mob_${mob.id}`] || {};
+  const excl    = new Set(store[`excl_${mob.id}`] || []);
+  const tlBase  = store[`tl_base_${mob.id}`] || null;
   let bestRate = 0, bestCount = 0;
   if (tlBase) {
-    const d = activeMob.drops.find(d => d.id === tlBase.id);
+    const d = mob.drops.find(d => d.id === tlBase.id);
     if (d) { const c = mobData[d.id]?.count || 0; const r = parseFloat(d.rate) / 100; if (c > 0 && r > 0) { bestRate = r; bestCount = c; } }
   } else {
-    activeMob.drops.forEach(d => {
+    mob.drops.forEach(d => {
       if (excl.has(d.id)) return;
       const c = mobData[d.id]?.count || 0; if (c <= 0) return;
       const r = parseFloat(d.rate) / 100; if (!r || r <= 0) return;
@@ -5072,20 +5103,21 @@ function _getProbKills() {
   return bestRate > 0 ? Math.round(bestCount / bestRate) : 0;
 }
 
-function openProbCalc() {
-  if (!activeMob) return;
-  const kills = _getProbKills();
+function openProbCalc(e) {
+  const mob = _tabFromEvent(e).tab?.mob || activeMob;
+  if (!mob) return;
+  const kills = _getProbKills(mob);
   const killsEl = document.getElementById('prob-kills');
   killsEl.innerHTML = kills > 0
     ? `현재 추정 킬수 <strong>${kills.toLocaleString()}마리</strong> 기준`
     : '<div class="pc-no-kills">아직 획득 기록이 없어요 — 확률 계산 불가</div>';
 
   const store   = loadS();
-  const mobData = store[`mob_${activeMob.id}`] || {};
-  const excl    = new Set(store[`excl_${activeMob.id}`] || []);
+  const mobData = store[`mob_${mob.id}`] || {};
+  const excl    = new Set(store[`excl_${mob.id}`] || []);
 
   // 기댓값 >= 1인 미획득 아이템만 (kills * rate >= 1)
-  const uncollectedRates = activeMob.drops
+  const uncollectedRates = mob.drops
     .filter(d => !excl.has(d.id) && !(mobData[d.id]?.count > 0))
     .map(d => parseFloat(d.rate) / 100)
     .filter(r => r > 0 && kills * r >= 1);
@@ -5100,7 +5132,7 @@ function openProbCalc() {
 
   const grid = document.getElementById('prob-grid');
   grid.innerHTML = '';
-  activeMob.drops.forEach(drop => {
+  mob.drops.forEach(drop => {
     if (excl.has(drop.id)) return;
     const found = (mobData[drop.id]?.count || 0) > 0;
     const card = document.createElement('div');
@@ -5200,12 +5232,13 @@ function toggleStatMode() {
   _renderStatBody();
 }
 
-function openStatTable() {
-  if (!activeMob) return;
+function openStatTable(e) {
+  const mob = _tabFromEvent(e).tab?.mob || activeMob;
+  if (!mob) return;
   _statMode = 'rate';
   document.getElementById('stat-mode-btn').textContent = '확률';
   document.getElementById('stat-modal').style.display = 'flex';
-  _renderStatBody();
+  _renderStatBody(mob);
 }
 
 function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
