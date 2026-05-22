@@ -3105,7 +3105,7 @@ function buildTabPanel(tab) {
               <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
               <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
             </div>
-            <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal()" title="크게 보기">↗</button>
+            <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal(event)" title="크게 보기">↗</button>
           </div>
           <div class="tl-rows"></div>
         </div>
@@ -5359,8 +5359,8 @@ function toggleTheme() {
 }
 
 // ── 타임라인 모달 ──
-function openTlModal() {
-  const tab = activeTab();
+function openTlModal(e) {
+  const { tab } = _tabFromEvent(e);
   if (!tab?.mob) return;
   const totalMs = swElapsed(tab);
   if (totalMs < 1000) return;
