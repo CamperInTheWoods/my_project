@@ -3991,7 +3991,7 @@ function updateHuntEstimateInPanel(panel, mob) {
 
   const estimated = Math.round(bestCount / bestRate);
   wrap.style.display = '';
-  panel.querySelector('.hunt-count').innerHTML = `${estimated.toLocaleString()}마리`;
+  panel.querySelector('.hunt-count').innerHTML = `${estimated.toLocaleString()}`;
   const label = `${bestDrop.name} ${bestCount}개 / ${bestDrop.rate}`;
   panel.querySelector('.hunt-reason').textContent = label;
 
