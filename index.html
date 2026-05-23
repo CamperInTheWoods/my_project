@@ -778,6 +778,15 @@
     }
     .trophy-card:hover .trophy-stat-btn { opacity:1; }
     .trophy-stat-btn:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
+    .trophy-resume-btn {
+      position:absolute; top:7px; left:7px; width:17px; height:17px;
+      border-radius:50%; border:1px solid rgba(80,180,120,.3); background:none;
+      color:rgba(100,200,140,.4); font-size:.55rem; cursor:pointer; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
+    }
+    .trophy-card:hover .trophy-resume-btn { opacity:1; }
+    .trophy-resume-btn:hover { background:rgba(30,120,70,.25); color:rgba(100,220,150,.95); border-color:rgba(80,200,120,.75); }
 
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
@@ -4298,6 +4307,8 @@ function saveTrophyFromModal() {
     date:    new Date().toISOString().slice(0, 10),
     drops:   mob.drops,
     mobData: { ...mobData },
+    excl:    [...(store[`excl_${mob.id}`] || [])],
+    tlBase:  store[`tl_base_${mob.id}`] || null,
   });
   store.completed = completed;
   if (store[`mob_${mob.id}`]) store[`mob_${mob.id}`].completionSaved = true;
@@ -4333,6 +4344,8 @@ function saveCompletion(mob, elapsedMs) {
     date:    new Date().toISOString().slice(0, 10),
     drops:   mob.drops,
     mobData: { ...mobData },
+    excl:    [...(store[`excl_${mob.id}`] || [])],
+    tlBase:  store[`tl_base_${mob.id}`] || null,
   });
   store.completed = completed;
   store[`mob_${mob.id}`] = { ...mobData, completionSaved: true };
@@ -4456,6 +4469,7 @@ function renderTrophyGrid() {
     const killPart = kills > 0 ? ` &nbsp;·&nbsp; 🗡 ${kills.toLocaleString()}마리` : '';
     const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
     return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
+      <button class="trophy-resume-btn" onclick="event.stopPropagation();resumeTrophy(${c.mobId})" title="이어하기">↩</button>
       <button class="trophy-stat-btn" onclick="event.stopPropagation();openTrophyStatTable(${c.mobId})" title="통계 보기">S</button>
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
       <div class="trophy-portrait">
@@ -4481,6 +4495,54 @@ function openTrophyRoom() {
   document.getElementById('trophy-overlay').classList.add('open');
 }
 
+let _pendingResumeMobId = null;
+
+function resumeTrophy(mobId) {
+  const store = loadS();
+  const c = (store.completed || []).find(x => x.mobId === mobId);
+  if (!c) return;
+  _pendingResumeMobId = mobId;
+  document.getElementById('resume-confirm-mob-name').textContent = `"${c.mobName}"`;
+  document.getElementById('resume-confirm-overlay').classList.add('open');
+}
+
+function closeResumeConfirm() {
+  _pendingResumeMobId = null;
+  document.getElementById('resume-confirm-overlay').classList.remove('open');
+}
+
+function confirmResumeTrophy() {
+  const mobId = _pendingResumeMobId;
+  closeResumeConfirm();
+  if (!mobId) return;
+
+  const store = loadS();
+  const c = (store.completed || []).find(x => x.mobId === mobId);
+  if (!c) return;
+
+  // 데이터 복원
+  const mobData = { ...c.mobData };
+  delete mobData.completionSaved;
+  store[`mob_${mobId}`] = mobData;
+  if (c.excl?.length)  store[`excl_${mobId}`] = c.excl;
+  if (c.tlBase)        store[`tl_base_${mobId}`] = c.tlBase;
+  const drops = c.drops || PRESET.find(p => p.id === mobId)?.drops || [];
+  store[`mob_${mobId}_meta`] = { name: c.mobName, level: c.level || 0, drops };
+  saveS(store);
+
+  // 탭에 불러오기
+  const mob = { id: mobId, name: c.mobName, level: c.level || 0, hp: 0, drops };
+  closeTrophyRoom();
+  activateMob(mob);
+
+  // 타이머 elapsed 복원 (일시정지 상태)
+  const tab = activeTab();
+  tab.sw.base = c.elapsed || 0;
+  tab.sw.startTs = null;
+  const panel = getActivePanel();
+  swTickPanel(panel, tab);
+}
+
 let _pendingDeleteMobId = null;
 
 function deleteTrophy(mobId) {
@@ -4500,6 +4562,9 @@ function closeDelConfirm() {
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
+    if (document.getElementById('resume-confirm-overlay')?.classList.contains('open')) {
+      closeResumeConfirm();
+    }
     if (document.getElementById('del-confirm-overlay')?.classList.contains('open')) {
       closeDelConfirm();
     }
@@ -4825,6 +4890,22 @@ renderTrophy();
   if (btn && document.documentElement.getAttribute('data-theme') === 'dark') btn.textContent = '☀️';
 })();
 </script>
+<div class="del-confirm-overlay" id="resume-confirm-overlay">
+  <div class="del-confirm-dialog">
+    <div class="del-confirm-body">
+      <div class="del-confirm-icon">↩</div>
+      <div class="del-confirm-msg">
+        <span id="resume-confirm-mob-name"></span><br>이어서 진행하시겠습니까?
+      </div>
+      <div class="del-confirm-sub">현재 탭에 불러옵니다. 타이머는 일시정지 상태로 복원됩니다</div>
+    </div>
+    <div class="del-confirm-actions">
+      <button class="del-confirm-btn del-confirm-btn-cancel" onclick="closeResumeConfirm()">취소</button>
+      <button class="del-confirm-btn" style="background:rgba(30,120,70,.25);border-color:rgba(80,200,120,.5);color:rgba(100,220,150,.95);" onclick="confirmResumeTrophy()">이어하기</button>
+    </div>
+  </div>
+</div>
+
 <div class="del-confirm-overlay" id="del-confirm-overlay">
   <div class="del-confirm-dialog">
     <div class="del-confirm-body">
@@ -4888,7 +4969,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.090.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.091.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5487,6 +5568,13 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.091', date: '26.05.23',
+    feat: [
+      '진열장 이어하기 — 카드 좌상단 ↩ 버튼으로 이전 도감작 데이터 복원 후 이어서 진행',
+    ],
+    fix: [],
+  },
+  {
     ver: '1.090', date: '26.05.22',
     feat: [
       '분할 뷰 — 탭 바의 "◫ 분할 뷰" 버튼으로 두 탭을 나란히 표시, 타이머 자동 중앙 정렬',
@@ -5649,18 +5737,6 @@ const PATCH_NOTES = [
       '썸네일 폴백 확장 — KMS 없는 이미지 GMS에서 자동 로드',
     ],
     fix: ['도감작 연속 완료 시 색종이 애니메이션 충돌 문제 수정'],
-  },
-  {
-    ver: '1.062', date: '26.04.16',
-    feat: [
-      '타임라인 전체/최초 획득 토글 — 헤더 버튼으로 전환, times[] 배열로 전체 시간 추적',
-      '저장된 도감작 소요 시간 표시 — 카드 하단 ⏱ HH:MM:SS',
-      '동기화 탭 시각적 표시 — 켜진 탭에 파란 점(●) 표시',
-    ],
-    fix: [
-      '타임라인 1시간 이후 새 줄 생성 안 되던 버그 수정',
-      '★ 첫 획득 뱃지 제거',
-    ],
   },
 ];
 
