@@ -5253,7 +5253,7 @@ function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
   const kills   = overrideKills != null ? overrideKills : _getProbKills();
   const store   = loadS();
   const mobData = overrideMobData || store[`mob_${mob.id}`] || {};
-  const excl    = overrideMob ? new Set() : new Set(store[`excl_${mob.id}`] || []);
+  const excl    = new Set(store[`excl_${mob.id}`] || []);
 
   document.getElementById('stat-kills').textContent =
     kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음 — 수치 미표시';
