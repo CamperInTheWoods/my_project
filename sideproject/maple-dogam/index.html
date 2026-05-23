@@ -5230,16 +5230,18 @@ function closeProbCalc() {
 }
 
 let _statMode = 'rate'; // 'rate' | 'count'
+let _statMob = null;
 
 function toggleStatMode() {
   _statMode = _statMode === 'rate' ? 'count' : 'rate';
   document.getElementById('stat-mode-btn').textContent = _statMode === 'rate' ? '확률' : '획득수';
-  _renderStatBody();
+  _renderStatBody(_statMob);
 }
 
 function openStatTable(e) {
   const mob = _tabFromEvent(e).tab?.mob || activeMob;
   if (!mob) return;
+  _statMob = mob;
   _statMode = 'rate';
   document.getElementById('stat-mode-btn').textContent = '확률';
   document.getElementById('stat-modal').style.display = 'flex';
