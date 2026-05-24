@@ -128,7 +128,23 @@
       padding: 14px 24px;
       display: flex; align-items: center; gap: 12px;
       box-shadow: var(--shadow-header);
-      position: sticky; top: 0; z-index: 100;
+      transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), opacity .25s ease;
+      will-change: transform, opacity;
+    }
+    header.collapsed {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    #header-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      overflow: hidden;
+      max-height: 80px;
+      transition: max-height .3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #header-wrap.collapsed {
+      max-height: 0;
     }
     header h1 { color: var(--header-title); font-size:1.4rem; font-weight:700; text-shadow:var(--header-title-shadow); }
     header .sub { color:var(--header-sub); font-size:.75rem; margin-top:2px; }
@@ -1465,6 +1481,7 @@
 </head>
 <body>
 
+<div id="header-wrap">
 <header>
   <span style="font-size:1.7rem">🍁</span>
   <div>
@@ -1476,6 +1493,7 @@
     <div class="char-label">허규복 ing</div>
   </div>
 </header>
+</div>
 
 <canvas id="meso-rain"></canvas>
 
@@ -5568,9 +5586,10 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
-    ver: '1.091', date: '26.05.23',
+    ver: '1.091', date: '26.05.24',
     feat: [
       '진열장 이어하기 — 카드 좌상단 ↩ 버튼으로 이전 도감작 데이터 복원 후 이어서 진행',
+      '헤더 자동 접힘 — 스크롤 내리면 상단 헤더가 부드럽게 접힘',
     ],
     fix: [],
   },
@@ -5796,6 +5815,17 @@ if (!_tabsRestored) {
   panel.classList.add('active');
   renderTabBar();
 }
+
+window.addEventListener('scroll', () => {
+  const sec = document.getElementById('section-checklist');
+  if (!sec || sec.style.display === 'none') return;
+  const tabBar = document.getElementById('tab-bar');
+  if (!tabBar) return;
+  const rect = tabBar.getBoundingClientRect();
+  const collapsed = rect.top <= 150;
+  document.getElementById('header-wrap').classList.toggle('collapsed', collapsed);
+  document.querySelector('header').classList.toggle('collapsed', collapsed);
+}, { passive: true });
 </script>
 </body>
 </html>
