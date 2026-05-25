@@ -2776,6 +2776,7 @@ function renderMobGrid(container, monsters) {
 // 8. 이름 검색 (프리셋 즉시 필터 + 자동 mapledb 검색)
 // ══════════════════════════════════════════
 let searchDebounce = null;
+let _searchAbort = null;
 
 function onNameInput(v) {
   const q = v.trim().toLowerCase();
@@ -2783,10 +2784,14 @@ function onNameInput(v) {
 
   clearTimeout(searchDebounce);
 
-  if (!q) { res.innerHTML = ''; setSearchMsg(''); return; }
+  if (!q) {
+    if (_searchAbort) { _searchAbort.abort(); _searchAbort = null; }
+    res.innerHTML = ''; setSearchMsg(''); return;
+  }
 
-  // 프리셋 즉시 표시 (빠른 응답)
-  const hits = PRESET.filter(m => m.name.toLowerCase().includes(q));
+  // 프리셋 즉시 표시 (공백 정규화 포함)
+  const qNorm = q.replace(/\s+/g, '');
+  const hits = PRESET.filter(m => m.name.toLowerCase().replace(/\s+/g, '').includes(qNorm));
   if (hits.length) renderMobGrid(res, hits);
   else res.innerHTML = '';
 
@@ -2835,19 +2840,39 @@ async function searchByName() {
   const q = document.getElementById('name-input').value.trim();
   if (!q) return;
 
+  // 진행 중인 검색 취소
+  if (_searchAbort) _searchAbort.abort();
+  _searchAbort = new AbortController();
+  const signal = _searchAbort.signal;
+
   setSearchMsg(`⏳ "${q}" 검색 중...`);
 
-  try {
-    // 1단계: kms/284로 한국어 이름 검색
+  // 공백 제거 정규화
+  const qNorm = q.replace(/\s+/g, '');
+  // prefix: qNorm 앞 2자 (공백 없는 버전이므로 위치 보장)
+  const prefix = qNorm.slice(0, 2);
+
+  async function fetchQuery(queryStr) {
     const res = await fetch(
-      `https://maplestory.io/api/kms/284/mob?name=${encodeURIComponent(q)}`,
-      { signal: AbortSignal.timeout(8000) }
+      `https://maplestory.io/api/kms/284/mob?name=${encodeURIComponent(queryStr)}`,
+      { signal: AbortSignal.any([signal, AbortSignal.timeout(8000)]) }
     );
     if (!res.ok) throw new Error(`API 오류 (${res.status})`);
     const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
 
-    const raw = (Array.isArray(data) ? data : [])
-      .filter(m => m.name && m.name.includes(q) && m.id < 9000000);
+  try {
+    // 1단계: 원본 쿼리 + prefix 동시 검색 (공백 유무 관계없이 매칭)
+    const queries = prefix !== q ? [q, prefix] : [q];
+    const results = await Promise.all(queries.map(fetchQuery));
+
+    if (signal.aborted) return;
+
+    // 공백 제거 후 포함 여부로 필터
+    const raw = results.flat().filter(m =>
+      m.name && m.name.replace(/\s+/g, '').includes(qNorm) && m.id < 9000000
+    );
 
     // 이름 중복 제거 (같은 이름이면 ID 낮은 것만)
     const seen = new Map();
@@ -2858,7 +2883,10 @@ async function searchByName() {
     let mobs = [...seen.values()]
       .map(m => ({ id: m.id, name: m.name, level: m.level || 0 }))
       .sort((a, b) => {
-        const aExact = a.name === q, bExact = b.name === q;
+        // 정규화 기준 정확도 정렬
+        const aNorm = a.name.replace(/\s+/g, '');
+        const bNorm = b.name.replace(/\s+/g, '');
+        const aExact = aNorm === qNorm, bExact = bNorm === qNorm;
         if (aExact !== bExact) return aExact ? -1 : 1;
         return a.level - b.level;
       });
@@ -2874,17 +2902,18 @@ async function searchByName() {
       try {
         const r = await fetch(
           `https://maplestory.io/api/kms/284/mob/${m.id}`,
-          { signal: AbortSignal.timeout(5000) }
+          { signal }
         );
         if (!r.ok) return m;
         const detail = await r.json();
-        // linksTo가 있으면 그게 클래식 ID
         if (detail.linksTo && detail.linksTo !== m.id) {
           return { ...m, id: detail.linksTo };
         }
       } catch {}
       return m;
     }));
+
+    if (signal.aborted) return;
 
     // 클래식 ID 중복 제거
     const finalSeen = new Map();
@@ -2896,6 +2925,7 @@ async function searchByName() {
     setSearchMsg(`✅ ${mobs.length}개 결과`);
     renderMobGrid(document.getElementById('search-results'), mobs);
   } catch(e) {
+    if (e.name === 'AbortError') return;
     setSearchMsg(`❌ ${e.message}`);
   }
 }
