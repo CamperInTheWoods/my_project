@@ -5158,7 +5158,7 @@ function showToast(msg) {
 }
 
 // ══════════════════════════════════════════
-// 30분 무활동 자동 정지
+// 1시간 무활동 자동 정지
 // ══════════════════════════════════════════
 let _lastActivity = Date.now();
 let _actThrottled = false;
@@ -5173,12 +5173,12 @@ document.addEventListener('click', _onActivity);
 document.addEventListener('keydown', _onActivity);
 
 setInterval(() => {
-  if (Date.now() - _lastActivity < 30 * 60 * 1000) return;
+  if (Date.now() - _lastActivity < 60 * 60 * 1000) return;
   let stopped = false;
   tabs.forEach(t => {
     if (t.sw.startTs !== null) { _swPauseOne(t, getPanelOf(t.idx)); stopped = true; }
   });
-  if (stopped) { renderTabBar(); showToast('30분 동안 활동이 없어 타이머가 정지됐습니다.'); }
+  if (stopped) { renderTabBar(); showToast('1시간 동안 활동이 없어 타이머가 정지됐습니다.'); }
   _lastActivity = Date.now(); // 재발동 방지
 }, 60000);
 
