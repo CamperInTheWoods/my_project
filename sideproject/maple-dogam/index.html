@@ -653,27 +653,26 @@
     .trophy-modal {
       position:relative;
       background:
-        repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 5px),
-        radial-gradient(ellipse at 25% 20%, rgba(120,15,15,.45) 0%, transparent 55%),
-        radial-gradient(ellipse at 75% 80%, rgba(90,10,10,.4) 0%, transparent 55%),
-        linear-gradient(160deg, #1c0404, #2a0808, #1c0404);
+        radial-gradient(ellipse at 30% 0%, rgba(216,148,38,.04) 0%, transparent 50%),
+        linear-gradient(170deg, #111014, #0d0b10, #0f0d13);
       border:none;
       border-radius:18px;
       width:min(640px,94vw); max-height:82vh; display:flex; flex-direction:column;
       box-shadow:
-        0 0 0 3px #6b2e0a,
-        0 0 0 5px #c8922a,
-        0 0 0 7px #5a2508,
-        0 24px 70px rgba(0,0,0,.85),
-        inset 0 1px 0 rgba(255,220,130,.08);
+        0 0 0 1px rgba(216,148,38,.3),
+        0 0 0 2.5px rgba(4,2,0,.98),
+        0 0 0 4px rgba(216,148,38,.12),
+        0 24px 70px rgba(0,0,0,.9),
+        inset 0 1px 0 rgba(255,220,130,.06);
       overflow:hidden;
     }
     .trophy-modal-header {
       display:flex; align-items:center; justify-content:space-between;
       padding:20px 24px 13px;
-      border-bottom:1px solid rgba(216,148,38,.3);
+      border-bottom:1px solid rgba(216,148,38,.2);
       background:
-        linear-gradient(90deg, rgba(216,148,38,.07) 0%, transparent 40%, transparent 60%, rgba(216,148,38,.07) 100%);
+        linear-gradient(90deg, rgba(216,148,38,.05) 0%, transparent 40%, transparent 60%, rgba(216,148,38,.05) 100%),
+        rgba(0,0,0,.2);
       flex-shrink:0;
       position:relative;
     }
@@ -684,7 +683,7 @@
       pointer-events:none;
     }
     .trophy-modal-title { font-size:1rem; font-weight:700; color:var(--gold); letter-spacing:.05em; text-shadow:0 0 12px rgba(216,148,38,.2); }
-    .trophy-modal-sub { font-size:.63rem; color:rgba(200,168,107,.52); margin-top:3px; letter-spacing:.02em; }
+    .trophy-modal-sub { font-size:.72rem; color:rgba(200,168,107,.52); margin-top:3px; letter-spacing:.02em; }
     .trophy-modal-close {
       width:27px; height:27px; border-radius:50%;
       border:1px solid rgba(216,148,38,.35); background:rgba(216,148,38,.04);
@@ -694,28 +693,25 @@
     .trophy-modal-close:hover { background:rgba(216,148,38,.14); color:var(--gold); border-color:rgba(216,148,38,.65); }
     .trophy-sort-bar {
       display:flex; gap:6px; padding:10px 24px;
-      border-bottom:1px solid rgba(216,148,38,.14); flex-shrink:0;
-      background:rgba(0,0,0,.12);
+      border-bottom:1px solid rgba(216,148,38,.12); flex-shrink:0;
+      background:rgba(0,0,0,.25);
     }
     .trophy-sort-btn {
       display:flex; align-items:center; gap:4px;
       padding:4px 11px; border-radius:6px;
       border:1px solid rgba(216,148,38,.18);
       background:none; color:rgba(200,168,107,.55); font-size:.63rem; font-weight:600;
-      cursor:pointer; font-family:inherit; transition:all .15s; letter-spacing:.02em;
+      cursor:pointer; font-family:inherit; transition:all .15s; letter-spacing:.02em; font-size:.7rem;
     }
     .trophy-sort-btn:hover { border-color:rgba(216,148,38,.48); color:rgba(216,148,38,.82); background:rgba(216,148,38,.05); }
     .trophy-sort-btn.active { border-color:rgba(216,148,38,.65); background:rgba(216,148,38,.1); color:rgba(216,148,38,.92); }
-    .trophy-sort-arrow { font-size:.58rem; }
+    .trophy-sort-arrow { font-size:.65rem; }
     .trophy-modal-body {
       overflow-y:auto; padding:22px 22px 26px;
       background:
-        repeating-linear-gradient(0deg,  rgba(255,255,255,.007) 0px, rgba(255,255,255,.007) 1px, transparent 1px, transparent 4px),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.007) 0px, rgba(255,255,255,.007) 1px, transparent 1px, transparent 4px),
-        radial-gradient(ellipse at 50% 0%, rgba(140,18,18,.22) 0%, transparent 62%),
-        radial-gradient(ellipse at 50% 100%, rgba(80,10,10,.2) 0%, transparent 55%),
-        linear-gradient(180deg, #1e0508, #250608, #1e0508);
-      box-shadow:inset 0 6px 20px rgba(0,0,0,.45), inset 0 -6px 20px rgba(0,0,0,.35);
+        radial-gradient(ellipse at 50% 0%, rgba(216,148,38,.03) 0%, transparent 55%),
+        linear-gradient(180deg, #0d0b10, #0f0d13);
+      box-shadow:inset 0 6px 20px rgba(0,0,0,.4), inset 0 -6px 20px rgba(0,0,0,.3);
     }
     .trophy-modal-body::-webkit-scrollbar { width:4px; }
     .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.15); }
@@ -725,95 +721,99 @@
     .trophy-stat-item:last-child { border-right:none; }
     .trophy-stat-icon { font-size:.78rem; opacity:.65; color:rgba(255,220,130,.9); }
     .trophy-stat-num { font-size:1.05rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; }
-    .trophy-stat-label { font-size:.54rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
-    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(152px,1fr)); gap:18px; }
+    .trophy-stat-label { font-size:.62rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
+    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
     .trophy-card {
-      display:flex; flex-direction:column; align-items:center; gap:0;
+      display:flex; flex-direction:column; gap:0;
       background:
-        radial-gradient(ellipse at 50% 0%, rgba(255,195,50,.05) 0%, transparent 58%),
-        linear-gradient(185deg, #3d2010 0%, #1e0a03 52%, #351808 100%);
-      border-radius:10px;
-      padding:18px 14px 15px; cursor:pointer;
+        radial-gradient(ellipse at 50% 0%, rgba(90,30,5,.55) 0%, transparent 65%),
+        linear-gradient(170deg, rgba(52,16,2,.97) 0%, rgba(12,3,1,1) 100%);
+      border-radius:12px;
+      padding:14px 16px 12px; cursor:pointer;
       position:relative;
       box-shadow:
-        0 0 0 1px rgba(160,100,20,.85),
-        0 0 0 3px rgba(12,5,0,.95),
-        0 0 0 4.5px rgba(216,148,38,.28),
-        0 12px 32px rgba(0,0,0,.72),
-        inset 0 1px 0 rgba(255,220,100,.07),
-        inset 0 -1px 0 rgba(0,0,0,.55);
-      transition:box-shadow .25s, transform .22s;
+        0 0 0 1px rgba(216,148,38,.65),
+        0 0 0 2.5px rgba(4,1,0,.98),
+        0 0 0 3.5px rgba(216,148,38,.25),
+        0 10px 28px rgba(0,0,0,.6);
+      transition: transform .2s cubic-bezier(.22,.8,.44,1), box-shadow .2s;
       overflow:visible;
     }
+    .trophy-card::before { display:none; }
     .trophy-card:hover {
       box-shadow:
-        0 0 0 1px rgba(216,148,38,.95),
-        0 0 0 3px rgba(12,5,0,.95),
-        0 0 0 5px rgba(216,148,38,.45),
-        0 18px 48px rgba(0,0,0,.8),
-        0 0 22px rgba(216,148,38,.12),
-        inset 0 1px 0 rgba(255,220,100,.1),
-        inset 0 -1px 0 rgba(0,0,0,.55);
-      transform:translateY(-5px);
+        0 0 0 1px rgba(240,175,55,1),
+        0 0 0 2.5px rgba(4,1,0,.98),
+        0 0 0 4.5px rgba(216,148,38,.4),
+        0 16px 40px rgba(0,0,0,.7);
+      transform: translateY(-4px);
     }
-    .trophy-portrait {
-      width:70px; height:70px; border-radius:10px;
-      background:radial-gradient(circle at 38% 30%, #3d2300, #0d0400);
-      box-shadow:
-        0 0 0 2px rgba(200,150,30,.8),
-        0 0 0 3.5px rgba(10,4,0,.9),
-        0 0 0 5.5px rgba(180,130,30,.35),
-        inset 0 2px 10px rgba(0,0,0,.75);
-      display:flex; align-items:center; justify-content:center; overflow:hidden;
-      position:relative; margin-bottom:11px; flex-shrink:0;
+    .trophy-portrait { display:none; }
+    .trophy-sep { display:none; }
+    .trophy-info { display:flex; flex-direction:column; gap:0; }
+    .trophy-name {
+      font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+      color:rgba(230,165,55,.9);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      margin-bottom:9px;
     }
-    .trophy-portrait img { width:80%; height:80%; object-fit:contain; image-rendering:pixelated; }
-    .trophy-portrait::after {
-      content:''; position:absolute; inset:0; border-radius:9px;
-      background:linear-gradient(140deg,rgba(255,220,100,.12) 0%,transparent 55%);
-      pointer-events:none;
+    .trophy-name-divider {
+      height:1px; margin-bottom:12px;
+      background: linear-gradient(90deg, rgba(216,148,38,.55) 0%, rgba(216,148,38,.2) 55%, transparent 100%);
     }
-    .trophy-sep {
-      width:68%; height:1px; flex-shrink:0;
-      background:linear-gradient(90deg, transparent, rgba(216,148,38,.55), rgba(216,148,38,.38), rgba(216,148,38,.55), transparent);
-      margin:0 auto 9px;
+    .trophy-stats {
+      display:flex; flex-direction:row; gap:0;
+      margin-bottom:11px;
     }
-    .trophy-info { width:100%; text-align:center; }
-    .trophy-name { font-size:.71rem; color:rgba(255,222,140,.95); font-weight:700; margin-bottom:5px; letter-spacing:.02em; }
-    .trophy-stats { font-size:.57rem; color:rgba(200,168,107,.58); line-height:1.8; }
+    .trophy-stat-row {
+      display:flex; flex-direction:column; gap:4px;
+      flex:1; padding-right:14px;
+    }
+    .trophy-stat-row + .trophy-stat-row {
+      border-left: 1px solid rgba(216,148,38,.2);
+      padding-left:14px; padding-right:0;
+    }
+    .trophy-stat-value {
+      font-size:1.32rem; font-weight:700; font-family:'Courier New',monospace;
+      color:rgba(255,236,168,.97); line-height:1; letter-spacing:-.02em;
+    }
+    .trophy-stat-label {
+      font-size:.56rem; color:rgba(200,168,107,.55);
+      letter-spacing:.1em; text-transform:uppercase;
+    }
     .trophy-date-badge {
-      font-size:.49rem; font-weight:700; letter-spacing:.09em;
-      color:rgba(216,148,38,.72); margin-top:5px; display:inline-block;
-      background:linear-gradient(90deg, transparent, rgba(216,148,38,.12), transparent);
-      padding:2px 10px; border-top:1px solid rgba(216,148,38,.18);
+      font-size:.58rem; letter-spacing:.07em;
+      color:rgba(216,148,38,.42); text-align:right; display:block;
+      border-top: 1px solid rgba(216,148,38,.12);
+      padding-top:8px;
     }
     .trophy-del {
       position:absolute; top:7px; right:7px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(255,80,80,.3); background:none;
-      color:rgba(255,100,100,.4); font-size:.55rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(180,50,50,.3); background:none;
+      color:rgba(210,80,80,.35); font-size:.5rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-del { opacity:1; }
-    .trophy-del:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
+    .trophy-del:hover { background:rgba(160,25,25,.3); color:rgba(255,120,120,.95); border-color:rgba(220,60,60,.8); }
     .trophy-stat-btn {
       position:absolute; top:7px; right:28px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(255,80,80,.3); background:none;
-      color:rgba(255,100,100,.4); font-size:.55rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(216,148,38,.25); background:none;
+      color:rgba(216,148,38,.35); font-size:.5rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-stat-btn { opacity:1; }
-    .trophy-stat-btn:hover { background:rgba(180,30,30,.25); color:rgba(255,130,130,.95); border-color:rgba(255,80,80,.75); }
+    .trophy-stat-btn:hover { background:rgba(120,80,10,.35); color:rgba(255,210,90,.95); border-color:rgba(216,148,38,.8); }
     .trophy-resume-btn {
       position:absolute; top:7px; left:7px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(80,180,120,.3); background:none;
-      color:rgba(100,200,140,.4); font-size:.55rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(80,200,130,.25); background:none;
+      color:rgba(100,210,150,.35); font-size:.55rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-resume-btn { opacity:1; }
-    .trophy-resume-btn:hover { background:rgba(30,120,70,.25); color:rgba(100,220,150,.95); border-color:rgba(80,200,120,.75); }
+    .trophy-resume-btn:hover { background:rgba(20,100,55,.35); color:rgba(120,240,170,.95); border-color:rgba(80,200,120,.8); }
 
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
@@ -1255,6 +1255,26 @@
         linear-gradient(135deg,rgba(216,148,38,.4),rgba(180,80,255,.35),rgba(80,200,255,.4)) border-box;
     }
     html:not([data-theme="dark"]) .result-card.complete .rsb-label { color: rgba(80,50,20,.55); }
+    html:not([data-theme="dark"]) .result-card.complete .rsb-value {
+      background: linear-gradient(90deg, #b07800 0%, #8a4fcf 50%, #1a8ab5 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .result-mob-name {
+      background: linear-gradient(90deg, #b07800 0%, #7b3fbf 50%, #1a7fa0 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    html:not([data-theme="dark"]) .result-card.complete .result-section-title {
+      background: linear-gradient(90deg, rgba(140,90,0,.85), rgba(120,50,180,.7));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     html:not([data-theme="dark"]) .result-card.complete .ri-cell.ri-found {
       background: rgba(255,240,180,.18);
     }
@@ -4526,21 +4546,24 @@ function renderTrophyGrid() {
     const yymm = c.date ? c.date.slice(2).replace(/-/g, '.') : '';
     const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
     const kills   = _calcTrophyKills(c, store);
-    const killPart = kills > 0 ? ` &nbsp;·&nbsp; 🗡 ${kills.toLocaleString()}마리` : '';
     const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
     return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
       <button class="trophy-resume-btn" onclick="event.stopPropagation();resumeTrophy(${c.mobId})" title="이어하기">↩</button>
       <button class="trophy-stat-btn" onclick="event.stopPropagation();openTrophyStatTable(${c.mobId})" title="통계 보기">S</button>
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
-      <div class="trophy-portrait">
-        <img src="https://maplestory.io/api/kms/284/mob/${c.mobId}/icon"
-             onerror="this.src='https://maplestory.io/api/gms/62/mob/${c.mobId}/icon'"
-             alt="${escHtml(c.mobName)}">
-      </div>
-      <div class="trophy-sep"></div>
       <div class="trophy-info">
         <div class="trophy-name">${escHtml(c.mobName)}</div>
-        <div class="trophy-stats">⏱ ${timeStr}${killPart}</div>
+        <div class="trophy-name-divider"></div>
+        <div class="trophy-stats">
+          <div class="trophy-stat-row">
+            <div class="trophy-stat-value">${timeStr}</div>
+            <div class="trophy-stat-label">소요 시간</div>
+          </div>
+          ${kills > 0 ? `<div class="trophy-stat-row">
+            <div class="trophy-stat-value">${kills.toLocaleString()}</div>
+            <div class="trophy-stat-label">사냥 수</div>
+          </div>` : ''}
+        </div>
         <div class="trophy-date-badge">${yymm}</div>
       </div>
     </div>`;
@@ -5029,7 +5052,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.092.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.093.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5627,6 +5650,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.093', date: '26.05.28',
+    feat: [
+      '진열장 카드 디자인 개편 — 미니멀 스탯 카드, 이중 금색 테두리',
+      '진열장 모달 배경 다크 중립으로 변경 — 카드 가시성 개선',
+    ],
+    fix: [
+      '진열장 전체 폰트 크기 가독성 개선',
+    ],
+  },
   {
     ver: '1.092', date: '26.05.24',
     feat: [
