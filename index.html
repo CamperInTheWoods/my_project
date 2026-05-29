@@ -566,17 +566,10 @@
     .hunt-dogam-exp strong { color:rgba(200,165,80,.8); }
 
     /* ─ Stopwatch ─ */
-    .sw-display {
-      font-family:'Courier New',monospace;
-      font-size:1.5rem; font-weight:700; color:var(--dark);
-      text-align:center; letter-spacing:-.5px;
-      padding:10px 0 8px;
-      font-variant-numeric:tabular-nums;
-    }
-    .sw-ch-elapsed { font-size:.85rem; color:#1a6fa8; margin:-6px 0 4px; display:flex; align-items:center; gap:5px; }
-    .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:1rem; }
-    .sw-ch-elapsed .sw-ch-hide { background:none; border:none; color:#a0c4e0; font-size:.65rem; cursor:pointer; padding:0 2px; line-height:1; }
-    .sw-ch-elapsed .sw-ch-hide:hover { color:#e55; }
+    .sw-display { /* sw-timer-row CSS에서 재정의됨 */ }
+    .sw-sub-row { display:flex; align-items:center; justify-content:space-between; min-height:20px; margin-bottom:2px; }
+    .sw-ch-elapsed { font-size:.8rem; color:#1a6fa8; display:flex; align-items:center; gap:4px; }
+    .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:.85rem; }
     .sw-btns { display:flex; flex-direction:column; gap:8px; }
     .sw-btn {
       padding:9px; border:none; border-radius:8px;
@@ -722,6 +715,70 @@
     .trophy-stat-icon { font-size:.78rem; opacity:.65; color:rgba(255,220,130,.9); }
     .trophy-stat-num { font-size:1.05rem; font-weight:700; color:var(--gold); font-family:'Courier New',monospace; }
     .trophy-stat-label { font-size:.62rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
+    /* 기대 보상 트래커 */
+    .sw-header-row {
+      display:flex; align-items:center; gap:5px; margin-bottom:6px;
+    }
+    .sw-header-row .ptitle { margin:0; flex:1; }
+    .sw-help-btn {
+      background:none; border:none; cursor:pointer; font-size:.78rem;
+      font-weight:700; color:var(--gray); padding:0 3px; line-height:1;
+      transition:color .15s; opacity:.6; flex-shrink:0;
+    }
+    .sw-help-btn:hover { opacity:1; }
+    .reward-drop-wrap { position:relative; flex-shrink:0; }
+    .reward-drop-btn {
+      background:none; border:1px solid var(--border); border-radius:5px;
+      padding:2px 6px; font-size:.68rem; cursor:pointer;
+      color:var(--text-sub); display:flex; align-items:center; gap:4px;
+      white-space:nowrap; line-height:1.4;
+      transition:color .15s, border-color .15s;
+    }
+    .reward-drop-btn:hover, .reward-drop-btn.open {
+      color:var(--primary); border-color:var(--primary);
+    }
+    .reward-drop-btn .rdb-text { font-size:.65rem; font-weight:600; }
+    .reward-drop-list {
+      position:absolute; top:calc(100% + 6px); right:0; z-index:50;
+      background:var(--panel); border:1px solid var(--border); border-radius:9px;
+      box-shadow:0 -4px 18px rgba(0,0,0,.14); padding:7px;
+      display:flex; flex-direction:column; gap:5px; min-width:46px;
+    }
+    .reward-drop-icon {
+      width:36px; height:36px; cursor:pointer; border-radius:6px;
+      border:1.5px solid transparent; padding:2px; box-sizing:border-box;
+      transition:border-color .12s, background .12s;
+      image-rendering:pixelated; object-fit:contain;
+      background:var(--bg-btn-sec);
+    }
+    .reward-drop-icon:hover { border-color:var(--primary); }
+    .reward-drop-icon.selected { border-color:var(--primary); background:var(--bg-card-sel); }
+    .reward-drop-clear {
+      display:flex; align-items:center; justify-content:center;
+      font-size:.72rem; color:var(--gray);
+      border-color:var(--border) !important; background:none !important;
+    }
+    .reward-drop-clear:hover { color:var(--red) !important; border-color:rgba(220,80,80,.5) !important; background:rgba(220,80,80,.06) !important; }
+    .sw-timer-row {
+      display:flex; align-items:center; gap:7px; padding:4px 0;
+    }
+    .sw-display {
+      font-family:'Courier New',monospace;
+      font-size:1.18rem; font-weight:700; color:var(--dark);
+      letter-spacing:-.5px; font-variant-numeric:tabular-nums;
+    }
+    .reward-badge {
+      display:flex; align-items:center; gap:3px;
+      font-size:.9rem; font-weight:400; color:#c07a10;
+      white-space:nowrap; flex-shrink:0;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-variant-numeric:tabular-nums;
+    }
+    [data-theme="dark"] .reward-badge { color:#f0b040; }
+    .reward-badge-icon {
+      width:22px; height:22px; object-fit:contain; image-rendering:pixelated;
+    }
+
     .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
     .trophy-card {
       display:flex; flex-direction:column; gap:0;
@@ -2399,9 +2456,94 @@ function restoreSwState(tab, mob) {
   tab.sw.base = saved ? (saved.base || 0) : 0;
 }
 
+// ── 기대 보상 트래커 ──────────────────────────────────────────
+const REWARD_TEST_ITEMS = [
+  { id: 1432005, name: '제코',                     ms: 48  * 3600000 + 25 * 60000 },
+  { id: 1062000, name: '아이스진',                  ms: 110 * 3600000 + 33 * 60000 },
+  { id: 2044002, name: '두손 검 공격력 주문서 10%', ms: 171 * 3600000 + 17 * 60000 },
+];
+function getRewardItems(mobId) {
+  return loadS()[`reward_items_${mobId}`] || REWARD_TEST_ITEMS;
+}
+function getRewardSel(mobId) {
+  const v = loadS()[`reward_sel_${mobId}`];
+  return v != null ? v : null;
+}
+function setRewardSel(mobId, idx) {
+  const s = loadS();
+  if (idx === null) delete s[`reward_sel_${mobId}`];
+  else s[`reward_sel_${mobId}`] = idx;
+  saveS(s);
+}
+function toggleRewardDrop(btn) {
+  const list = btn.nextElementSibling;
+  const open = list.style.display === 'none';
+  list.style.display = open ? '' : 'none';
+  btn.classList.toggle('open', open);
+  btn.querySelector('.rdb-arrow').textContent = open ? '▾' : '▴';
+  if (open) {
+    const tab = activeTab();
+    if (tab?.mob) renderRewardDrop(list, tab.mob);
+  }
+}
+function _closeAllRewardDrops(e) {
+  document.querySelectorAll('.reward-drop-wrap').forEach(wrap => {
+    if (!wrap.contains(e.target)) {
+      const list = wrap.querySelector('.reward-drop-list');
+      const btn  = wrap.querySelector('.reward-drop-btn');
+      if (list && list.style.display !== 'none') {
+        list.style.display = 'none';
+        btn?.classList.remove('open');
+        if (btn) btn.querySelector('.rdb-arrow').textContent = '▴';
+      }
+    }
+  });
+}
+document.addEventListener('click', _closeAllRewardDrops);
+function renderRewardDrop(container, mob) {
+  const items = getRewardItems(mob.id);
+  const sel   = getRewardSel(mob.id);
+  container.innerHTML = items.map((item, i) =>
+    `<img class="reward-drop-icon${i===sel?' selected':''}"
+      src="https://maplestory.io/api/kms/284/item/${item.id}/icon"
+      title="${item.name}" onclick="selectRewardItem(${i})"
+      onerror="this.style.opacity='.3'">`
+  ).join('') +
+  `<div class="reward-drop-icon reward-drop-clear" title="선택 해제" onclick="selectRewardItem(null)">✕</div>`;
+}
+function selectRewardItem(idx) {
+  const tab = activeTab();
+  if (!tab?.mob) return;
+  setRewardSel(tab.mob.id, idx === null ? null : idx);
+  const panel = getActivePanel();
+  const list  = panel?.querySelector('.reward-drop-list');
+  if (list && list.style.display !== 'none') renderRewardDrop(list, tab.mob);
+  updateRewardBadge(panel, tab);
+}
+function updateRewardBadge(panel, tab) {
+  const badge = panel?.querySelector('.reward-badge');
+  if (!badge) return;
+  const sel = tab?.mob ? getRewardSel(tab.mob.id) : null;
+  if (!tab?.mob || sel === null) { badge.style.display = 'none'; return; }
+  const items = getRewardItems(tab.mob.id);
+  if (!items.length) { badge.style.display = 'none'; return; }
+  const item  = items[sel];
+  if (!item) { badge.style.display = 'none'; return; }
+  const elMs  = swElapsed(tab);
+  if (elMs < 1000) { badge.style.display = 'none'; return; }
+  const count = (elMs / item.ms).toFixed(2);
+  const icon  = item.id
+    ? `<img class="reward-badge-icon" src="https://maplestory.io/api/kms/284/item/${item.id}/icon" onerror="this.style.display='none'">`
+    : '';
+  badge.innerHTML = `<span>${count}</span>${icon}`;
+  badge.style.display = '';
+}
+// ─────────────────────────────────────────────────────────────
+
 function swTickPanel(panel, tab) {
   const el = panel?.querySelector('.sw-display');
   if (el) el.textContent = fmtTime(swElapsed(tab));
+  updateRewardBadge(panel, tab);
   // 채널 경과 업데이트
   const chEl = panel?.querySelector('.sw-ch-elapsed');
   if (chEl) {
@@ -2460,12 +2602,20 @@ function tlRarity(rateStr) {
   return TL_RARITY[4];
 }
 function tlColor(ms) {
-  // sqrt 커브: 파랑(240)→빨강(0), 6시간에서도 시안으로 눈에 띄게 변화
-  const p = Math.sqrt(Math.min(ms / TL_MAX_MS, 1));
-  const h = Math.round(240 - p * 240); // 파랑(240) → 빨강(0)
-  const s = Math.round(70 + p * 20);
-  const l = Math.round(50 - p * 10);
-  return `hsl(${h},${s}%,${l}%)`;
+  if (ms <= TL_MAX_MS) {
+    // 0→100h: 파랑(240) → 빨강(0), sqrt 커브
+    const p = Math.sqrt(ms / TL_MAX_MS);
+    const h = Math.round(240 - p * 240);
+    const s = Math.round(70 + p * 20);
+    const l = Math.round(50 - p * 10);
+    return `hsl(${h},${s}%,${l}%)`;
+  } else {
+    // 100→200h: 빨강 → 검정 (채도·명도 선형 감소)
+    const p = Math.min((ms - TL_MAX_MS) / TL_MAX_MS, 1);
+    const s = Math.round(90 * (1 - p));
+    const l = Math.round(40 * (1 - p));
+    return `hsl(0,${s}%,${l}%)`;
+  }
 }
 let _tlShowAll = !!loadS().tl_show_all;
 function tlShowAll() { return _tlShowAll; }
@@ -3166,14 +3316,24 @@ function buildTabPanel(tab) {
           <div class="hunt-dogam-exp"></div>
           <div class="divider" style="margin:10px 0 12px"></div>
         </div>
-        <div class="ptitle" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>⏱ 스톱워치</span>
-          <button onclick="openSwHelp()" title="단축키 안내" style="background:none;border:none;cursor:pointer;font-size:.78rem;font-weight:700;color:var(--gray);padding:0 3px;line-height:1;transition:color .15s;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">?</button>
+        <div class="sw-header-row">
+          <div class="ptitle">스톱워치</div>
+          <button class="sw-help-btn" onclick="openSwHelp()" title="단축키 안내">?</button>
+          <div class="reward-drop-wrap">
+            <button class="reward-drop-btn" onclick="toggleRewardDrop(this)">
+              <span class="rdb-arrow">▴</span><span class="rdb-text">허규복은?</span>
+            </button>
+            <div class="reward-drop-list" style="display:none"></div>
+          </div>
         </div>
-        <div class="sw-display">00:00:00.00</div>
-        <div class="sw-ch-elapsed" style="display:none">
-          <span class="sw-ch-val">00:00:00.00</span>
-          <button class="sw-ch-hide" onclick="this.closest('.sw-ch-elapsed').dataset.hidden='1';this.closest('.sw-ch-elapsed').style.visibility='hidden'">✕</button>
+        <div class="sw-timer-row">
+          <div class="sw-display">00:00:00.00</div>
+        </div>
+        <div class="sw-sub-row">
+          <div class="sw-ch-elapsed" style="display:none">
+            <span class="sw-ch-val">00:00:00.00</span>
+          </div>
+          <div class="reward-badge" style="display:none"></div>
         </div>
         <div class="sw-btns">
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
@@ -5059,7 +5219,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.093.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.094.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5657,6 +5817,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.094', date: '26.05.29',
+    feat: [
+      '허규복은? 버튼 — 아이템 기대 드롭 시간 기준 실시간 진행률 표시',
+      '타임라인 색상 200시간 → 검정으로 확장',
+    ],
+    fix: [],
+  },
   {
     ver: '1.093.1', date: '26.05.29',
     feat: [
