@@ -787,6 +787,12 @@
       border-top: 1px solid rgba(216,148,38,.12);
       padding-top:8px;
     }
+    .trophy-face {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; object-position:top center;
+      opacity:.09; pointer-events:none; border-radius:12px;
+      mix-blend-mode:luminosity;
+    }
     .trophy-del {
       position:absolute; top:7px; right:7px; width:17px; height:17px;
       border-radius:50%; border:1px solid rgba(180,50,50,.3); background:none;
@@ -1587,7 +1593,7 @@
 
     <div class="divider"></div>
 
-    <div class="ptitle">완료 도감작</div>
+    <div class="ptitle">완료된 도감작</div>
     <div class="trophy-open-btn" id="trophy-open-btn" onclick="openTrophyRoom()">
       <span class="tob-icon">🏅</span>
       <div class="tob-text">
@@ -4551,6 +4557,7 @@ function renderTrophyGrid() {
       <button class="trophy-resume-btn" onclick="event.stopPropagation();resumeTrophy(${c.mobId})" title="이어하기">↩</button>
       <button class="trophy-stat-btn" onclick="event.stopPropagation();openTrophyStatTable(${c.mobId})" title="통계 보기">S</button>
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
+      <img class="trophy-face" src="${mobImg(c.mobId)}" alt="" onerror="this.style.display='none'" draggable="false">
       <div class="trophy-info">
         <div class="trophy-name">${escHtml(c.mobName)}</div>
         <div class="trophy-name-divider"></div>
@@ -5009,7 +5016,7 @@ renderTrophy();
   <div class="trophy-modal" onclick="event.stopPropagation()">
     <div class="trophy-modal-header">
       <div>
-        <div class="trophy-modal-title">🏅 완료 도감작 진열장</div>
+        <div class="trophy-modal-title">🏅 완료된 도감작 진열장</div>
       </div>
       <button class="trophy-modal-close" onclick="closeTrophyRoom()">✕</button>
     </div>
@@ -5052,7 +5059,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.093.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.093.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5650,6 +5657,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.093.1', date: '26.05.29',
+    feat: [
+      '진열장 카드 몹 이미지 오버랩 추가 — low opacity 배경 장식',
+      '"완료 도감작" 문구를 "완료된 도감작"으로 변경',
+    ],
+    fix: [],
+  },
   {
     ver: '1.093', date: '26.05.28',
     feat: [
