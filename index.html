@@ -5219,7 +5219,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.094.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.094.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5818,6 +5818,13 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.094.1', date: '26.06.04',
+    feat: [
+      'EXE 리모컨 연동 지원 — 로컬 실행 시 스톱워치/채널변경 원격 제어',
+    ],
+    fix: [],
+  },
+  {
     ver: '1.094', date: '26.05.29',
     feat: [
       '허규복은? 버튼 — 아이템 기대 드롭 시간 기준 실시간 진행률 표시',
@@ -6094,6 +6101,42 @@ window.addEventListener('scroll', () => {
   document.getElementById('header-wrap').classList.toggle('collapsed', collapsed);
   document.querySelector('header').classList.toggle('collapsed', collapsed);
 }, { passive: true });
+
+// ── 리모컨 WebSocket 클라이언트 ───────────────────────────────
+(function _remote() {
+  let ws, _pushT = null;
+
+  function _pushState() {
+    if (!ws || ws.readyState !== 1) return;
+    const tab = activeTab();
+    const ms = tab ? swElapsed(tab) : 0;
+    const running = tab ? (tab.sw?.startTs !== null && tab.sw?.startTs !== undefined) : false;
+    const mob_id   = tab?.mob?.id   ?? null;
+    const mob_name = tab?.mob?.name ?? null;
+    const panel = getActivePanel();
+    let ch_ms = null;
+    if (panel) {
+      const entries = panel.querySelectorAll('.sw-log-entry.sw-log-channel');
+      const last = entries.length ? entries[entries.length - 1] : null;
+      if (last) ch_ms = Math.max(0, ms - (parseFloat(last.dataset.chMs) || 0));
+    }
+    try { ws.send(JSON.stringify({ type:'tick', ms, ch_ms, running, mob_id, mob_name })); } catch(e) {}
+  }
+
+  function connect() {
+    try {
+      ws = new WebSocket('ws://localhost:9999');
+      ws.onopen  = () => { _pushT = setInterval(_pushState, 300); };
+      ws.onmessage = ({ data }) => {
+        if (data === 'sw_toggle')  swToggle();
+        if (data === 'sw_channel') swChannelMark();
+      };
+      ws.onclose = () => { clearInterval(_pushT); setTimeout(connect, 3000); };
+      ws.onerror = () => {};
+    } catch(e) {}
+  }
+  connect();
+})();
 </script>
 </body>
 </html>
