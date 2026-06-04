@@ -406,6 +406,25 @@
       background:#1c1c1c; border-color:#383838;
     }
     .item-card.nf:hover { background:#242424; border-color:#555; }
+
+    /* 아이템 카드 우클릭 컨텍스트 메뉴 */
+    .item-ctx-menu {
+      position:fixed; z-index:9000;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:8px; padding:4px 0;
+      box-shadow:0 4px 16px rgba(0,0,0,.18);
+      min-width:170px; display:none;
+    }
+    .item-ctx-menu.open { display:block; }
+    .item-ctx-item {
+      padding:8px 14px; font-size:.78rem; cursor:pointer;
+      color:var(--text); display:flex; align-items:center; gap:8px;
+      transition:background .1s;
+    }
+    .item-ctx-item:hover { background:var(--bg-btn-sec); }
+    .item-ctx-item.danger { color:var(--red); }
+    .item-ctx-item.danger:hover { background:rgba(220,80,80,.08); }
+    .item-ctx-sep { height:1px; background:var(--border); margin:3px 0; }
     .item-card.nf .icon-wrap { background:#141414; }
     .item-card.nf .icon-wrap img { filter:brightness(.3) saturate(.2); }
     .item-card.nf .cn { color:#555; }
@@ -3872,6 +3891,8 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
   `;
 
   if (!isExcl) card.addEventListener('click', (e) => incrementItem(drop.id, e));
+  card.addEventListener('contextmenu', (e) => showItemCtxMenu(e, drop.id));
+  card.addEventListener('mousedown', (e) => { if (e.button === 2) e.preventDefault(); });
   return card;
 }
 
@@ -3887,6 +3908,7 @@ function toggleExclude(e, itemId) {
   store[`excl_${mob.id}`] = [...excl];
   saveS(store);
   renderItemGridInPanel(panel, mob);
+  updateProgressInPanel(panel, mob);
   renderSaves();
 }
 
@@ -5219,7 +5241,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.095.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.096.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5818,6 +5840,15 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.096', date: '26.06.04',
+    feat: [
+      '아이템 카드 우클릭 메뉴 — 갯수 조정 / 마릿수 기준 지정 / 가격 보기 / 숨기기·보이기',
+    ],
+    fix: [
+      '숨기기·보이기 시 완료 진행도(nn/mm) 즉시 갱신',
+    ],
+  },
+  {
     ver: '1.095', date: '26.06.04',
     feat: [
       'EXE 리모컨 연동 지원 — 로컬 실행 시 스톱워치/채널변경 원격 제어',
@@ -6102,6 +6133,105 @@ window.addEventListener('scroll', () => {
   document.querySelector('header').classList.toggle('collapsed', collapsed);
 }, { passive: true });
 
+// ── 아이템 카드 우클릭 컨텍스트 메뉴 ─────────────────────────
+let _ctxDropId = null;
+
+function showItemCtxMenu(e, dropId) {
+  e.preventDefault();
+  e.stopPropagation();
+  _ctxDropId = dropId;
+
+  const menu = document.getElementById('item-ctx-menu');
+  const mob  = activeMob;
+  const store = loadS();
+  const isExcl = mob ? new Set(store[`excl_${mob.id}`] || []).has(dropId) : false;
+
+  // 숨긴 아이템은 보이기 / 기준·갯수 숨김
+  document.getElementById('ctx-hide').textContent = isExcl ? '↩ 보이기' : '✕ 숨기기';
+  document.getElementById('ctx-hide').className = isExcl ? 'item-ctx-item' : 'item-ctx-item danger';
+  ['ctx-bulk','ctx-sep1','ctx-base','ctx-base-hid'].forEach(id => {
+    document.getElementById(id).style.display = isExcl ? 'none' : '';
+  });
+
+  // 기준 상태 텍스트 업데이트
+  if (mob && !isExcl) {
+    const tlBase = getTlBase(mob.id);
+    const isBase = tlBase?.id === dropId;
+    document.getElementById('ctx-base').textContent =
+      isBase && !tlBase.hidden ? '⚑ 기준 해제' : '⚑ 마릿수 기준 지정';
+    document.getElementById('ctx-base-hid').textContent =
+      isBase && tlBase.hidden ? '⚑ 기준 해제 (타임라인 숨김)' : '⚑ 기준 지정 (타임라인 숨김)';
+  }
+
+  // 화면 밖으로 나가지 않도록 위치 조정
+  const mw = 180, mh = 160;
+  let x = e.clientX, y = e.clientY;
+  if (x + mw > window.innerWidth)  x = window.innerWidth  - mw - 4;
+  if (y + mh > window.innerHeight) y = window.innerHeight - mh - 4;
+  menu.style.left = x + 'px';
+  menu.style.top  = y + 'px';
+  menu.classList.add('open');
+}
+
+function hideItemCtxMenu() {
+  document.getElementById('item-ctx-menu')?.classList.remove('open');
+  _ctxDropId = null;
+}
+
+function ctxItemSetBase(hidden) {
+  const id = _ctxDropId;
+  hideItemCtxMenu();
+  const mob = activeMob; if (!mob || id == null) return;
+  const cur = getTlBase(mob.id);
+  if (cur?.id === id && cur?.hidden === hidden) {
+    setTlBase(mob.id, null);
+  } else {
+    setTlBase(mob.id, { id, hidden });
+  }
+  const panel = getActivePanel();
+  const tab   = activeTab();
+  renderItemGridInPanel(panel, mob);
+  if (tab) renderTimeline(panel, mob, tab);
+  const list = panel?.querySelector('.sw-log-list');
+  if (list) { list.innerHTML = ''; restoreLogEntries(panel, mob); }
+  updateProgressInPanel(panel, mob);
+}
+
+function ctxItemBulk() {
+  const id = _ctxDropId;
+  hideItemCtxMenu();
+  if (id == null) return;
+  openBulkPopup(id, activeTabIdx);
+}
+
+function ctxItemPrice() {
+  const id = _ctxDropId;
+  hideItemCtxMenu();
+  if (id == null) return;
+  window.open(`https://mapleland.gg/item/${id}`, '_blank', 'noopener');
+}
+
+function ctxItemHide() {
+  const id = _ctxDropId;
+  hideItemCtxMenu();
+  if (!activeMob || id == null) return;
+  const store = loadS();
+  const excl  = new Set(store[`excl_${activeMob.id}`] || []);
+  if (excl.has(id)) excl.delete(id); else excl.add(id);
+  store[`excl_${activeMob.id}`] = [...excl];
+  saveS(store);
+  const panel = getActivePanel();
+  renderItemGridInPanel(panel, activeMob);
+  updateProgressInPanel(panel, activeMob);
+  renderSaves();
+}
+
+// 외부 클릭 시 메뉴 닫기
+document.addEventListener('click', hideItemCtxMenu);
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('.item-card')) hideItemCtxMenu();
+});
+
 // ── 리모컨 WebSocket 클라이언트 ───────────────────────────────
 (function _remote() {
   let ws, _pushT = null;
@@ -6138,5 +6268,15 @@ window.addEventListener('scroll', () => {
   connect();
 })();
 </script>
+<div class="item-ctx-menu" id="item-ctx-menu">
+  <div class="item-ctx-item" id="ctx-bulk"     onclick="ctxItemBulk()">≡ 갯수 조정</div>
+  <div class="item-ctx-sep" id="ctx-sep1"></div>
+  <div class="item-ctx-item" id="ctx-base"     onclick="ctxItemSetBase(false)">⚑ 마릿수 기준 지정</div>
+  <div class="item-ctx-item" id="ctx-base-hid" onclick="ctxItemSetBase(true)">⚑ 기준 지정 (타임라인 숨김)</div>
+  <div class="item-ctx-sep"></div>
+  <div class="item-ctx-item"                   onclick="ctxItemPrice()">$ 가격 보기</div>
+  <div class="item-ctx-sep"></div>
+  <div class="item-ctx-item danger" id="ctx-hide" onclick="ctxItemHide()">✕ 숨기기</div>
+</div>
 </body>
 </html>
