@@ -1497,8 +1497,8 @@
     /* ─ Responsive ─ */
     @media(max-width:640px){
       .main-layout { flex-direction:column; }
-      .sw-section { width:100%; position:static; }
-      .item-grid { grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); }
+      .sw-section { width:100%; position:static; order:-1; }
+      .item-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
     }
     @media(max-width:400px){
       .mob-grid { grid-template-columns:repeat(3,1fr); }
@@ -5241,7 +5241,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.096.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.097.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5839,6 +5839,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.097', date: '26.06.06',
+    feat: [
+      '스마트폰 화면 최적화 — 스톱워치를 상단으로 이동, 아이템 카드 한 줄에 3개 고정 표시',
+    ],
+    fix: [],
+  },
   {
     ver: '1.096', date: '26.06.04',
     feat: [
