@@ -2475,6 +2475,15 @@ function restoreSwState(tab, mob) {
   tab.sw.base = saved ? (saved.base || 0) : 0;
 }
 
+// 진행 중 페이지를 닫을 때 경과시간 보존 (복원은 정지 상태)
+function _persistRunningSw() {
+  tabs.forEach(t => { if (t.mob && t.sw.startTs !== null) saveSwState(t); });
+}
+window.addEventListener('pagehide', _persistRunningSw);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') _persistRunningSw();
+});
+
 // ── 기대 보상 트래커 ──────────────────────────────────────────
 const REWARD_TEST_ITEMS = [
   { id: 1432005, name: '제코',                     ms: 48  * 3600000 + 25 * 60000 },
@@ -5241,7 +5250,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.097.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.098.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5839,6 +5848,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.098', date: '26.06.06',
+    feat: [
+      '스톱워치 진행 중 페이지를 닫거나 새로고침해도 경과 시간 보존 — 다시 열면 정지 상태로 복원',
+    ],
+    fix: [],
+  },
   {
     ver: '1.097', date: '26.06.06',
     feat: [
