@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>도감길드 도감작 체크리스트</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>🍁</text></svg>">
-  <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.style.colorScheme='light';}})()</script>
+  <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
@@ -99,6 +99,60 @@
       --sw-start-bg:   #5a8a62;
       --sw-pause-bg:   #b88a30;
       --header-title-shadow: 0 1px 3px rgba(0,0,0,.6);
+    }
+
+    [data-theme="summer"] { color-scheme: light;
+      --brown:  #6e4a28;
+      --gold:   #0f9aa8;
+      --green:  #3f9d56;
+      --red:    #ef5a4c;
+      --gray:   #6e8a82;
+      --dark:   #284a44;
+      --panel:  #ffffff;
+      --border: #cbe7e0;
+      --shadow: rgba(20,90,90,.14);
+
+      --bg-body:       #d9eef2;
+      --bg-input:      #f1faf7;
+      --bg-card:       #ffffff;
+      --bg-card-sel:   #ecfbf6;
+      --bg-tab:        #dcf0ea;
+      --bg-tab-hover:  #c9e8e0;
+      --bg-log:        #ffffff;
+      --bg-log-border: #cbe7e0;
+      --bg-btn-sec:    #f1faf7;
+      --bg-tl-toggle:  #ecfbf6;
+      --bg-excl-tog:   #ffffff;
+      --bg-prog:       #d0ebe3;
+      --header-bg:     #ffffff;
+      --header-border: #cbe7e0;
+      --header-title:  #1f6b6b;
+      --header-sub:    #6e8a82;
+      --char-label:    #85a89e;
+      --btn-grad:      linear-gradient(135deg,#17b0bc,#0f93a0);
+      --btn-shad:      rgba(15,147,160,.22);
+      --tl-tog-bg:     #dcf0ea;
+      --tl-tog-col:    #1f6b6b;
+      --sw-ch-bg:      #fff2d6;
+      --sw-ch-col:     #c8841e;
+      --sw-syn-bg:     #e4f7f1;
+      --sw-syn-col:    #0f93a0;
+      --sw-syn-bdr:    #a4e0d6;
+      --shadow-header: 0 1px 3px rgba(20,90,90,.1);
+      --shadow-card:   0 4px 16px rgba(20,90,90,.12);
+      --primary-bar:   linear-gradient(90deg,#17b0bc,#3f9d56);
+      --success-bar:   linear-gradient(90deg,#2f9d76,#3f9d56);
+      --sw-start-bg:   #3f9d56;
+      --sw-pause-bg:   #17b0bc;
+      --header-title-shadow: none;
+    }
+    /* 여름: 하늘→바다→모래밭 그라데이션 위에 따모 해변 그림을 작게 얹음 */
+    [data-theme="summer"] body {
+      background-image: url('summer-bg.svg'), linear-gradient(180deg,#c6ecf6 0%,#dff3ec 42%,#f6edd5 100%);
+      background-size: auto 30%, cover;
+      background-position: left bottom, center;
+      background-repeat: no-repeat, no-repeat;
+      background-attachment: fixed, fixed;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -5168,7 +5222,9 @@ renderTrophy();
 // 테마 토글 아이콘 초기 동기화
 (function(){
   const btn = document.getElementById('theme-toggle');
-  if (btn && document.documentElement.getAttribute('data-theme') === 'dark') btn.textContent = '☀️';
+  if (!btn) return;
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  btn.textContent = ({light:'☀️',dark:'🌙',summer:'🏖️'})[cur] || '☀️';
 })();
 </script>
 <div class="del-confirm-overlay" id="resume-confirm-overlay">
@@ -5250,7 +5306,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.098.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.099.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5306,7 +5362,7 @@ renderTrophy();
 <!-- 패치노트 버튼 -->
 <button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
 <!-- 테마 토글 버튼 -->
-<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">🌙</button>
+<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">☀️</button>
 
 <!-- 스톱워치 단축키 안내 모달 -->
 <div id="sw-help-modal" onclick="if(event.target===this)closeSwHelp()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -5707,19 +5763,25 @@ function closeStatTable() {
   document.getElementById('stat-modal').style.display = 'none';
 }
 
-function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (isDark) {
+// 테마 순환: light → dark → summer → light
+const THEME_CYCLE = ['light', 'dark', 'summer'];
+const THEME_ICON  = { light: '☀️', dark: '🌙', summer: '🏖️' };
+function applyTheme(theme) {
+  if (theme === 'light') {
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.style.colorScheme = 'light';
-    localStorage.setItem('maple-theme', 'light');
-    document.getElementById('theme-toggle').textContent = '🌙';
   } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.style.colorScheme = 'dark';
-    localStorage.setItem('maple-theme', 'dark');
-    document.getElementById('theme-toggle').textContent = '☀️';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = (theme === 'dark') ? 'dark' : 'light';
   }
+  localStorage.setItem('maple-theme', theme);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = THEME_ICON[theme];
+}
+function toggleTheme() {
+  const cur  = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = THEME_CYCLE[(THEME_CYCLE.indexOf(cur) + 1) % THEME_CYCLE.length];
+  applyTheme(next);
 }
 
 // ── 타임라인 모달 ──
@@ -5848,6 +5910,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.099', date: '26.06.08',
+    feat: [
+      '여름 테마 추가 — 좌하단 버튼으로 ☀️ → 🌙 → 🏖️ 순환, 해변 배경',
+    ],
+    fix: [],
+  },
   {
     ver: '1.098', date: '26.06.06',
     feat: [
