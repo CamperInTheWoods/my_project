@@ -1688,8 +1688,11 @@
     .hg-grid-wrap { overflow-x:auto; padding-bottom:6px; }
     .hg-grid { display:flex; gap:3px; width:max-content; margin:0 auto; }
     .hg-col { display:flex; flex-direction:column; gap:3px; }
+    .hg-dow-col { display:flex; flex-direction:column; gap:3px; }
+    .hg-day { height:13px; line-height:13px; font-size:.58rem; color:var(--gray); width:26px; text-align:right; padding-right:4px; box-sizing:border-box; white-space:nowrap; }
     .hg-months { display:flex; gap:3px; width:max-content; margin:0 auto 5px; height:13px; }
     .hg-month { font-size:.6rem; color:var(--gray); line-height:13px; white-space:nowrap; overflow:visible; }
+    .hg-months-spacer { width:26px; flex-shrink:0; }
     .hg-cell { width:13px; height:13px; border-radius:2px; background:rgba(128,128,128,.13); }
     .hg-cell.hg-future { background:transparent; }
     .hg-cell.l1 { background:color-mix(in srgb, var(--green) 30%, transparent); }
@@ -2681,7 +2684,13 @@ function renderHuntGrid() {
   const start = new Date(today);
   start.setDate(today.getDate() - dow - (HUNT_WEEKS - 1) * 7); // 그리드 좌상단(일요일)
 
-  let gridH = '', monthsH = '';
+  // 세로축 요일 라벨 (GitHub식 — Mon/Wed/Fri만)
+  const dowLabels = { 1: 'Mon', 3: 'Wed', 5: 'Fri' };
+  let dowH = '<div class="hg-dow-col">';
+  for (let d = 0; d < 7; d++) dowH += `<div class="hg-day">${dowLabels[d] || ''}</div>`;
+  dowH += '</div>';
+
+  let gridH = dowH, monthsH = '<div class="hg-months-spacer"></div>';
   let total = 0, todayMs = 0, activeDays = 0, best = 0;
   let prevMonth = -1;
   for (let w = 0; w < HUNT_WEEKS; w++) {
