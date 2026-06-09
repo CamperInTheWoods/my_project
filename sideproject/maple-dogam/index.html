@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>도감길드 도감작 체크리스트</title>
+  <title>도감길드 도감작 도우미</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>🍁</text></svg>">
   <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
   <style>
@@ -267,7 +267,6 @@
       white-space:nowrap;
     }
     .btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
-    .btn.danger { background:linear-gradient(135deg,#e53935,#b71c1c); box-shadow:0 2px 6px rgba(229,57,53,.4); }
     .btn.sm { padding:5px 12px; font-size:.75rem; }
 
     .msg { font-size:.75rem; color:var(--gray); margin-top:6px; min-height:16px; display:flex; align-items:center; gap:5px; }
@@ -1652,7 +1651,7 @@
 <header>
   <span style="font-size:1.7rem">🍁</span>
   <div>
-    <h1>도감길드 도감작 체크리스트</h1>
+    <h1>도감길드 도감작 도우미</h1>
     <div class="sub">도감길드 파이팅</div>
   </div>
   <div class="char-status" id="char-status">
@@ -3374,7 +3373,7 @@ function buildTabPanel(tab) {
 <button class="btn sm" onclick="openResultModal(_tabFromEvent(event).tab?.mob)" title="도감작 결과 카드">📋 결과</button>
 <button class="btn sm" onclick="openStatTable(event)" title="드롭 통계" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">통계</button>
 <button class="btn sm" onclick="openProbCalc(event)" title="운 계산기" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);box-shadow:none;">운계산기</button>
-<button class="btn sm danger" onclick="resetChecklist(event)">초기화</button>
+<button class="btn sm" onclick="resetChecklist(event)">초기화</button>
       </div>
     </div>
     <div class="panel" style="padding:14px 18px">
@@ -5306,7 +5305,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.099.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.099.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5910,6 +5909,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.099.1', date: '26.06.09',
+    feat: [],
+    fix: [
+      '초기화 버튼 색상을 테마색으로 변경 — 과한 빨강 제거',
+      '타이틀 변경 — 도감길드 도감작 도우미',
+    ],
+  },
   {
     ver: '1.099', date: '26.06.08',
     feat: [
