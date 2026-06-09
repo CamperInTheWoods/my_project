@@ -515,6 +515,15 @@
       padding:1px 5px; border-radius:10px; min-width:17px; text-align:center;
     }
 
+    /* item type badge (top-left) */
+    .item-card .type-badge {
+      position:absolute; top:4px; left:5px; z-index:2;
+      font-size:.55rem; font-weight:700; letter-spacing:.02em;
+      padding:1px 5px; border-radius:8px;
+      background:rgba(0,0,0,.45); color:#fff;
+    }
+    .item-card.nf .type-badge { background:rgba(255,255,255,.12); color:#aaa; }
+
     .item-card .card-body { padding:6px 7px 8px; }
     .item-card .cname { font-size:.7rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; transition:color .2s; }
     .item-card .crate { font-size:.6rem; line-height:1.6; transition:color .2s; }
@@ -620,6 +629,35 @@
     }
     .excl-toggle:hover { border-color:var(--gold); color:var(--brown); }
     .excl-toggle.hide-excl { background:#fff0f0; border-color:#f5c6c6; color:var(--red); }
+
+    /* ─ 유형 필터 ─ */
+    .items-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .items-toolbar .excl-toggle { margin-bottom:0; }
+    .type-filter-btn {
+      flex:0 0 auto; display:inline-flex; align-items:center; gap:5px;
+      padding:5px 10px; border-radius:8px; border:1.5px solid var(--border);
+      background:var(--bg-excl-tog); font-family:inherit; font-size:.75rem;
+      color:var(--gray); cursor:pointer; transition:all .15s;
+    }
+    .type-filter-btn:hover { border-color:var(--gold); color:var(--brown); }
+    .type-filter-btn.open { background:var(--btn-grad); color:#fff; border-color:transparent; }
+    .type-filter-bar {
+      display:none; gap:6px; flex-wrap:wrap; align-items:center; min-width:0;
+    }
+    .type-filter-bar.open { display:flex; animation:chipSlide .3s ease; }
+    @keyframes chipSlide {
+      from { opacity:0; transform:translateX(-10px); }
+      to   { opacity:1; transform:none; }
+    }
+    .type-chip {
+      flex:0 0 auto; padding:4px 9px; border-radius:7px;
+      border:1.5px solid var(--border); background:var(--bg-excl-tog);
+      font-family:inherit; font-size:.7rem; font-weight:700;
+      color:var(--dark); cursor:pointer; transition:all .12s; white-space:nowrap;
+    }
+    .type-chip:hover { border-color:var(--gold); }
+    .type-chip.off { opacity:.45; background:transparent; text-decoration:line-through; }
+    .type-chip-all { border-style:dashed; border-color:var(--gold); color:var(--brown); margin-right:2px; }
 
     /* ─ Hunt Estimate ─ */
     .hunt-count {
@@ -2998,6 +3036,19 @@ function initSw() { /* 탭 생성 시 각 탭에서 초기화 */ }
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 function mobImg(id)  { return `https://maplestory.io/api/kms/284/mob/${id}/icon`; }
 function itemImg(id) { return `https://maplestory.io/api/kms/284/item/${id}/icon`; }
+// 아이템 ID 범위로 유형 판별 (메이플 아이템 ID 규칙)
+function itemTypeLabel(id) {
+  const n = Number(id);
+  if (n >= 1000000 && n < 2000000) return '장비';
+  if (n >= 2040000 && n < 2050000) return '주문서';
+  if (n >= 2070000 && n < 2080000) return '표창';
+  if (n >= 2000000 && n < 3000000) return '소비';
+  if (n >= 3000000 && n < 4000000) return '설치';
+  if (n >= 4030000 && n < 4040000) return '퀘스트';
+  if (n >= 4000000 && n < 5000000) return '기타';
+  if (n >= 5000000 && n < 6000000) return '캐시';
+  return '';
+}
 function onItemImgError(img, id) {
   const fb = parseInt(img.dataset.fb || '0');
   if (fb === 0) { img.dataset.fb = '1'; img.src = `https://maplestory.io/api/gms/62/item/${id}/icon`; }
@@ -3386,7 +3437,11 @@ function buildTabPanel(tab) {
     </div>
     <div class="main-layout">
       <div class="items-section panel" style="padding:14px">
-        <button class="excl-toggle" onclick="toggleExclView(event)">👁 제외된 아이템 보기</button>
+        <div class="items-toolbar">
+          <button class="excl-toggle" onclick="toggleExclView(event)">👁 제외된 아이템 보기</button>
+          <button class="type-filter-btn" onclick="toggleTypeFilter(event)" title="유형별 필터">⚲ 유형</button>
+          <div class="type-filter-bar"></div>
+        </div>
         <div class="item-grid"></div>
       </div>
       <div class="sw-section panel">
@@ -3842,12 +3897,71 @@ function _applyExclToggleBtn(panel) {
 
 function toggleExclView(e) {
   setShowExcluded(!getShowExcluded());
-  const show = getShowExcluded();
   const { panel } = _tabFromEvent(e);
   if (!panel) return;
   _applyExclToggleBtn(panel);
-  panel.querySelectorAll('.item-card.excl').forEach(c => {
-    c.style.display = show ? '' : 'none';
+  applyTypeFilter(panel);
+}
+
+// ── 유형별 필터 (탭별, 메모리 상태 = 숨긴 유형 집합) ──
+const hiddenTypesByTab = {};
+function getHiddenTypes() {
+  const k = String(activeTabIdx);
+  if (!hiddenTypesByTab[k]) hiddenTypesByTab[k] = new Set();
+  return hiddenTypesByTab[k];
+}
+function toggleTypeFilter(e) {
+  e.stopPropagation();
+  const { panel, tab } = _tabFromEvent(e);
+  if (!panel) return;
+  const btn = panel.querySelector('.type-filter-btn');
+  const bar = panel.querySelector('.type-filter-bar');
+  const open = bar.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) buildTypeChips(panel, tab?.mob || activeMob);
+}
+function buildTypeChips(panel, mob) {
+  const bar = panel.querySelector('.type-filter-bar');
+  if (!bar || !mob) return;
+  const types = [];
+  mob.drops.forEach(d => { const t = itemTypeLabel(d.id); if (t && !types.includes(t)) types.push(t); });
+  const hidden = getHiddenTypes();
+  const allOff = types.length > 0 && types.every(t => hidden.has(t));
+  const allChip = `<button class="type-chip type-chip-all${allOff ? ' off' : ''}" onclick="toggleAllTypes(event)">전체</button>`;
+  bar.innerHTML = allChip + types.map(t =>
+    `<button class="type-chip${hidden.has(t) ? ' off' : ''}" onclick="toggleTypeChip(event,'${t}')">${t}</button>`
+  ).join('');
+}
+function toggleAllTypes(e) {
+  e.stopPropagation();
+  const { panel, tab } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  if (!mob) return;
+  const types = [];
+  mob.drops.forEach(d => { const t = itemTypeLabel(d.id); if (t && !types.includes(t)) types.push(t); });
+  const hidden = getHiddenTypes();
+  const allOff = types.length > 0 && types.every(t => hidden.has(t));
+  if (allOff) hidden.clear();                  // 전체 켜기
+  else        types.forEach(t => hidden.add(t)); // 전체 끄기
+  buildTypeChips(panel, mob);
+  applyTypeFilter(panel);
+}
+function toggleTypeChip(e, type) {
+  e.stopPropagation();
+  const { panel } = _tabFromEvent(e);
+  const hidden = getHiddenTypes();
+  if (hidden.has(type)) hidden.delete(type); else hidden.add(type);
+  e.currentTarget.classList.toggle('off', hidden.has(type));
+  applyTypeFilter(panel);
+}
+function applyTypeFilter(panel) {
+  if (!panel) return;
+  const hidden = getHiddenTypes();
+  const showExcl = getShowExcluded();
+  panel.querySelectorAll('.item-card').forEach(c => {
+    const hideByType = hidden.has(c.dataset.type || '');
+    const hideByExcl = c.classList.contains('excl') && !showExcl;
+    c.style.display = (hideByType || hideByExcl) ? 'none' : '';
   });
 }
 
@@ -3918,6 +4032,9 @@ function renderItemGridInPanel(panel, mob) {
     if (isExcl && !getShowExcluded()) card.style.display = 'none';
     grid.appendChild(card);
   });
+  const fbar = panel.querySelector('.type-filter-bar');
+  if (fbar && fbar.classList.contains('open')) buildTypeChips(panel, mob);
+  applyTypeFilter(panel);
 }
 
 // baseState: 0=없음, 1=기준(타임라인표시), 2=기준(타임라인숨김)
@@ -3932,7 +4049,11 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
   const baseTip  = baseState === 0 ? '사냥 횟수 기준으로 지정' :
                    baseState === 1 ? '다시 클릭: 타임라인에서도 숨기기' : '다시 클릭: 해제';
 
+  const typeLabel = itemTypeLabel(drop.id);
+  card.dataset.type = typeLabel;
+
   card.innerHTML = `
+    ${typeLabel ? `<span class="type-badge">${typeLabel}</span>` : ''}
     <div class="icon-wrap">
       <img src="${itemImg(drop.id)}" alt="${escHtml(drop.name)}" onerror="onItemImgError(this,${drop.id})">
       <span class="cn" style="${found?'':'display:none'}">${state.count}</span>
@@ -5305,7 +5426,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.099.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.100.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5909,6 +6030,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.100', date: '26.06.09',
+    feat: [
+      '아이템 유형 표시 — 카드 좌상단에 장비/소비/주문서/표창/기타/퀘스트 등 구분 뱃지',
+      '유형별 필터 — 유형 버튼으로 보고 싶은 종류만 골라서 표시',
+      '전체 토글 — 모든 유형을 한 번에 켜고 끄기',
+    ],
+    fix: [],
+  },
   {
     ver: '1.099.1', date: '26.06.09',
     feat: [],
