@@ -1680,6 +1680,28 @@
       background:#ccc; box-shadow:none; cursor:default;
     }
 
+    /* ─ 헤더 단풍잎 (사냥 잔디 진입점) ─ */
+    .leaf-btn { cursor:pointer; transition:transform .18s ease; user-select:none; }
+    .leaf-btn:hover { transform:scale(1.18) rotate(-12deg); }
+
+    /* ─ 사냥 잔디 모달 ─ */
+    .hg-grid-wrap { overflow-x:auto; padding-bottom:6px; }
+    .hg-grid { display:flex; gap:3px; width:max-content; margin:0 auto; }
+    .hg-col { display:flex; flex-direction:column; gap:3px; }
+    .hg-months { display:flex; gap:3px; width:max-content; margin:0 auto 5px; height:13px; }
+    .hg-month { font-size:.6rem; color:var(--gray); line-height:13px; white-space:nowrap; overflow:visible; }
+    .hg-cell { width:13px; height:13px; border-radius:2px; background:rgba(128,128,128,.13); }
+    .hg-cell.hg-future { background:transparent; }
+    .hg-cell.l1 { background:color-mix(in srgb, var(--green) 30%, transparent); }
+    .hg-cell.l2 { background:color-mix(in srgb, var(--green) 55%, transparent); }
+    .hg-cell.l3 { background:color-mix(in srgb, var(--green) 78%, transparent); }
+    .hg-cell.l4 { background:var(--green); }
+    .hg-cell.hg-today { box-shadow:0 0 0 1.5px var(--gold); }
+    .hg-legend { display:flex; align-items:center; justify-content:flex-end; gap:5px; font-size:.62rem; color:var(--gray); margin-top:10px; }
+    .hg-legend .hg-cell { width:11px; height:11px; }
+    .hg-summary { font-size:.72rem; color:var(--dark); line-height:1.6; margin-bottom:14px; }
+    .hg-summary b { color:var(--green); font-family:'Courier New',monospace; }
+
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.4.0/dom-to-image-more.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
@@ -1687,7 +1709,7 @@
 
 <div id="header-wrap">
 <header>
-  <span style="font-size:1.7rem">🍁</span>
+  <span class="leaf-btn" style="font-size:1.7rem" onclick="openHuntGrid()" title="🌱 사냥 잔디 보기">🍁</span>
   <div>
     <h1>도감길드 도감작 도우미</h1>
     <div class="sub">도감길드 파이팅</div>
@@ -2448,6 +2470,7 @@ function swElapsed(tab) {
 function _swStartOne(tab, panel) {
   if (tab.sw.startTs !== null) return;
   tab.sw.startTs = Date.now();
+  huntWallSync();
   const tabRef = tab;
   tab.sw.ticker = setInterval(() => swTickPanel(getPanelOf(tabRef.idx), tabRef), 50);
   if (panel) {
@@ -2460,6 +2483,7 @@ function _swPauseOne(tab, panel) {
   if (tab.sw.startTs === null) return;
   tab.sw.base += Date.now() - tab.sw.startTs;
   tab.sw.startTs = null;
+  huntWallSync();
   clearInterval(tab.sw.ticker); tab.sw.ticker = null;
   if (panel) {
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
@@ -2471,6 +2495,7 @@ function _swPauseOne(tab, panel) {
 function _swResetOne(tab, panel) {
   clearInterval(tab.sw.ticker); tab.sw.ticker = null;
   tab.sw.base = 0; tab.sw.startTs = null;
+  huntWallSync();
   if (panel) {
     panel.querySelector('.sw-toggle').textContent = '▶ 시작';
     panel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle';
@@ -2569,11 +2594,135 @@ function restoreSwState(tab, mob) {
 // 진행 중 페이지를 닫을 때 경과시간 보존 (복원은 정지 상태)
 function _persistRunningSw() {
   tabs.forEach(t => { if (t.mob && t.sw.startTs !== null) saveSwState(t); });
+  huntFlushOngoing();
 }
 window.addEventListener('pagehide', _persistRunningSw);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') _persistRunningSw();
 });
+
+// ══════════════════════════════════════════
+// 4-b. 사냥 잔디 (날짜별 벽시계 누적)
+//   하나라도 타이머가 돌고 있는 "실제 시간"만 누적 — 동시에 여러 개 돌아도 중복 없음
+// ══════════════════════════════════════════
+const HUNT_KEY = 'hunt_daily';
+let _huntWallStart = null; // 활성 구간 시작 ts (null이면 아무 타이머도 안 돎)
+
+function _huntActiveCount() {
+  return tabs.reduce((n, t) => n + (t.sw && t.sw.startTs !== null ? 1 : 0), 0);
+}
+function huntDateKey(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+// start~end 구간을 자정 경계로 쪼개 날짜별로 누적 저장
+function _huntAddRange(start, end) {
+  if (!(end > start)) return;
+  const s = loadS();
+  const daily = s[HUNT_KEY] || {};
+  let cur = start;
+  while (cur < end) {
+    const d = new Date(cur);
+    const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+    const seg = Math.min(end, midnight);
+    const key = huntDateKey(cur);
+    daily[key] = (daily[key] || 0) + (seg - cur);
+    cur = seg;
+  }
+  s[HUNT_KEY] = daily;
+  saveS(s);
+}
+// 타이머 시작/정지 직후 호출 — 활성 상태 변화를 잔디에 반영
+function huntWallSync() {
+  const active = _huntActiveCount();
+  if (active > 0 && _huntWallStart === null) {
+    _huntWallStart = Date.now();
+  } else if (active === 0 && _huntWallStart !== null) {
+    _huntAddRange(_huntWallStart, Date.now());
+    _huntWallStart = null;
+  }
+}
+// 진행 중인 구간을 지금까지 저장하고 시작점을 현재로 당김 (페이지 종료/숨김 대비)
+function huntFlushOngoing() {
+  if (_huntWallStart !== null) {
+    _huntAddRange(_huntWallStart, Date.now());
+    _huntWallStart = Date.now();
+  }
+}
+
+function huntLevel(ms) {
+  const h = ms / 3600000;
+  if (h <= 0) return 0;
+  if (h < 8 / 3) return 1; // ~2h40m
+  if (h < 16 / 3) return 2; // ~5h20m
+  if (h < 8) return 3;
+  return 4; // 8시간 이상 — 최고 농도
+}
+function fmtHuntDur(ms) {
+  if (ms <= 0) return '기록 없음';
+  const m = Math.round(ms / 60000);
+  const h = Math.floor(m / 60), mm = m % 60;
+  return h ? `${h}시간 ${mm}분` : `${mm}분`;
+}
+
+const HUNT_WEEKS = 13;
+function renderHuntGrid() {
+  const daily = loadS()[HUNT_KEY] || {};
+  // 진행 중인 구간을 오늘 칸에 실시간 반영 (표시용)
+  const live = { ...daily };
+  if (_huntWallStart !== null) {
+    const k = huntDateKey(Date.now());
+    live[k] = (live[k] || 0) + (Date.now() - _huntWallStart);
+  }
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayKey = huntDateKey(today.getTime());
+  const dow = today.getDay(); // 0=일
+  const start = new Date(today);
+  start.setDate(today.getDate() - dow - (HUNT_WEEKS - 1) * 7); // 그리드 좌상단(일요일)
+
+  let gridH = '', monthsH = '';
+  let total = 0, todayMs = 0, activeDays = 0, best = 0;
+  let prevMonth = -1;
+  for (let w = 0; w < HUNT_WEEKS; w++) {
+    const colTop = new Date(start); colTop.setDate(start.getDate() + w * 7);
+    const m = colTop.getMonth();
+    if (m !== prevMonth) { monthsH += `<div class="hg-month" style="width:13px">${m + 1}월</div>`; prevMonth = m; }
+    else monthsH += `<div class="hg-month" style="width:13px"></div>`;
+
+    let col = '';
+    for (let d = 0; d < 7; d++) {
+      const cell = new Date(start); cell.setDate(start.getDate() + w * 7 + d);
+      if (cell > today) { col += `<div class="hg-cell hg-future"></div>`; continue; }
+      const key = huntDateKey(cell.getTime());
+      const ms = live[key] || 0;
+      total += ms;
+      if (ms > 0) activeDays++;
+      if (ms > best) best = ms;
+      if (key === todayKey) todayMs = ms;
+      const lv = huntLevel(ms);
+      const isToday = key === todayKey ? ' hg-today' : '';
+      const label = `${cell.getMonth() + 1}/${cell.getDate()} · ${fmtHuntDur(ms)}`;
+      col += `<div class="hg-cell${lv ? ` l${lv}` : ''}${isToday}" title="${label}"></div>`;
+    }
+    gridH += `<div class="hg-col">${col}</div>`;
+  }
+
+  document.getElementById('hg-months').innerHTML = monthsH;
+  document.getElementById('hg-grid').innerHTML = gridH;
+  document.getElementById('hg-summary').innerHTML =
+    `오늘 <b>${fmtHuntDur(todayMs)}</b> · 최근 ${HUNT_WEEKS}주 합계 <b>${fmtHuntDur(total)}</b><br>` +
+    `사냥한 날 <b>${activeDays}일</b> · 최고 기록 <b>${fmtHuntDur(best)}</b>`;
+}
+
+function openHuntGrid() {
+  huntFlushOngoing(); // 진행 중이면 최신 시간 반영
+  renderHuntGrid();
+  document.getElementById('hunt-grid-modal').style.display = 'flex';
+}
+function closeHuntGrid() {
+  document.getElementById('hunt-grid-modal').style.display = 'none';
+}
 
 // ── 기대 보상 트래커 ──────────────────────────────────────────
 const REWARD_TEST_ITEMS = [
@@ -5426,7 +5575,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.100.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5483,6 +5632,30 @@ renderTrophy();
 <button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
 <!-- 테마 토글 버튼 -->
 <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">☀️</button>
+
+<!-- 사냥 잔디 모달 -->
+<div id="hunt-grid-modal" onclick="if(event.target===this)closeHuntGrid()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <span style="font-size:.9rem;font-weight:700;color:var(--dark);">🌱 사냥 잔디</span>
+      <button onclick="closeHuntGrid()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
+    </div>
+    <div class="hg-summary" id="hg-summary"></div>
+    <div class="hg-grid-wrap">
+      <div class="hg-months" id="hg-months"></div>
+      <div class="hg-grid" id="hg-grid"></div>
+    </div>
+    <div class="hg-legend">
+      <span>적음</span>
+      <span class="hg-cell"></span>
+      <span class="hg-cell l1"></span>
+      <span class="hg-cell l2"></span>
+      <span class="hg-cell l3"></span>
+      <span class="hg-cell l4"></span>
+      <span>많음</span>
+    </div>
+  </div>
+</div>
 
 <!-- 스톱워치 단축키 안내 모달 -->
 <div id="sw-help-modal" onclick="if(event.target===this)closeSwHelp()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -6030,6 +6203,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.101', date: '26.06.09',
+    feat: [
+      '사냥 잔디 추가 — 좌상단 🍁 클릭 시 날짜별 사냥 시간을 깃허브식 잔디로 표시 (하루 8시간이 가장 진함)',
+      '타이머가 여러 개 동시에 돌아도 실제 사냥 시간(벽시계 기준)만 카운트 — 중복 합산 없음',
+    ],
+    fix: [],
+  },
   {
     ver: '1.100', date: '26.06.09',
     feat: [
