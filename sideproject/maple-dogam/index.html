@@ -1695,10 +1695,6 @@
     .hg-months-spacer { width:26px; flex-shrink:0; }
     .hg-cell { width:13px; height:13px; border-radius:2px; background:rgba(128,128,128,.13); }
     .hg-cell.hg-future { background:transparent; }
-    .hg-cell.l1 { background:color-mix(in srgb, var(--green) 30%, transparent); }
-    .hg-cell.l2 { background:color-mix(in srgb, var(--green) 55%, transparent); }
-    .hg-cell.l3 { background:color-mix(in srgb, var(--green) 78%, transparent); }
-    .hg-cell.l4 { background:var(--green); }
     .hg-cell.hg-today { box-shadow:0 0 0 1.5px var(--gold); }
     .hg-legend { display:flex; align-items:center; justify-content:flex-end; gap:5px; font-size:.62rem; color:var(--gray); margin-top:10px; }
     .hg-legend .hg-cell { width:11px; height:11px; }
@@ -2668,6 +2664,38 @@ function fmtHuntDur(ms) {
   return h ? `${h}시간 ${mm}분` : `${mm}분`;
 }
 
+// ── 계절 그라데이션 색 ──
+//   겨울=하늘색, 봄=보라, 여름=파랑, 가을=적황 — 계절 경계는 hue 보간으로 부드럽게
+//   사냥 시간(level 1~4)은 명도로 표현, level 0(빈칸)은 색 없음(회색 유지)
+const HUNT_SEASONS = [
+  { doy: 15,  h: 198, s: 42 }, // 1/15  겨울 흐린 하늘색 (채도 낮게)
+  { doy: 105, h: 283, s: 52 }, // 4/15  봄   보라
+  { doy: 196, h: 211, s: 72 }, // 7/15  여름 선명한 파랑 (채도 높게, 남색 완화)
+  { doy: 288, h: 28,  s: 80 }, // 10/15 가을 적황
+];
+function _doy(d) {
+  return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+}
+function _hueLerp(a, b, t) {
+  const diff = ((b - a + 540) % 360) - 180; // 색상환 최단경로
+  return (a + diff * t + 360) % 360;
+}
+function seasonColor(date, level) {
+  if (level <= 0) return null;
+  const doy = _doy(date), YL = 365, pts = HUNT_SEASONS;
+  let i0 = pts.length - 1, i1 = 0;
+  for (let i = 0; i < pts.length; i++) {
+    if (doy < pts[i].doy) { i1 = i; i0 = (i - 1 + pts.length) % pts.length; break; }
+    if (i === pts.length - 1) { i0 = pts.length - 1; i1 = 0; }
+  }
+  let span = (pts[i1].doy - pts[i0].doy + YL) % YL || YL;
+  const t = ((doy - pts[i0].doy + YL) % YL) / span;
+  const h = _hueLerp(pts[i0].h, pts[i1].h, t);
+  const s = pts[i0].s + (pts[i1].s - pts[i0].s) * t;
+  const lByLevel = [0, 80, 67, 55, 44]; // L1~L4 명도(%) — 전반적으로 밝게(진함 완화)
+  return `hsl(${Math.round(h)} ${Math.round(s)}% ${lByLevel[level]}%)`;
+}
+
 const HUNT_WEEKS = 13;
 function renderHuntGrid() {
   const daily = loadS()[HUNT_KEY] || {};
@@ -2712,7 +2740,8 @@ function renderHuntGrid() {
       const lv = huntLevel(ms);
       const isToday = key === todayKey ? ' hg-today' : '';
       const label = `${cell.getMonth() + 1}/${cell.getDate()} · ${fmtHuntDur(ms)}`;
-      col += `<div class="hg-cell${lv ? ` l${lv}` : ''}${isToday}" title="${label}"></div>`;
+      const bg = seasonColor(cell, lv);
+      col += `<div class="hg-cell${isToday}"${bg ? ` style="background:${bg}"` : ''} title="${label}"></div>`;
     }
     gridH += `<div class="hg-col">${col}</div>`;
   }
@@ -2722,6 +2751,11 @@ function renderHuntGrid() {
   document.getElementById('hg-summary').innerHTML =
     `오늘 <b>${fmtHuntDur(todayMs)}</b> · 최근 ${HUNT_WEEKS}주 합계 <b>${fmtHuntDur(total)}</b><br>` +
     `사냥한 날 <b>${activeDays}일</b> · 최고 기록 <b>${fmtHuntDur(best)}</b>`;
+
+  // 색상 범례 — 오늘 기준 계절 색 (첫 칸은 빈칸 회색 유지)
+  document.querySelectorAll('#hunt-grid-modal .hg-legend .hg-cell').forEach((el, i) => {
+    el.style.background = i === 0 ? '' : seasonColor(today, i);
+  });
 }
 
 function openHuntGrid() {
@@ -5584,7 +5618,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5657,10 +5691,10 @@ renderTrophy();
     <div class="hg-legend">
       <span>적음</span>
       <span class="hg-cell"></span>
-      <span class="hg-cell l1"></span>
-      <span class="hg-cell l2"></span>
-      <span class="hg-cell l3"></span>
-      <span class="hg-cell l4"></span>
+      <span class="hg-cell"></span>
+      <span class="hg-cell"></span>
+      <span class="hg-cell"></span>
+      <span class="hg-cell"></span>
       <span>많음</span>
     </div>
   </div>
@@ -6212,6 +6246,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.101.1', date: '26.06.09',
+    feat: [
+      '사냥 잔디 계절 그라데이션 — 겨울 하늘색·봄 보라·여름 파랑·가을 적황으로 날짜에 따라 색이 변함',
+    ],
+    fix: [
+      '사냥 잔디 세로축에 요일(Mon/Wed/Fri) 라벨 추가',
+    ],
+  },
   {
     ver: '1.101', date: '26.06.09',
     feat: [
