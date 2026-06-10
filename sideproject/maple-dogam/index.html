@@ -1708,7 +1708,7 @@
 
 <div id="header-wrap">
 <header>
-  <span class="leaf-btn" style="font-size:1.7rem" onclick="openHuntGrid()" title="🌱 사냥 잔디 보기">🍁</span>
+  <span class="leaf-btn" style="font-size:1.7rem" onclick="openHuntGrid()" title="🌱 도감작 잘 하고 있나요?">🍁</span>
   <div>
     <h1>도감길드 도감작 도우미</h1>
     <div class="sub">도감길드 파이팅</div>
@@ -2756,6 +2756,10 @@ function renderHuntGrid() {
   document.querySelectorAll('#hunt-grid-modal .hg-legend .hg-cell').forEach((el, i) => {
     el.style.background = i === 0 ? '' : seasonColor(today, i);
   });
+
+  // 요약 강조 숫자 — 오늘 계절 색 연동
+  const accent = seasonColor(today, 4);
+  document.querySelectorAll('#hg-summary b').forEach(b => { b.style.color = accent; });
 }
 
 function openHuntGrid() {
@@ -5618,7 +5622,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5680,7 +5684,7 @@ renderTrophy();
 <div id="hunt-grid-modal" onclick="if(event.target===this)closeHuntGrid()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-      <span style="font-size:.9rem;font-weight:700;color:var(--dark);">🌱 사냥 잔디</span>
+      <span style="font-size:.9rem;font-weight:700;color:var(--dark);">🌱 도감작 잘 하고 있나요?</span>
       <button onclick="closeHuntGrid()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
     </div>
     <div class="hg-summary" id="hg-summary"></div>
@@ -6246,6 +6250,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.101.2', date: '26.06.09',
+    feat: [],
+    fix: [
+      '사냥 잔디 요약 숫자 색을 오늘 계절색으로 연동',
+      '잔디 모달 제목 문구 변경 — 도감작 잘 하고 있나요?',
+    ],
+  },
   {
     ver: '1.101.1', date: '26.06.09',
     feat: [
