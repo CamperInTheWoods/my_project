@@ -2649,13 +2649,14 @@ function huntFlushOngoing() {
   }
 }
 
-function huntLevel(ms) {
-  const h = ms / 3600000;
-  if (h <= 0) return 0;
-  if (h < 8 / 3) return 1; // ~2h40m
-  if (h < 16 / 3) return 2; // ~5h20m
-  if (h < 8) return 3;
-  return 4; // 8시간 이상 — 최고 농도
+// 기간 내 최대 사냥시간(best) 대비 비율로 농도 단계 결정 (상대 기준)
+function huntLevel(ms, best) {
+  if (ms <= 0 || best <= 0) return 0;
+  const r = ms / best;
+  if (r <= 0.25) return 1;
+  if (r <= 0.5) return 2;
+  if (r <= 0.75) return 3;
+  return 4; // 기간 내 최다 사냥일 기준 75% 이상 — 최고 농도
 }
 function fmtHuntDur(ms) {
   if (ms <= 0) return '기록 없음';
@@ -2712,6 +2713,15 @@ function renderHuntGrid() {
   const start = new Date(today);
   start.setDate(today.getDate() - dow - (HUNT_WEEKS - 1) * 7); // 그리드 좌상단(일요일)
 
+  // 1차 패스 — 기간 내 최대 사냥시간(비율 농도의 기준)
+  let best = 0;
+  for (let i = 0; i < HUNT_WEEKS * 7; i++) {
+    const c = new Date(start); c.setDate(start.getDate() + i);
+    if (c > today) break;
+    const ms = live[huntDateKey(c.getTime())] || 0;
+    if (ms > best) best = ms;
+  }
+
   // 세로축 요일 라벨 (GitHub식 — Mon/Wed/Fri만)
   const dowLabels = { 1: 'Mon', 3: 'Wed', 5: 'Fri' };
   let dowH = '<div class="hg-dow-col">';
@@ -2719,7 +2729,7 @@ function renderHuntGrid() {
   dowH += '</div>';
 
   let gridH = dowH, monthsH = '<div class="hg-months-spacer"></div>';
-  let total = 0, todayMs = 0, activeDays = 0, best = 0;
+  let total = 0, todayMs = 0, activeDays = 0;
   let prevMonth = -1;
   for (let w = 0; w < HUNT_WEEKS; w++) {
     const colTop = new Date(start); colTop.setDate(start.getDate() + w * 7);
@@ -2735,9 +2745,8 @@ function renderHuntGrid() {
       const ms = live[key] || 0;
       total += ms;
       if (ms > 0) activeDays++;
-      if (ms > best) best = ms;
       if (key === todayKey) todayMs = ms;
-      const lv = huntLevel(ms);
+      const lv = huntLevel(ms, best);
       const isToday = key === todayKey ? ' hg-today' : '';
       const label = `${cell.getMonth() + 1}/${cell.getDate()} · ${fmtHuntDur(ms)}`;
       const bg = seasonColor(cell, lv);
@@ -5622,7 +5631,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.4</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6250,6 +6259,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.101.4', date: '26.06.11',
+    feat: [],
+    fix: [
+      '사냥 잔디 농도를 기간 내 최다 사냥일 기준 상대 비율로 변경',
+    ],
+  },
   {
     ver: '1.101.3', date: '26.06.09',
     feat: [],
