@@ -562,7 +562,7 @@
 
     /* exclude button */
     .item-card .excl-btn {
-      position:absolute; top:5px; left:5px;
+      position:absolute; top:5px; left:5px; z-index:3;
       width:17px; height:17px; border-radius:50%;
       border:none; background:rgba(200,200,200,.6); color:#555;
       font-size:.65rem; cursor:pointer;
@@ -4220,6 +4220,34 @@ function renderItemGrid() {
   updateProgress();
 }
 
+// 그리드 재배치를 FLIP으로 부드럽게 — 기존 카드는 위치 이동만 애니메이트(깜빡임 제거), 새 카드는 fade-in
+function flipReorder(grid, renderFn) {
+  const first = new Map();
+  grid.querySelectorAll('.item-card').forEach(c => {
+    if (c.offsetParent === null) return; // 숨겨진(display:none) 카드 제외
+    first.set(c.dataset.itemId, c.getBoundingClientRect());
+  });
+  renderFn();
+  grid.querySelectorAll('.item-card').forEach(c => {
+    const f = first.get(c.dataset.itemId);
+    if (!f) return;                 // 새로 나타난 카드는 fade-in 유지
+    c.classList.remove('fade-in');  // 기존 카드는 fade-in 제거 → 번쩍임 방지
+    if (c.offsetParent === null) return;
+    const l = c.getBoundingClientRect();
+    const dx = f.left - l.left, dy = f.top - l.top;
+    if (!dx && !dy) return;
+    c.style.transform = `translate(${dx}px, ${dy}px)`;
+    c.style.transition = 'none';
+    requestAnimationFrame(() => {
+      c.style.transition = 'transform .28s ease';
+      c.style.transform = '';
+      c.addEventListener('transitionend', function te() {
+        c.style.transition = ''; c.removeEventListener('transitionend', te);
+      });
+    });
+  });
+}
+
 function renderItemGridInPanel(panel, mob) {
   const grid = panel.querySelector('.item-grid');
   grid.innerHTML = '';
@@ -4295,7 +4323,8 @@ function toggleExclude(e, itemId) {
   else                   excl.add(itemId);
   store[`excl_${mob.id}`] = [...excl];
   saveS(store);
-  renderItemGridInPanel(panel, mob);
+  const grid = panel.querySelector('.item-grid');
+  flipReorder(grid, () => renderItemGridInPanel(panel, mob));
   updateProgressInPanel(panel, mob);
   renderSaves();
 }
@@ -5631,7 +5660,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.5</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6259,6 +6288,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.101.5', date: '26.06.12',
+    feat: [],
+    fix: [
+      '아이템 카드 ✕(숨기기) 버튼이 유형 뱃지에 가려 잘 안 눌리던 문제 수정',
+      '숨기기·해제 시 카드가 번쩍이지 않고 빈자리를 부드럽게 밀며 채우도록 개선',
+    ],
+  },
   {
     ver: '1.101.4', date: '26.06.11',
     feat: [],
