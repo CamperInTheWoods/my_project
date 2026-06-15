@@ -255,6 +255,9 @@
     .ptitle-toggle { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
     .ptitle-toggle .toggle-arrow { font-size:.75rem; color:var(--gray); transition:transform .3s; }
     .ptitle-toggle.collapsed .toggle-arrow { transform:rotate(-90deg); }
+    .id-toggle-sm { font-size:.66rem; color:var(--gray); margin-top:8px; }
+    .id-toggle-sm:hover { color:var(--brown); }
+    .id-toggle-sm .toggle-arrow { font-size:.58rem; }
 
     .btn {
       padding:8px 18px;
@@ -1056,6 +1059,7 @@
       transition:all .15s; text-align:center;
     }
     .save-card:hover { border-color:var(--gold); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .save-card.dragging { opacity:.4; }
     .save-card.act { border-color:var(--gold); background:#fffbe8; }
     .save-card.complete { border-color:var(--green); background:#f0f5e6; }
     [data-theme="dark"] .save-card { background:#15100c; border-color:#2a1e15; }
@@ -1760,6 +1764,15 @@
              onkeydown="if(event.key==='Enter')searchByName()">
       <button class="btn" onclick="searchByName()">검색</button>
     </div>
+    <div class="ptitle-toggle id-toggle-sm collapsed" id="id-section-toggle" onclick="toggleIdSection()">
+      몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
+    </div>
+    <div class="id-section collapsed" id="id-section-body">
+      <div class="id-row">
+        <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
+        <button class="btn" onclick="loadById()">불러오기</button>
+      </div>
+    </div>
     <div id="search-status" class="msg"></div>
     <div id="load-msg" class="msg"></div>
     <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
@@ -1791,18 +1804,6 @@
       <span class="tob-arrow">▶</span>
     </div>
 
-    <div class="divider"></div>
-
-    <div class="ptitle ptitle-toggle collapsed" id="id-section-toggle" onclick="toggleIdSection()">
-      몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
-    </div>
-    <div class="id-section collapsed" id="id-section-body">
-      <div class="id-row">
-        <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
-        <button class="btn" onclick="loadById()">불러오기</button>
-      </div>
-    </div>
-
   </div>
 
   <!-- ② 체크리스트 탭 -->
@@ -1821,6 +1822,28 @@
 // 1. 프리셋 몬스터 데이터
 // ══════════════════════════════════════════
 const PRESET = [
+  {
+    id:2130103, name:"주니어 네키", level:21, hp:285,
+    drops:[
+      {name:"주니어 네키의 가죽",        id:4000034, rate:"40%"    },
+      {name:"주황 포션",                id:2000001, rate:"1%"     },
+      {name:"오렌지",                   id:2010003, rate:"0.8%"   },
+      {name:"미스릴의 원석",            id:4010002, rate:"0.3%"   },
+      {name:"토파즈의 원석",            id:4020006, rate:"0.2%"   },
+      {name:"넙치검",                  id:1332008, rate:"0.01%"  },
+      {name:"펫장비 점프력 주문서 100%", id:2048003, rate:"0.01%"  },
+      {name:"파란색 검도복",            id:1050005, rate:"0.01%"  },
+      {name:"흰색 가람 치마",           id:1061028, rate:"0.01%"  },
+      {name:"보라색 가람",              id:1041031, rate:"0.01%"  },
+      {name:"혼돈의 주문서 60%",        id:2049100, rate:"0.008%" },
+      {name:"브라운 라멜 치마",         id:1061018, rate:"0.008%" },
+      {name:"브라운 라멜",              id:1041021, rate:"0.008%" },
+      {name:"스틸 샤프 헬름",           id:1002027, rate:"0.007%" },
+      {name:"레드 잭부츠",              id:1072069, rate:"0.006%" },
+      {name:"방패 방어력 주문서 10%",    id:2040902, rate:"0.006%" },
+      {name:"더블테일 너클",            id:1482002, rate:"0.0016%"},
+    ]
+  },
   {
     id:100100, name:"달팽이", level:1, hp:8,
     drops:[
@@ -3820,7 +3843,7 @@ function renderTabBar() {
 }
 
 const CHAR_MOBS = [
-  { id: 1140100, name: '고스텀프' },
+  { id: 2130103, name: '주니어 네키' },
 ];
 function updateCharStatus() {
   const el = document.getElementById('char-mobs');
@@ -4891,6 +4914,17 @@ function renderSaves() {
     el.innerHTML = '<span class="no-saves">아직 시작한 도감작이 없습니다.</span>'; return;
   }
 
+  // 사용자 지정 순서(saveOrder) 적용, 미지정 항목은 뒤로
+  const order = store.saveOrder || [];
+  const midOf = k => parseInt(k.replace('mob_',''));
+  keys.sort((a, b) => {
+    const ia = order.indexOf(midOf(a)), ib = order.indexOf(midOf(b));
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+
   keys.forEach(key => {
     const mobId = parseInt(key.replace('mob_',''));
     const preset = PRESET.find(m => m.id === mobId);
@@ -4918,6 +4952,9 @@ function renderSaves() {
 
     const card = document.createElement('div');
     card.className = 'save-card' + (isAct ? ' act' : '') + (full ? ' complete' : '');
+    card.dataset.mobid = mobId;
+    card.draggable = true;
+    attachSaveDrag(card);
     const swSaved = store[`sw_mob_${mobId}`];
     const activeT = tabs.find(t => t.mob && t.mob.id === mobId);
     const elapsedMs = activeT ? swElapsed(activeT) : (swSaved?.base || 0);
@@ -4951,6 +4988,35 @@ function renderSaves() {
     });
     el.appendChild(card);
   });
+}
+
+// 저장된 도감작 카드 드래그 정렬
+function attachSaveDrag(card) {
+  card.addEventListener('dragstart', e => {
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', card.dataset.mobid); } catch {}
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+    persistSaveOrder();
+  });
+  card.addEventListener('dragover', e => {
+    e.preventDefault();
+    const list = document.getElementById('saves-list');
+    const dragging = list.querySelector('.save-card.dragging');
+    if (!dragging || dragging === card) return;
+    const rect = card.getBoundingClientRect();
+    const before = (e.clientX - rect.left) < rect.width / 2;
+    list.insertBefore(dragging, before ? card : card.nextSibling);
+  });
+}
+function persistSaveOrder() {
+  const list = document.getElementById('saves-list');
+  const order = Array.from(list.querySelectorAll('.save-card')).map(c => parseInt(c.dataset.mobid));
+  const s = loadS();
+  s.saveOrder = order;
+  saveS(s);
 }
 
 // ══════════════════════════════════════════
@@ -5660,7 +5726,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.101.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.102.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6288,6 +6354,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.102', date: '26.06.15',
+    feat: [
+      '저장된 도감작 카드 드래그 정렬 — 끌어서 순서 변경, 순서 저장됨',
+      '주니어 네키 추가 — 우상단 캐릭터/프리셋, 검색·클릭 즉시 로드',
+    ],
+    fix: [
+      '몬스터 ID 직접 입력란을 검색창 바로 밑으로 이동(작게)',
+    ],
+  },
   {
     ver: '1.101.5', date: '26.06.12',
     feat: [],
