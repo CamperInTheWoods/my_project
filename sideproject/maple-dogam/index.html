@@ -3855,6 +3855,20 @@ function renderTabBar() {
     bar.appendChild(splitBtn);
   }
   updateCharStatus();
+  updateGotoBtn();
+}
+
+// 도감작 카드 영역으로 부드럽게 스크롤 (활성 도감작 있을 때만 버튼 노출)
+function gotoChecklist() {
+  const panel = getActivePanel();
+  const target = panel?.querySelector('.prog-label')?.closest('.panel')
+              || panel?.querySelector('.main-layout')
+              || document.getElementById('section-checklist');
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function updateGotoBtn() {
+  const btn = document.getElementById('goto-checklist');
+  if (btn) btn.style.display = tabs.some(t => t.mob) ? 'flex' : 'none';
 }
 
 const CHAR_MOBS = [
@@ -5741,7 +5755,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.104.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.105.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -5798,6 +5812,9 @@ renderTrophy();
 <button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
 <!-- 테마 토글 버튼 -->
 <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">☀️</button>
+
+<!-- 도감작 카드로 스크롤 -->
+<button id="goto-checklist" onclick="gotoChecklist()" title="도감작 카드로 이동" style="display:none;position:fixed;bottom:34px;right:12px;align-items:center;gap:4px;padding:6px 13px;border-radius:18px;background:color-mix(in srgb, var(--panel) 18%, transparent);color:var(--gold);border:1.5px solid var(--gold);font-family:inherit;font-size:.7rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px var(--shadow);z-index:9400;">슝슝</button>
 
 <!-- 사냥 잔디 모달 -->
 <div id="hunt-grid-modal" onclick="if(event.target===this)closeHuntGrid()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
@@ -6380,6 +6397,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.105', date: '26.06.16',
+    feat: [
+      '"슝슝" 플로팅 버튼 추가 — 진행도·아이템 카드 영역으로 부드럽게 이동',
+    ],
+    fix: [],
+  },
   {
     ver: '1.104', date: '26.06.16',
     feat: [
