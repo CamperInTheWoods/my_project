@@ -563,6 +563,23 @@
     .item-card.nf .bulk-btn { display:none; }
     .item-card.excl .bulk-btn { display:none; }
 
+    /* memo button (바닥 왼쪽) */
+    .item-card .note-btn {
+      position:absolute; bottom:5px; left:5px; z-index:3;
+      width:17px; height:17px; border-radius:50%;
+      border:none; background:rgba(200,200,200,.6); color:#555;
+      font-size:.62rem; cursor:pointer; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .15s, background .15s;
+    }
+    .item-card:hover .note-btn { opacity:1; }
+    .item-card .note-btn:hover { background:#d89426; color:#fff; }
+    .item-card.has-note .note-btn { opacity:1; background:#d89426; color:#fff; }
+    .item-card.nf .note-btn { background:rgba(255,255,255,.15); color:#aaa; }
+    .item-card.nf.has-note .note-btn { background:#d89426; color:#fff; }
+    .item-card.excl .note-btn { display:none; }
+    @media (hover: none) { .item-card .note-btn { opacity:1; } }
+
     /* exclude button */
     .item-card .excl-btn {
       position:absolute; top:5px; left:5px; z-index:3;
@@ -1806,14 +1823,34 @@
 
     <div class="divider"></div>
 
-    <div class="ptitle">완료된 도감작</div>
-    <div class="trophy-open-btn" id="trophy-open-btn" onclick="openTrophyRoom()">
-      <span class="tob-icon">🏅</span>
-      <div class="tob-text">
-        <div class="tob-title" id="trophy-btn-title">진열장 열기</div>
-        <div class="tob-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
+    <div class="ptitle ptitle-toggle" id="dex-toggle" onclick="toggleDexSection()">
+      완료 · 아이템 도감작 <span class="toggle-arrow">▼</span>
+    </div>
+    <div id="dex-body">
+      <div class="trophy-open-btn" id="trophy-open-btn" onclick="openTrophyRoom()">
+        <span class="tob-icon">🏅</span>
+        <div class="tob-text">
+          <div class="tob-title" id="trophy-btn-title">진열장 열기</div>
+          <div class="tob-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
+        </div>
+        <span class="tob-arrow">▶</span>
       </div>
-      <span class="tob-arrow">▶</span>
+      <div class="trophy-open-btn" onclick="fetchMobDrops(9999001,'표창 모으기',0)" style="margin-top:8px">
+        <span class="tob-icon">🌟</span>
+        <div class="tob-text">
+          <div class="tob-title">표창 모으기!</div>
+          <div class="tob-sub">수비 표창부터 절제된 분노까지 12종</div>
+        </div>
+        <span class="tob-arrow">▶</span>
+      </div>
+      <div class="trophy-open-btn" onclick="fetchMobDrops(9999002,'완드 모으기',0)" style="margin-top:8px">
+        <span class="tob-icon">🔮</span>
+        <div class="tob-text">
+          <div class="tob-title">완드 모으기!</div>
+          <div class="tob-sub">우드 완드부터 다이몬의 완드까지 15종</div>
+        </div>
+        <span class="tob-arrow">▶</span>
+      </div>
     </div>
 
   </div>
@@ -1834,6 +1871,45 @@
 // 1. 프리셋 몬스터 데이터
 // ══════════════════════════════════════════
 const PRESET = [
+  {
+    id:9999001, name:"표창 모으기", level:0, hp:0,
+    img:"https://maplestory.io/api/kms/284/item/2070006/icon",
+    drops:[
+      {name:"수비 표창",   id:2070000, rate:""}, // 공15
+      {name:"월비 표창",   id:2070001, rate:""}, // 공17
+      {name:"눈덩이",      id:2070008, rate:""}, // 공17
+      {name:"목비 표창",   id:2070002, rate:""}, // 공19
+      {name:"나무팽이",    id:2070009, rate:""}, // 공19
+      {name:"금비 표창",   id:2070003, rate:""}, // 공21
+      {name:"고드름",      id:2070010, rate:""}, // 공21
+      {name:"토비 표창",   id:2070004, rate:""}, // 공23
+      {name:"뇌전 수리검", id:2070005, rate:""}, // 공25
+      {name:"일비 표창",   id:2070006, rate:""}, // 공27
+      {name:"화비 표창",   id:2070007, rate:""}, // 공27
+      {name:"절제된 분노", id:2070018, rate:""}, // 공? (확인 불가, 맨 뒤)
+    ]
+  },
+  {
+    id:9999002, name:"완드 모으기", level:0, hp:0,
+    img:"https://maplestory.io/api/kms/284/item/1372033/icon",
+    drops:[
+      {name:"우드 완드",     id:1372005, rate:""}, // lv8  마18
+      {name:"하드우드 완드", id:1372006, rate:""}, // lv13 마28
+      {name:"메탈 완드",     id:1372002, rate:""}, // lv18 마33
+      {name:"아이스 완드",   id:1372004, rate:""}, // lv23 마38
+      {name:"미스릴 완드",   id:1372003, rate:""}, // lv28 마43
+      {name:"위저드 완드",   id:1372001, rate:""}, // lv33 마48
+      {name:"크리스탈 완드", id:1372012, rate:""}, // lv38 마53
+      {name:"페어리 완드",   id:1372000, rate:""}, // lv38 마53
+      {name:"크로미",        id:1372007, rate:""}, // lv48 마63
+      {name:"하트 완드",     id:1372033, rate:""}, // lv54 마68
+      {name:"이블테일러",    id:1372014, rate:""}, // lv58 마73
+      {name:"엔젤윙즈",      id:1372015, rate:""}, // lv68 마83
+      {name:"피닉스 완드",   id:1372016, rate:""}, // lv78 마93
+      {name:"마기코라스",    id:1372009, rate:""}, // lv88 마103
+      {name:"다이몬의 완드", id:1372010, rate:""}, // lv98 마113
+    ]
+  },
   {
     id:2130103, name:"주니어 네키", level:21, hp:285,
     drops:[
@@ -2457,8 +2533,13 @@ function restoreTabsState() {
       const tab = makeTab(i);
       tab.synced = t.synced || false;
       if (t.mobId) {
+        const preset = PRESET.find(p => p.id === t.mobId);
         const meta = s[`mob_${t.mobId}_meta`];
-        if (meta?.drops?.length) {
+        if (preset) {
+          tab.mob = preset; // 프리셋 우선 (img·드롭 온전히 복원)
+          restoreSwState(tab, tab.mob);
+          anyMob = true;
+        } else if (meta?.drops?.length) {
           tab.mob = { id: t.mobId, name: meta.name, level: meta.level || 0, hp: meta.hp || 0, drops: meta.drops };
           restoreSwState(tab, tab.mob); // sw.base 복원, startTs=null 보장 (항상 정지)
           anyMob = true;
@@ -2817,6 +2898,7 @@ function openHuntGrid() {
 function closeHuntGrid() {
   document.getElementById('hunt-grid-modal').style.display = 'none';
 }
+
 
 // ── 기대 보상 트래커 ──────────────────────────────────────────
 const REWARD_TEST_ITEMS = [
@@ -3297,6 +3379,19 @@ function onItemImgError(img, id) {
   if (fb === 0) { img.dataset.fb = '1'; img.src = `https://maplestory.io/api/gms/62/item/${id}/icon`; }
   else { img.src = BLANK; }
 }
+// 몹/탭 이미지: 일시적 로드 실패 시 같은 URL 1회 재시도 후 폴백
+function imgRetry(img, mode) {
+  if (!img.dataset.r) {
+    img.dataset.r = '1';
+    const s = img.src;
+    img.src = '';
+    setTimeout(() => { img.src = s; }, 400);
+  } else if (mode === 'hide') {
+    img.style.display = 'none';
+  } else {
+    img.src = BLANK;
+  }
+}
 
 // ══════════════════════════════════════════
 // 6. 드롭률 배지
@@ -3321,7 +3416,7 @@ function renderMobGrid(container, monsters) {
     c.className = 'mob-card fade-in';
     c.dataset.mobId = m.id;
     c.innerHTML = `
-      <img src="${mobImg(m.id)}" alt="${escHtml(m.name)}" onerror="this.src='${BLANK}'">
+      <img src="${m.img || mobImg(m.id)}" alt="${escHtml(m.name)}" onerror="this.src='${BLANK}'">
       <div class="mn">${escHtml(m.name)}</div>
     `;
     c.addEventListener('click', () => {
@@ -3658,7 +3753,7 @@ function buildTabPanel(tab) {
   div.dataset.tabIdx = tab.idx;
   div.innerHTML = `
     <div class="panel mob-bar">
-      <img class="mob-img" src="" alt="mob" onerror="this.src='${BLANK}'">
+      <img class="mob-img" src="" alt="mob" onerror="imgRetry(this)">
       <div class="info">
         <h2 class="mob-name">-</h2>
         <div class="mob-stats stats"></div>
@@ -3813,7 +3908,7 @@ function renderTabBar() {
     if (splitBIdx >= 0 && tab.idx === splitBIdx) cls += ' split-b-active';
     btn.className = cls;
     const name = tab.mob ? tab.mob.name : `탭 ${tab.idx + 1}`;
-    const imgSrc = tab.mob ? mobImg(tab.mob.id) : '';
+    const imgSrc = tab.mob ? (tab.mob.img || mobImg(tab.mob.id)) : '';
     const isRunning = tab.sw.startTs !== null;
     const hasTimer  = tab.sw.base > 0 || isRunning;
     const canSync   = tabs.length >= 2;
@@ -3824,7 +3919,7 @@ function renderTabBar() {
       ? `<span class="tab-status-dot ${dotState}${tab.synced ? ' synced' : ''}${canSync ? ' clickable' : ''}" title="${dotTitle}"${dotClick ? ` onclick="${dotClick}"` : ''}></span>`
       : '';
     btn.innerHTML = `
-      ${tab.mob ? `<img src="${imgSrc}" onerror="this.style.display='none'">` : ''}
+      ${tab.mob ? `<img src="${imgSrc}" onerror="imgRetry(this,'hide')">` : ''}
       <span>${name}</span>
       ${statusDot}
       ${tabs.length > 1 ? `<span class="tab-close" data-tidx="${tab.idx}" onclick="closeTab(event,${tab.idx})">✕</span>` : ''}
@@ -4057,7 +4152,7 @@ function restorePanelForTab(tab) {
   const panel = getPanelOf(tab.idx);
   if (!panel || !tab.mob) return;
   const mob = tab.mob;
-  panel.querySelector('.mob-img').src = mobImg(mob.id);
+  { const _mi = panel.querySelector('.mob-img'); _mi.dataset.r = ''; _mi.src = mob.img || mobImg(mob.id); }
   panel.querySelector('.mob-name').textContent = mob.name;
   panel.querySelector('.mob-stats').textContent = '';
   // 아이템 그리드 복원
@@ -4107,7 +4202,7 @@ function activateMob(mob) {
   );
 
   // 헤더 업데이트
-  panel.querySelector('.mob-img').src = mobImg(mob.id);
+  { const _mi = panel.querySelector('.mob-img'); _mi.dataset.r = ''; _mi.src = mob.img || mobImg(mob.id); }
   panel.querySelector('.mob-name').textContent = mob.name;
   panel.querySelector('.mob-stats').textContent = '';
 
@@ -4313,7 +4408,7 @@ function renderItemGridInPanel(panel, mob) {
     const state      = mobData[drop.id] || { count:0, firstTime:null };
     const isExcl     = excluded.has(drop.id);
     const baseState  = tlBase?.id === drop.id ? (tlBase.hidden ? 2 : 1) : 0;
-    const card       = buildItemCard(drop, state, isExcl, baseState);
+    const card       = buildItemCard(drop, state, isExcl, baseState, mob);
     if (isExcl && !getShowExcluded()) card.style.display = 'none';
     grid.appendChild(card);
   });
@@ -4323,12 +4418,14 @@ function renderItemGridInPanel(panel, mob) {
 }
 
 // baseState: 0=없음, 1=기준(타임라인표시), 2=기준(타임라인숨김)
-function buildItemCard(drop, state, isExcl = false, baseState = 0) {
+function buildItemCard(drop, state, isExcl = false, baseState = 0, mob = null) {
   const found    = state.count > 0 && !isExcl;
   const baseCls  = baseState === 2 ? ' tl-base-hidden' : baseState === 1 ? ' tl-base' : '';
   const cls      = isExcl ? 'excl' : (found ? 'fd' : 'nf');
+  const noteTxt  = mob ? getNote(mob.id, drop.id) : '';
+  const hasNote  = !!noteTxt;
   const card     = document.createElement('div');
-  card.className = `item-card ${cls}${baseCls} fade-in`;
+  card.className = `item-card ${cls}${baseCls}${hasNote ? ' has-note' : ''} fade-in`;
   card.dataset.itemId = drop.id;
 
   const baseTip  = baseState === 0 ? '사냥 횟수 기준으로 지정' :
@@ -4345,7 +4442,7 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
     </div>
     <div class="card-body">
       <div class="cname" title="${escHtml(drop.name)}">${escHtml(drop.name)}</div>
-      <div class="crate">${isExcl ? '<span style="font-size:.6rem;color:#4a3030">제외됨</span>' : rateBadge(drop.rate)}</div>
+      <div class="crate">${isExcl ? '<span style="font-size:.6rem;color:#4a3030">제외됨</span>' : (drop.rate ? rateBadge(drop.rate) : '')}</div>
       <div class="ccnt">${isExcl ? '' : `수집 ${state.count}회`}</div>
       <div class="ctime">${(!isExcl && state.firstTime !== null) ? '첫 출현 ' + fmtTime(state.firstTime) : ''}</div>
     </div>
@@ -4356,6 +4453,7 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0) {
             onclick="toggleTlBase(event,${drop.id})">⚑</button>` : ''}
     ${!isExcl ? `<button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>` : ''}
     ${!isExcl ? `<button class="bulk-btn" title="수량 일괄 조정" onclick="bulkBtnClick(event,${drop.id})">≡</button>` : ''}
+    ${!isExcl ? `<button class="note-btn" title="${hasNote ? escHtml(noteTxt) : '메모'}" onclick="openNoteModal(event,${mob ? mob.id : 'null'},${drop.id})">✎</button>` : ''}
   `;
 
   if (!isExcl) card.addEventListener('click', (e) => incrementItem(drop.id, e));
@@ -5051,6 +5149,21 @@ function persistSaveOrder() {
 // ══════════════════════════════════════════
 // 17-A. ID 입력 토글
 // ══════════════════════════════════════════
+function toggleDexSection() {
+  const t = document.getElementById('dex-toggle');
+  const b = document.getElementById('dex-body');
+  const collapsed = t.classList.toggle('collapsed');
+  b.style.display = collapsed ? 'none' : 'block';
+  const s = loadS(); s.dex_collapsed = collapsed; saveS(s);
+}
+function applyDexState() {
+  const collapsed = !!loadS().dex_collapsed; // 기본값: 펼침
+  const t = document.getElementById('dex-toggle');
+  const b = document.getElementById('dex-body');
+  if (!t || !b) return;
+  t.classList.toggle('collapsed', collapsed);
+  b.style.display = collapsed ? 'none' : 'block';
+}
 function toggleIdSection() {
   const toggle = document.getElementById('id-section-toggle');
   const body   = document.getElementById('id-section-body');
@@ -5668,6 +5781,7 @@ function exportResultImage() {
 
 renderSaves();
 renderTrophy();
+applyDexState();
 // 테마 토글 아이콘 초기 동기화
 (function(){
   const btn = document.getElementById('theme-toggle');
@@ -5755,7 +5869,7 @@ renderTrophy();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.105.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.106.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6398,6 +6512,18 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
+    ver: '1.106', date: '26.06.17',
+    feat: [
+      '표창 도감 추가 — 수비~절제된 분노 12종, 공격력 순, 카드 체크·시간 측정',
+      '완드 도감 추가 — 우드~다이몬의 완드 15종, 마력 순',
+      '아이템별 메모 기능 — 카드 ✎ 또는 우클릭(📝), 몹별 저장',
+      '완료·아이템 도감작을 한 토글로 통합 (펼침/접힘 저장)',
+    ],
+    fix: [
+      '몹/탭 이미지 로드 실패 시 재시도, 도감 복원 시 이미지 보존',
+    ],
+  },
+  {
     ver: '1.105', date: '26.06.16',
     feat: [
       '"슝슝" 플로팅 버튼 추가 — 진행도·아이템 카드 영역으로 부드럽게 이동',
@@ -6901,6 +7027,48 @@ function ctxItemHide() {
   renderSaves();
 }
 
+// ── 📝 아이템 메모 (몹별) ──
+let _noteMobId = null, _noteItemId = null;
+function getNote(mobId, itemId) { return (loadS()[`note_${mobId}`] || {})[itemId] || ''; }
+function setNote(mobId, itemId, text) {
+  const s = loadS();
+  const m = s[`note_${mobId}`] || {};
+  const t = (text || '').trim();
+  if (t) m[itemId] = t; else delete m[itemId];
+  if (Object.keys(m).length) s[`note_${mobId}`] = m; else delete s[`note_${mobId}`];
+  saveS(s);
+}
+function openNoteModal(e, mobId, itemId) {
+  if (e) e.stopPropagation();
+  if (mobId == null) mobId = activeMob?.id;
+  if (mobId == null || itemId == null) return;
+  _noteMobId = mobId; _noteItemId = itemId;
+  document.getElementById('note-text').value = getNote(mobId, itemId);
+  document.getElementById('note-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('note-text').focus(), 30);
+}
+function closeNoteModal() { document.getElementById('note-modal').style.display = 'none'; }
+function _noteRefresh() {
+  const panel = getActivePanel();
+  if (panel && activeMob) renderItemGridInPanel(panel, activeMob);
+}
+function saveNoteModal() {
+  if (_noteMobId == null) return;
+  setNote(_noteMobId, _noteItemId, document.getElementById('note-text').value);
+  closeNoteModal(); _noteRefresh();
+}
+function deleteNoteModal() {
+  if (_noteMobId == null) return;
+  setNote(_noteMobId, _noteItemId, '');
+  closeNoteModal(); _noteRefresh();
+}
+function ctxItemNote() {
+  const id = _ctxDropId;
+  hideItemCtxMenu();
+  if (id == null) return;
+  openNoteModal(null, activeMob?.id, id);
+}
+
 // 외부 클릭 시 메뉴 닫기
 document.addEventListener('click', hideItemCtxMenu);
 document.addEventListener('contextmenu', e => {
@@ -6943,6 +7111,21 @@ document.addEventListener('contextmenu', e => {
   connect();
 })();
 </script>
+<!-- 아이템 메모 모달 -->
+<div id="note-modal" onclick="if(event.target===this)closeNoteModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;max-width:340px;width:100%;padding:18px 18px 16px;box-shadow:var(--shadow-card);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:.9rem;font-weight:700;color:var(--dark);">📝 아이템 메모</span>
+      <button onclick="closeNoteModal()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;">&times;</button>
+    </div>
+    <textarea id="note-text" rows="4" placeholder="이 아이템 메모..." style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-input);color:var(--dark);font-family:inherit;font-size:.8rem;resize:vertical;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+      <button class="btn sm" onclick="deleteNoteModal()" style="background:transparent;color:var(--red);border:1.5px solid var(--border);box-shadow:none;">삭제</button>
+      <button class="btn sm" onclick="saveNoteModal()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="item-ctx-menu" id="item-ctx-menu">
   <div class="item-ctx-item" id="ctx-bulk"     onclick="ctxItemBulk()">≡ 갯수 조정</div>
   <div class="item-ctx-sep" id="ctx-sep1"></div>
@@ -6950,6 +7133,7 @@ document.addEventListener('contextmenu', e => {
   <div class="item-ctx-item" id="ctx-base-hid" onclick="ctxItemSetBase(true)">⚑ 기준 지정 (타임라인 숨김)</div>
   <div class="item-ctx-sep"></div>
   <div class="item-ctx-item"                   onclick="ctxItemPrice()">$ 가격 보기</div>
+  <div class="item-ctx-item"                   onclick="ctxItemNote()">📝 메모</div>
   <div class="item-ctx-sep"></div>
   <div class="item-ctx-item danger" id="ctx-hide" onclick="ctxItemHide()">✕ 숨기기</div>
 </div>
