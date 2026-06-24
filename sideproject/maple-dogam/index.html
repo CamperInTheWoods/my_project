@@ -710,7 +710,9 @@
     .sw-btn:active { filter:brightness(.88); transform:translateY(0); }
     .sw-start { background:var(--sw-start-bg); color:white; }
     .sw-pause { background:var(--sw-pause-bg); color:white; }
-    .sw-reset { background:transparent; color:#ccc; border:1px solid #ddd; font-size:.62rem; padding:3px 10px; font-weight:400; }
+    .sw-reset { background:transparent; color:#ccc; border:1px solid #ddd; font-size:.66rem; padding:5px 12px; font-weight:400; }
+    .sw-overlay { background:var(--bg-tl-toggle); color:var(--gold); border:1.5px solid var(--gold); font-size:.66rem; font-weight:700; padding:5px 13px; border-radius:7px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .sw-overlay:hover { filter:brightness(.97); box-shadow:0 1px 4px var(--btn-shad); }
     .sw-reset:hover { background:var(--sw-ch-bg); color:var(--sw-ch-col); border-color:var(--sw-syn-bdr); filter:none; transform:none; }
     .sw-channel { background:var(--sw-ch-bg); color:var(--sw-ch-col); font-size:.8rem; }
     .sw-sync { background:var(--sw-syn-bg); color:var(--sw-syn-col); border:1px solid var(--sw-syn-bdr); font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
@@ -2716,6 +2718,89 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') _persistRunningSw();
 });
 
+// ── 📌 PiP 오버레이 (항상 위 작은 창, 활성 탭 스톱워치) ──
+let _pipWin = null, _pipTimer = null;
+async function openOverlay() {
+  if (!('documentPictureInPicture' in window)) {
+    alert('이 브라우저는 오버레이(문서 PiP)를 지원하지 않습니다.\n크롬/엣지 데스크톱에서 사용해 주세요.');
+    return;
+  }
+  if (_pipWin && !_pipWin.closed) { try { _pipWin.focus(); } catch {} return; }
+  let pip;
+  try {
+    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 152 });
+  } catch (e) { console.warn('오버레이 열기 실패:', e); return; }
+  _pipWin = pip;
+  const style = pip.document.createElement('style');
+  style.textContent = `
+    body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#15100c;color:#f0e6d2;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;height:100vh;user-select:none;cursor:default;}
+    .ov-name{font-size:.68rem;color:#a08868;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
+    .ov-ch-time{font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#5fb0e8;}
+    .ov-btns{display:flex;gap:6px;margin-top:2px;}
+    .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
+    .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
+    .ov-ch{background:#1a6fa8;}
+  `;
+  pip.document.head.appendChild(style);
+  const wrap = pip.document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;';
+  wrap.innerHTML = `
+    <div class="ov-name" id="ov-name">-</div>
+    <div class="ov-time" id="ov-time">00:00:00.00</div>
+    <div class="ov-ch-time" id="ov-ch-time" style="display:none"></div>
+    <div class="ov-btns">
+      <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
+      <button class="ov-ch" id="ov-ch">채널변경</button>
+    </div>`;
+  pip.document.body.appendChild(wrap);
+  pip.document.getElementById('ov-toggle').addEventListener('click', (e) => { swToggle(e); _overlayTick(); });
+  pip.document.getElementById('ov-ch').addEventListener('click', (e) => { swChannelMark(e); });
+  pip.addEventListener('pagehide', () => {
+    if (_pipTimer) { try { pip.clearInterval(_pipTimer); } catch {} _pipTimer = null; }
+    if (_pipWin === pip) _pipWin = null;
+  });
+  _pipTimer = pip.setInterval(_overlayTick, 80); // PiP 창 기준 타이머 → 백그라운드 throttle 안 됨
+  _overlayTick();
+}
+function _overlayTick() {
+  if (!_pipWin || _pipWin.closed) return;
+  const tab = activeTab();
+  const d = _pipWin.document;
+  if (!tab) return; // 탭 전환 중 등 일시적으로 활성 탭이 없을 때 방어
+  const nm = d.getElementById('ov-name');
+  if (nm) {
+    if (tab?.synced) {
+      const names = tabs.filter(t => t.synced && t.mob).map(t => t.mob.name);
+      nm.textContent = names.length ? names.join(' / ') : (tab.mob?.name || '도감작 없음');
+    } else {
+      nm.textContent = tab?.mob?.name || '도감작 없음';
+    }
+  }
+  const t  = d.getElementById('ov-time'); if (t) t.textContent = fmtTime(swElapsed(tab));
+  // 채널변경 이후 경과 (본문과 동일 소스: 활성 패널 마지막 채널 로그)
+  const chTimeEl = d.getElementById('ov-ch-time');
+  if (chTimeEl) {
+    const chEntries = getActivePanel()?.querySelectorAll('.sw-log-entry.sw-log-channel');
+    const lastCh = chEntries?.length ? chEntries[chEntries.length - 1] : null;
+    if (lastCh) {
+      const lastChMs = parseFloat(lastCh.dataset.chMs) || 0;
+      chTimeEl.textContent = fmtTime(Math.max(0, swElapsed(tab) - lastChMs));
+      chTimeEl.style.display = '';
+    } else {
+      chTimeEl.style.display = 'none';
+    }
+  }
+  const running = !!(tab && tab.sw.startTs !== null);
+  if (t) t.style.opacity = running ? '1' : '.38'; // 멈추면 흐리게
+  const tg = d.getElementById('ov-toggle');
+  if (tg) {
+    tg.textContent = running ? '⏸ 정지' : '▶ 시작';
+    tg.className = 'ov-toggle' + (running ? ' run' : '');
+  }
+}
+
 // ══════════════════════════════════════════
 // 4-b. 사냥 잔디 (날짜별 벽시계 누적)
 //   하나라도 타이머가 돌고 있는 "실제 시간"만 누적 — 동시에 여러 개 돌아도 중복 없음
@@ -3813,8 +3898,9 @@ function buildTabPanel(tab) {
           <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
           <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
         </div>
-        <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px">
+        <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
           <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
+          <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
           <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
         </div>
         <div class="sw-log">
@@ -5869,7 +5955,7 @@ applyDexState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.106.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6511,6 +6597,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.107', date: '26.06.18',
+    feat: [
+      '스톱워치 오버레이 창 — 게임 위에 항상 떠 있는 작은 창(크롬/엣지), 시간·채널경과·시작/정지·채널변경',
+      '동기화 중이면 오버레이에 몹 목록 표시, 멈추면 시간 흐리게',
+    ],
+    fix: [],
+  },
   {
     ver: '1.106', date: '26.06.17',
     feat: [
