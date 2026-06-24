@@ -2728,15 +2728,15 @@ async function openOverlay() {
   if (_pipWin && !_pipWin.closed) { try { _pipWin.focus(); } catch {} return; }
   let pip;
   try {
-    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 184 });
+    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 196 });
   } catch (e) { console.warn('오버레이 열기 실패:', e); return; }
   _pipWin = pip;
   const style = pip.document.createElement('style');
   style.textContent = `
     body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#15100c;color:#f0e6d2;
       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;height:100vh;user-select:none;cursor:default;}
-    #ov-mobs{display:flex;gap:5px;justify-content:center;align-items:center;min-height:30px;}
-    #ov-mobs img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;}
+    #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:48px;margin-top:-4px;}
+    #ov-mobs img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;}
     .ov-name{font-size:.68rem;color:#a08868;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
     .ov-ch-time{font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#5fb0e8;}
@@ -2747,7 +2747,7 @@ async function openOverlay() {
   `;
   pip.document.head.appendChild(style);
   const wrap = pip.document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;';
+  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;';
   wrap.innerHTML = `
     <div id="ov-mobs"></div>
     <div class="ov-name" id="ov-name">-</div>
@@ -2772,16 +2772,26 @@ function _overlayTick() {
   const tab = activeTab();
   const d = _pipWin.document;
   if (!tab) return; // 탭 전환 중 등 일시적으로 활성 탭이 없을 때 방어
+  const running = tab.sw.startTs !== null;
   let mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
   if (!mobs.length && tab.mob) mobs = [tab.mob];
   const nm = d.getElementById('ov-name');
   if (nm) nm.textContent = mobs.length ? mobs.map(m => m.name).join(' / ') : '도감작 없음';
   const mobsEl = d.getElementById('ov-mobs');
   if (mobsEl) {
-    const key = mobs.map(m => m.img || mobImg(m.id)).join('|');
-    if (mobsEl.dataset.k !== key) { // 몹 구성 바뀔 때만 다시 그림 (깜빡임 방지)
+    // 도는 중 = move(걷기), 멈춤 = stand(가만히). 둘 다 같은 렌더라 크기 일치. 프리셋(표창/완드)은 정적 유지
+    const anim = running ? 'move' : 'stand';
+    const key = anim + '|' + mobs.map(m => m.img || m.id).join('|');
+    if (mobsEl.dataset.k !== key) {
       mobsEl.dataset.k = key;
-      mobsEl.innerHTML = mobs.map(m => `<img src="${m.img || mobImg(m.id)}" onerror="this.style.display='none'">`).join('');
+      mobsEl.innerHTML = mobs.map(m => {
+        const stat = m.img || mobImg(m.id);
+        const src = m.img ? stat : `https://maplestory.io/api/kms/284/mob/${m.id}/render/${anim}`;
+        return `<img src="${src}" onerror="this.onerror=null;this.src='${stat}'">`;
+      }).join('');
+      // 반대 상태 스프라이트 미리 로드 → 시작/정지 전환 시 안 사라짐
+      const other = running ? 'stand' : 'move';
+      mobs.forEach(m => { if (!m.img) { const im = new Image(); im.src = `https://maplestory.io/api/kms/284/mob/${m.id}/render/${other}`; } });
     }
   }
   const t  = d.getElementById('ov-time'); if (t) t.textContent = fmtTime(swElapsed(tab));
@@ -2798,7 +2808,6 @@ function _overlayTick() {
       chTimeEl.style.display = 'none';
     }
   }
-  const running = !!(tab && tab.sw.startTs !== null);
   if (t) t.style.opacity = running ? '1' : '.38'; // 멈추면 흐리게
   const tg = d.getElementById('ov-toggle');
   if (tg) {
@@ -5961,7 +5970,7 @@ applyDexState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6603,6 +6612,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.107.2', date: '26.06.18',
+    feat: [
+      '오버레이 몹이 움직이는 스프라이트로 — 스톱워치 도는 동안 걷고, 멈추면 가만히',
+    ],
+    fix: [],
+  },
   {
     ver: '1.107.1', date: '26.06.18',
     feat: [
