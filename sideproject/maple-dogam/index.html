@@ -2728,13 +2728,15 @@ async function openOverlay() {
   if (_pipWin && !_pipWin.closed) { try { _pipWin.focus(); } catch {} return; }
   let pip;
   try {
-    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 152 });
+    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 184 });
   } catch (e) { console.warn('오버레이 열기 실패:', e); return; }
   _pipWin = pip;
   const style = pip.document.createElement('style');
   style.textContent = `
     body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#15100c;color:#f0e6d2;
       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;height:100vh;user-select:none;cursor:default;}
+    #ov-mobs{display:flex;gap:5px;justify-content:center;align-items:center;min-height:30px;}
+    #ov-mobs img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;}
     .ov-name{font-size:.68rem;color:#a08868;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
     .ov-ch-time{font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#5fb0e8;}
@@ -2747,6 +2749,7 @@ async function openOverlay() {
   const wrap = pip.document.createElement('div');
   wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;';
   wrap.innerHTML = `
+    <div id="ov-mobs"></div>
     <div class="ov-name" id="ov-name">-</div>
     <div class="ov-time" id="ov-time">00:00:00.00</div>
     <div class="ov-ch-time" id="ov-ch-time" style="display:none"></div>
@@ -2769,13 +2772,16 @@ function _overlayTick() {
   const tab = activeTab();
   const d = _pipWin.document;
   if (!tab) return; // 탭 전환 중 등 일시적으로 활성 탭이 없을 때 방어
+  let mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
+  if (!mobs.length && tab.mob) mobs = [tab.mob];
   const nm = d.getElementById('ov-name');
-  if (nm) {
-    if (tab?.synced) {
-      const names = tabs.filter(t => t.synced && t.mob).map(t => t.mob.name);
-      nm.textContent = names.length ? names.join(' / ') : (tab.mob?.name || '도감작 없음');
-    } else {
-      nm.textContent = tab?.mob?.name || '도감작 없음';
+  if (nm) nm.textContent = mobs.length ? mobs.map(m => m.name).join(' / ') : '도감작 없음';
+  const mobsEl = d.getElementById('ov-mobs');
+  if (mobsEl) {
+    const key = mobs.map(m => m.img || mobImg(m.id)).join('|');
+    if (mobsEl.dataset.k !== key) { // 몹 구성 바뀔 때만 다시 그림 (깜빡임 방지)
+      mobsEl.dataset.k = key;
+      mobsEl.innerHTML = mobs.map(m => `<img src="${m.img || mobImg(m.id)}" onerror="this.style.display='none'">`).join('');
     }
   }
   const t  = d.getElementById('ov-time'); if (t) t.textContent = fmtTime(swElapsed(tab));
@@ -5955,7 +5961,7 @@ applyDexState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6597,6 +6603,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.107.1', date: '26.06.18',
+    feat: [
+      '오버레이 창에 몹 이미지 표시 (동기화 시 여러 몹 아이콘)',
+    ],
+    fix: [],
+  },
   {
     ver: '1.107', date: '26.06.18',
     feat: [
