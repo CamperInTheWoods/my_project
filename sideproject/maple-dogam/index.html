@@ -133,8 +133,8 @@
       --btn-shad:      rgba(15,147,160,.22);
       --tl-tog-bg:     #dcf0ea;
       --tl-tog-col:    #1f6b6b;
-      --sw-ch-bg:      #fff2d6;
-      --sw-ch-col:     #c8841e;
+      --sw-ch-bg:      #d4ecfb;
+      --sw-ch-col:     #1a72b0;
       --sw-syn-bg:     #e4f7f1;
       --sw-syn-col:    #0f93a0;
       --sw-syn-bdr:    #a4e0d6;
@@ -178,8 +178,8 @@
     /* ─ Header ─ */
     header {
       background: var(--header-bg);
-      border-bottom: 1.5px solid var(--header-border);
-      padding: 14px 24px;
+      border-bottom: 1px solid var(--header-border);
+      padding: 15px 24px;
       display: flex; align-items: center; gap: 12px;
       box-shadow: var(--shadow-header);
       transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), opacity .25s ease;
@@ -200,7 +200,7 @@
     #header-wrap.collapsed {
       max-height: 0;
     }
-    header h1 { color: var(--header-title); font-size:1.4rem; font-weight:700; text-shadow:var(--header-title-shadow); }
+    header h1 { color: var(--header-title); font-size:1.42rem; font-weight:800; letter-spacing:-0.02em; text-shadow:var(--header-title-shadow); }
     header .sub { color:var(--header-sub); font-size:.75rem; margin-top:2px; }
     .char-status { margin-left:auto; display:flex; flex-direction:column; align-items:center; gap:5px; }
     .char-label { font-size:.58rem; color:var(--char-label); letter-spacing:.03em; font-weight:600; }
@@ -220,15 +220,23 @@
       margin-bottom: 14px;
     }
     .ptitle {
-      font-size:.7rem; font-weight:700; color:var(--brown);
-      text-transform:uppercase; letter-spacing:1px;
-      margin-bottom:10px;
-      display:flex; align-items:center; gap:6px;
+      font-size:.82rem; font-weight:700; color:var(--dark);
+      letter-spacing:.2px;
+      margin-bottom:12px;
+      display:flex; align-items:center; gap:7px;
     }
     .ptitle::before {
       content:''; display:inline-block;
-      width:3px; height:13px; background:var(--gold); border-radius:2px;
+      width:3px; height:15px; background:var(--gold); border-radius:2px;
     }
+    /* 선택 패널 전체 접기 헤더 */
+    .select-head { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; margin-bottom:16px; }
+    .select-head.collapsed { margin-bottom:0; }
+    .select-head .sh-label { font-size:.86rem; font-weight:800; color:var(--dark); letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+    .select-head .sh-label::before { content:''; width:3px; height:16px; background:var(--gold); border-radius:2px; display:inline-block; }
+    .select-head .toggle-arrow { font-size:.8rem; color:var(--gray); transition:transform .3s; }
+    .select-head.collapsed .toggle-arrow { transform:rotate(-90deg); }
+    .select-head:hover .sh-label { color:var(--gold); }
 
     /* ─ Search ─ */
     .search-row { display:flex; gap:8px; }
@@ -274,6 +282,8 @@
     .btn.sm { padding:5px 12px; font-size:.75rem; }
 
     .msg { font-size:.75rem; color:var(--gray); margin-top:6px; min-height:16px; display:flex; align-items:center; gap:5px; }
+    .msg:empty { display:none; }
+    #search-results:empty { margin-top:0 !important; }
     .msg.err  { color:var(--red); }
     .msg-icon { display:inline-flex; width:14px; height:14px; border-radius:50%; align-items:center; justify-content:center; flex-shrink:0; }
     .msg.loading .msg-icon {
@@ -412,8 +422,8 @@
     .prog-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
     .prog-label .cnt { font-size:.95rem; font-weight:700; color:var(--brown); }
     .prog-label .pct { font-size:.78rem; color:var(--gray); font-feature-settings:"tnum"; letter-spacing:-0.02em; }
-    .prog-bg { height:14px; background:var(--bg-prog); border-radius:7px; overflow:hidden; border:1px solid var(--border); }
-    .prog-fill { height:100%; background:var(--primary-bar); border-radius:7px; transition:width .4s ease; }
+    .prog-bg { height:12px; background:var(--bg-prog); border-radius:999px; overflow:hidden; border:1px solid var(--border); }
+    .prog-fill { height:100%; background:var(--primary-bar); border-radius:999px; transition:width .4s ease; }
     .prog-fill.complete {
       background: linear-gradient(90deg, #7c4dff, #448aff, #80d8ff, #b388ff, #7c4dff);
       background-size: 300% 100%;
@@ -644,7 +654,7 @@
     /* 제외 토글 버튼 */
     .excl-toggle {
       display:inline-flex; align-items:center; gap:5px;
-      padding:5px 10px; border-radius:8px; border:1.5px solid var(--border);
+      padding:6px 11px; border-radius:10px; border:1.5px solid var(--border);
       background:var(--bg-excl-tog); font-family:inherit; font-size:.75rem;
       color:var(--gray); cursor:pointer; transition:all .15s; margin-bottom:10px;
     }
@@ -656,7 +666,7 @@
     .items-toolbar .excl-toggle { margin-bottom:0; }
     .type-filter-btn {
       flex:0 0 auto; display:inline-flex; align-items:center; gap:5px;
-      padding:5px 10px; border-radius:8px; border:1.5px solid var(--border);
+      padding:6px 11px; border-radius:10px; border:1.5px solid var(--border);
       background:var(--bg-excl-tog); font-family:inherit; font-size:.75rem;
       color:var(--gray); cursor:pointer; transition:all .15s;
     }
@@ -703,9 +713,9 @@
     .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:.85rem; }
     .sw-btns { display:flex; flex-direction:column; gap:8px; }
     .sw-btn {
-      padding:9px; border:none; border-radius:8px;
+      padding:12px; border:none; border-radius:12px;
       font-family:inherit; font-size:.85rem; font-weight:700;
-      cursor:pointer; transition:all .15s; text-align:center;
+      cursor:pointer; transition:transform .12s, filter .15s, box-shadow .15s; text-align:center;
     }
     .sw-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
     .sw-btn:active { filter:brightness(.88); transform:translateY(0); }
@@ -1094,10 +1104,10 @@
     .del-confirm-btn-del:hover { background:rgba(180,30,30,.2); color:rgba(255,120,120,.92); }
 
     /* ─ Saves ─ */
-    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:6px; }
+    .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(102px,1fr)); gap:8px; margin-top:6px; }
     .save-card {
       position:relative; background:var(--bg-card); border:1.5px solid var(--border);
-      border-radius:14px; padding:13px 10px 11px; cursor:pointer;
+      border-radius:12px; padding:10px 8px 9px; cursor:pointer;
       transition:transform .15s, box-shadow .15s, border-color .15s; text-align:center;
     }
     .save-card:hover { border-color:var(--gold); transform:translateY(-1px); box-shadow:0 4px 14px var(--shadow); }
@@ -1109,15 +1119,15 @@
     [data-theme="dark"] .save-card.act { background:#1f1808; border-color:var(--gold); }
     [data-theme="dark"] .save-card.complete { background:#0a1a0c; border-color:#3a7a3e; }
     .save-card-name {
-      font-size:.78rem; font-weight:700; color:var(--dark);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px;
+      font-size:.72rem; font-weight:700; color:var(--dark);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;
     }
     .save-card-pct {
-      font-size:1.6rem; font-weight:900; line-height:1;
-      color:var(--gold); margin-bottom:4px;
+      font-size:1.3rem; font-weight:900; line-height:1;
+      color:var(--gold); margin-bottom:3px;
     }
     .save-card.complete .save-card-pct { color:var(--green); }
-    .save-card-count { font-size:.65rem; color:var(--gray); margin-bottom:8px; }
+    .save-card-count { font-size:.6rem; color:var(--gray); margin-bottom:6px; }
     .save-card-bar-bg {
       height:6px; background:#eee; border-radius:3px; overflow:hidden;
     }
@@ -1811,6 +1821,11 @@
 
   <!-- ① 몬스터 선택 -->
   <div class="panel" id="panel-select">
+    <div class="select-head" id="select-toggle" onclick="toggleSelectPanel()">
+      <span class="sh-label">도감작 메뉴</span>
+      <span class="toggle-arrow">▼</span>
+    </div>
+    <div id="select-body">
     <div class="ptitle">몬스터 검색</div>
     <div class="search-row">
       <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
@@ -1869,6 +1884,7 @@
           <div class="dc-sub">15종</div>
         </div>
       </div>
+    </div>
     </div>
 
   </div>
@@ -5266,6 +5282,19 @@ function persistSaveOrder() {
 // ══════════════════════════════════════════
 // 17-A. ID 입력 토글
 // ══════════════════════════════════════════
+function toggleSelectPanel() {
+  const collapsed = document.getElementById('select-toggle').classList.toggle('collapsed');
+  document.getElementById('select-body').style.display = collapsed ? 'none' : '';
+  const s = loadS(); s.select_collapsed = collapsed; saveS(s);
+}
+function applySelectPanelState() {
+  const c = !!loadS().select_collapsed;
+  const t = document.getElementById('select-toggle');
+  const b = document.getElementById('select-body');
+  if (!t || !b) return;
+  t.classList.toggle('collapsed', c);
+  b.style.display = c ? 'none' : '';
+}
 function toggleDexSection() {
   const t = document.getElementById('dex-toggle');
   const b = document.getElementById('dex-body');
@@ -5899,6 +5928,7 @@ function exportResultImage() {
 renderSaves();
 renderTrophy();
 applyDexState();
+applySelectPanelState();
 // 테마 토글 아이콘 초기 동기화
 (function(){
   const btn = document.getElementById('theme-toggle');
@@ -5986,7 +6016,7 @@ applyDexState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6040,9 +6070,9 @@ applyDexState();
 </div>
 
 <!-- 패치노트 버튼 -->
-<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">i</button>
+<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">i</button>
 <!-- 테마 토글 버튼 -->
-<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(180,150,80,.18);border:1px solid rgba(180,150,80,.35);color:rgba(180,150,80,.6);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(180,150,80,.35)';this.style.color='rgba(220,190,100,.9)'" onmouseleave="this.style.background='rgba(180,150,80,.18)';this.style.color='rgba(180,150,80,.6)'">☀️</button>
+<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">☀️</button>
 
 <!-- 도감작 카드로 스크롤 -->
 <button id="goto-checklist" onclick="gotoChecklist()" title="도감작 카드로 이동" style="display:none;position:fixed;bottom:34px;right:12px;align-items:center;gap:4px;padding:6px 13px;border-radius:18px;background:color-mix(in srgb, var(--panel) 18%, transparent);color:var(--gold);border:1.5px solid var(--gold);font-family:inherit;font-size:.7rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px var(--shadow);z-index:9400;">슝슝</button>
@@ -6628,6 +6658,17 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.108.1', date: '26.06.25',
+    feat: [
+      '도감작 메뉴(검색·저장·아이템 도감작) 전체 접기/펴기 — 상태 저장',
+    ],
+    fix: [
+      'UI 추가 정리 — 진행도 바 알약형, 섹션 제목·헤더·하단 버튼 톤 통일',
+      '저장된 도감작 카드 크기 축소, 검색 영역 빈 공간 정리',
+      '바다 테마 채널변경 버튼 파란색으로',
+    ],
+  },
   {
     ver: '1.108', date: '26.06.25',
     feat: [
@@ -7260,7 +7301,7 @@ document.addEventListener('contextmenu', e => {
 </script>
 <!-- 아이템 메모 모달 -->
 <div id="note-modal" onclick="if(event.target===this)closeNoteModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;max-width:340px;width:100%;padding:18px 18px 16px;box-shadow:var(--shadow-card);">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:340px;width:100%;padding:18px 18px 16px;box-shadow:var(--shadow-card);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <span style="font-size:.9rem;font-weight:700;color:var(--dark);">📝 아이템 메모</span>
       <button onclick="closeNoteModal()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;">&times;</button>
