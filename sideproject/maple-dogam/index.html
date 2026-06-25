@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>🍁</text></svg>">
   <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css");
 
     :root { color-scheme: light;
       --brown:  #3a3f47;
@@ -158,7 +158,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Noto Sans KR', sans-serif;
       background: var(--bg-body) url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
       min-height: 100vh;
       color: var(--dark);
@@ -213,11 +213,11 @@
 
     .panel {
       background: var(--panel);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: 0 4px 16px var(--shadow);
-      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 2px var(--shadow), 0 6px 20px color-mix(in srgb, var(--shadow) 55%, transparent);
+      margin-bottom: 14px;
     }
     .ptitle {
       font-size:.7rem; font-weight:700; color:var(--brown);
@@ -233,21 +233,21 @@
     /* ─ Search ─ */
     .search-row { display:flex; gap:8px; }
     .search-row input, .id-row input {
-      flex:1; padding:9px 14px;
-      border:2px solid var(--border); border-radius:8px;
+      flex:1; padding:11px 15px;
+      border:1.5px solid var(--border); border-radius:11px;
       font-family:inherit; font-size:.85rem; background:var(--bg-input); color:var(--dark);
-      outline:none; transition:border-color .15s;
+      outline:none; transition:border-color .15s, box-shadow .15s;
     }
-    .search-row input:focus, .id-row input:focus { border-color:var(--gold); }
+    .search-row input:focus, .id-row input:focus { border-color:var(--gold); box-shadow:0 0 0 3px color-mix(in srgb, var(--gold) 16%, transparent); }
     .search-row input::placeholder, .id-row input::placeholder { color:var(--gray); }
     .id-row { display:flex; gap:8px; margin-top:8px; }
     .backup-inline { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; align-items:center; gap:5px; }
-    .backup-toggle-btn { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--gray); font-family:inherit; cursor:pointer; transition:all .15s; }
+    .backup-toggle-btn { font-size:.6rem; padding:3px 9px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--gray); font-family:inherit; cursor:pointer; transition:all .15s; }
     .backup-toggle-btn:hover { border-color:var(--gold); color:var(--brown); }
     .backup-toggle-btn.open { border-color:rgba(210,140,20,.7); color:#7a4500; background:rgba(220,155,15,.14); }
     .backup-inline-btns { display:none; gap:4px; }
     .backup-inline-btns.open { display:flex; }
-    .backup-inline-btns button { font-size:.6rem; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:var(--bg-btn-sec); color:var(--brown); font-family:inherit; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .backup-inline-btns button { font-size:.6rem; padding:3px 9px; border-radius:8px; border:1px solid var(--border); background:var(--bg-btn-sec); color:var(--brown); font-family:inherit; cursor:pointer; transition:all .15s; white-space:nowrap; }
     .backup-inline-btns button:hover { border-color:var(--gold); background:var(--bg-tab-hover); }
     .id-section { overflow:hidden; transition:max-height .3s ease, opacity .3s ease; }
     .id-section.collapsed { max-height:0; opacity:0; pointer-events:none; }
@@ -260,16 +260,17 @@
     .id-toggle-sm .toggle-arrow { font-size:.58rem; }
 
     .btn {
-      padding:8px 18px;
+      padding:10px 18px;
       background:var(--btn-grad);
-      border:none; border-radius:8px;
+      border:none; border-radius:11px;
       color:white; font-family:inherit; font-size:.85rem; font-weight:700;
-      cursor:pointer; transition:all .15s;
-      text-shadow:0 1px 2px rgba(0,0,0,.3);
-      box-shadow:0 2px 6px var(--btn-shad);
+      cursor:pointer; transition:transform .12s, box-shadow .15s, filter .15s;
+      letter-spacing:.01em;
+      box-shadow:0 1px 2px var(--btn-shad);
       white-space:nowrap;
     }
-    .btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
+    .btn:hover { filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 4px 12px var(--btn-shad); }
+    .btn:active { transform:translateY(0); box-shadow:0 1px 2px var(--btn-shad); }
     .btn.sm { padding:5px 12px; font-size:.75rem; }
 
     .msg { font-size:.75rem; color:var(--gray); margin-top:6px; min-height:16px; display:flex; align-items:center; gap:5px; }
@@ -297,11 +298,11 @@
       gap:8px; margin-top:4px;
     }
     .mob-card {
-      background:var(--bg-card); border:2px solid var(--border); border-radius:10px;
-      padding:10px 6px; text-align:center; cursor:pointer;
-      transition:all .15s; position:relative;
+      background:var(--bg-card); border:1.5px solid var(--border); border-radius:13px;
+      padding:11px 6px; text-align:center; cursor:pointer;
+      transition:transform .15s, box-shadow .15s, border-color .15s; position:relative;
     }
-    .mob-card:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 4px 12px var(--shadow); }
+    .mob-card:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 18px var(--shadow); }
     .mob-card.sel { border-color:var(--gold); background:var(--bg-card-sel); box-shadow:0 0 0 3px rgba(150,158,168,.35); }
     .mob-card.sel::after { content:'✓'; position:absolute; top:4px; right:6px; font-size:.65rem; color:var(--gold); font-weight:700; }
     .mob-card img { width:44px; height:44px; object-fit:contain; image-rendering:pixelated; display:block; margin:0 auto 5px; }
@@ -323,7 +324,7 @@
     .tab-bar::-webkit-scrollbar-thumb { background:rgba(150,158,168,.4); border-radius:2px; }
     .tab-btn {
       display:flex; align-items:center; gap:5px;
-      padding:7px 11px; border-radius:8px 8px 0 0;
+      padding:8px 12px; border-radius:11px 11px 0 0;
       border:1px solid var(--border); border-bottom:none;
       background:var(--bg-tab); color:var(--brown); font-size:.76rem;
       cursor:pointer; transition:background .15s;
@@ -374,7 +375,7 @@
       margin:0 !important; transition:none !important;
     }
     .tab-add {
-      padding:7px 11px; border-radius:8px 8px 0 0;
+      padding:8px 12px; border-radius:11px 11px 0 0;
       border:1px dashed var(--border); border-bottom:none;
       background:transparent; color:var(--border); font-size:1rem;
       cursor:pointer; transition:color .15s, background .15s;
@@ -452,8 +453,8 @@
 
     /* ─ Item card ─ */
     .item-card {
-      border-radius:10px; border:2px solid; overflow:hidden;
-      cursor:pointer; transition:all .2s ease; position:relative;
+      border-radius:13px; border:1.5px solid; overflow:hidden;
+      cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; position:relative;
       user-select:none;
     }
 
@@ -756,18 +757,40 @@
     .tl-sec-toggle:hover { color:var(--dark); }
 
     /* ─ 완료 진열장 ─ */
-    .trophy-open-btn {
-      display:flex; align-items:center; gap:8px; cursor:pointer;
-      background:var(--bg-btn-sec);
-      border:1.5px solid var(--border); border-radius:10px;
-      padding:8px 12px; margin-top:6px; transition:border-color .2s, background .2s;
+
+    /* 완료·아이템 도감작 카드 (저장 도감작과 구별: 점선 테두리 + 아이콘형) */
+    .dex-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:10px; margin-top:8px; }
+    .dex-card {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      position:relative;
+      padding:15px 8px 13px; border-radius:14px; cursor:pointer; text-align:center;
+      background:var(--bg-tl-toggle);
+      border:1.5px solid color-mix(in srgb, var(--gold) 30%, var(--border));
+      box-shadow:0 1px 3px var(--shadow), inset 0 0 0 1px color-mix(in srgb, var(--gold) 8%, transparent);
+      transition:transform .15s, box-shadow .15s, border-color .15s, background .15s;
     }
-    .trophy-open-btn:hover { border-color:var(--gold); background:var(--bg-tab-hover); }
-    .trophy-open-btn .tob-icon { font-size:1.1rem; }
-    .trophy-open-btn .tob-text { flex:1; }
-    .trophy-open-btn .tob-title { font-size:.75rem; color:#c8941e; font-weight:700; }
-    .trophy-open-btn .tob-sub { font-size:.6rem; color:var(--gray); margin-top:1px; }
-    .trophy-open-btn .tob-arrow { font-size:.65rem; color:var(--gray); }
+    .dex-card:hover { transform:translateY(-2px); border-color:var(--gold); box-shadow:0 6px 18px var(--shadow); background:var(--bg-card-sel); }
+    .dex-card .dc-icon { font-size:1.7rem; line-height:1; }
+    .dex-card .dc-title { font-size:.78rem; font-weight:700; color:var(--dark); }
+    .dex-card .dc-sub { font-size:.6rem; color:var(--gray); line-height:1.3; }
+
+    /* 진열장 — 골드 그라데이션 테두리 + 은은한 광 (가장 특별하게) */
+    .dex-card.dex-trophy {
+      border:1.5px solid transparent;
+      background:
+        linear-gradient(var(--bg-tl-toggle), var(--bg-tl-toggle)) padding-box,
+        linear-gradient(135deg, #f3d27a, #c8941e 48%, #f3d27a) border-box;
+      box-shadow:0 2px 12px rgba(200,148,38,.18);
+    }
+    .dex-card.dex-trophy:hover {
+      border:1.5px solid transparent;
+      transform:translateY(-2px);
+      background:
+        linear-gradient(var(--bg-card-sel), var(--bg-card-sel)) padding-box,
+        linear-gradient(135deg, #f8de90, #d8a32e 48%, #f8de90) border-box;
+      box-shadow:0 7px 24px rgba(200,148,38,.34);
+    }
+    .dex-card.dex-trophy .dc-title { color:#c8941e; }
 
     /* 트로피룸 모달 */
     .trophy-overlay {
@@ -1073,11 +1096,11 @@
     /* ─ Saves ─ */
     .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:6px; }
     .save-card {
-      position:relative; background:white; border:2px solid var(--border);
-      border-radius:12px; padding:12px 10px 10px; cursor:pointer;
-      transition:all .15s; text-align:center;
+      position:relative; background:var(--bg-card); border:1.5px solid var(--border);
+      border-radius:14px; padding:13px 10px 11px; cursor:pointer;
+      transition:transform .15s, box-shadow .15s, border-color .15s; text-align:center;
     }
-    .save-card:hover { border-color:var(--gold); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .save-card:hover { border-color:var(--gold); transform:translateY(-1px); box-shadow:0 4px 14px var(--shadow); }
     .save-card.dragging { opacity:.4; }
     .save-card.act { border-color:var(--gold); background:#f3f6fa; }
     .save-card.complete { border-color:var(--green); background:#eef7f1; }
@@ -1829,29 +1852,22 @@
       완료 · 아이템 도감작 <span class="toggle-arrow">▼</span>
     </div>
     <div id="dex-body">
-      <div class="trophy-open-btn" id="trophy-open-btn" onclick="openTrophyRoom()">
-        <span class="tob-icon">🏅</span>
-        <div class="tob-text">
-          <div class="tob-title" id="trophy-btn-title">진열장 열기</div>
-          <div class="tob-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
+      <div class="dex-grid">
+        <div class="dex-card dex-trophy" id="trophy-open-btn" onclick="openTrophyRoom()">
+          <span class="dc-icon">🏅</span>
+          <div class="dc-title" id="trophy-btn-title">진열장</div>
+          <div class="dc-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
         </div>
-        <span class="tob-arrow">▶</span>
-      </div>
-      <div class="trophy-open-btn" onclick="fetchMobDrops(9999001,'표창 모으기',0)" style="margin-top:8px">
-        <span class="tob-icon">🌟</span>
-        <div class="tob-text">
-          <div class="tob-title">표창 모으기!</div>
-          <div class="tob-sub">수비 표창부터 절제된 분노까지 12종</div>
+        <div class="dex-card" onclick="fetchMobDrops(9999001,'표창 모으기',0)">
+          <span class="dc-icon">🌟</span>
+          <div class="dc-title">표창 모으기</div>
+          <div class="dc-sub">12종</div>
         </div>
-        <span class="tob-arrow">▶</span>
-      </div>
-      <div class="trophy-open-btn" onclick="fetchMobDrops(9999002,'완드 모으기',0)" style="margin-top:8px">
-        <span class="tob-icon">🔮</span>
-        <div class="tob-text">
-          <div class="tob-title">완드 모으기!</div>
-          <div class="tob-sub">우드 완드부터 다이몬의 완드까지 15종</div>
+        <div class="dex-card" onclick="fetchMobDrops(9999002,'완드 모으기',0)">
+          <span class="dc-icon">🔮</span>
+          <div class="dc-title">완드 모으기</div>
+          <div class="dc-sub">15종</div>
         </div>
-        <span class="tob-arrow">▶</span>
       </div>
     </div>
 
@@ -5359,8 +5375,8 @@ function renderTrophy() {
   const btn = document.getElementById('trophy-open-btn');
   const btnTitle = document.getElementById('trophy-btn-title');
   const btnSub = document.getElementById('trophy-btn-sub');
-  if (btnTitle) btnTitle.textContent = `진열장 열기`;
-  if (btnSub) btnSub.textContent = completed.length ? `${completed.length}마리 완료` : '완료한 도감작이 없습니다';
+  if (btnTitle) btnTitle.textContent = `진열장`;
+  if (btnSub) btnSub.textContent = completed.length ? `${completed.length}마리 완료` : '아직 없음';
   if (btn) btn.style.opacity = completed.length ? '1' : '0.5';
 }
 
@@ -5970,7 +5986,7 @@ applyDexState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.107.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(180,150,80,.45);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6612,6 +6628,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.108', date: '26.06.25',
+    feat: [
+      'UI 리뉴얼 — 폰트 Pretendard로 교체, 패널·버튼·카드·탭 톤 정리(얇은 테두리·부드러운 그림자·라운드 ↑)',
+      '완료·아이템 도감작을 카드형으로 — 진열장은 골드 그라데이션 테두리로 강조',
+    ],
+    fix: [],
+  },
   {
     ver: '1.107.2', date: '26.06.18',
     feat: [
