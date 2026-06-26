@@ -1106,18 +1106,19 @@
     /* ─ Saves ─ */
     .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(102px,1fr)); gap:8px; margin-top:6px; }
     .save-card {
-      position:relative; background:var(--bg-card); border:1.5px solid var(--border);
+      position:relative; background:var(--bg-tab); border:1.5px solid var(--border);
       border-radius:12px; padding:10px 8px 9px; cursor:pointer;
+      box-shadow:0 1px 3px var(--shadow);
       transition:transform .15s, box-shadow .15s, border-color .15s; text-align:center;
     }
     .save-card:hover { border-color:var(--gold); transform:translateY(-1px); box-shadow:0 4px 14px var(--shadow); }
     .save-card.dragging { opacity:.4; }
     .save-card.act { border-color:var(--gold); background:#f3f6fa; }
-    .save-card.complete { border-color:var(--green); background:#eef7f1; }
+    .save-card.complete { border-color:#d6a93e; background:#fbf4e2; }
     [data-theme="dark"] .save-card { background:#15100c; border-color:#2a1e15; }
     [data-theme="dark"] .save-card:hover { box-shadow:0 2px 10px rgba(0,0,0,.4); }
     [data-theme="dark"] .save-card.act { background:#1f1808; border-color:var(--gold); }
-    [data-theme="dark"] .save-card.complete { background:#0a1a0c; border-color:#3a7a3e; }
+    [data-theme="dark"] .save-card.complete { background:#211803; border-color:#7a5f1a; }
     .save-card-name {
       font-size:.72rem; font-weight:700; color:var(--dark);
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;
@@ -1126,7 +1127,7 @@
       font-size:1.3rem; font-weight:900; line-height:1;
       color:var(--gold); margin-bottom:3px;
     }
-    .save-card.complete .save-card-pct { color:var(--green); }
+    .save-card.complete .save-card-pct { color:#c8941e; }
     .save-card-count { font-size:.6rem; color:var(--gray); margin-bottom:6px; }
     .save-card-bar-bg {
       height:6px; background:#eee; border-radius:3px; overflow:hidden;
@@ -1134,10 +1135,9 @@
     [data-theme="dark"] .save-card-bar-bg { background:#2a1e15; }
     .save-card-bar-fill {
       height:100%; border-radius:3px;
-      background:linear-gradient(90deg,#d89426,#c8781a);
-      transition:width .3s;
+      transition:width .3s, background .3s;
     }
-    .save-card.complete .save-card-bar-fill { background:var(--success-bar); }
+    .save-card.complete .save-card-bar-fill { background:linear-gradient(90deg,#e0b34e,#c8941e); background-size:100% 100%; }
     .save-card-del {
       position:absolute; top:6px; right:8px;
       background:none; border:none; color:#ccc; font-size:.7rem;
@@ -1848,9 +1848,9 @@
 
     <div class="divider"></div>
 
-    <div class="ptitle" style="position:relative">
-      저장된 도감작
-      <div class="backup-inline">
+    <div class="ptitle ptitle-toggle" id="saves-toggle" onclick="toggleSavesSection()" style="position:relative">
+      저장된 도감작 <span class="toggle-arrow">▼</span>
+      <div class="backup-inline" onclick="event.stopPropagation()">
         <div class="backup-inline-btns" id="backup-inline-btns">
           <button onclick="exportData()">⬇ 내보내기</button>
           <button onclick="document.getElementById('import-file').click()">⬆ 가져오기</button>
@@ -5225,7 +5225,7 @@ function renderSaves() {
       <div class="save-card-pct">${pct}%</div>
       <div class="save-card-count">${done} / ${total}</div>
       <div class="save-card-bar-bg">
-        <div class="save-card-bar-fill" style="width:${pct}%"></div>
+        <div class="save-card-bar-fill" style="width:${pct}%;background:${full ? 'linear-gradient(90deg,#e0b34e,#c8941e)' : `hsl(${Math.round(pct*2.4)} 42% 60%)`}"></div>
       </div>
       ${elapsedStr ? `<div style="font-size:.6rem;color:#aaa;margin-top:5px">⏱ ${elapsedStr}</div>` : ''}
     `;
@@ -5291,6 +5291,19 @@ function applySelectPanelState() {
   const c = !!loadS().select_collapsed;
   const t = document.getElementById('select-toggle');
   const b = document.getElementById('select-body');
+  if (!t || !b) return;
+  t.classList.toggle('collapsed', c);
+  b.style.display = c ? 'none' : '';
+}
+function toggleSavesSection() {
+  const collapsed = document.getElementById('saves-toggle').classList.toggle('collapsed');
+  document.getElementById('saves-list').style.display = collapsed ? 'none' : '';
+  const s = loadS(); s.saves_collapsed = collapsed; saveS(s);
+}
+function applySavesState() {
+  const c = !!loadS().saves_collapsed;
+  const t = document.getElementById('saves-toggle');
+  const b = document.getElementById('saves-list');
   if (!t || !b) return;
   t.classList.toggle('collapsed', c);
   b.style.display = c ? 'none' : '';
@@ -5928,6 +5941,7 @@ function exportResultImage() {
 renderSaves();
 renderTrophy();
 applyDexState();
+applySavesState();
 applySelectPanelState();
 // 테마 토글 아이콘 초기 동기화
 (function(){
@@ -6016,7 +6030,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.3</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6658,6 +6672,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.108.3', date: '26.06.25',
+    feat: [
+      '저장된 도감작 섹션 따로 접기/펴기 (상태 저장)',
+    ],
+    fix: [
+      '저장 카드 살짝 채움+그림자로 흰 배경에서 잘 보이게',
+      '완료 카드 초록 → 골드(진열장과 통일), 진행도 바를 진행률에 따라 빨강→초록→파랑 단색으로',
+    ],
+  },
   {
     ver: '1.108.2', date: '26.06.25',
     feat: [],
