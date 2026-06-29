@@ -1169,12 +1169,12 @@
     .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
     .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
     .tl-arrow-spacer { height:5px; }
-    .tl-r0 { border-color:#3498db; }
-    .tl-r1 { border-color:#2ecc71; box-shadow:0 1px 5px rgba(46,204,113,.3); }
-    .tl-r2 { border-color:#f1c40f; box-shadow:0 1px 5px rgba(241,196,15,.3); }
-    .tl-r3 { border-color:#e67e22; box-shadow:0 1px 6px rgba(230,126,34,.4); }
-    .tl-r4 { border-color:#e74c3c; box-shadow:0 1px 6px rgba(231,76,60,.4); }
-    .tl-r5 { border-color:#9b59b6; box-shadow:0 1px 6px rgba(155,89,182,.45); }
+    .tl-r0 { border-color:#5b93bf; }
+    .tl-r1 { border-color:#5aab7e; box-shadow:0 1px 5px rgba(90,171,126,.3); }
+    .tl-r2 { border-color:#cbae50; box-shadow:0 1px 5px rgba(203,174,80,.3); }
+    .tl-r3 { border-color:#cf8c54; box-shadow:0 1px 6px rgba(207,140,84,.4); }
+    .tl-r4 { border-color:#d06b62; box-shadow:0 1px 6px rgba(208,107,98,.4); }
+    .tl-r5 { border-color:#9275a6; box-shadow:0 1px 6px rgba(146,117,166,.45); }
     .tl-bar-wrap { position:relative; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
     .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
@@ -3356,12 +3356,12 @@ const TL_MODAL_ROW_MS = 10 * 3600 * 1000; // 10시간 = 한 줄 (모달)
 const TL_MAX_MS = 100 * 3600 * 1000;      // 100시간 = 빨강 기준
 
 const TL_RARITY = [
-  { min:1,     cls:'tl-r0', color:'#3498db'  }, // 파랑  (1%~100%)
-  { min:0.1,   cls:'tl-r1', color:'#2ecc71'  }, // 초록  (0.1%~1%)
-  { min:0.01,  cls:'tl-r2', color:'#f1c40f'  }, // 노랑  (0.01%~0.1%)
-  { min:0.007, cls:'tl-r3', color:'#e67e22'  }, // 주황  (0.007%~0.01%)
-  { min:0.005, cls:'tl-r4', color:'#e74c3c'  }, // 빨강  (0.005%~0.007%)
-  { min:0,     cls:'tl-r5', color:'#9b59b6'  }, // 보라  (0.005% 이하)
+  { min:1,     cls:'tl-r0', color:'#5b93bf'  }, // 파랑  (1%~100%)
+  { min:0.1,   cls:'tl-r1', color:'#5aab7e'  }, // 초록  (0.1%~1%)
+  { min:0.01,  cls:'tl-r2', color:'#cbae50'  }, // 노랑  (0.01%~0.1%)
+  { min:0.007, cls:'tl-r3', color:'#cf8c54'  }, // 주황  (0.007%~0.01%)
+  { min:0.005, cls:'tl-r4', color:'#d06b62'  }, // 빨강  (0.005%~0.007%)
+  { min:0,     cls:'tl-r5', color:'#9275a6'  }, // 보라  (0.005% 이하)
 ];
 function tlRarity(rateStr) {
   const r = parseFloat(rateStr);
@@ -5888,23 +5888,23 @@ function openTrophyModal(mobId) {
 // ══════════════════════════════════════════
 function rarityColor(rateStr) {
   const r = parseFloat(rateStr);
-  if (isNaN(r)) return { bg:'rgba(155,89,182,.25)', fg:'#ce93d8' };
-  if (r >= 1)     return { bg:'rgba(52,152,219,.25)',  fg:'#7ec8e3' };
-  if (r >= 0.1)   return { bg:'rgba(46,204,113,.22)',  fg:'#7ddfab' };
-  if (r >= 0.01)  return { bg:'rgba(241,196,15,.22)',  fg:'#f9e14b' };
-  if (r >= 0.007) return { bg:'rgba(230,126,34,.22)',  fg:'#f5a55a' };
-  if (r >= 0.005) return { bg:'rgba(231,76,60,.22)',   fg:'#f08080' };
-  return                  { bg:'rgba(155,89,182,.25)', fg:'#ce93d8' };
+  if (isNaN(r)) return { bg:'rgba(146,117,166,.22)', fg:'#c1aecf' };
+  if (r >= 1)     return { bg:'rgba(91,147,191,.22)',  fg:'#93bcd6' };
+  if (r >= 0.1)   return { bg:'rgba(90,171,126,.20)',  fg:'#96c8a9' };
+  if (r >= 0.01)  return { bg:'rgba(203,174,80,.20)',  fg:'#dcc983' };
+  if (r >= 0.007) return { bg:'rgba(207,140,84,.20)',  fg:'#e0b491' };
+  if (r >= 0.005) return { bg:'rgba(208,107,98,.20)',  fg:'#dd9a93' };
+  return                  { bg:'rgba(146,117,166,.22)', fg:'#c1aecf' };
 }
 function rarityBorderColor(rateStr) {
   const r = parseFloat(rateStr);
-  if (isNaN(r)) return '#9b59b6';
-  if (r >= 1)     return '#3498db';
-  if (r >= 0.1)   return '#2ecc71';
-  if (r >= 0.01)  return '#f1c40f';
-  if (r >= 0.007) return '#e67e22';
-  if (r >= 0.005) return '#e74c3c';
-  return '#9b59b6';
+  if (isNaN(r)) return '#9275a6';
+  if (r >= 1)     return '#5b93bf';
+  if (r >= 0.1)   return '#5aab7e';
+  if (r >= 0.01)  return '#cbae50';
+  if (r >= 0.007) return '#cf8c54';
+  if (r >= 0.005) return '#d06b62';
+  return '#9275a6';
 }
 
 function openResultModal(mob, _overrideTab, _overrideStore) {
@@ -6226,7 +6226,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.109</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.109.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6869,6 +6869,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.109.1', date: '26.06.29',
+    fix: [
+      '희귀도 색상 채도 한 단계 낮춰 전체 톤과 어울리게 (타임라인·결과카드)',
+    ],
+  },
   {
     ver: '1.109', date: '26.06.29',
     feat: [
