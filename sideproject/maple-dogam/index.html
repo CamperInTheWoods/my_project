@@ -1820,8 +1820,8 @@
 <div class="container">
 
   <!-- ① 몬스터 선택 -->
-  <div class="panel" id="panel-select">
-    <div class="select-head" id="select-toggle" onclick="toggleSelectPanel()">
+  <div class="panel" id="panel-select" onclick="panelSelectExpand()">
+    <div class="select-head" id="select-toggle" onclick="event.stopPropagation();toggleSelectPanel()">
       <span class="sh-label">도감작 메뉴</span>
       <span class="toggle-arrow">▼</span>
     </div>
@@ -2766,9 +2766,9 @@ async function openOverlay() {
   const style = pip.document.createElement('style');
   style.textContent = `
     body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#15100c;color:#f0e6d2;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;height:100vh;user-select:none;cursor:default;}
-    #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:48px;margin-top:-4px;}
-    #ov-mobs img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;}
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;height:100vh;padding-top:10px;box-sizing:border-box;user-select:none;cursor:default;}
+    #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:65px;margin-top:0;}
+    #ov-mobs img{width:65px;height:65px;object-fit:contain;image-rendering:pixelated;}
     .ov-name{font-size:.68rem;color:#a08868;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
     .ov-ch-time{font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#5fb0e8;}
@@ -5287,6 +5287,10 @@ function toggleSelectPanel() {
   document.getElementById('select-body').style.display = collapsed ? 'none' : '';
   const s = loadS(); s.select_collapsed = collapsed; saveS(s);
 }
+function panelSelectExpand() {
+  // 접혀 있을 때 패널 빈 영역 클릭 시 펼치기
+  if (document.getElementById('select-toggle').classList.contains('collapsed')) toggleSelectPanel();
+}
 function applySelectPanelState() {
   const c = !!loadS().select_collapsed;
   const t = document.getElementById('select-toggle');
@@ -6030,7 +6034,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.5</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6672,6 +6676,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.108.5', date: '26.06.29',
+    fix: [
+      '오버레이 몹 이미지 크게(48→65px) + 상단 여백 조정',
+      '도감작 메뉴 접혔을 때 패널 영역 어디나 클릭하면 펼쳐지게',
+    ],
+  },
   {
     ver: '1.108.4', date: '26.06.29',
     feat: [
