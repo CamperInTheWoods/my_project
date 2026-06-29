@@ -602,17 +602,17 @@
     }
     .item-card:hover .excl-btn { opacity:1; }
     .item-card .excl-btn:hover { background:#9e9e9e; color:white; }
-    .item-card .price-btn {
+    .item-card .info-btn {
       position:absolute; top:25px; left:5px;
       width:17px; height:17px; border-radius:50%;
       border:none; background:rgba(200,200,200,.6); color:#555;
-      font-size:.58rem; font-weight:700; cursor:pointer;
+      font-size:.58rem; font-weight:700; font-style:italic; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s;
-      text-decoration:none;
+      text-decoration:none; font-family:Georgia,serif;
     }
-    .item-card:hover .price-btn { opacity:1; }
-    .item-card .price-btn:hover { background:rgba(80,160,80,.7); color:white; }
+    .item-card:hover .info-btn { opacity:1; }
+    .item-card .info-btn:hover { background:rgba(80,130,200,.75); color:white; }
 
     /* excluded state */
     .item-card.excl {
@@ -4581,7 +4581,7 @@ function buildItemCard(drop, state, isExcl = false, baseState = 0, mob = null) {
     </div>
     <button class="excl-btn" title="${isExcl?'제외 해제':'이 아이템 제외'}"
             onclick="toggleExclude(event,${drop.id})">${isExcl ? '↩' : '✕'}</button>
-    <a class="price-btn" title="메랜지지에서 가격 보기" href="https://mapleland.gg/item/${drop.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()">$</a>
+    <a class="info-btn" title="메이플노트에서 아이템 정보 보기" href="https://xn--o80b01o9mlw3kdzc.com/item_detail/${drop.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()">i</a>
     ${!isExcl ? `<button class="tl-base-btn" title="${baseTip}"
             onclick="toggleTlBase(event,${drop.id})">⚑</button>` : ''}
     ${!isExcl ? `<button class="decr" title="수집 1 감소" onclick="decrementItem(event,${drop.id})">−</button>` : ''}
@@ -6030,7 +6030,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.4</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6672,6 +6672,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.108.4', date: '26.06.29',
+    feat: [
+      '아이템 카드 정보(i) 버튼 — 클릭 시 메이플노트 아이템 상세 페이지 새 탭으로 열림',
+    ],
+    fix: [
+      '아이템 카드 메랜지지 가격($) 버튼 제거',
+    ],
+  },
   {
     ver: '1.108.3', date: '26.06.25',
     feat: [
