@@ -2752,6 +2752,85 @@ document.addEventListener('visibilitychange', () => {
 
 // ── 📌 PiP 오버레이 (항상 위 작은 창, 활성 탭 스톱워치) ──
 let _pipWin = null, _pipTimer = null;
+// 오버레이 테마 팔레트 (앱 테마 자동 추종)
+const OV_THEME = {
+  light:  { bg:'#ffffff', fg:'#2b2f36', name:'#8b9098', ch:'#1a6fa8' },
+  dark:   { bg:'#15100c', fg:'#f0e6d2', name:'#a08868', ch:'#5fb0e8' },
+  summer: { bg:'#eaf6fb', fg:'#1c3a44', name:'#4f8a99', ch:'#1a72b0' },
+};
+function _ovTheme() {
+  return OV_THEME[document.documentElement.getAttribute('data-theme') || 'light'] || OV_THEME.light;
+}
+function _ovStyleText() {
+  const t = _ovTheme();
+  return `
+    html,body{overflow:hidden;}
+    img{-webkit-user-drag:none;user-drag:none;}
+    body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:${t.bg};color:${t.fg};
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;height:100vh;padding-top:10px;box-sizing:border-box;user-select:none;cursor:default;}
+    #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:65px;margin-top:0;}
+    #ov-mobs img{width:65px;height:65px;object-fit:contain;image-rendering:pixelated;}
+    .ov-name{font-size:.68rem;color:${t.name};max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
+    .ov-ch-time{font-family:'Courier New',monospace;font-size:.98rem;font-weight:700;color:${t.ch};}
+    .ov-btns{display:flex;gap:6px;margin-top:2px;}
+    .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
+    .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
+    .ov-ch{background:#1a6fa8;}
+    .ov-item{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+    .ov-item-card{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 7px;border-radius:10px;background:${t.name}22;cursor:pointer;transition:background .15s;}
+    .ov-item-card:hover{background:${t.name}38;}
+    .ov-item-card img{width:38px;height:38px;object-fit:contain;image-rendering:pixelated;}
+    .ov-item-cnt{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:700;min-width:18px;text-align:center;}
+    .ov-ctx-bulk{padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .ov-bulk-cnt{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:${t.fg};}
+    .ov-bulk-row{display:flex;gap:6px;}
+    .ov-bulk-row button{font-family:inherit;font-size:.8rem;font-weight:700;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;background:${t.name}33;color:${t.fg};}
+    .ov-bulk-row button:hover{background:${t.name}55;}
+    .ov-ctx{position:fixed;z-index:9000;background:${t.bg};border:1px solid ${t.name}66;border-radius:8px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,.28);min-width:160px;display:none;}
+    .ov-ctx.open{display:block;}
+    .ov-ctx-item{padding:7px 13px;font-size:.74rem;cursor:pointer;color:${t.fg};display:flex;align-items:center;gap:7px;white-space:nowrap;transition:background .1s;}
+    .ov-ctx-item:hover{background:${t.name}22;}
+    .ov-ctx-item.danger{color:#e0584e;}
+    .ov-ctx-item.danger:hover{background:rgba(220,80,80,.12);}
+    .ov-ctx-sep{height:1px;background:${t.name}33;margin:3px 0;}
+  `;
+}
+// 테마 변경 시 열려있는 오버레이 색 갱신
+function syncOverlayTheme() {
+  if (_pipWin && !_pipWin.closed) {
+    const st = _pipWin.document.getElementById('ov-style');
+    if (st) st.textContent = _ovStyleText();
+  }
+}
+
+// 마릿수 계산 기준 아이템: 지정 기준 → 없으면 가장 흔한(최고확률) 아이템
+function huntBaseDrop(mob) {
+  if (!mob || !mob.drops) return null;
+  const store   = loadS();
+  const mobData = store[`mob_${mob.id}`] || {};
+  const excl    = new Set(store[`excl_${mob.id}`] || []);
+  const tlBase  = store[`tl_base_${mob.id}`] || null;
+  if (tlBase) return mob.drops.find(d => d.id === tlBase.id) || null;
+  // 수집된 것 중 최고확률
+  let best = null, bestRate = 0;
+  mob.drops.forEach(d => {
+    if (excl.has(d.id)) return;
+    if ((mobData[d.id]?.count || 0) <= 0) return;
+    const rate = parseFloat(d.rate) / 100;
+    if (rate > bestRate) { bestRate = rate; best = d; }
+  });
+  if (best) return best;
+  // 아직 아무것도 없으면 비제외 전체 중 최고확률(가장 흔한)
+  bestRate = 0;
+  mob.drops.forEach(d => {
+    if (excl.has(d.id)) return;
+    const rate = parseFloat(d.rate) / 100;
+    if (rate > bestRate) { bestRate = rate; best = d; }
+  });
+  return best;
+}
+
 async function openOverlay() {
   if (!('documentPictureInPicture' in window)) {
     alert('이 브라우저는 오버레이(문서 PiP)를 지원하지 않습니다.\n크롬/엣지 데스크톱에서 사용해 주세요.');
@@ -2760,23 +2839,12 @@ async function openOverlay() {
   if (_pipWin && !_pipWin.closed) { try { _pipWin.focus(); } catch {} return; }
   let pip;
   try {
-    pip = await documentPictureInPicture.requestWindow({ width: 230, height: 196 });
+    pip = await documentPictureInPicture.requestWindow({ width: 240, height: 268 });
   } catch (e) { console.warn('오버레이 열기 실패:', e); return; }
   _pipWin = pip;
   const style = pip.document.createElement('style');
-  style.textContent = `
-    body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#15100c;color:#f0e6d2;
-      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;height:100vh;padding-top:10px;box-sizing:border-box;user-select:none;cursor:default;}
-    #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:65px;margin-top:0;}
-    #ov-mobs img{width:65px;height:65px;object-fit:contain;image-rendering:pixelated;}
-    .ov-name{font-size:.68rem;color:#a08868;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
-    .ov-ch-time{font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#5fb0e8;}
-    .ov-btns{display:flex;gap:6px;margin-top:2px;}
-    .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
-    .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
-    .ov-ch{background:#1a6fa8;}
-  `;
+  style.id = 'ov-style';
+  style.textContent = _ovStyleText();
   pip.document.head.appendChild(style);
   const wrap = pip.document.createElement('div');
   wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;';
@@ -2788,10 +2856,26 @@ async function openOverlay() {
     <div class="ov-btns">
       <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
       <button class="ov-ch" id="ov-ch">채널변경</button>
-    </div>`;
+    </div>
+    <div class="ov-item" id="ov-item" style="display:none" title="좌클릭 +1 / 우클릭 −1"></div>`;
   pip.document.body.appendChild(wrap);
+  pip.document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
   pip.document.getElementById('ov-toggle').addEventListener('click', (e) => { swToggle(e); _overlayTick(); });
   pip.document.getElementById('ov-ch').addEventListener('click', (e) => { swChannelMark(e); });
+  const ovItemEl = pip.document.getElementById('ov-item');
+  ovItemEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.ov-item-card'); if (!card) return;
+    const id = Number(card.dataset.baseId), mobId = Number(card.dataset.mobId);
+    if (!id) return;
+    incrementItem(id, _ovFakeEvt(mobId)); _overlayTick();
+  });
+  ovItemEl.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    const card = e.target.closest('.ov-item-card'); if (!card) return;
+    const id = Number(card.dataset.baseId), mobId = Number(card.dataset.mobId);
+    if (!id) return;
+    _ovShowCtxMenu(e, id, mobId);
+  });
   pip.addEventListener('pagehide', () => {
     if (_pipTimer) { try { pip.clearInterval(_pipTimer); } catch {} _pipTimer = null; }
     if (_pipWin === pip) _pipWin = null;
@@ -2846,6 +2930,114 @@ function _overlayTick() {
     tg.textContent = running ? '⏸ 정지' : '▶ 시작';
     tg.className = 'ov-toggle' + (running ? ' run' : '');
   }
+  // 마릿수 기준 아이템 카드 (좌클릭 +1 / 우클릭 −1, 본문과 동기화)
+  const itemEl = d.getElementById('ov-item');
+  if (itemEl) {
+    const cards = mobs.map(m => {
+      const bd = huntBaseDrop(m);
+      if (!bd) return null;
+      const cnt = ((loadS()[`mob_${m.id}`] || {})[bd.id] || {}).count || 0;
+      return { mobId: m.id, dropId: bd.id, name: bd.name, cnt, isAuto: !getTlBase(m.id) };
+    }).filter(Boolean);
+    if (cards.length) {
+      const key = cards.map(c => `${c.mobId}:${c.dropId}:${c.cnt}:${c.isAuto}`).join('|');
+      if (itemEl.dataset.k !== key) {
+        itemEl.dataset.k = key;
+        itemEl.innerHTML = cards.map(c =>
+          `<div class="ov-item-card" data-mob-id="${c.mobId}" data-base-id="${c.dropId}" title="${escHtml(c.name)}${c.isAuto ? ' (자동·가장 흔한)' : ' (기준)'} — 좌클릭 +1 / 우클릭 메뉴"><img src="${itemImg(c.dropId)}" onerror="this.style.visibility='hidden'"><div class="ov-item-cnt">${c.cnt}</div></div>`
+        ).join('');
+      }
+      if (itemEl.style.display === 'none') itemEl.style.display = '';
+    } else if (itemEl.style.display !== 'none') {
+      itemEl.style.display = 'none'; itemEl.dataset.k = '';
+    }
+  }
+}
+// 특정 몹의 탭/패널을 가리키는 가짜 이벤트 (본문 increment/decrement 재사용용)
+function _ovFakeEvt(mobId) {
+  const idx = tabs.findIndex(t => t.mob && t.mob.id === mobId);
+  const panel = idx >= 0 ? getPanelOf(idx) : null;
+  return { stopPropagation() {}, preventDefault() {}, target: { closest: (s) => (s === '.tab-panel' ? panel : null) } };
+}
+// 오버레이 내 갯수 조정 (본문 모달 대신 PiP 안에서 +/− 즉시 반영)
+function _ovBulkInline(menu, dropId, mobId) {
+  const stepRow = (n) => `<button data-d="${-n}">−${n}</button><button data-d="${n}">+${n}</button>`;
+  menu.innerHTML = `
+    <div class="ov-ctx-bulk">
+      <div class="ov-bulk-cnt" id="ov-bulk-cnt">0</div>
+      <div class="ov-bulk-row">${stepRow(1)}</div>
+      <div class="ov-bulk-row">${stepRow(10)}</div>
+    </div>`;
+  const cntEl = menu.querySelector('#ov-bulk-cnt');
+  const sync = () => { cntEl.textContent = ((loadS()[`mob_${mobId}`] || {})[dropId] || {}).count || 0; };
+  sync();
+  menu.querySelectorAll('.ov-bulk-row button').forEach(b => {
+    b.onclick = (ev) => {
+      ev.stopPropagation();
+      const delta = Number(b.dataset.d);
+      const evt = _ovFakeEvt(mobId);
+      if (delta > 0) for (let i = 0; i < delta; i++) incrementItem(dropId, evt);
+      else           for (let i = 0; i < -delta; i++) decrementItem(_ovFakeEvt(mobId), dropId);
+      sync(); _overlayTick();
+    };
+  });
+}
+// 오버레이용 컨텍스트 메뉴 — 본문 메뉴와 동일 구조/동작 (PiP 문서에 복제)
+function _ovShowCtxMenu(pipEvt, dropId, mobId) {
+  const pip = _pipWin; if (!pip || pip.closed) return;
+  const d = pip.document;
+  const mob = (mobId != null ? tabs.find(t => t.mob && t.mob.id === mobId)?.mob : activeTab()?.mob);
+  if (!mob) return;
+  _ctxDropId = dropId;
+  let menu = d.getElementById('ov-ctx');
+  if (!menu) {
+    menu = d.createElement('div');
+    menu.id = 'ov-ctx'; menu.className = 'ov-ctx';
+    d.body.appendChild(menu);
+    d.addEventListener('click', () => { menu.classList.remove('open'); });
+  }
+  const store  = loadS();
+  const isExcl = new Set(store[`excl_${mob.id}`] || []).has(dropId);
+  const tlBase = getTlBase(mob.id);
+  const isBase = tlBase?.id === dropId;
+  const baseLabel    = isBase && !tlBase.hidden ? '⚑ 기준 해제' : '⚑ 마릿수 기준 지정';
+  const baseHidLabel = isBase && tlBase.hidden  ? '⚑ 기준 해제 (타임라인 숨김)' : '⚑ 기준 지정 (타임라인 숨김)';
+  const hideLabel    = isExcl ? '↩ 보이기' : '✕ 숨기기';
+  const upper = isExcl ? '' : `
+    <div class="ov-ctx-item" data-act="bulk">≡ 갯수 조정</div>
+    <div class="ov-ctx-sep"></div>
+    <div class="ov-ctx-item" data-act="base">${baseLabel}</div>
+    <div class="ov-ctx-item" data-act="baseh">${baseHidLabel}</div>
+    <div class="ov-ctx-sep"></div>`;
+  menu.innerHTML = `${upper}
+    <div class="ov-ctx-item" data-act="info">ℹ 정보 보기</div>
+    <div class="ov-ctx-item" data-act="note">📝 메모</div>
+    <div class="ov-ctx-sep"></div>
+    <div class="ov-ctx-item danger" data-act="hide">${hideLabel}</div>`;
+  menu.querySelectorAll('.ov-ctx-item').forEach(it => {
+    it.onclick = (ev) => {
+      ev.stopPropagation();
+      _ctxDropId = dropId;
+      if (it.dataset.act === 'bulk') { _ovBulkInline(menu, dropId, mob.id); return; } // 메뉴 유지
+      menu.classList.remove('open');
+      switch (it.dataset.act) {
+        case 'base':  ctxItemSetBase(false, mob.id); break;
+        case 'baseh': ctxItemSetBase(true, mob.id);  break;
+        case 'info':  ctxItemInfo();                 break;
+        case 'note':  ctxItemNote(mob.id);           break;
+        case 'hide':  ctxItemHide(mob.id);           break;
+      }
+      _overlayTick();
+    };
+  });
+  menu.style.left = '0px'; menu.style.top = '0px';
+  menu.classList.add('open');
+  const mw = menu.offsetWidth || 165, mh = menu.offsetHeight || 220;
+  let x = pipEvt.clientX, y = pipEvt.clientY;
+  if (x + mw > pip.innerWidth)  x = pip.innerWidth  - mw - 4;
+  if (y + mh > pip.innerHeight) y = pip.innerHeight - mh - 4;
+  menu.style.left = Math.max(2, x) + 'px';
+  menu.style.top  = Math.max(2, y) + 'px';
 }
 
 // ══════════════════════════════════════════
@@ -6034,7 +6226,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.108.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.109</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6543,6 +6735,7 @@ function applyTheme(theme) {
   localStorage.setItem('maple-theme', theme);
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.textContent = THEME_ICON[theme];
+  syncOverlayTheme();
 }
 function toggleTheme() {
   const cur  = document.documentElement.getAttribute('data-theme') || 'light';
@@ -6676,6 +6869,21 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.109', date: '26.06.29',
+    feat: [
+      '오버레이가 앱 테마(밝음/어둠/바다)를 자동으로 따라감',
+      '오버레이에 마릿수 기준 아이템 카드 표시(미지정 시 가장 흔한 아이템) — 좌클릭 +1, 우클릭 메뉴',
+      '오버레이 우클릭 메뉴에서 갯수 조정(−1/+1, −10/+10)을 오버레이 안에서 바로',
+      '동기화 시 여러 몹의 기준 아이템을 각각 표시',
+    ],
+    fix: [
+      '오버레이 고정 크기로 열려 창 크기 변동·스크롤바 제거',
+      '채널변경 후 경과 시간 폰트 확대',
+      '우클릭 드래그로 선택/드래그되던 현상 방지(메인·오버레이)',
+      '우클릭 메뉴 가격 보기 → 정보 보기(메이플노트)로 정리',
+    ],
+  },
   {
     ver: '1.108.5', date: '26.06.29',
     fix: [
@@ -7218,18 +7426,25 @@ function hideItemCtxMenu() {
   _ctxDropId = null;
 }
 
-function ctxItemSetBase(hidden) {
+// mobId 지정 시 해당 몹/패널/탭, 없으면 활성 몹 기준 (오버레이 다중 몹 지원)
+function _resolveMobCtx(mobId) {
+  if (mobId == null) return { mob: activeMob, panel: getActivePanel(), tab: activeTab() };
+  const idx = tabs.findIndex(t => t.mob && t.mob.id === mobId);
+  if (idx < 0) return { mob: activeMob, panel: getActivePanel(), tab: activeTab() };
+  return { mob: tabs[idx].mob, panel: getPanelOf(idx), tab: tabs[idx] };
+}
+
+function ctxItemSetBase(hidden, mobId) {
   const id = _ctxDropId;
   hideItemCtxMenu();
-  const mob = activeMob; if (!mob || id == null) return;
+  const { mob, panel, tab } = _resolveMobCtx(mobId);
+  if (!mob || id == null) return;
   const cur = getTlBase(mob.id);
   if (cur?.id === id && cur?.hidden === hidden) {
     setTlBase(mob.id, null);
   } else {
     setTlBase(mob.id, { id, hidden });
   }
-  const panel = getActivePanel();
-  const tab   = activeTab();
   renderItemGridInPanel(panel, mob);
   if (tab) renderTimeline(panel, mob, tab);
   const list = panel?.querySelector('.sw-log-list');
@@ -7244,25 +7459,25 @@ function ctxItemBulk() {
   openBulkPopup(id, activeTabIdx);
 }
 
-function ctxItemPrice() {
+function ctxItemInfo() {
   const id = _ctxDropId;
   hideItemCtxMenu();
   if (id == null) return;
-  window.open(`https://mapleland.gg/item/${id}`, '_blank', 'noopener');
+  window.open(`https://xn--o80b01o9mlw3kdzc.com/item_detail/${id}`, '_blank', 'noopener');
 }
 
-function ctxItemHide() {
+function ctxItemHide(mobId) {
   const id = _ctxDropId;
   hideItemCtxMenu();
-  if (!activeMob || id == null) return;
+  const { mob, panel } = _resolveMobCtx(mobId);
+  if (!mob || id == null) return;
   const store = loadS();
-  const excl  = new Set(store[`excl_${activeMob.id}`] || []);
+  const excl  = new Set(store[`excl_${mob.id}`] || []);
   if (excl.has(id)) excl.delete(id); else excl.add(id);
-  store[`excl_${activeMob.id}`] = [...excl];
+  store[`excl_${mob.id}`] = [...excl];
   saveS(store);
-  const panel = getActivePanel();
-  renderItemGridInPanel(panel, activeMob);
-  updateProgressInPanel(panel, activeMob);
+  renderItemGridInPanel(panel, mob);
+  updateProgressInPanel(panel, mob);
   renderSaves();
 }
 
@@ -7301,11 +7516,12 @@ function deleteNoteModal() {
   setNote(_noteMobId, _noteItemId, '');
   closeNoteModal(); _noteRefresh();
 }
-function ctxItemNote() {
+function ctxItemNote(mobId) {
   const id = _ctxDropId;
   hideItemCtxMenu();
   if (id == null) return;
-  openNoteModal(null, activeMob?.id, id);
+  const { mob } = _resolveMobCtx(mobId);
+  openNoteModal(null, mob?.id, id);
 }
 
 // 외부 클릭 시 메뉴 닫기
@@ -7313,6 +7529,8 @@ document.addEventListener('click', hideItemCtxMenu);
 document.addEventListener('contextmenu', e => {
   if (!e.target.closest('.item-card')) hideItemCtxMenu();
 });
+// 우클릭 드래그로 선택/드래그되는 것 방지
+document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
 
 // ── 리모컨 WebSocket 클라이언트 ───────────────────────────────
 (function _remote() {
@@ -7371,7 +7589,7 @@ document.addEventListener('contextmenu', e => {
   <div class="item-ctx-item" id="ctx-base"     onclick="ctxItemSetBase(false)">⚑ 마릿수 기준 지정</div>
   <div class="item-ctx-item" id="ctx-base-hid" onclick="ctxItemSetBase(true)">⚑ 기준 지정 (타임라인 숨김)</div>
   <div class="item-ctx-sep"></div>
-  <div class="item-ctx-item"                   onclick="ctxItemPrice()">$ 가격 보기</div>
+  <div class="item-ctx-item"                   onclick="ctxItemInfo()">ℹ 정보 보기</div>
   <div class="item-ctx-item"                   onclick="ctxItemNote()">📝 메모</div>
   <div class="item-ctx-sep"></div>
   <div class="item-ctx-item danger" id="ctx-hide" onclick="ctxItemHide()">✕ 숨기기</div>
