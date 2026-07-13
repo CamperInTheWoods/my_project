@@ -2668,7 +2668,16 @@ function _swResetOne(tab, panel) {
     const tl = panel.querySelector('.tl-section'); if (tl) tl.style.display='none';
     swTickPanel(panel, tab);
   }
-  if (tab.mob) { const s = loadS(); delete s[`sw_mob_${tab.mob.id}`]; delete s[`sw_ch_${tab.mob.id}`]; saveS(s); }
+  if (tab.mob) {
+    const s = loadS();
+    delete s[`sw_mob_${tab.mob.id}`];
+    delete s[`sw_ch_${tab.mob.id}`];
+    // 스톱워치 리셋 = 시간기록(firstTime·times)만 초기화, 수집수(count)는 유지
+    const md = s[`mob_${tab.mob.id}`];
+    if (md) Object.values(md).forEach(st => { if (st && typeof st === 'object') { st.firstTime = null; st.times = []; } });
+    saveS(s);
+    if (panel) renderItemGridInPanel(panel, tab.mob);
+  }
 }
 
 function _tabFromEvent(e) {
@@ -2897,7 +2906,7 @@ async function openOverlay() {
       <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
       <button class="ov-ch" id="ov-ch">채널변경</button>
     </div>
-    <div class="ov-item" id="ov-item" style="display:none" title="좌클릭 +1 / 우클릭 −1"></div>`;
+    <div class="ov-item" id="ov-item" style="display:none"></div>`;
   pip.document.body.appendChild(wrap);
   pip.document.body.classList.toggle('small', !!getSetting('ov_small'));
   pip.document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
@@ -3501,7 +3510,7 @@ function renderTimeline(panel, mob, tab) {
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
       const allTimes = st.times?.length ? st.times : [st.firstTime];
-      allTimes.forEach(t => items.push({ ...d, firstTime: t }));
+      allTimes.forEach(t => { if (t != null) items.push({ ...d, firstTime: t }); });
     } else {
       items.push({ ...d, firstTime: st.firstTime });
     }
@@ -4958,10 +4967,10 @@ function applyBulk() {
   const newCount = Math.max(0, state.count + _bpPendingDelta);
   const t = swElapsed(tab);
   if (newCount > state.count) {
-    const wasZero = state.count === 0;
-    if (wasZero && newCount > 0) state.firstTime = t;
+    const needFirst = state.firstTime == null;   // count===0 이거나 로그 삭제로 firstTime만 null인 경우 복구
+    if (needFirst && newCount > 0) state.firstTime = t;
     for (let i = state.count; i < newCount; i++) state.times.push(t);
-    if (wasZero && newCount > 0) addSwLogToPanel(panel, drop.name, state.firstTime, _bpItemId);
+    if (needFirst && newCount > 0) addSwLogToPanel(panel, drop.name, state.firstTime, _bpItemId);
   } else if (newCount < state.count) {
     for (let i = state.count; i > newCount; i--) state.times.pop();
     if (newCount === 0) { state.firstTime = null; state.times = []; removeItemLog(panel, _bpItemId); }
@@ -4998,7 +5007,8 @@ function incrementItem(itemId, e) {
   if (!store[key]) store[key] = {};
   const state = store[key][itemId] || { count:0, firstTime:null, times:[] };
   if (!state.times) state.times = state.firstTime ? [state.firstTime] : [];
-  const isFirst = state.count === 0;
+  // firstTime이 비어 있으면(로그 삭제 등으로 count>0인데 firstTime=null인 모순 상태 포함) 첫 출현으로 취급해 복구
+  const isFirst = state.count === 0 || state.firstTime == null;
   const t = swElapsed(tab);
   if (isFirst) state.firstTime = t;
   state.times.push(t);
@@ -5140,12 +5150,21 @@ function deleteLogEntry(btn) {
   if (dropId != null && activeMob) {
     const s = loadS();
     const key = `mob_${activeMob.id}`;
-    if (s[key]?.[dropId]) {
-      s[key][dropId].firstTime = null;
+    const st = s[key]?.[dropId];
+    if (st) {
+      // 획득 기록 삭제 = 실제 수집수 1 감소 (상태 일관성 유지)
+      st.count = Math.max(0, (st.count || 0) - 1);
+      if (Array.isArray(st.times) && st.times.length) st.times.pop();
+      if (st.count === 0) { st.firstTime = null; st.times = []; }
+      else st.firstTime = (Array.isArray(st.times) && st.times.length) ? st.times[0] : st.firstTime;
       saveS(s);
-      const card = getActivePanel()?.querySelector(`.item-card[data-item-id="${dropId}"]`);
-      if (card) card.querySelector('.ctime').textContent = '';
-      renderTimeline(getActivePanel(), activeMob, activeTab());
+      const panel = getActivePanel();
+      const drop  = activeMob.drops.find(d => d.id === dropId);
+      if (drop) updateCardUI(dropId, st, drop, panel, activeMob);
+      updateProgressInPanel(panel, activeMob);
+      updateHuntEstimateInPanel(panel, activeMob);
+      renderSaves();
+      renderTimeline(panel, activeMob, activeTab());
     }
   }
   entry.remove();
@@ -6300,7 +6319,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.110</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.110.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6911,7 +6930,7 @@ function _renderTlModalRows(mob, tab) {
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
       const allTimes = st.times?.length ? st.times : [st.firstTime];
-      allTimes.forEach(t => items.push({ ...d, firstTime: t }));
+      allTimes.forEach(t => { if (t != null) items.push({ ...d, firstTime: t }); });
     } else {
       items.push({ ...d, firstTime: st.firstTime });
     }
@@ -6996,6 +7015,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.110.1', date: '26.07.02',
+    fix: [
+      '획득 기록(로그) ✕ 삭제 시 실제 수집수도 1 감소하도록',
+      '아이템을 많이 눌렀다 기록 삭제한 뒤 다시 눌러도 타임라인에 안 뜨던 문제 수정(firstTime 자가복구)',
+      '스톱워치 리셋이 시간기록을 제대로 초기화(재복원·좌표 어긋남 버그 수정), 수집수는 유지',
+    ],
+  },
   {
     ver: '1.110', date: '26.06.30',
     feat: [
