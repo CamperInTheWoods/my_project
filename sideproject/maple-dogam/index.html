@@ -3767,10 +3767,17 @@ function initSw() { /* 탭 생성 시 각 탭에서 초기화 */ }
 // ══════════════════════════════════════════
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 function mobImg(id)  { return `https://maplestory.io/api/kms/284/mob/${id}/icon`; }
-function itemImg(id) { return `https://maplestory.io/api/kms/284/item/${id}/icon`; }
+// 몬스터 카드 — 모든 몹 드롭 목록 맨 앞에 추가되는 트래킹용 항목 (센티넬 id, 실제 아이템과 충돌 없음)
+const MONSTER_CARD_ID = 9990001;
+const MONSTER_CARD_IMG = 'data:image/png;base64,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';
+function itemImg(id) {
+  if (id === MONSTER_CARD_ID) return MONSTER_CARD_IMG;
+  return `https://maplestory.io/api/kms/284/item/${id}/icon`;
+}
 // 아이템 ID 범위로 유형 판별 (메이플 아이템 ID 규칙)
 function itemTypeLabel(id) {
   const n = Number(id);
+  if (n === MONSTER_CARD_ID) return '카드';
   if (n >= 1000000 && n < 2000000) return '장비';
   if (n >= 2040000 && n < 2050000) return '주문서';
   if (n >= 2070000 && n < 2080000) return '표창';
@@ -4588,6 +4595,11 @@ function restorePanelForTab(tab) {
 function activateMob(mob) {
   const tab = activeTab();
 
+  // 몬스터 카드를 드롭 목록 맨 앞에 추가 (실제 몹만, 프리셋 표창/완드 제외, 중복 방지)
+  if (mob && Array.isArray(mob.drops) && mob.id < 9990000 && mob.drops[0]?.id !== MONSTER_CARD_ID) {
+    mob.drops = [{ name: '몬스터 카드', id: MONSTER_CARD_ID, rate: '' }, ...mob.drops];
+  }
+
   // 이전 몹 sw 상태 저장 (다른 몹으로 교체 시)
   if (tab.mob && tab.mob.id !== mob.id) {
     saveSwState(tab);
@@ -4616,7 +4628,7 @@ function activateMob(mob) {
 
   // 몬스터 이름/drops meta 저장 (level, hp 포함 → 로컬 캐시로 재사용)
   const s = loadS();
-  s[`mob_${mob.id}_meta`] = { name: mob.name, level: mob.level || 0, hp: mob.hp || 0, total: mob.drops.length, drops: mob.drops };
+  s[`mob_${mob.id}_meta`] = { name: mob.name, level: mob.level || 0, hp: mob.hp || 0, total: mob.drops.filter(d => d.id !== MONSTER_CARD_ID).length, drops: mob.drops };
   saveS(s);
 
   // 스톱워치 상태 복원 (몹별 저장된 시간)
@@ -5185,7 +5197,7 @@ function updateProgressInPanel(panel, mob) {
   const excl    = new Set(store[`excl_${mob.id}`] || []);
   const tlBaseId = store[`tl_base_${mob.id}`]?.id;
 
-  const active  = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+  const active  = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId && d.id !== MONSTER_CARD_ID);
   const total   = active.length;
   const done    = active.filter(d => (mobData[d.id]?.count||0) > 0).length;
   const pct     = total ? Math.round(done/total*100) : 0;
@@ -5482,14 +5494,14 @@ function renderSaves() {
     const meta      = store[`mob_${mobId}_meta`] || {};
     let done, total;
     if (activeMob && activeMob.id === mobId) {
-      const activeDrops = activeMob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+      const activeDrops = activeMob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId && d.id !== MONSTER_CARD_ID);
       total = activeDrops.length;
       done  = activeDrops.filter(d => (items[d.id]?.count||0) > 0).length;
     } else {
       const baseAdj = tlBaseId ? 1 : 0;
       const allTotal = meta.total || Object.keys(items).length;
       total = Math.max(1, allTotal - excl.size - baseAdj);
-      done  = Math.min(total, Object.entries(items).filter(([id,s]) => !excl.has(Number(id)) && Number(id) !== tlBaseId && (s.count||0)>0).length);
+      done  = Math.min(total, Object.entries(items).filter(([id,s]) => !excl.has(Number(id)) && Number(id) !== tlBaseId && Number(id) !== MONSTER_CARD_ID && (s.count||0)>0).length);
     }
     const isAct  = activeMob && activeMob.id === mobId;
     const full   = total > 0 && done === total;
@@ -6011,7 +6023,7 @@ function openResultModal(mob, _overrideTab, _overrideStore) {
   const elapsedMs = swElapsed(tab);
 
   // 진척도
-  const drops    = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId);
+  const drops    = mob.drops.filter(d => !excl.has(d.id) && d.id !== tlBaseId && d.id !== MONSTER_CARD_ID);
   const total    = drops.length;
   const done     = drops.filter(d => (mobData[d.id]?.count || 0) > 0).length;
   const pct      = total ? Math.round(done / total * 100) : 0;
@@ -6319,7 +6331,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.110.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.111</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7015,6 +7027,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.111', date: '26.07.15',
+    feat: [
+      '모든 몹 아이템 목록 맨 앞에 몬스터 카드 추가 — 일반 아이템처럼 수집수·획득 시각(타임라인) 기록, 5개 넘어도 계속 카운트',
+    ],
+    fix: [
+      '몬스터 카드는 도감작 완료율(진행도)에는 포함하지 않음(별도 수집)',
+    ],
+  },
   {
     ver: '1.110.1', date: '26.07.02',
     fix: [
