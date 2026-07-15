@@ -4878,7 +4878,10 @@ function renderItemGridInPanel(panel, mob) {
   const excluded = new Set(store[`excl_${mob.id}`] || []);
   const tlBase   = getTlBase(mob.id);
 
+  const _seen = new Set();
   mob.drops.forEach(drop => {
+    if (_seen.has(drop.id)) return; // 같은 아이템 중복 카드 방지
+    _seen.add(drop.id);
     const state      = mobData[drop.id] || { count:0, firstTime:null };
     const isExcl     = excluded.has(drop.id);
     const baseState  = tlBase?.id === drop.id ? (tlBase.hidden ? 2 : 1) : 0;
@@ -5066,6 +5069,8 @@ function bulkOverlayClick(e) {
 }
 
 function incrementItem(itemId, e) {
+  // 같은 클릭 이벤트가 두 리스너로 중복 처리되어 +2 되는 것 방지 (실제 클릭에만 적용; 오버레이/일괄은 e.type 없음)
+  if (e && e.type === 'click') { if (e._incDone) return; e._incDone = true; }
   const { tab, panel } = _tabFromEvent(e);
   const mob = tab?.mob || activeMob;
   if (!mob) return;
@@ -6409,7 +6414,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.111</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.111.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7105,6 +7110,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.111.1', date: '26.07.15',
+    fix: [
+      '아이템 카드 한 번 클릭에 수집수가 2씩 올라가던 문제 수정 (같은 클릭 이벤트 중복 처리 방지)',
+      '같은 아이템이 드롭 목록에 중복될 때 카드가 하나만 표시되도록 방지',
+    ],
+  },
   {
     ver: '1.111', date: '26.07.15',
     feat: [
