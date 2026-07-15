@@ -207,6 +207,9 @@
     .char-mobs { display:flex; gap:8px; align-items:center; }
     .char-mob-img { width:40px; height:40px; object-fit:contain; image-rendering:pixelated; border:2px solid var(--gold); border-radius:8px; background:rgba(0,0,0,.25); padding:2px; box-shadow:0 0 6px rgba(90,100,112,.35); transition:transform .15s,box-shadow .15s; }
     .char-mob-img:hover { transform:scale(1.12); box-shadow:0 0 10px rgba(120,130,142,.7); }
+    .char-ver-text { font-size:1rem; font-weight:800; color:var(--gold); letter-spacing:.02em; cursor:default; user-select:none;
+      border:2px solid var(--gold); border-radius:8px; padding:0 9px; height:40px; box-sizing:border-box;
+      display:inline-flex; align-items:center; box-shadow:0 0 6px rgba(120,130,142,.25); }
 
     /* ─ Layout ─ */
     .container { max-width:980px; margin:0 auto; padding:20px 16px; }
@@ -4439,9 +4442,12 @@ const CHAR_MOBS = [
 function updateCharStatus() {
   const el = document.getElementById('char-mobs');
   if (!el) return;
-  el.innerHTML = CHAR_MOBS.map(m =>
-    `<img class="char-mob-img" src="${mobImg(m.id)}" alt="${m.name}" title="${m.name} 클릭하여 도감작 시작" onclick="fetchMobDrops(${m.id},'${m.name}',0)" style="cursor:pointer" onerror="this.style.display='none'">`
-  ).join('');
+  // 원래: 주니어 네키 이미지 + 클릭 시 도감작 로드 (나중에 되살릴 수 있게 보존)
+  // el.innerHTML = CHAR_MOBS.map(m =>
+  //   `<img class="char-mob-img" src="${mobImg(m.id)}" alt="${m.name}" title="${m.name} 클릭하여 도감작 시작" onclick="fetchMobDrops(${m.id},'${m.name}',0)" style="cursor:pointer" onerror="this.style.display='none'">`
+  // ).join('');
+  // 현재: 이미지 대신 "2.0" 글자만, 클릭 이동 없음
+  el.innerHTML = `<span class="char-ver-text">2.0</span>`;
 }
 
 function switchTab(idx) {
@@ -6418,7 +6424,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.112</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.112.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7122,6 +7128,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.112.1', date: '26.07.15',
+    fix: [
+      '우상단 캐릭터 이미지를 테마색 테두리의 "2.0" 표기로 교체 (클릭 이동 없음)',
+    ],
+  },
   {
     ver: '1.112', date: '26.07.15',
     feat: [
