@@ -498,6 +498,8 @@
       box-shadow:0 6px 22px var(--shadow); padding:10px 0; display:none; }
     .settings-pop.open { display:block; }
     .settings-pop .settings-title { font-size:.7rem; font-weight:800; color:var(--dark); letter-spacing:.2px; padding:2px 14px 8px; }
+    .settings-pop .settings-section + .settings-section { border-top:1px solid var(--border); margin-top:5px; padding-top:5px; }
+    .settings-pop .settings-section-title { font-size:.62rem; font-weight:800; color:var(--gray); letter-spacing:.4px; padding:3px 14px 4px; }
     .settings-row { display:flex; align-items:center; justify-content:space-between; gap:12px;
       padding:7px 14px; font-size:.76rem; color:var(--dark); cursor:pointer; }
     .settings-row:hover { background:var(--bg-btn-sec); }
@@ -4879,7 +4881,9 @@ function renderItemGridInPanel(panel, mob) {
   const tlBase   = getTlBase(mob.id);
 
   const _seen = new Set();
+  const _hideCard = !getSetting('show_card');
   mob.drops.forEach(drop => {
+    if (drop.id === MONSTER_CARD_ID && _hideCard) return; // 설정에서 몬스터 카드 숨김
     if (_seen.has(drop.id)) return; // 같은 아이템 중복 카드 방지
     _seen.add(drop.id);
     const state      = mobData[drop.id] || { count:0, firstTime:null };
@@ -6414,7 +6418,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.111.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.112</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6941,12 +6945,14 @@ function toggleTheme() {
 
 // ── 설정 (확장: 항목을 배열에 추가) ──
 const SETTINGS = [
-  { key: 'ov_show_mob',    label: '오버레이에 몹 이미지 표시', def: true },
-  { key: 'ov_show_name',   label: '오버레이에 몹 이름 표시', def: true },
-  { key: 'ov_show_item',   label: '오버레이에 기준 아이템 표시', def: true },
-  { key: 'ov_show_chtime', label: '오버레이에 채널 경과 시간 표시', def: true },
-  { key: 'ov_small',       label: '오버레이 스몰 모드 (더 작게)', def: false },
+  { key: 'show_card',      label: '아이템 목록에 몬스터 카드 표시', def: true,  group: 'general' },
+  { key: 'ov_show_mob',    label: '몹 이미지 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_name',   label: '몹 이름 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
+  { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
 ];
+const SETTINGS_GROUPS = [['general', '일반'], ['overlay', '오버레이']];
 function getSetting(key) {
   const s = loadS();
   const def = SETTINGS.find(o => o.key === key)?.def;
@@ -6956,11 +6962,14 @@ function setSetting(key, val) { const s = loadS(); s[key] = val; saveS(s); }
 function renderSettings() {
   const body = document.getElementById('settings-body');
   if (!body) return;
-  body.innerHTML = SETTINGS.map(o =>
-    `<label class="settings-row"><span>${o.label}</span>` +
-    `<input type="checkbox" ${getSetting(o.key) ? 'checked' : ''} onchange="onSettingChange('${o.key}',this.checked)">` +
-    `<span class="settings-sw"></span></label>`
-  ).join('');
+  body.innerHTML = SETTINGS_GROUPS.map(([g, title]) => {
+    const rows = SETTINGS.filter(o => (o.group || 'general') === g).map(o =>
+      `<label class="settings-row"><span>${o.label}</span>` +
+      `<input type="checkbox" ${getSetting(o.key) ? 'checked' : ''} onchange="onSettingChange('${o.key}',this.checked)">` +
+      `<span class="settings-sw"></span></label>`
+    ).join('');
+    return `<div class="settings-section"><div class="settings-section-title">${title}</div>${rows}</div>`;
+  }).join('');
 }
 function onSettingChange(key, val) {
   setSetting(key, val);
@@ -6970,6 +6979,9 @@ function onSettingChange(key, val) {
       _overlayTick();
       _ovFitTicks = 6;
     }
+  } else if (key === 'show_card') {
+    // 모든 탭 아이템 그리드 재렌더 (카드 표시/숨김 반영)
+    tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderItemGridInPanel(p, t.mob); } });
   }
 }
 function toggleSettings(e) {
@@ -7110,6 +7122,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.112', date: '26.07.15',
+    feat: [
+      '설정창을 일반 / 오버레이 섹션으로 구분',
+      '설정 › 일반: 아이템 목록에서 몬스터 카드 표시/숨김 토글 (숨겨도 수집수는 보존)',
+    ],
+  },
   {
     ver: '1.111.1', date: '26.07.15',
     fix: [
