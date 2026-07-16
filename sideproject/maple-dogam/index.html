@@ -56,48 +56,48 @@
     }
 
     [data-theme="dark"] {
-      --brown:  #e8d8b4;
-      --gold:   #c89432;
+      --brown:  #dcc38a;
+      --gold:   #d0a83e;
       --green:  #7dc97e;
       --red:    #e06060;
-      --gray:   #a08868;
-      --dark:   #ecdcbe;
-      --panel:  #22140c;
-      --border: #3a2418;
+      --gray:   #8b909b;
+      --dark:   #e6e8ec;
+      --panel:  #1e2128;
+      --border: #2e333c;
       --shadow: rgba(0,0,0,.55);
 
-      --bg-body:       #1a0e08;
-      --bg-input:      #170c06;
-      --bg-card:       #22140c;
-      --bg-card-sel:   #281810;
-      --bg-tab:        #22140c;
-      --bg-tab-hover:  #281810;
-      --bg-log:        #22140c;
-      --bg-log-border: #3a2418;
-      --bg-btn-sec:    #22140c;
-      --bg-tl-toggle:  #281810;
-      --bg-excl-tog:   #22140c;
-      --bg-prog:       #170c06;
-      --header-bg:     #22140c;
-      --header-border: #3a2418;
-      --header-title:  #ecdcbe;
-      --header-sub:    #a08868;
-      --char-label:    #a08868;
-      --btn-grad:      linear-gradient(135deg,#c89432,#a87820);
-      --btn-shad:      rgba(168,120,32,.3);
-      --tl-tog-bg:     #22140c;
-      --tl-tog-col:    #c89432;
+      --bg-body:       #15171c;
+      --bg-input:      #191c22;
+      --bg-card:       #1e2128;
+      --bg-card-sel:   #262a33;
+      --bg-tab:        #1e2128;
+      --bg-tab-hover:  #262a33;
+      --bg-log:        #1e2128;
+      --bg-log-border: #2e333c;
+      --bg-btn-sec:    #1e2128;
+      --bg-tl-toggle:  #262a33;
+      --bg-excl-tog:   #1e2128;
+      --bg-prog:       #14161a;
+      --header-bg:     #1e2128;
+      --header-border: #2e333c;
+      --header-title:  #e6e8ec;
+      --header-sub:    #8b909b;
+      --char-label:    #8b909b;
+      --btn-grad:      linear-gradient(135deg,#d0a83e,#b0872a);
+      --btn-shad:      rgba(208,168,62,.28);
+      --tl-tog-bg:     #1e2128;
+      --tl-tog-col:    #d0a83e;
       --sw-ch-bg:      #0a1520;
       --sw-ch-col:     #5aa8e8;
       --sw-syn-bg:     #0a1520;
       --sw-syn-col:    #5aa8e8;
       --sw-syn-bdr:    #1a3050;
-      --shadow-header: inset 0 0.5px 0 rgba(255,255,255,.04);
-      --shadow-card:   0 6px 18px rgba(0,0,0,.45);
-      --primary-bar:   linear-gradient(90deg,#c89432,#4a7a52);
+      --shadow-header: inset 0 0.5px 0 rgba(255,255,255,.05);
+      --shadow-card:   0 6px 18px rgba(0,0,0,.5);
+      --primary-bar:   linear-gradient(90deg,#d0a83e,#4a7a52);
       --success-bar:   linear-gradient(90deg,#4a8a4a,#7dc97e);
       --sw-start-bg:   #5a8a62;
-      --sw-pause-bg:   #b88a30;
+      --sw-pause-bg:   #c09a3e;
       --header-title-shadow: 0 1px 3px rgba(0,0,0,.6);
     }
 
@@ -159,7 +159,7 @@
 
     body {
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Noto Sans KR', sans-serif;
-      background: var(--bg-body) url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+      background: var(--bg-body) url("data:image/svg+xml,%3Csvg width='22' height='22' viewBox='0 0 22 22' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%23ffffff' fill-opacity='0.035'/%3E%3C/svg%3E");
       min-height: 100vh;
       color: var(--dark);
     }
@@ -1183,10 +1183,10 @@
     .save-card.dragging { opacity:.4; }
     .save-card.act { border-color:var(--gold); background:#f3f6fa; }
     .save-card.complete { border-color:#d6a93e; background:#fbf4e2; }
-    [data-theme="dark"] .save-card { background:#15100c; border-color:#2a1e15; }
+    [data-theme="dark"] .save-card { background:var(--bg-card); border-color:var(--border); }
     [data-theme="dark"] .save-card:hover { box-shadow:0 2px 10px rgba(0,0,0,.4); }
-    [data-theme="dark"] .save-card.act { background:#1f1808; border-color:var(--gold); }
-    [data-theme="dark"] .save-card.complete { background:#211803; border-color:#7a5f1a; }
+    [data-theme="dark"] .save-card.act { background:#2a2f3a; border-color:var(--gold); }
+    [data-theme="dark"] .save-card.complete { background:#2a2416; border-color:#7a6a2e; }
     .save-card-name {
       font-size:.72rem; font-weight:700; color:var(--dark);
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;
@@ -1200,7 +1200,7 @@
     .save-card-bar-bg {
       height:6px; background:#eee; border-radius:3px; overflow:hidden;
     }
-    [data-theme="dark"] .save-card-bar-bg { background:#2a1e15; }
+    [data-theme="dark"] .save-card-bar-bg { background:#2e333c; }
     .save-card-bar-fill {
       height:100%; border-radius:3px;
       transition:width .3s, background .3s;
@@ -1673,17 +1673,17 @@
 
     /* ─ 다크 테마 오버라이드 ─ */
     [data-theme="dark"] .prog-fill.complete { background:linear-gradient(90deg,#4a3880,#6858b0,#8878d0,#4a3880); background-size:300% 100%; box-shadow:0 0 8px rgba(90,70,180,.4), 0 0 3px rgba(140,120,220,.3) inset; }
-    [data-theme="dark"] .sw-log-entry.complete { background:#1f1508; color:var(--gold); border-color:var(--border); }
+    [data-theme="dark"] .sw-log-entry.complete { background:#2a2416; color:var(--gold); border-color:var(--border); }
     [data-theme="dark"] .sw-log-entry.sw-log-channel { background:#0a1520; color:#5aa8e8; border-color:#1a3050; }
     [data-theme="dark"] .sw-reset { color:#6a5a42; border-color:var(--border); }
     [data-theme="dark"] .sw-reset:hover { background:#1a0808; color:#e07070; border-color:#3a1a1a; }
     [data-theme="dark"] .excl-toggle.hide-excl { background:#1a0808; border-color:#4a2020; color:var(--red); }
-    [data-theme="dark"] .backup-inline-btns button:hover { background:#251a10; border-color:var(--gold); }
+    [data-theme="dark"] .backup-inline-btns button:hover { background:#262a33; border-color:var(--gold); }
     [data-theme="dark"] .backup-toggle-btn.open { background:rgba(168,133,74,.14); border-color:rgba(168,133,74,.5); color:#c8a850; }
     [data-theme="dark"] .complete-badge { background:linear-gradient(135deg,#0f0820,#15102a,#0f0820); border-color:#5040a0; color:#b0a0e8; box-shadow:0 0 12px rgba(100,80,200,.25); }
     [data-theme="dark"] #tl-modal > div { background:#f5f0e8 !important; }
-    [data-theme="dark"] #tl-modal > div { background:#15100c !important; border-color:#2a1e15 !important; }
-    [data-theme="dark"] #tl-modal > div > div:first-child { border-bottom-color:#2a1e15 !important; }
+    [data-theme="dark"] #tl-modal > div { background:#1e2128 !important; border-color:#2e333c !important; }
+    [data-theme="dark"] #tl-modal > div > div:first-child { border-bottom-color:#2e333c !important; }
     [data-theme="dark"] #tl-modal-title { color:#d4af6e !important; }
     [data-theme="dark"] #tl-modal-rows .tl-time-labels { color:#5a4a32; }
     [data-theme="dark"] .sw-sync.sw-sync-on { background:#2a5880; border-color:#3a78b0; }
@@ -2832,7 +2832,7 @@ let _pipWin = null, _pipTimer = null, _ovFitTicks = 0;
 // 오버레이 테마 팔레트 (앱 테마 자동 추종)
 const OV_THEME = {
   light:  { bg:'#ffffff', fg:'#2b2f36', name:'#8b9098', ch:'#1a6fa8' },
-  dark:   { bg:'#15100c', fg:'#f0e6d2', name:'#a08868', ch:'#5fb0e8' },
+  dark:   { bg:'#181b20', fg:'#e6e8ec', name:'#8b909b', ch:'#5fb0e8' },
   summer: { bg:'#eaf6fb', fg:'#1c3a44', name:'#4f8a99', ch:'#1a72b0' },
 };
 function _ovTheme() {
@@ -6429,7 +6429,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.113</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.114</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6483,12 +6483,12 @@ applySelectPanelState();
 </div>
 
 <!-- 패치노트 버튼 -->
-<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:12px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">i</button>
+<button id="patch-btn" onclick="openPatchNotes()" style="position:fixed;bottom:10px;left:50px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">i</button>
 <!-- 테마 토글 버튼 -->
-<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:40px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">☀️</button>
+<button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:78px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">☀️</button>
 
 <!-- 설정 버튼 -->
-<button id="settings-btn" onclick="toggleSettings(event)" title="설정" style="position:fixed;bottom:10px;left:68px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">⚙</button>
+<button id="settings-btn" onclick="toggleSettings(event)" title="설정" style="position:fixed;bottom:10px;left:12px;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb, var(--gold) 15%, transparent);border:1.5px solid color-mix(in srgb, var(--gold) 50%, transparent);color:var(--gold);font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,transform .15s,box-shadow .2s;z-index:9500;box-shadow:0 1px 5px var(--shadow);" onmouseenter="this.style.background='color-mix(in srgb, var(--gold) 30%, transparent)';this.style.transform='scale(1.1)'" onmouseleave="this.style.background='color-mix(in srgb, var(--gold) 15%, transparent)';this.style.transform='scale(1)'">⚙</button>
 <!-- 설정 팝업 -->
 <div id="settings-pop" class="settings-pop" onclick="event.stopPropagation()">
   <div class="settings-title">설정</div>
@@ -7135,6 +7135,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.114', date: '26.07.16',
+    feat: [
+      '어두운 테마 리디자인 — 갈색 계열 → 뉴트럴 다크(짙은 슬레이트 그레이 + 골드 강조)',
+    ],
+    fix: [
+      '배경 패턴을 + 무늬 → 은은한 도트 그리드로 교체',
+      '설정(⚙) 버튼 크게 + 좌하단 맨 왼쪽으로 + 테마 강조색 적용',
+    ],
+  },
   {
     ver: '1.113', date: '26.07.16',
     feat: [
