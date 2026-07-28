@@ -878,76 +878,67 @@
     .trophy-overlay.open { display:flex; }
     .trophy-modal {
       position:relative;
-      background:
-        radial-gradient(ellipse at 30% 0%, rgba(216,148,38,.04) 0%, transparent 50%),
-        linear-gradient(170deg, #111014, #0d0b10, #0f0d13);
+      background: linear-gradient(180deg, #f6f1e5, #efe8d9);
       border:none;
-      border-radius:18px;
+      border-radius:9px;
       width:min(640px,94vw); max-height:82vh; display:flex; flex-direction:column;
       box-shadow:
-        0 0 0 1px rgba(150,158,168,.35),
-        0 0 0 2.5px rgba(4,2,0,.98),
-        0 0 0 4px rgba(216,148,38,.12),
-        0 24px 70px rgba(0,0,0,.9),
-        inset 0 1px 0 rgba(255,220,130,.06);
+        0 0 0 5px #3a444e,
+        0 0 0 6px rgba(0,0,0,.5),
+        0 0 0 8px rgba(255,255,255,.04),
+        0 24px 64px rgba(0,0,0,.6);
       overflow:hidden;
     }
     .trophy-modal-header {
       display:flex; align-items:center; justify-content:space-between;
-      padding:20px 24px 13px;
-      border-bottom:1px solid rgba(216,148,38,.2);
-      background:
-        linear-gradient(90deg, rgba(216,148,38,.05) 0%, transparent 40%, transparent 60%, rgba(216,148,38,.05) 100%),
-        rgba(0,0,0,.2);
+      padding:18px 22px 12px;
+      border-bottom:1px solid rgba(96,82,58,.2);
+      background:transparent;
       flex-shrink:0;
       position:relative;
     }
-    .trophy-modal-header::after {
-      content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
-      width:40%; height:1px;
-      background:linear-gradient(90deg, transparent, rgba(216,148,38,.55), transparent);
-      pointer-events:none;
-    }
-    .trophy-modal-title { font-size:1rem; font-weight:700; color:#d89426; letter-spacing:.05em; text-shadow:0 0 12px rgba(216,148,38,.2); }
-    .trophy-modal-sub { font-size:.72rem; color:rgba(200,168,107,.52); margin-top:3px; letter-spacing:.02em; }
+    .trophy-modal-header::after { display:none; }
+    .trophy-modal-title { font-size:1rem; font-weight:800; color:#3a3428; letter-spacing:.02em; text-shadow:none; }
+    .trophy-modal-sub { font-size:.72rem; color:#8a7d64; margin-top:3px; letter-spacing:.02em; }
     .trophy-modal-close {
       width:27px; height:27px; border-radius:50%;
-      border:1px solid rgba(150,158,168,.4); background:rgba(216,148,38,.04);
-      color:rgba(120,130,142,.6); font-size:.75rem; cursor:pointer;
+      border:1px solid rgba(96,82,58,.32); background:rgba(255,255,255,.55);
+      color:rgba(96,82,58,.6); font-size:.75rem; cursor:pointer;
       display:flex; align-items:center; justify-content:center; transition:all .15s;
     }
-    .trophy-modal-close:hover { background:rgba(216,148,38,.14); color:var(--gold); border-color:rgba(216,148,38,.65); }
+    .trophy-modal-close:hover { background:rgba(96,82,58,.14); color:#3a3428; border-color:rgba(96,82,58,.6); }
     .trophy-sort-bar {
-      display:flex; gap:6px; padding:10px 24px;
-      border-bottom:1px solid rgba(216,148,38,.12); flex-shrink:0;
-      background:rgba(0,0,0,.25);
+      display:flex; gap:6px; padding:10px 22px;
+      border-bottom:1px solid rgba(96,82,58,.16); flex-shrink:0;
+      background:transparent;
     }
     .trophy-sort-btn {
       display:flex; align-items:center; gap:4px;
       padding:4px 11px; border-radius:6px;
-      border:1px solid rgba(216,148,38,.18);
-      background:none; color:rgba(200,168,107,.55); font-size:.63rem; font-weight:600;
+      border:1px solid rgba(96,82,58,.28);
+      background:none; color:rgba(90,78,58,.72); font-size:.63rem; font-weight:600;
       cursor:pointer; font-family:inherit; transition:all .15s; letter-spacing:.02em; font-size:.7rem;
     }
-    .trophy-sort-btn:hover { border-color:rgba(216,148,38,.48); color:rgba(216,148,38,.82); background:rgba(216,148,38,.05); }
-    .trophy-sort-btn.active { border-color:rgba(216,148,38,.65); background:rgba(216,148,38,.1); color:rgba(216,148,38,.92); }
+    .trophy-sort-btn:hover { border-color:rgba(96,82,58,.5); color:#4a4234; background:rgba(96,82,58,.06); }
+    .trophy-sort-btn.active { border-color:rgba(96,82,58,.55); background:rgba(96,82,58,.13); color:#3a3428; }
     .trophy-sort-arrow { font-size:.65rem; }
+    /* 책 낱장(크림 종이) — 은은한 괘선 */
     .trophy-modal-body {
-      overflow-y:auto; padding:22px 22px 26px;
+      overflow-y:auto; padding:18px 18px 22px;
       background:
-        radial-gradient(ellipse at 50% 0%, rgba(216,148,38,.03) 0%, transparent 55%),
-        linear-gradient(180deg, #0d0b10, #0f0d13);
-      box-shadow:inset 0 6px 20px rgba(0,0,0,.4), inset 0 -6px 20px rgba(0,0,0,.3);
+        repeating-linear-gradient(0deg, transparent 0, transparent 33px, rgba(96,82,58,.08) 33px, rgba(96,82,58,.08) 34px),
+        transparent;
+      box-shadow:inset 0 8px 14px -10px rgba(80,62,34,.28);
     }
     .trophy-modal-body::-webkit-scrollbar { width:4px; }
-    .trophy-modal-body::-webkit-scrollbar-track { background:rgba(0,0,0,.15); }
-    .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(150,158,168,.4); border-radius:2px; }
-    .trophy-stats-bar { display:flex; flex-shrink:0; border-bottom:1px solid rgba(216,148,38,.18); background:rgba(0,0,0,.18); }
-    .trophy-stat-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 8px; gap:3px; border-right:1px solid rgba(216,148,38,.1); }
+    .trophy-modal-body::-webkit-scrollbar-track { background:rgba(120,105,80,.12); }
+    .trophy-modal-body::-webkit-scrollbar-thumb { background:rgba(120,105,80,.4); border-radius:2px; }
+    .trophy-stats-bar { display:flex; flex-shrink:0; border-bottom:1px solid rgba(96,82,58,.18); background:transparent; }
+    .trophy-stat-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 8px; gap:3px; border-right:1px solid rgba(96,82,58,.13); }
     .trophy-stat-item:last-child { border-right:none; }
-    .trophy-stat-icon { font-size:.78rem; opacity:.65; color:rgba(255,220,130,.9); }
-    .trophy-stat-num { font-size:1.05rem; font-weight:700; color:#d89426; font-family:'Courier New',monospace; }
-    .trophy-stat-label { font-size:.62rem; color:rgba(200,168,107,.5); letter-spacing:.03em; }
+    .trophy-stat-icon { font-size:.78rem; opacity:.85; color:rgba(90,78,58,.85); }
+    .trophy-stat-num { font-size:1.05rem; font-weight:700; color:#3a3428; font-family:'Courier New',monospace; }
+    .trophy-stat-label { font-size:.62rem; color:#8a7d64; letter-spacing:.03em; }
     /* 기대 보상 트래커 */
     .sw-header-row {
       display:flex; align-items:center; gap:5px; margin-bottom:6px;
@@ -1012,40 +1003,38 @@
       width:22px; height:22px; object-fit:contain; image-rendering:pixelated;
     }
 
-    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
+    .trophy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:10px; }
     .trophy-card {
-      display:flex; flex-direction:column; gap:0;
-      background:
-        radial-gradient(ellipse at 50% 0%, rgba(90,30,5,.55) 0%, transparent 65%),
-        linear-gradient(170deg, rgba(52,16,2,.97) 0%, rgba(12,3,1,1) 100%);
-      border-radius:12px;
-      padding:14px 16px 12px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:0;
+      background:linear-gradient(165deg,#fffdf7,#f4efe3);
+      border-radius:9px;
+      padding:11px 6px 8px; cursor:pointer;
       position:relative;
       box-shadow:
-        0 0 0 1px rgba(216,148,38,.65),
-        0 0 0 2.5px rgba(4,1,0,.98),
-        0 0 0 3.5px rgba(216,148,38,.25),
-        0 10px 28px rgba(0,0,0,.6);
-      transition: transform .2s cubic-bezier(.22,.8,.44,1), box-shadow .2s;
+        0 0 0 1px rgba(120,102,72,.3),
+        0 2px 5px rgba(80,64,38,.15);
+      transition: transform .16s cubic-bezier(.22,.8,.44,1), box-shadow .16s;
       overflow:visible;
     }
     .trophy-card::before { display:none; }
     .trophy-card:hover {
       box-shadow:
-        0 0 0 1px rgba(240,175,55,1),
-        0 0 0 2.5px rgba(4,1,0,.98),
-        0 0 0 4.5px rgba(216,148,38,.4),
-        0 16px 40px rgba(0,0,0,.7);
-      transform: translateY(-4px);
+        0 0 0 1px rgba(110,92,60,.55),
+        0 8px 18px rgba(80,64,38,.28);
+      transform: translateY(-3px);
     }
     .trophy-portrait { display:none; }
     .trophy-sep { display:none; }
-    .trophy-info { display:flex; flex-direction:column; gap:0; }
+    .trophy-info { display:flex; flex-direction:column; align-items:center; gap:0; width:100%; }
     .trophy-name {
-      font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
-      color:rgba(230,165,55,.9);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      margin-bottom:9px;
+      font-size:.64rem; font-weight:700; letter-spacing:0; text-transform:none;
+      color:#443d30; text-align:center;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+      margin:7px 0 3px;
+    }
+    .trophy-album-meta {
+      font-size:.5rem; letter-spacing:.03em; color:#8a7d64; text-align:center;
+      font-family:'Courier New',monospace;
     }
     .trophy-name-divider {
       height:1px; margin-bottom:12px;
@@ -1078,15 +1067,16 @@
       padding-top:8px;
     }
     .trophy-face {
-      position:absolute; inset:0; width:100%; height:100%;
-      object-fit:cover; object-position:top center;
-      opacity:.09; pointer-events:none; border-radius:12px;
-      mix-blend-mode:luminosity;
+      position:static; inset:auto; width:56px; height:56px;
+      object-fit:contain; image-rendering:pixelated;
+      opacity:1; pointer-events:none; border-radius:0;
+      mix-blend-mode:normal;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.55));
     }
     .trophy-del {
       position:absolute; top:7px; right:7px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(180,50,50,.3); background:none;
-      color:rgba(210,80,80,.35); font-size:.5rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(180,50,50,.35); background:rgba(255,255,255,.5);
+      color:rgba(190,60,60,.6); font-size:.5rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
@@ -1094,42 +1084,193 @@
     .trophy-del:hover { background:rgba(160,25,25,.3); color:rgba(255,120,120,.95); border-color:rgba(220,60,60,.8); }
     .trophy-stat-btn {
       position:absolute; top:7px; right:28px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(216,148,38,.25); background:none;
-      color:rgba(150,158,168,.4); font-size:.5rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(90,80,60,.32); background:rgba(255,255,255,.5);
+      color:rgba(90,80,60,.6); font-size:.5rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-stat-btn { opacity:1; }
-    .trophy-stat-btn:hover { background:rgba(120,80,10,.35); color:rgba(255,210,90,.95); border-color:rgba(216,148,38,.8); }
+    .trophy-stat-btn:hover { background:rgba(90,80,60,.16); color:rgba(55,48,32,.95); border-color:rgba(90,80,60,.7); }
     .trophy-resume-btn {
       position:absolute; top:7px; left:7px; width:17px; height:17px;
-      border-radius:50%; border:1px solid rgba(80,200,130,.25); background:none;
-      color:rgba(100,210,150,.35); font-size:.55rem; cursor:pointer; line-height:1;
+      border-radius:50%; border:1px solid rgba(40,150,90,.4); background:rgba(255,255,255,.5);
+      color:rgba(30,140,80,.6); font-size:.55rem; cursor:pointer; line-height:1;
       display:flex; align-items:center; justify-content:center;
       opacity:0; transition:opacity .15s, background .15s, color .15s, border-color .15s;
     }
     .trophy-card:hover .trophy-resume-btn { opacity:1; }
     .trophy-resume-btn:hover { background:rgba(20,100,55,.35); color:rgba(120,240,170,.95); border-color:rgba(80,200,120,.8); }
 
+    /* ═══ 몬스터북 (펼친 책) ═══ */
+    .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.62); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:24px; }
+    .mbook-overlay.open { display:flex; }
+    /* 나무 뒷표지(바깥) + 금속 테(안쪽 띠, 원통형 하이라이트로 입체감) — 실제 그라데이션 밴드라 각지지 않음 */
+    .mbook-metal {
+      position:relative; border-radius:11px; padding:5px;
+      background:linear-gradient(155deg, #8a6a3a 0%, #e8cf94 20%, #fdf3d6 32%, #cfa855 46%, #7a5a2e 62%, #4a3318 78%, #8a6a3a 100%);
+      box-shadow: 0 0 0 6px #4e3018, 0 30px 70px rgba(0,0,0,.6);
+    }
+    .mbook {
+      position:relative; width:min(910px,96vw); height:min(84vh,656px); display:flex;
+      background:linear-gradient(180deg,#ece2cc,#e2d6ba);
+      border-radius:7px; padding:16px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.22);
+    }
+    .mbook-close { position:absolute; top:9px; right:11px; z-index:3; width:24px; height:24px; border-radius:50%;
+      border:1px solid rgba(96,74,40,.4); background:rgba(255,252,244,.6); color:rgba(96,74,40,.7);
+      font-size:.75rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .mbook-close:hover { background:rgba(96,74,40,.15); color:#4a3a1e; }
+    /* 책갈피 탭 (오른쪽 바깥 — 선택한 몹의 내용 전환) */
+    .mbook-tabs { position:absolute; left:100%; top:52px; transform:translateX(-8px); display:flex; flex-direction:column; gap:7px; z-index:1; }
+    .mbook-tab {
+      padding:6px 16px 6px 12px; border:none; border-radius:0 8px 8px 0; cursor:pointer;
+      background:
+        repeating-linear-gradient(112deg, rgba(90,66,30,.07) 0 1.5px, transparent 1.5px 4.5px),
+        repeating-linear-gradient(22deg, rgba(255,255,255,.05) 0 1.5px, transparent 1.5px 4px),
+        linear-gradient(90deg,#c9ad6f,#b8975a);
+      color:#4a3a1a; font-family:inherit; white-space:nowrap; text-align:right;
+      font-size:.68rem; font-weight:800; letter-spacing:.03em; box-shadow:2px 2px 5px rgba(0,0,0,.28);
+      transition:all .15s; opacity:.8;
+    }
+    .mbook-tab:hover { opacity:1; }
+    .mbook-tab.active {
+      background:
+        repeating-linear-gradient(112deg, rgba(90,66,30,.06) 0 1.5px, transparent 1.5px 4.5px),
+        repeating-linear-gradient(22deg, rgba(255,255,255,.08) 0 1.5px, transparent 1.5px 4px),
+        linear-gradient(90deg,#e6cf8f,#d8bd6f);
+      opacity:1; box-shadow:3px 3px 7px rgba(0,0,0,.32);
+    }
+    .mbook-tab.disabled { opacity:.4; cursor:default; pointer-events:none; }
+    /* 책갈피 탭 (왼쪽 바깥 — 표지 · 페이지 색상 인덱스) */
+    .mbook-tabs-left { position:absolute; right:100%; top:52px; transform:translateX(8px); display:flex; flex-direction:column; gap:7px; z-index:1; }
+    .mbook-tabs-left-gap { height:100px; flex-shrink:0; }
+    .mbook-tab-left {
+      width:22px; height:46px; padding:0; border:none; border-radius:7px 0 0 7px; cursor:pointer;
+      color:#fff; font-family:inherit; box-shadow:-2px 2px 5px rgba(0,0,0,.28);
+      transition:all .15s; opacity:.8;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .mbook-tab-left:hover { opacity:1; }
+    .mbook-tab-left.active { opacity:1; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
+    .mbook-tab-left-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+    .mbook-tab-left[data-page="cover"] { background:linear-gradient(90deg,#6b5a3e,#5a4a30); }
+    .mbook-tab-left[data-page="0"] { background:linear-gradient(90deg,#c0453f,#a83a35); }
+    .mbook-tab-left[data-page="1"] { background:linear-gradient(90deg,#c99b2e,#b28727); }
+    .mbook-tab-left[data-page="2"] { background:linear-gradient(90deg,#3f7fc9,#3569a8); }
+    .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
+    .mbook-pages { display:flex; flex:1; min-width:0; }
+    .mbook-page { flex:1; min-width:0; padding:14px 15px 34px; overflow-y:auto; position:relative; }
+    /* 종이 섬유질 노이즈 — feTurbulence, 갈색 대신 중립 그레이 톤이라 누렇지 않음 */
+    .mbook-page::before {
+      content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:inherit;
+      opacity:.16; mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.36  0 0 0 0 0.34  0 0 0 0 0.3  0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .mbook-left  { background:linear-gradient(90deg,#f4eeddee,#ece3ccee); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-right { background:linear-gradient(90deg,#ece3ccee,#f4eeddee); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
+    .mbook-page::-webkit-scrollbar { width:5px; }
+    .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
+    .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
+    .mbook-count { color:#8a7038; font-weight:700; }
+    /* 왼쪽 몹 격자 (5×5 고정) */
+    .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+    .mbook-mob { aspect-ratio:1; border-radius:7px; background:linear-gradient(160deg,#fffdf6,#efe7d2);
+      box-shadow:0 0 0 3px rgba(208,168,62,.28), 0 2px 4px rgba(0,0,0,.3); cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:transform .14s, box-shadow .14s; }
+    .mbook-mob img { width:86%; height:86%; object-fit:contain; image-rendering:pixelated; }
+    .mbook-mob:hover { transform:translateY(-2px); box-shadow:0 0 0 3px rgba(208,168,62,.45), 0 5px 12px rgba(0,0,0,.35); }
+    .mbook-mob.sel { box-shadow:0 0 0 3px #c8922a, 0 0 0 4px rgba(208,168,62,.28), 0 5px 12px rgba(0,0,0,.35); background:linear-gradient(160deg,#fff8e6,#f3e9cc); }
+    .mbook-mob.empty { cursor:default; background:rgba(120,95,55,.06); box-shadow:inset 0 0 0 2px rgba(208,168,62,.2); }
+    /* 오른쪽 */
+    .mbook-right-title { font-size:.86rem; font-weight:800; color:#4a3a1a; text-align:center; margin-bottom:12px; padding-bottom:9px; border-bottom:1px solid rgba(120,95,55,.25); display:flex; align-items:center; justify-content:center; gap:8px; }
+    .mbook-right-actions { display:inline-flex; gap:4px; }
+    .mbook-right-actions button { width:19px; height:19px; border-radius:50%; border:1px solid rgba(96,74,40,.35); background:rgba(255,252,244,.6); color:rgba(96,74,40,.65); font-size:.6rem; cursor:pointer; line-height:1; }
+    .mbook-right-actions button:hover { background:rgba(96,74,40,.14); color:#3a2c12; }
+    /* 아이템 슬롯 (테두리 색 = 드롭 희귀도) */
+    .mbook-item-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .mbook-slot { position:relative; aspect-ratio:1; border-radius:8px; background:linear-gradient(160deg,#fffef9,#f0e9d6);
+      box-shadow:inset 0 0 0 2px var(--rc,rgba(120,95,55,.28)), 0 1px 3px rgba(90,66,30,.16);
+      display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s; }
+    .mbook-slot:hover { transform:translateY(-2px); }
+    .mbook-slot img { width:80%; height:80%; object-fit:contain; image-rendering:pixelated; }
+    .mbook-slot-cnt { position:absolute; right:3px; bottom:2px; font-size:.66rem; font-weight:800;
+      color:#fff; background:rgba(74,58,26,.9); border-radius:5px; padding:0 4px; line-height:1.4; }
+    /* 아이템 클릭 시 메모지 팝업 */
+    .mbook-note {
+      position:absolute; z-index:20; width:168px; padding:10px 12px 11px; border-radius:3px;
+      background:linear-gradient(165deg,#fffdf5,#fbf3dd);
+      box-shadow:0 6px 16px rgba(60,45,20,.32), 0 1px 0 rgba(255,255,255,.6) inset;
+      transform:rotate(-1.2deg); font-size:.66rem; color:#4a3a1a; line-height:1.55;
+      border:1px solid rgba(120,95,55,.2);
+    }
+    .mbook-note::before { content:''; position:absolute; top:-6px; left:16px; width:20px; height:10px; border-radius:2px;
+      background:rgba(200,148,38,.35); transform:rotate(-8deg); }
+    .mbook-note-name { font-weight:800; font-size:.72rem; margin-bottom:4px; color:#3a2c12; }
+    .mbook-note-row { display:flex; justify-content:space-between; gap:10px; }
+    .mbook-note-row + .mbook-note-row { margin-top:2px; }
+    .mbook-note-label { color:#8a7038; }
+    .mbook-note-val { font-weight:700; color:#3a2c12; }
+    /* 통계 (드롭 통계 모달 구조 재사용, 크림 페이지에 맞게 색 덮어씀) */
+    .mbook-stat-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
+    .mbook-stat-kills { font-size:.62rem; color:#7a6234; font-weight:700; }
+    .mbook-stat-mode { font-size:.58rem; padding:2px 9px; border-radius:5px; border:1px solid rgba(120,95,55,.35); background:rgba(255,252,244,.6); color:#5a4a2a; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all .15s; }
+    .mbook-stat-mode:hover { background:rgba(120,95,55,.14); color:#3a2c12; }
+    .mbook-right .stat-name { color:#4a3a1a; }
+    .mbook-right .stat-rate { color:#8a7038; }
+    .mbook-right .stat-row { border-bottom-color:rgba(120,95,55,.14); }
+    .mbook-right .stat-divider { background:rgba(120,95,55,.18); }
+    /* 타임라인 — 본문 타임라인(.tl-row 등)과 동일한 구조·클래스를 재사용, 여백/라벨 색만 책에 맞게 보정 */
+    .mbook-tl { padding:8px 6px 4px; }
+    .mbook-tl .tl-row { margin-bottom:22px; }
+    .mbook-tl .tl-time-labels { color:#8a7038; }
+    .mbook-empty { color:#8a7d64; font-size:.78rem; text-align:center; padding:26px 10px; }
+    /* 라벨‥값 세로 목록 — 책 목차식 점선 리더 (표지·기본정보 공용) */
+    .mbook-stat-list { display:flex; flex-direction:column; gap:11px; margin:0 auto; width:230px; }
+    .mbook-stat-list-row { display:flex; align-items:baseline; width:100%; }
+    .msl-label { flex:0 0 auto; white-space:nowrap; color:#6b5636; font-size:.76rem; font-weight:600; letter-spacing:.01em; }
+    .msl-dots { flex:1; min-width:14px; margin:0 6px; border-bottom:1px dotted rgba(110,90,60,.5); position:relative; top:-4px; }
+    .msl-val { flex:0 0 auto; color:#2f2410; font-weight:600; font-size:.9rem; font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+    .mbook-stat-list.lg { width:270px; gap:17px; }
+    .mbook-stat-list.lg .msl-label { font-size:.96rem; }
+    .mbook-stat-list.lg .msl-val { font-size:1.02rem; }
+    /* 기본정보 탭 */
+    .mbook-info-top { display:flex; flex-direction:column; align-items:center; padding:8px 0 16px; }
+    .mbook-info-name { font-size:1.15rem; font-weight:800; color:#2f2410; margin-bottom:10px; letter-spacing:-.01em; }
+    .mbook-info-img { width:220px; height:220px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 6px 10px rgba(60,45,20,.32)); }
+    .mbook-info-bottom { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px; padding-top:16px; border-top:1px solid rgba(120,95,55,.22); }
+    .mbook-stat-list.sm { width:200px; gap:5px; margin:2px auto 0; }
+    .mbook-stat-list.sm .msl-label { font-size:.6rem; }
+    .mbook-stat-list.sm .msl-val { font-size:.7rem; }
+    /* 표지(cover) — 책 제목면처럼: 장식 없이 여백·플뢰론 위주 */
+    .mbook-cover { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:22px; }
+    .mbook-cover-title { font-size:1.3rem; font-weight:800; color:#2f2410; letter-spacing:.22em; text-shadow:0 1px 0 rgba(255,255,255,.5); }
+    .mbook-cover .mbook-stat-list { margin-top:14px; }
+    .mbook-cover-leaf { font-size:3rem; line-height:1; filter:drop-shadow(0 3px 5px rgba(60,45,20,.32)); }
+    .mbook-cover-rule { display:flex; align-items:center; gap:10px; width:100%; max-width:190px; }
+    .mbook-cover-rule::before, .mbook-cover-rule::after { content:''; flex:1; height:1px; background:rgba(110,90,60,.4); }
+    /* 우측 페이지(표지) — 안내문 + 버전 */
+    .mbook-colophon { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:9px; padding:0 14px; }
+    .mbook-colophon p { font-size:.72rem; color:#6b5636; line-height:1.6; }
+    .mbook-colophon-cheer { margin-top:8px; font-size:.86rem; font-weight:800; color:#2f2410; letter-spacing:.03em; }
+    .mbook-colophon-ver { position:absolute; right:6px; bottom:4px; font-size:.6rem; color:rgba(110,90,60,.55); letter-spacing:.02em; }
+
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
-      display:none; position:fixed; inset:0; z-index:500;
+      display:none; position:fixed; inset:0; z-index:9600;
       background:rgba(0,0,0,.6); align-items:center; justify-content:center;
       backdrop-filter:blur(2px);
     }
     .del-confirm-overlay.open { display:flex; }
     .del-confirm-dialog {
       position:relative;
-      background:
-        radial-gradient(ellipse at 30% 15%, rgba(120,15,15,.3) 0%, transparent 55%),
-        linear-gradient(165deg, #1e0506, #2a0708, #1e0506);
-      border-radius:14px; width:min(320px,86vw);
+      background:linear-gradient(180deg,#ece2cc,#e2d6ba);
+      border-radius:10px; width:min(320px,86vw);
       box-shadow:
-        0 0 0 1.5px #6b2e0a,
-        0 0 0 3.5px #c8922a,
-        0 0 0 5.5px #4a2008,
-        0 24px 70px rgba(0,0,0,.95),
-        inset 0 1px 0 rgba(255,220,130,.05);
+        0 0 0 5px #c3a86e,
+        0 0 0 7px #8f7538,
+        0 0 0 8px rgba(0,0,0,.4),
+        0 24px 60px rgba(0,0,0,.7);
       overflow:hidden;
       animation: delConfirmIn .18s ease-out;
     }
@@ -1138,38 +1279,39 @@
       to   { opacity:1; transform:scale(1) translateY(0); }
     }
     .del-confirm-body {
-      padding:30px 26px 22px;
-      border-bottom:1px solid rgba(216,148,38,.2);
+      padding:28px 26px 20px;
+      border-bottom:1px solid rgba(120,95,55,.22);
+      background:linear-gradient(180deg,#f4eedd,#ece3cc);
     }
     .del-confirm-icon {
-      font-size:1.5rem; text-align:center; margin-bottom:13px; opacity:.8;
+      font-size:1.5rem; text-align:center; margin-bottom:13px; opacity:.85;
     }
     .del-confirm-msg {
-      font-size:.78rem; color:rgba(255,218,128,.82); line-height:1.65; text-align:center;
+      font-size:.78rem; color:#4a3a1a; line-height:1.65; text-align:center;
     }
     .del-confirm-name {
-      color:rgba(216,148,38,.95); font-weight:700;
+      color:#8a6a1e; font-weight:800;
     }
     .del-confirm-sub {
-      font-size:.62rem; color:rgba(200,168,107,.38); margin-top:7px; text-align:center;
+      font-size:.62rem; color:#8a7d64; margin-top:7px; text-align:center;
       letter-spacing:.02em;
     }
     .del-confirm-actions {
       display:flex;
-      background:rgba(0,0,0,.3);
+      background:rgba(120,95,55,.08);
     }
     .del-confirm-btn {
       flex:1; padding:14px; border:none; background:none;
-      font-family:inherit; font-size:.76rem; font-weight:600;
+      font-family:inherit; font-size:.76rem; font-weight:700;
       cursor:pointer; transition:background .15s, color .15s;
       letter-spacing:.03em;
     }
     .del-confirm-btn-cancel {
-      color:rgba(200,168,107,.55); border-right:1px solid rgba(216,148,38,.18);
+      color:rgba(90,74,42,.7); border-right:1px solid rgba(120,95,55,.2);
     }
-    .del-confirm-btn-cancel:hover { background:rgba(255,255,255,.04); color:rgba(200,168,107,.88); }
-    .del-confirm-btn-del { color:rgba(235,90,90,.65); }
-    .del-confirm-btn-del:hover { background:rgba(180,30,30,.2); color:rgba(255,120,120,.92); }
+    .del-confirm-btn-cancel:hover { background:rgba(120,95,55,.1); color:#4a3a1a; }
+    .del-confirm-btn-del { color:rgba(190,60,60,.82); }
+    .del-confirm-btn-del:hover { background:rgba(190,60,60,.14); color:#c23030; }
 
     /* ─ Saves ─ */
     .saves-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(102px,1fr)); gap:8px; margin-top:6px; }
@@ -5761,6 +5903,7 @@ function saveTrophyFromModal() {
     mobData: { ...mobData },
     excl:    [...(store[`excl_${mob.id}`] || [])],
     tlBase:  store[`tl_base_${mob.id}`] || null,
+    chCount: (store[`sw_ch_${mob.id}`] || []).length,
   });
   store.completed = completed;
   if (store[`mob_${mob.id}`]) store[`mob_${mob.id}`].completionSaved = true;
@@ -5798,6 +5941,7 @@ function saveCompletion(mob, elapsedMs) {
     mobData: { ...mobData },
     excl:    [...(store[`excl_${mob.id}`] || [])],
     tlBase:  store[`tl_base_${mob.id}`] || null,
+    chCount: (store[`sw_ch_${mob.id}`] || []).length,
   });
   store.completed = completed;
   store[`mob_${mob.id}`] = { ...mobData, completionSaved: true };
@@ -5910,45 +6054,315 @@ function renderTrophyGrid() {
   if (!grid) return;
   if (!sorted.length) {
     updateTrophyStats([], store);
-    grid.innerHTML = '<div style="color:rgba(200,168,107,.5);font-size:.8rem;padding:20px;text-align:center">아직 완료한 도감작이 없습니다</div>';
+    grid.innerHTML = '<div style="color:#8a7d64;font-size:.8rem;padding:20px;text-align:center">아직 완료한 도감작이 없습니다</div>';
     return;
   }
   updateTrophyStats(completed, store);
   grid.innerHTML = sorted.map(c => {
     const yymm = c.date ? c.date.slice(2).replace(/-/g, '.') : '';
-    const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
     const kills   = _calcTrophyKills(c, store);
     const lv = c.level || PRESET.find(p => p.id === c.mobId)?.level || 0;
-    return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})">
+    return `<div class="trophy-card" onclick="openTrophyModal(${c.mobId})" title="${escHtml(c.mobName)}">
       <button class="trophy-resume-btn" onclick="event.stopPropagation();resumeTrophy(${c.mobId})" title="이어하기">↩</button>
       <button class="trophy-stat-btn" onclick="event.stopPropagation();openTrophyStatTable(${c.mobId})" title="통계 보기">S</button>
       <button class="trophy-del" onclick="event.stopPropagation();deleteTrophy(${c.mobId})">✕</button>
       <img class="trophy-face" src="${mobImg(c.mobId)}" alt="" onerror="this.style.display='none'" draggable="false">
       <div class="trophy-info">
         <div class="trophy-name">${escHtml(c.mobName)}</div>
-        <div class="trophy-name-divider"></div>
-        <div class="trophy-stats">
-          <div class="trophy-stat-row">
-            <div class="trophy-stat-value">${timeStr}</div>
-            <div class="trophy-stat-label">소요 시간</div>
-          </div>
-          ${kills > 0 ? `<div class="trophy-stat-row">
-            <div class="trophy-stat-value">${kills.toLocaleString()}</div>
-            <div class="trophy-stat-label">사냥 수</div>
-          </div>` : ''}
-        </div>
-        <div class="trophy-date-badge">${yymm}</div>
+        <div class="trophy-album-meta">${yymm}${kills > 0 ? ` · ${kills.toLocaleString()}마리` : ''}</div>
       </div>
     </div>`;
   }).join('');
 }
 
-function openTrophyRoom() {
+// ═══ 몬스터북 (완료 도감작을 펼친 책으로) ═══
+const MBOOK_PAGE_SIZE = 25; // 5×5
+let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'cover', _mbookNoteData = null;
+
+function openTrophyRoom() { openMonsterBook(); }  // 진열장 트리거 → 몬스터북
+function openMonsterBook() {
+  // 항상 표지(기본 통계) 화면부터 시작
+  _mbookPage = 'cover';
+  _mbookSel = null;
+  _mbookTab = 'info';
+  mbookSyncLeftTabs();
+  mbookSyncTabs();
+  renderMbookList();
+  renderMbookRight();
+  document.getElementById('mbook-overlay').classList.add('open');
+}
+function closeMonsterBook() {
+  mbookHideNote();
+  document.getElementById('mbook-overlay').classList.remove('open');
+}
+function mbookSyncLeftTabs() {
+  document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
+}
+function mbookSyncTabs() {
+  const noSel = _mbookSel == null;
+  document.querySelectorAll('.mbook-tab').forEach(t => {
+    const isInfo = t.dataset.tab === 'info';
+    t.classList.toggle('active', t.dataset.tab === _mbookTab);
+    t.classList.toggle('disabled', noSel && !isInfo);
+  });
+}
+function mbookSetPage(page) {
+  _mbookPage = page;
+  mbookHideNote();
+  mbookSyncLeftTabs();
+  mbookSyncTabs();
+  renderMbookList();
+  renderMbookRight();
+}
+function mbookSetTab(tab) {
+  if (_mbookSel == null && tab !== 'info') return; // 몹 미선택 시 기본정보만 활성화
+  _mbookTab = tab; mbookHideNote(); mbookSyncTabs(); renderMbookRight();
+}
+function mbookSelect(mobId) {
+  _mbookSel = mobId;
+  mbookHideNote();
+  document.querySelectorAll('.mbook-mob').forEach(el => el.classList.toggle('sel', Number(el.dataset.mob) === mobId));
+  mbookSyncTabs();
+  renderMbookRight();
+}
+function renderMbookList() {
+  const leftPage = document.querySelector('.mbook-page.mbook-left');
+  if (!leftPage) return;
   const completed = getTrophyCompleted();
-  const sub = document.getElementById('trophy-modal-sub');
-  if (sub) sub.textContent = `총 ${completed.length}마리 완료`;
-  setTrophySort(_trophySort.key); // renderTrophyGrid 내부에서 호출됨
-  document.getElementById('trophy-overlay').classList.add('open');
+  if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(completed); return; }
+  leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div><div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
+  const cnt = document.getElementById('mbook-count');
+  if (cnt) cnt.textContent = completed.length ? `(${completed.length})` : '';
+  const grid = document.getElementById('mbook-mob-grid');
+  if (!completed.length) { grid.innerHTML = '<div class="mbook-empty" style="grid-column:1/-1">아직 완료한 도감작이 없습니다</div>'; return; }
+  const pageIdx = Number(_mbookPage);
+  const slice = completed.slice(pageIdx * MBOOK_PAGE_SIZE, pageIdx * MBOOK_PAGE_SIZE + MBOOK_PAGE_SIZE);
+  let html = slice.map(c =>
+    `<div class="mbook-mob${c.mobId === _mbookSel ? ' sel' : ''}" data-mob="${c.mobId}" onclick="mbookSelect(${c.mobId})" title="${escHtml(c.mobName)}">
+       <img src="${mobImg(c.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`
+  ).join('');
+  for (let i = slice.length; i < MBOOK_PAGE_SIZE; i++) html += '<div class="mbook-mob empty"></div>';
+  grid.innerHTML = html;
+}
+// 표지(왼쪽 페이지) — 완료 도감작 전체 통계를 한곳에 모아 표시
+function mbookCoverLeftHtml(completed) {
+  const store = loadS();
+  const count = completed.length;
+  const totalMs = completed.reduce((s, c) => s + (c.elapsed || 0), 0);
+  const totalKills = completed.reduce((s, c) => s + _calcTrophyKills(c, store), 0);
+  const rows = [
+    ['완료한 도감작', count ? `${count}개` : '-'],
+    ['누적 소요시간', fmtAvgElapsed(totalMs)],
+    ['전체 사냥 마릿수', totalKills ? `${totalKills.toLocaleString()}마리` : '-'],
+  ];
+  return `<div class="mbook-cover">
+    <div class="mbook-cover-leaf">🍁</div>
+    <div class="mbook-cover-rule"></div>
+    <div class="mbook-cover-title">완료된 도감작</div>
+    <div class="mbook-cover-rule"></div>
+    ${mbookStatListHtml(rows, 'lg')}
+  </div>`;
+}
+// 라벨‥값 세로 목록 공용 빌더 (책 목차식 점선 리더)
+function mbookStatListHtml(rows, size) {
+  return `<div class="mbook-stat-list${size ? ' ' + size : ''}">` +
+    rows.map(([label, val]) => `<div class="mbook-stat-list-row"><span class="msl-label">${label}</span><span class="msl-dots"></span><span class="msl-val">${val}</span></div>`).join('') +
+    `</div>`;
+}
+function renderMbookRight() {
+  const titleEl = document.getElementById('mbook-right-title');
+  const bodyEl  = document.getElementById('mbook-right-body');
+  if (!titleEl || !bodyEl) return;
+  mbookHideNote();
+  const completed = getTrophyCompleted();
+  if (_mbookPage === 'cover') {
+    titleEl.textContent = '';
+    const ver = document.getElementById('ver-label')?.textContent || '';
+    bodyEl.innerHTML = `<div class="mbook-colophon">
+      <p>완료된 도감작이 저장됩니다</p>
+      <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
+      <p class="mbook-colophon-cheer">도감길드 파이팅</p>
+    </div>
+    <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
+    return;
+  }
+  if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
+  const store = loadS();
+  const c = completed.find(x => x.mobId === _mbookSel);
+  if (!c) { titleEl.textContent = '-'; bodyEl.innerHTML = ''; return; }
+  titleEl.innerHTML = `<span>${escHtml(c.mobName)}</span><span class="mbook-right-actions">
+    <button onclick="resumeTrophy(${c.mobId})" title="이어하기">↩</button>
+    <button onclick="deleteTrophy(${c.mobId})" title="삭제">✕</button></span>`;
+  const excl    = new Set(store[`excl_${c.mobId}`] || []);
+  const drops   = (c.drops || []).filter(d => !excl.has(d.id));
+  const mobData = c.mobData || {};
+  if (_mbookTab === 'stats')         bodyEl.innerHTML = mbookStatsHtml(c, drops, mobData, store);
+  else if (_mbookTab === 'timeline') bodyEl.innerHTML = mbookTimelineHtml(c, drops, mobData);
+  else if (_mbookTab === 'info')     bodyEl.innerHTML = mbookInfoHtml(c, drops, mobData, store);
+  else                               bodyEl.innerHTML = mbookItemsHtml(c, drops, mobData, store);
+}
+function mbookInfoHtml(c, drops, mobData, store) {
+  const kills = _calcTrophyKills(c, store);
+  const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
+  const chCount = (c.chCount != null) ? `${c.chCount.toLocaleString()}회` : '-';
+  const activeRates = drops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
+  const exp = activeRates.length ? `${_calcExpectedAll(activeRates).toLocaleString('ko-KR')}마리` : '-';
+  const animBase = `https://maplestory.io/api/kms/284/mob/${c.mobId}/render`;
+  const bigRows = [
+    ['소요 시간', timeStr],
+    ['사냥 마릿수', kills ? `${kills.toLocaleString()}마리` : '-'],
+  ];
+  const smallRows = [
+    ['채널 변경 횟수', chCount],
+    ['도감 완료 기댓값', exp],
+  ];
+  return `<div class="mbook-info-top">
+      <div class="mbook-info-name">${escHtml(c.mobName)}</div>
+      <img class="mbook-info-img" src="${animBase}/move" onerror="this.onerror=null;this.src='${mobImg(c.mobId)}'">
+    </div>
+    <div class="mbook-info-bottom">${mbookStatListHtml(bigRows, 'lg')}${mbookStatListHtml(smallRows, 'sm')}</div>`;
+}
+function mbookItemsHtml(c, drops, mobData, store) {
+  if (!drops.length) return '<div class="mbook-empty">표시할 아이템이 없습니다</div>';
+  const kills = _calcTrophyKills(c, store);
+  _mbookNoteData = { drops, mobData, kills };
+  return '<div class="mbook-item-grid">' + drops.map(d => {
+    const cnt = mobData[d.id]?.count || 0;
+    const col = tlRarity(d.rate).color;
+    return `<div class="mbook-slot" style="--rc:${col}" data-item="${d.id}" onclick="mbookShowNote(event,${d.id})" title="${escHtml(d.name)}">
+      <img src="${itemImg(d.id)}" onerror="onItemImgError(this,${d.id})">
+      <span class="mbook-slot-cnt">${cnt}</span></div>`;
+  }).join('') + '</div>';
+}
+// 아이템 클릭 → 메모지 팝업 (다른 곳 클릭 시 닫힘)
+function mbookHideNote() { document.getElementById('mbook-note')?.remove(); }
+function mbookShowNote(e, dropId) {
+  e.stopPropagation();
+  mbookHideNote();
+  const data = _mbookNoteData; if (!data) return;
+  const d = data.drops.find(x => x.id === dropId);
+  if (!d) return;
+  const cnt  = data.mobData[dropId]?.count || 0;
+  const rate = parseFloat(d.rate) / 100;
+  const expVal = (data.kills > 0 && rate > 0) ? (data.kills * rate) : null;
+  const exp = expVal == null ? '-' : (expVal >= 10 ? expVal.toFixed(1) : expVal.toFixed(2)) + '개';
+  const typeLabel = itemTypeLabel(dropId) || '기타';
+  const page = e.currentTarget.closest('.mbook-page');
+  if (!page) return;
+  const pr = page.getBoundingClientRect();
+  const sr = e.currentTarget.getBoundingClientRect();
+  const note = document.createElement('div');
+  note.className = 'mbook-note';
+  note.id = 'mbook-note';
+  note.onclick = (ev) => ev.stopPropagation();
+  note.innerHTML = `<div class="mbook-note-name">${escHtml(d.name)}</div>
+    <div class="mbook-note-row"><span class="mbook-note-label">분류</span><span class="mbook-note-val">${typeLabel}</span></div>
+    <div class="mbook-note-row"><span class="mbook-note-label">확률</span><span class="mbook-note-val">${d.rate || '-'}</span></div>
+    <div class="mbook-note-row"><span class="mbook-note-label">획득</span><span class="mbook-note-val">${cnt}개</span></div>
+    <div class="mbook-note-row"><span class="mbook-note-label">기대값</span><span class="mbook-note-val">${exp}</span></div>`;
+  page.appendChild(note);
+  const noteW = note.offsetWidth || 168, noteH = note.offsetHeight || 110;
+  let left = sr.left - pr.left + sr.width / 2 - noteW / 2;
+  left = Math.max(4, Math.min(left, page.clientWidth - noteW - 4));
+  let top = sr.top - pr.top + sr.height + 10;
+  if (top + noteH > page.clientHeight) top = Math.max(4, sr.top - pr.top - noteH - 8);
+  note.style.left = left + 'px';
+  note.style.top  = top + 'px';
+  document.addEventListener('click', mbookHideNote, { once: true });
+}
+function mbookToggleStatMode() { _statMode = _statMode === 'rate' ? 'count' : 'rate'; renderMbookRight(); }
+function mbookStatsHtml(c, drops, mobData, store) {
+  const kills = _calcTrophyKills(c, store);
+  if (!drops.length) return '<div class="mbook-empty">표시할 아이템이 없습니다</div>';
+  const sorted = drops.slice().sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)).slice(0, 20);
+  const killLine = kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음';
+  const modeLabel = _statMode === 'rate' ? '확률' : '획득수';
+  return `<div class="mbook-stat-top">
+      <span class="mbook-stat-kills">${killLine}</span>
+      <button class="mbook-stat-mode" onclick="mbookToggleStatMode()">${modeLabel}</button>
+    </div>
+    <div class="mbook-stat-body" style="display:flex">${buildStatColsHtml(sorted, mobData, kills, _statMode)}</div>`;
+}
+// 총 소요시간에 맞춰 한 줄에 표시할 시간 폭을 골라 8줄 이내로 맞춤 (짧은 사냥~100시간대 사냥 모두 대응)
+const MBOOK_TL_ROW_CANDIDATES = [5,15,30,60,120,240,480,720,1440,2880,6000].map(m => m * 60 * 1000);
+function _mbookTlPickRowMs(total) {
+  for (const ms of MBOOK_TL_ROW_CANDIDATES) { if (Math.ceil(total / ms) <= 8) return ms; }
+  return MBOOK_TL_ROW_CANDIDATES[MBOOK_TL_ROW_CANDIDATES.length - 1];
+}
+// 본문 타임라인(renderTimeline/_renderTlModalRows)과 동일한 행·클러스터 구조를 재사용
+function mbookTimelineHtml(c, drops, mobData) {
+  const total = c.elapsed || 0;
+  const items = drops.filter(d => mobData[d.id]?.firstTime != null)
+    .map(d => ({ ...d, firstTime: mobData[d.id].firstTime }))
+    .sort((a, b) => a.firstTime - b.firstTime);
+  if (!total || !items.length) return '<div class="mbook-empty">타임라인 정보가 없습니다</div>';
+
+  const ROW_MS = _mbookTlPickRowMs(total);
+  const totalRows = Math.max(1, Math.ceil(total / ROW_MS));
+  const OVERLAP = 10; // % 이내 = 같은 클러스터
+  let rowsHtml = '';
+  for (let row = 0; row < totalRows; row++) {
+    const rStart = row * ROW_MS, rEnd = rStart + ROW_MS;
+    const fillPct = total >= rEnd ? 100 : ((total - rStart) / ROW_MS * 100).toFixed(1);
+    const rowItems = items.filter(d => d.firstTime >= rStart && d.firstTime < rEnd);
+
+    const clusters = [];
+    rowItems.forEach(d => {
+      const xPct = (d.firstTime - rStart) / ROW_MS * 100;
+      const hit = clusters.find(cl => Math.abs(cl.xPct - xPct) < OVERLAP);
+      if (hit) hit.items.push(d); else clusters.push({ xPct, items: [d] });
+    });
+    const calloutsH = rowItems.length > 0 ? 42 : 0;
+
+    let callHtml = '';
+    clusters.forEach(({ xPct, items: cItems }) => {
+      const cx = Math.min(Math.max(xPct, 2), 98).toFixed(1);
+      if (cItems.length === 1) {
+        const d = cItems[0]; const rar = tlRarity(d.rate);
+        callHtml += `<div class="tl-callout" style="left:${cx}%;bottom:0">
+          <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+            <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
+          </div>
+          <div class="tl-arrow" style="border-top-color:${rar.color}"></div>
+        </div>`;
+      } else {
+        const seenIds = new Set();
+        const uniqueItems = [], dupItems = [];
+        cItems.forEach(d => { if (!seenIds.has(d.id)) { seenIds.add(d.id); uniqueItems.push(d); } else dupItems.push(d); });
+        const orderedItems = [...uniqueItems, ...dupItems];
+        const MAX_VIS = 3;
+        const visCount = Math.min(uniqueItems.length, MAX_VIS);
+        const arrowIdx = visCount > 1 ? 1 : 0;
+        let wrapsHtml = '';
+        orderedItems.forEach((d, i) => {
+          const rar = tlRarity(d.rate);
+          const rot = i < visCount ? (i - (visCount - 1) / 2) * 6 : 0;
+          const isExtra = i >= MAX_VIS;
+          const showArrow = i === arrowIdx;
+          wrapsHtml += `<div class="tl-callout-wrap${isExtra ? ' tl-extra' : ''}" data-item-id="${d.id}" style="transform:rotate(${rot}deg)">
+            <div class="tl-callout-box ${rar.cls}" title="${escHtml(d.name)}">
+              <img src="${itemImg(d.id)}" alt="${escHtml(d.name)}" onerror="onItemImgError(this,${d.id})">
+            </div>
+            ${showArrow ? `<div class="tl-arrow" style="border-top-color:${rar.color}"></div>` : `<div class="tl-arrow-spacer"></div>`}
+          </div>`;
+        });
+        callHtml += `<div class="tl-cluster" style="left:${cx}%" onclick="tlToggleCluster(event,this)">
+          ${wrapsHtml}
+          <div class="tl-cluster-badge">+${cItems.length - 1}</div>
+        </div>`;
+      }
+    });
+
+    const grad = `linear-gradient(90deg,${tlColor(rStart)},${tlColor(rEnd)})`;
+    rowsHtml += `<div class="tl-row" data-row="${row}">
+      ${calloutsH > 0 ? `<div class="tl-callouts" style="height:${calloutsH}px">${callHtml}</div>` : ''}
+      <div class="tl-bar-zone">
+        <div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:${fillPct}%;background:${grad}"></div></div>
+      </div>
+      <div class="tl-time-labels"><span>${fmtTime(rStart).replace(/\.\d+$/, '')}</span><span>${fmtTime(Math.min(rEnd, total)).replace(/\.\d+$/, '')}</span></div>
+    </div>`;
+  }
+  return `<div class="mbook-tl">${rowsHtml}</div>`;
 }
 
 let _pendingResumeMobId = null;
@@ -6050,14 +6464,14 @@ function confirmDeleteTrophy() {
   if (store[`mob_${mobId}`]) delete store[`mob_${mobId}`].completionSaved;
   saveS(store);
   renderTrophy();
-  renderTrophyGrid();
-  const sub = document.getElementById('trophy-modal-sub');
-  if (sub) sub.textContent = `총 ${getTrophyCompleted().length}마리 완료`;
+  // 몬스터북 갱신
+  if (_mbookSel === mobId) { _mbookSel = null; mbookSyncTabs(); }
+  renderMbookList();
+  renderMbookRight();
 }
 
 function closeTrophyRoom(e) {
-  if (e && e.target !== document.getElementById('trophy-overlay')) return;
-  document.getElementById('trophy-overlay').classList.remove('open');
+  closeMonsterBook();
 }
 
 function openTrophyModal(mobId) {
@@ -6362,7 +6776,7 @@ applySelectPanelState();
     </div>
     <div class="del-confirm-actions">
       <button class="del-confirm-btn del-confirm-btn-cancel" onclick="closeResumeConfirm()">취소</button>
-      <button class="del-confirm-btn" style="background:rgba(30,120,70,.25);border-color:rgba(80,200,120,.5);color:rgba(100,220,150,.95);" onclick="confirmResumeTrophy()">이어하기</button>
+      <button class="del-confirm-btn" style="background:rgba(40,150,90,.14);color:#1d7a45;" onclick="confirmResumeTrophy()">이어하기</button>
     </div>
   </div>
 </div>
@@ -6383,11 +6797,13 @@ applySelectPanelState();
   </div>
 </div>
 
+<!-- 구 진열장(트로피 카드 뷰) — 몬스터북으로 교체, 보존용 주석
 <div class="trophy-overlay" id="trophy-overlay" onclick="closeTrophyRoom(event)">
   <div class="trophy-modal" onclick="event.stopPropagation()">
     <div class="trophy-modal-header">
       <div>
-        <div class="trophy-modal-title">🏅 완료된 도감작 진열장</div>
+        <div class="trophy-modal-title">📖 몬스터북</div>
+        <div class="trophy-modal-sub" id="trophy-modal-sub">완료한 도감작 수집</div>
       </div>
       <button class="trophy-modal-close" onclick="closeTrophyRoom()">✕</button>
     </div>
@@ -6397,26 +6813,47 @@ applySelectPanelState();
       <button class="trophy-sort-btn" id="tsort-kills" onclick="setTrophySort('kills')">마릿수 <span class="trophy-sort-arrow" id="tsort-kills-arrow">↓</span></button>
     </div>
     <div class="trophy-stats-bar">
-      <div class="trophy-stat-item">
-        <div class="trophy-stat-icon">🏆</div>
-        <div class="trophy-stat-num" id="tstat-count">-</div>
-        <div class="trophy-stat-label">완료한 몹</div>
-      </div>
-      <div class="trophy-stat-item">
-        <div class="trophy-stat-icon">🗡</div>
-        <div class="trophy-stat-num" id="tstat-kills">-</div>
-        <div class="trophy-stat-label">총 마릿수</div>
-      </div>
-      <div class="trophy-stat-item">
-        <div class="trophy-stat-icon">⏱</div>
-        <div class="trophy-stat-num" id="tstat-avg">-</div>
-        <div class="trophy-stat-label">누적 소요시간</div>
-      </div>
+      <div class="trophy-stat-item"><div class="trophy-stat-icon">🏆</div><div class="trophy-stat-num" id="tstat-count">-</div><div class="trophy-stat-label">완료한 몹</div></div>
+      <div class="trophy-stat-item"><div class="trophy-stat-icon">🗡</div><div class="trophy-stat-num" id="tstat-kills">-</div><div class="trophy-stat-label">총 마릿수</div></div>
+      <div class="trophy-stat-item"><div class="trophy-stat-icon">⏱</div><div class="trophy-stat-num" id="tstat-avg">-</div><div class="trophy-stat-label">누적 소요시간</div></div>
     </div>
-    <div class="trophy-modal-body">
-      <div class="trophy-grid" id="trophy-grid"></div>
+    <div class="trophy-modal-body"><div class="trophy-grid" id="trophy-grid"></div></div>
+  </div>
+</div>
+-->
+
+<!-- 몬스터북 (펼친 책) -->
+<div class="mbook-overlay" id="mbook-overlay" onclick="if(event.target===this)closeMonsterBook()">
+ <div class="mbook-metal">
+  <div class="mbook">
+    <button class="mbook-close" onclick="closeMonsterBook()">✕</button>
+    <div class="mbook-tabs-left" id="mbook-tabs-left">
+      <button class="mbook-tab-left active" data-page="cover" onclick="mbookSetPage('cover')" title="표지"><span class="mbook-tab-left-icon">ⓘ</span></button>
+      <div class="mbook-tabs-left-gap"></div>
+      <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
+      <button class="mbook-tab-left" data-page="1" onclick="mbookSetPage(1)" title="노랑"></button>
+      <button class="mbook-tab-left" data-page="2" onclick="mbookSetPage(2)" title="파랑"></button>
+      <button class="mbook-tab-left" data-page="3" onclick="mbookSetPage(3)" title="보라"></button>
+    </div>
+    <div class="mbook-tabs" id="mbook-tabs-right">
+      <button class="mbook-tab active" data-tab="info" onclick="mbookSetTab('info')">기본정보</button>
+      <button class="mbook-tab" data-tab="items" onclick="mbookSetTab('items')">아이템</button>
+      <button class="mbook-tab" data-tab="stats" onclick="mbookSetTab('stats')">통계</button>
+      <button class="mbook-tab" data-tab="timeline" onclick="mbookSetTab('timeline')">타임라인</button>
+    </div>
+    <div class="mbook-pages">
+      <div class="mbook-page mbook-left">
+        <div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>
+        <div class="mbook-mob-grid" id="mbook-mob-grid"></div>
+      </div>
+      <div class="mbook-spine"></div>
+      <div class="mbook-page mbook-right">
+        <div class="mbook-right-title" id="mbook-right-title">완료한 도감작을 선택하세요</div>
+        <div class="mbook-right-body" id="mbook-right-body"></div>
+      </div>
     </div>
   </div>
+ </div>
 </div>
 
 <div id="result-overlay" class="result-overlay" style="display:none" onclick="closeResultModal(event)">
@@ -6430,7 +6867,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.114.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6836,21 +7273,8 @@ function openStatTable(e) {
   _renderStatBody(mob);
 }
 
-function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
-  const mob     = overrideMob || activeMob;
-  const kills   = overrideKills != null ? overrideKills : _getProbKills();
-  const store   = loadS();
-  const mobData = overrideMobData || store[`mob_${mob.id}`] || {};
-  const excl    = new Set(store[`excl_${mob.id}`] || []);
-
-  document.getElementById('stat-kills').textContent =
-    kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음 — 수치 미표시';
-
-  const drops = mob.drops
-    .filter(d => !excl.has(d.id))
-    .sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate))
-    .slice(0, 20);
-
+// 통계 두 열 HTML 빌더 (드롭 통계 모달 · 몬스터북 통계 탭 공용). drops=필터·정렬·slice 완료본
+function buildStatColsHtml(drops, mobData, kills, mode) {
   function statColor(count, rate) {
     if (kills === 0) return 'var(--gray)';
     const r = parseFloat(rate) / 100;
@@ -6860,28 +7284,24 @@ function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
     if (ratio >= 0.75) return 'rgba(216,148,38,.85)';
     return '#e06060';
   }
-
   function fmtExpected(rate) {
     if (kills === 0) return '-';
     const v = kills * parseFloat(rate) / 100;
     return v >= 10 ? v.toFixed(1) : v.toFixed(2);
   }
-
   function fmtMissProb(rate, count) {
     if (kills === 0 || count > 0) return '';
     const r = parseFloat(rate) / 100;
     if (r <= 0) return '';
-    const p = Math.pow(1 - r, kills) * 100;
-    return p.toFixed(1) + '%';
+    return (Math.pow(1 - r, kills) * 100).toFixed(1) + '%';
   }
-
   function makeRows(items) {
     return items.map(d => {
       const count = mobData[d.id]?.count || 0;
       const color = statColor(count, d.rate);
-      const left  = _statMode === 'rate' ? d.rate
-                                         : `<span style="color:var(--gray)">${fmtExpected(d.rate)}</span>`;
-      const right = _statMode === 'rate'
+      const left  = mode === 'rate' ? d.rate
+                                    : `<span style="color:var(--gray)">${fmtExpected(d.rate)}</span>`;
+      const right = mode === 'rate'
         ? (() => {
             if (kills === 0) return '-';
             const val = count / kills * 100;
@@ -6901,13 +7321,24 @@ function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
       </div>`;
     }).join('');
   }
+  const left = drops.slice(0, 10), right = drops.slice(10, 20);
+  return `<div class="stat-col">${makeRows(left)}</div>` +
+    (right.length ? `<div class="stat-divider"></div><div class="stat-col">${makeRows(right)}</div>` : '');
+}
 
-  const left  = drops.slice(0, 10);
-  const right = drops.slice(10, 20);
-  document.getElementById('stat-body').innerHTML = `
-    <div class="stat-col">${makeRows(left)}</div>
-    ${right.length ? `<div class="stat-divider"></div><div class="stat-col">${makeRows(right)}</div>` : ''}
-  `;
+function _renderStatBody(overrideMob, overrideMobData, overrideKills) {
+  const mob     = overrideMob || activeMob;
+  const kills   = overrideKills != null ? overrideKills : _getProbKills();
+  const store   = loadS();
+  const mobData = overrideMobData || store[`mob_${mob.id}`] || {};
+  const excl    = new Set(store[`excl_${mob.id}`] || []);
+  document.getElementById('stat-kills').textContent =
+    kills > 0 ? `추정 킬수 ${kills.toLocaleString()}마리 기준` : '획득 기록 없음 — 수치 미표시';
+  const drops = mob.drops
+    .filter(d => !excl.has(d.id))
+    .sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate))
+    .slice(0, 20);
+  document.getElementById('stat-body').innerHTML = buildStatColsHtml(drops, mobData, kills, _statMode);
 }
 
 function openTrophyStatTable(mobId) {
@@ -7141,6 +7572,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.115', date: '26.07.28',
+    feat: [
+      '완료된 도감작(진열장)을 펼친 "몬스터북" 형태로 전면 개편',
+      '표지 — 완료 개수·누적 소요시간·전체 사냥 마릿수 요약',
+      '좌측: 완료한 몹 5×5 페이지네이션 목록 (표지/빨강/노랑/파랑/보라 책갈피로 이동)',
+      '우측: 기본정보(몹 애니메이션·소요시간·마릿수·채널변경·완료 기댓값) / 아이템 / 통계 / 타임라인 탭',
+      '아이템 클릭 시 메모지 팝업(이름·분류·확률·획득수·기대값), 외부 클릭 시 닫힘',
+    ],
+  },
   {
     ver: '1.114.1', date: '26.07.16',
     feat: [
