@@ -1255,6 +1255,24 @@
     .mbook-colophon-cheer { margin-top:8px; font-size:.86rem; font-weight:800; color:#2f2410; letter-spacing:.03em; }
     .mbook-colophon-ver { position:absolute; right:6px; bottom:4px; font-size:.6rem; color:rgba(110,90,60,.55); letter-spacing:.02em; }
 
+    /* 모바일 — 펼친 책(좌우) 대신 위아래로 쌓아서 한 줄로 스크롤, 책갈피는 옆에 안 튀어나오게 상단 가로 탭으로 */
+    @media (max-width: 700px) {
+      .mbook { flex-direction:column; width:94vw; height:90vh; padding:10px; }
+      .mbook-close { top:6px; right:8px; }
+      .mbook-tabs-left, .mbook-tabs {
+        position:static; transform:none; flex-direction:row; flex-wrap:wrap;
+        justify-content:center; width:100%; gap:5px; box-shadow:none; margin-bottom:6px;
+      }
+      .mbook-tabs-left-gap { display:none; }
+      .mbook-tab-left { width:34px; height:26px; border-radius:6px; }
+      .mbook-tab { border-radius:6px; padding:5px 10px; text-align:center; }
+      .mbook-pages { flex-direction:column; overflow-y:auto; }
+      .mbook-page { flex:none; overflow:visible; }
+      .mbook-spine { display:none; }
+      .mbook-left, .mbook-right { border-radius:5px; background:#f0e8d4; box-shadow:none; }
+      .mbook { background:#e8ddc0; }
+    }
+
     /* 삭제 confirm 다이얼로그 */
     .del-confirm-overlay {
       display:none; position:fixed; inset:0; z-index:9600;
@@ -6867,7 +6885,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7572,6 +7590,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.115.1', date: '26.07.28',
+    fix: [
+      '몬스터북 모바일(좁은 화면) 대응 — 펼친 책 대신 위아래로 쌓아 스크롤, 책갈피는 상단 가로 탭으로, 페이지 그라데이션은 단색으로',
+    ],
+  },
   {
     ver: '1.115', date: '26.07.28',
     feat: [
