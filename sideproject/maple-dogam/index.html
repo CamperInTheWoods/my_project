@@ -3558,8 +3558,9 @@ function renderTimeline(panel, mob, tab) {
   const chMarks = s[`sw_ch_${mob.id}`] || [];
 
   // tl_base hidden 아이템은 타임라인에서 제외
+  const _cardOffTl = !getSetting('card_in_timeline');
   const items = [];
-  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id)).forEach(d => {
+  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id) && !(_cardOffTl && d.id === MONSTER_CARD_ID)).forEach(d => {
     const st = store[d.id];
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
@@ -6429,7 +6430,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.114</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.114.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6956,9 +6957,10 @@ function toggleTheme() {
 
 // ── 설정 (확장: 항목을 배열에 추가) ──
 const SETTINGS = [
-  { key: 'show_card',      label: '아이템 목록에 몬스터 카드 표시', def: true,  group: 'general' },
-  { key: 'stamp_fx_card',  label: '몬스터 카드 5장 완성 시 도장 이팩트', def: true, group: 'general' },
-  { key: 'stamp_fx',       label: '아이템 처음 획득 시 도장 이팩트', def: true, group: 'general' },
+  { key: 'show_card',        label: '아이템 목록에 몬스터 카드 표시', def: true,  group: 'general' },
+  { key: 'card_in_timeline', label: '몬스터 카드를 타임라인에 표시', def: true,  group: 'general' },
+  { key: 'stamp_fx_card',    label: '몬스터 카드 5장 완성 시 도장 이팩트', def: true, group: 'general' },
+  { key: 'stamp_fx',         label: '아이템 처음 획득 시 도장 이팩트', def: true, group: 'general' },
   { key: 'ov_show_mob',    label: '몹 이미지 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_name',   label: '몹 이름 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
@@ -6995,6 +6997,9 @@ function onSettingChange(key, val) {
   } else if (key === 'show_card') {
     // 모든 탭 아이템 그리드 재렌더 (카드 표시/숨김 반영)
     tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderItemGridInPanel(p, t.mob); } });
+  } else if (key === 'card_in_timeline') {
+    // 모든 탭 타임라인 재렌더
+    tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderTimeline(p, t.mob, t); } });
   }
 }
 function toggleSettings(e) {
@@ -7044,8 +7049,9 @@ function _renderTlModalRows(mob, tab) {
   const ROW_MS  = TL_MODAL_ROW_MS;
   const OVERLAP = 1; // 25h 기준 ~15분
 
+  const _cardOffTl = !getSetting('card_in_timeline');
   const items = [];
-  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id)).forEach(d => {
+  mob.drops.filter(d => !excl.has(d.id) && !(tlBase?.hidden && tlBase.id === d.id) && !(_cardOffTl && d.id === MONSTER_CARD_ID)).forEach(d => {
     const st = store[d.id];
     if (!st || st.firstTime == null) return;
     if (tlShowAll()) {
@@ -7135,6 +7141,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.114.1', date: '26.07.16',
+    feat: [
+      '설정 › 일반: 몬스터 카드를 타임라인에 표시할지 on/off 토글 추가',
+    ],
+  },
   {
     ver: '1.114', date: '26.07.16',
     feat: [
