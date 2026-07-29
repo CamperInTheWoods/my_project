@@ -6333,20 +6333,21 @@ function mbookToggleStatSel(mobId) {
 }
 const MBOOK_LEAF_MSGS = [
   '허규복 화이팅!', '도감길드 화이팅!', '우리 길드 정상 영업 합니다', '도감작 몬스터북작 파이팅',
-  '좋은 하루 되세요!', '이 넓은 맵을 혼자 쓰세요?', '건강 조심하기!', '감기 조심하세요!',
+  '좋은 하루 되세요!', '이 넓은 맵을 혼자 쓰세요?', '건강 조심하기!',
   '척추요정: 허리 쭉 펴세요', '스트레칭 하세요! 쭉쭉', '나무꾼 여러분 감사합니다!', '도감길드 항시 모집중',
-  '파이팅!', '힘내랏!', '오늘 하루도 고생하셨어요!', '미리 굿밤!',
+  '파이팅!', '오늘 하루도 고생하셨어요!', '미리 굿밤!',
   '어서오세용용', '득템하세요!', 
-  '에어컨 파워 냉방으로 틀어!', '항상 차조심!', '주문서 주세요 제발', '일비 주세요!', '안녕하세요!',
+  '항상 차조심!', '주문서 주세요 제발', '일비 주세요!', '안녕하세요!',
   '왼쪽아래 설정 버튼을 사용해보세요', '여러가지 테마를 바꿔가며 사용해보세요!', '문의사항은 똘레로에게 디스코드로!',
 ];
 const MBOOK_LEAF_MSGS_RARE = [
   '몌몌뀽님 비디오님 피드백 감사합니다.', '허규복은 영상을 올려랏!',
   '부대찌개에 콩나물 넣는 사람들이 이해가 안되요', '채널론은 진짜입니다.', '맴맴맴...',
+  '길마 어디갔어!', '다음 도감작 추천좀요!',
 ];
 let _mbookLastLeafMsg = null;
 function mbookLeafMsg() {
-  const rare = Math.random() < 0.01;
+  const rare = Math.random() < 0.05;
   const pool = rare ? MBOOK_LEAF_MSGS_RARE : MBOOK_LEAF_MSGS;
   let msg = pool[Math.floor(Math.random() * pool.length)];
   if (pool.length > 1) while (msg === _mbookLastLeafMsg) msg = pool[Math.floor(Math.random() * pool.length)];
@@ -7200,7 +7201,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
