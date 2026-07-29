@@ -1,3 +1,12 @@
+<!--
+  이 문구를 읽고있는 당신! 호기심에 오셨거나 개발직종이겠네요!
+  저는 C쪽을 주로 개발하고 있어서 html은 잼병이나, 클로드의 도움으로 여기까지 만들었습니다.
+  제가 직접 쉽고 편하게 쓰고자 하니 기능이 자꾸 늘었습니다.
+  직접 짠게 아니라서 코드가 지저분 할 수 있어요!
+  그래도 수익을 창출하지 않고 보안을 나름 신경써서 개발하고 있으니 좋게 봐주셨음 합니다.
+  문의 사항은 도감길드 디스코드로 부탁드립니다!
+  감사합니다! 항상 건강하시길 바랍니다!
+-->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1185,6 +1194,8 @@
     /* 왼쪽 몹 격자 (5×5 고정) */
     .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
     .mbook-stat-hint { text-align:center; font-size:.66rem; color:#6b5636; margin:-4px 0 8px; }
+    .mbook-stat-divider { border:none; border-top:3px dashed rgba(110,90,60,.5); margin:16px 0 10px; }
+    .mbook-stat-subtitle { font-size:.68rem; font-weight:800; color:#6b5636; margin:0 0 8px; text-align:center; }
     .mbook-mob.mbook-stat-pick img { filter:grayscale(1) opacity(.5); transition:filter .15s; }
     .mbook-mob.mbook-stat-pick.picked img { filter:none; }
     .mbook-chart-block + .mbook-chart-block { margin-top:18px; padding-top:16px; border-top:1px solid rgba(120,95,55,.22); }
@@ -6270,7 +6281,7 @@ function renderMbookList() {
   if (!leftPage) return;
   const rawCompleted = getTrophyCompleted();
   if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(rawCompleted); return; }
-  if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted); return; }
+  if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted, loadS()); return; }
   const completed = mbookSortedCompleted();
   leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
   const cnt = document.getElementById('mbook-count');
@@ -6312,19 +6323,45 @@ function mbookCoverLeftHtml(completed) {
   </div>`;
 }
 // 통계 페이지(왼쪽) — 완료한 몬스터를 클릭해 그래프에 추가/제거하는 선택 그리드
-function mbookStatsLeftHtml(completed) {
-  if (!completed.length) return `<div class="mbook-page-title">통계</div><div class="mbook-empty">아직 완료한 도감작이 없습니다</div>`;
+// 저장된 도감작(store의 mob_숫자 키) 중 아직 완료 목록에 없는 것들 — 진행중인 도감작 목록
+function mbookInProgressList(store, completed) {
+  const completedIds = new Set(completed.map(c => c.mobId));
+  return Object.keys(store).filter(k => /^mob_\d+$/.test(k)).map(k => {
+    const mobId = parseInt(k.replace('mob_', ''));
+    const preset = PRESET.find(m => m.id === mobId);
+    const meta = store[`mob_${mobId}_meta`] || {};
+    const name = (activeMob && activeMob.id === mobId) ? activeMob.name : (preset ? preset.name : (meta.name || `#${mobId}`));
+    return { mobId, name };
+  }).filter(m => !completedIds.has(m.mobId));
+}
+// 진행중인 도감작 하나를 완료된 항목과 같은 모양(mobId/mobName/elapsed/drops/mobData)으로 변환
+function mbookInProgressEntry(mobId, store) {
+  const preset = PRESET.find(m => m.id === mobId);
+  const meta = store[`mob_${mobId}_meta`] || {};
+  const drops = (meta.drops && meta.drops.length) ? meta.drops : (preset ? preset.drops : []);
+  const mobData = store[`mob_${mobId}`] || {};
+  const activeT = tabs.find(t => t.mob && t.mob.id === mobId);
+  const elapsed = activeT ? swElapsed(activeT) : (store[`sw_mob_${mobId}`]?.base || 0);
+  const name = (activeMob && activeMob.id === mobId) ? activeMob.name : (preset ? preset.name : (meta.name || `#${mobId}`));
+  return { mobId, mobName: name, elapsed, drops, mobData };
+}
+function mbookStatsLeftHtml(completed, store) {
+  const inProgress = mbookInProgressList(store, completed);
+  if (!completed.length && !inProgress.length) return `<div class="mbook-page-title">통계</div><div class="mbook-empty">아직 시작한 도감작이 없습니다</div>`;
   const selArr = Array.from(_mbookStatSel);
-  const cells = completed.map(c => {
-    const idx = selArr.indexOf(c.mobId);
+  const cellHtml = (mobId, name) => {
+    const idx = selArr.indexOf(mobId);
     const picked = idx !== -1;
     const ring = picked ? MBOOK_CHART_PALETTE[idx % MBOOK_CHART_PALETTE.length] : null;
-    return `<div class="mbook-mob mbook-stat-pick${picked ? ' picked' : ''}" style="${ring ? `box-shadow:0 0 0 3px ${ring}, 0 2px 4px rgba(0,0,0,.3)` : ''}" data-mob="${c.mobId}" onclick="mbookToggleStatSel(${c.mobId})" title="${escHtml(c.mobName)}">
-      <img src="${mobImg(c.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`;
-  }).join('');
+    return `<div class="mbook-mob mbook-stat-pick${picked ? ' picked' : ''}" style="${ring ? `box-shadow:0 0 0 3px ${ring}, 0 2px 4px rgba(0,0,0,.3)` : ''}" data-mob="${mobId}" onclick="mbookToggleStatSel(${mobId})" title="${escHtml(name)}">
+      <img src="${mobImg(mobId)}" onerror="this.style.display='none'" draggable="false"></div>`;
+  };
+  const completedCells   = completed.map(c => cellHtml(c.mobId, c.mobName)).join('');
+  const inProgressCells  = inProgress.map(m => cellHtml(m.mobId, m.name)).join('');
   return `<div class="mbook-page-title">통계 <span class="mbook-count">(${_mbookStatSel.size}개 선택)</span></div>
     <div class="mbook-stat-hint">몬스터를 클릭해 그래프에 추가·제거하세요</div>
-    <div class="mbook-mob-grid">${cells}</div>`;
+    ${completed.length ? `<div class="mbook-mob-grid">${completedCells}</div>` : '<div class="mbook-empty">완료한 도감작이 없습니다</div>'}
+    ${inProgress.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">진행중인 도감작</div><div class="mbook-mob-grid">${inProgressCells}</div>` : ''}`;
 }
 function mbookToggleStatSel(mobId) {
   if (_mbookStatSel.has(mobId)) _mbookStatSel.delete(mobId); else _mbookStatSel.add(mobId);
@@ -6532,14 +6569,20 @@ function mbookChartSeries(c, store, mode) {
   const drops = (c.drops || []).filter(d => !excl.has(d.id));
   const mobData = c.mobData || {};
   if (!c.elapsed) return null;
+
+  // 전체 아이템(모드 무관) 기준 실제 100% 달성 여부/시점 — 미완료면 그래프가 지금까지 온 지점에서 끊김
+  const allTotal = drops.length;
+  const allTimes = drops.map(d => mobData[d.id]?.firstTime).filter(t => t != null).sort((a, b) => a - b);
+  const isDone = allTotal > 0 && allTimes.length >= allTotal;
+  const completeAt = isDone ? allTimes[allTotal - 1] : null;
+  const markerAt = isDone ? completeAt : c.elapsed; // 100% 달성 시점(완료) 또는 끊긴 시점(미완료)
+
   if (mode === 'rate') {
-    const total = drops.length;
-    if (!total) return null;
-    const times = drops.map(d => mobData[d.id]?.firstTime).filter(t => t != null).sort((a, b) => a - b);
+    if (!allTotal) return null;
     const pts = [[0, 0]];
-    times.forEach((t, i) => { pts.push([t, i / total * 100]); pts.push([t, (i + 1) / total * 100]); });
-    pts.push([c.elapsed, 100]);
-    return { pts, maxY: 100, elapsed: c.elapsed };
+    allTimes.forEach((t, i) => { pts.push([t, i / allTotal * 100]); pts.push([t, (i + 1) / allTotal * 100]); });
+    pts.push([c.elapsed, pts[pts.length - 1][1]]);
+    return { pts, maxY: 100, elapsed: c.elapsed, isDone, markerAt };
   } else {
     const diffTypes = ['장비', '주문서', '표창'];
     const items = drops.filter(d => diffTypes.includes(itemTypeLabel(d.id)) && mobData[d.id]?.firstTime != null)
@@ -6549,14 +6592,14 @@ function mbookChartSeries(c, store, mode) {
     const pts = [[0, 0]];
     items.forEach(it => { pts.push([it.t, cum]); cum += it.cnt; pts.push([it.t, cum]); });
     pts.push([c.elapsed, cum]);
-    return { pts, maxY: cum, elapsed: c.elapsed };
+    return { pts, maxY: cum, elapsed: c.elapsed, isDone, markerAt };
   }
 }
 function mbookChartHtml(completed, store, mode) {
   const selMobs = Array.from(_mbookStatSel);
   if (!selMobs.length) return '<div class="mbook-empty">아래에서 몬스터를 선택하면 그래프에 표시됩니다</div>';
   const series = selMobs.map((mobId, i) => {
-    const c = completed.find(x => x.mobId === mobId);
+    const c = completed.find(x => x.mobId === mobId) || mbookInProgressEntry(mobId, store);
     if (!c) return null;
     const s = mbookChartSeries(c, store, mode);
     if (!s) return null;
@@ -6573,9 +6616,12 @@ function mbookChartHtml(completed, store, mode) {
 
   const paths = series.map(s => {
     const pts = s.pts.slice();
-    if (s.elapsed < maxX) pts.push([maxX, pts[pts.length - 1][1]]);
+    // 완료된(100% 달성) 몹만 끝까지 평평하게 연장, 미완료는 지금까지 온 지점에서 끊어둠
+    if (s.isDone && s.elapsed < maxX) pts.push([maxX, pts[pts.length - 1][1]]);
     const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1]).toFixed(1)}`).join(' ');
-    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>`;
+    const markerX = xScale(s.markerAt).toFixed(1);
+    const marker = `<line x1="${markerX}" y1="${PAD_T}" x2="${markerX}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="4 3" opacity=".7"/>`;
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}`;
   }).join('');
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => {
@@ -7201,7 +7247,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7910,6 +7956,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.116.2', date: '26.07.29',
+    fix: [
+      '통계 그래프에 진행중인 도감작(완료 전 저장된 몬스터)도 함께 선택해서 비교 가능',
+      '미완료 몹의 달성률이 100%로 잘못 치솟던 버그 수정 — 실제 진행 지점에서 그래프가 끊기도록 수정',
+      '각 몹 그래프에 100% 달성 시점(완료) 또는 끊긴 지점(미완료) 표시용 점선 마커 추가',
+    ],
+  },
   {
     ver: '1.116', date: '26.07.29',
     feat: [
