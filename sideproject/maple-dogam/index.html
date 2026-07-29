@@ -6999,7 +6999,7 @@ function openResultModal(mob, _overrideTab, _overrideStore) {
 
   document.getElementById('result-overlay').style.display = 'flex';
 
-  // 진열장 저장 버튼
+  // 도감 저장 버튼
   const trophyBtn = document.getElementById('result-btn-trophy');
   if (trophyBtn) {
     const fromTrophy = !!_overrideStore;
@@ -7009,7 +7009,7 @@ function openResultModal(mob, _overrideTab, _overrideStore) {
       const alreadySaved = !!(loadS()[`mob_${mob.id}`]?.completionSaved);
       trophyBtn.style.display = '';
       trophyBtn.disabled = alreadySaved;
-      trophyBtn.textContent = alreadySaved ? '✓ 저장됨' : '🏅 진열장에 저장';
+      trophyBtn.textContent = alreadySaved ? '✓ 저장됨' : '📖 도감에 저장';
       window._trophyCtx = { mob, elapsedMs, mobData: { ...mobData } };
     }
   }
@@ -7241,13 +7241,13 @@ applySelectPanelState();
     <div id="result-card-export" class="result-card"></div>
     <div class="result-actions">
       <button class="result-btn result-btn-close" onclick="closeResultModal()">닫기</button>
-      <button class="result-btn result-btn-trophy" id="result-btn-trophy" onclick="saveTrophyFromModal()" style="display:none">🏅 진열장에 저장</button>
+      <button class="result-btn result-btn-trophy" id="result-btn-trophy" onclick="saveTrophyFromModal()" style="display:none">📖 도감에 저장</button>
       <button class="result-btn result-btn-save" onclick="exportResultImage()">이미지 저장</button>
     </div>
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.3</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7956,6 +7956,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.116.3', date: '26.07.29',
+    fix: [
+      '결과 모달의 "🏅 진열장에 저장" 버튼을 "📖 도감에 저장"으로 명칭 변경',
+    ],
+  },
   {
     ver: '1.116.2', date: '26.07.29',
     fix: [
