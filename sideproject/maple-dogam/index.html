@@ -852,7 +852,7 @@
     .dex-card .dc-title { font-size:.78rem; font-weight:700; color:var(--dark); }
     .dex-card .dc-sub { font-size:.6rem; color:var(--gray); line-height:1.3; }
 
-    /* 진열장 — 골드 그라데이션 테두리 + 은은한 광 (가장 특별하게) */
+    /* 도감(몬스터북) — 골드 그라데이션 테두리 + 은은한 광 (가장 특별하게) */
     .dex-card.dex-trophy {
       border:1.5px solid transparent;
       background:
@@ -868,7 +868,7 @@
         linear-gradient(135deg, #f8de90, #d8a32e 48%, #f8de90) border-box;
       box-shadow:0 7px 24px rgba(200,148,38,.34);
     }
-    .dex-card.dex-trophy .dc-title { color:#c8941e; }
+    .dex-card.dex-trophy .dc-title { color:#96690a; font-weight:800; }
 
     /* 트로피룸 모달 */
     .trophy-overlay {
@@ -1173,15 +1173,30 @@
     .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
     .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
     .mbook-count { color:#8a7038; font-weight:700; }
+    /* 목차 스타일 정렬 메뉴 — 버튼이 아니라 밑줄 텍스트 링크처럼 */
+    .mbook-sort-bar { display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:0; margin-bottom:10px; }
+    .mbook-sort-btn { font-size:.64rem; font-weight:600; padding:2px 7px; cursor:pointer;
+      border:none; border-bottom:1.5px solid transparent; background:none; color:#8a7350; font-family:inherit; transition:color .15s, border-color .15s; }
+    .mbook-sort-btn:hover { color:#4a3a1e; }
+    .mbook-sort-btn.active { color:#96690a; font-weight:800; border-bottom-color:#c8941e; }
+    .mbook-sort-sep { color:rgba(120,95,55,.4); font-size:.62rem; }
+    .mbook-sort-arrow { font-size:.56rem; }
     /* 왼쪽 몹 격자 (5×5 고정) */
     .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
-    .mbook-mob { aspect-ratio:1; border-radius:7px; background:linear-gradient(160deg,#fffdf6,#efe7d2);
+    .mbook-mob { position:relative; aspect-ratio:1; border-radius:7px; background:linear-gradient(160deg,#fffdf6,#efe7d2);
       box-shadow:0 0 0 3px rgba(208,168,62,.28), 0 2px 4px rgba(0,0,0,.3); cursor:pointer;
       display:flex; align-items:center; justify-content:center; transition:transform .14s, box-shadow .14s; }
     .mbook-mob img { width:86%; height:86%; object-fit:contain; image-rendering:pixelated; }
     .mbook-mob:hover { transform:translateY(-2px); box-shadow:0 0 0 3px rgba(208,168,62,.45), 0 5px 12px rgba(0,0,0,.35); }
     .mbook-mob.sel { box-shadow:0 0 0 3px #c8922a, 0 0 0 4px rgba(208,168,62,.28), 0 5px 12px rgba(0,0,0,.35); background:linear-gradient(160deg,#fff8e6,#f3e9cc); }
     .mbook-mob.empty { cursor:default; background:rgba(120,95,55,.06); box-shadow:inset 0 0 0 2px rgba(208,168,62,.2); }
+    /* 소요시간(난이도) 색을 뱃지보다 옅게 반영한 몹 칸 배경 (설정으로 켜고 끔) */
+    .mbook-mob.time-bg { background:color-mix(in srgb, var(--rc, rgba(120,95,55,.15)) 38%, #fffdf6); }
+    /* 소요시간 뱃지 — 타임라인과 동일한 시간별 색조(파랑→빨강→검정)를 파스텔톤으로, 사각·픽셀 느낌 */
+    .mbook-mob-time { position:absolute; bottom:2px; right:2px; min-width:14px; height:12px; padding:0 2px; border-radius:0; z-index:2;
+      display:flex; align-items:center; justify-content:center; font-size:.44rem; font-weight:800; font-family:'Courier New',monospace;
+      color:rgba(48,36,24,.85); box-shadow:0 0 0 1px rgba(0,0,0,.45);
+      image-rendering:pixelated; }
     /* 오른쪽 */
     .mbook-right-title { font-size:.86rem; font-weight:800; color:#4a3a1a; text-align:center; margin-bottom:12px; padding-bottom:9px; border-bottom:1px solid rgba(120,95,55,.25); display:flex; align-items:center; justify-content:center; gap:8px; }
     .mbook-right-actions { display:inline-flex; gap:4px; }
@@ -1189,7 +1204,8 @@
     .mbook-right-actions button:hover { background:rgba(96,74,40,.14); color:#3a2c12; }
     /* 아이템 슬롯 (테두리 색 = 드롭 희귀도) */
     .mbook-item-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
-    .mbook-slot { position:relative; aspect-ratio:1; border-radius:8px; background:linear-gradient(160deg,#fffef9,#f0e9d6);
+    .mbook-slot { position:relative; aspect-ratio:1; border-radius:8px;
+      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 16%, #fdf8ec);
       box-shadow:inset 0 0 0 2px var(--rc,rgba(120,95,55,.28)), 0 1px 3px rgba(90,66,30,.16);
       display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s; }
     .mbook-slot:hover { transform:translateY(-2px); }
@@ -1252,6 +1268,8 @@
     /* 우측 페이지(표지) — 안내문 + 버전 */
     .mbook-colophon { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:9px; padding:0 14px; }
     .mbook-colophon p { font-size:.72rem; color:#6b5636; line-height:1.6; }
+    .mbook-colophon-msg { margin-top:14px; font-size:.72rem; color:#5a4a2a; line-height:1.75; }
+    .mbook-colophon-msg2 { margin-top:10px; font-size:.78rem; font-weight:700; color:#3a2c12; }
     .mbook-colophon-cheer { margin-top:8px; font-size:.86rem; font-weight:800; color:#2f2410; letter-spacing:.03em; }
     .mbook-colophon-ver { position:absolute; right:6px; bottom:4px; font-size:.6rem; color:rgba(110,90,60,.55); letter-spacing:.02em; }
 
@@ -1397,12 +1415,15 @@
     .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
     .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
     .tl-arrow-spacer { height:5px; }
-    .tl-r0 { border-color:#5b93bf; }
-    .tl-r1 { border-color:#5aab7e; box-shadow:0 1px 5px rgba(90,171,126,.3); }
-    .tl-r2 { border-color:#cbae50; box-shadow:0 1px 5px rgba(203,174,80,.3); }
-    .tl-r3 { border-color:#cf8c54; box-shadow:0 1px 6px rgba(207,140,84,.4); }
-    .tl-r4 { border-color:#d06b62; box-shadow:0 1px 6px rgba(208,107,98,.4); }
-    .tl-r5 { border-color:#9275a6; box-shadow:0 1px 6px rgba(146,117,166,.45); }
+    .tl-r0 { border-color:#3f5f85; }
+    .tl-r1 { border-color:#5b93bf; box-shadow:0 1px 5px rgba(91,147,191,.3); }
+    .tl-r2 { border-color:#4f9c98; box-shadow:0 1px 5px rgba(79,156,152,.3); }
+    .tl-r3 { border-color:#4fac85; box-shadow:0 1px 5px rgba(79,172,133,.35); }
+    .tl-r4 { border-color:#c9ae55; box-shadow:0 1px 6px rgba(201,174,85,.4); }
+    .tl-r5 { border-color:#d06b62; box-shadow:0 1px 6px rgba(208,107,98,.4); }
+    .tl-r6 { border-color:#b06a92; box-shadow:0 1px 6px rgba(176,106,146,.42); }
+    .tl-r7 { border-color:#9275a6; box-shadow:0 1px 6px rgba(146,117,166,.45); }
+    .tl-r8 { border-color:#5b4a68; box-shadow:0 1px 6px rgba(91,74,104,.5); }
     .tl-bar-wrap { position:relative; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
     .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
@@ -2097,12 +2118,12 @@
     <div id="dex-body">
       <div class="dex-grid">
         <div class="dex-card dex-trophy" id="trophy-open-btn" onclick="openTrophyRoom()">
-          <span class="dc-icon">🏅</span>
-          <div class="dc-title" id="trophy-btn-title">진열장</div>
+          <span class="dc-icon">📖</span>
+          <div class="dc-title" id="trophy-btn-title">도감</div>
           <div class="dc-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
         </div>
         <div class="dex-card" onclick="fetchMobDrops(9999001,'표창 모으기',0)">
-          <span class="dc-icon">🌟</span>
+          <span class="dc-icon">✳︎</span>
           <div class="dc-title">표창 모으기</div>
           <div class="dc-sub">12종</div>
         </div>
@@ -3653,12 +3674,15 @@ const TL_MODAL_ROW_MS = 10 * 3600 * 1000; // 10시간 = 한 줄 (모달)
 const TL_MAX_MS = 100 * 3600 * 1000;      // 100시간 = 빨강 기준
 
 const TL_RARITY = [
-  { min:1,     cls:'tl-r0', color:'#5b93bf'  }, // 파랑  (1%~100%)
-  { min:0.1,   cls:'tl-r1', color:'#5aab7e'  }, // 초록  (0.1%~1%)
-  { min:0.01,  cls:'tl-r2', color:'#cbae50'  }, // 노랑  (0.01%~0.1%)
-  { min:0.007, cls:'tl-r3', color:'#cf8c54'  }, // 주황  (0.007%~0.01%)
-  { min:0.005, cls:'tl-r4', color:'#d06b62'  }, // 빨강  (0.005%~0.007%)
-  { min:0,     cls:'tl-r5', color:'#9275a6'  }, // 보라  (0.005% 이하)
+  { min:30,    cls:'tl-r0', color:'#3f5f85'  }, // 남색    (30%~100%)
+  { min:1,     cls:'tl-r1', color:'#5b93bf'  }, // 파랑    (1%~30%)
+  { min:0.1,   cls:'tl-r2', color:'#4f9c98'  }, // 청록    (0.1%~1%)
+  { min:0.01,  cls:'tl-r3', color:'#4fac85'  }, // 옥색    (0.01%~0.1%)
+  { min:0.007, cls:'tl-r4', color:'#c9ae55'  }, // 노랑    (0.007%~0.01%)
+  { min:0.004, cls:'tl-r5', color:'#d06b62'  }, // 빨강    (0.004%~0.007%)
+  { min:0.002, cls:'tl-r6', color:'#b06a92'  }, // 자주    (0.002%~0.004%)
+  { min:0.001, cls:'tl-r7', color:'#9275a6'  }, // 보라    (0.001%~0.002%)
+  { min:0,     cls:'tl-r8', color:'#5b4a68'  }, // 검보라  (0.001% 이하)
 ];
 function tlRarity(rateStr) {
   const r = parseFloat(rateStr);
@@ -3679,6 +3703,20 @@ function tlColor(ms) {
     const p = Math.min((ms - TL_MAX_MS) / TL_MAX_MS, 1);
     const s = Math.round(90 * (1 - p));
     const l = Math.round(40 * (1 - p));
+    return `hsl(0,${s}%,${l}%)`;
+  }
+}
+function mbookTimeBadgeColor(ms) {
+  if (ms <= TL_MAX_MS) {
+    const p = Math.sqrt(ms / TL_MAX_MS);
+    const h = Math.round(240 - p * 240);
+    const s = 42;
+    const l = Math.round(80 - p * 10);
+    return `hsl(${h},${s}%,${l}%)`;
+  } else {
+    const p = Math.min((ms - TL_MAX_MS) / TL_MAX_MS, 1);
+    const s = Math.round(42 * (1 - p) + 14 * p);
+    const l = Math.round(70 - p * 30);
     return `hsl(0,${s}%,${l}%)`;
   }
 }
@@ -5952,6 +5990,7 @@ function saveCompletion(mob, elapsedMs) {
   completed.push({
     mobId:   mob.id,
     mobName: mob.name,
+    level:   mob.level || 0,
     elapsed: elapsedMs,
     kills,
     date:    new Date().toISOString().slice(0, 10),
@@ -5979,7 +6018,7 @@ function renderTrophy() {
   const btn = document.getElementById('trophy-open-btn');
   const btnTitle = document.getElementById('trophy-btn-title');
   const btnSub = document.getElementById('trophy-btn-sub');
-  if (btnTitle) btnTitle.textContent = `진열장`;
+  if (btnTitle) btnTitle.textContent = `도감`;
   if (btnSub) btnSub.textContent = completed.length ? `${completed.length}마리 완료` : '아직 없음';
   if (btn) btn.style.opacity = completed.length ? '1' : '0.5';
 }
@@ -6143,22 +6182,62 @@ function mbookSelect(mobId) {
   mbookSyncTabs();
   renderMbookRight();
 }
+// 몬스터 목록 정렬 — 최근완료순(기본)/이름순/레벨순/소요시간순
+let _mbookSort = { key: 'date', dir: -1 };
+const MBOOK_SORT_OPTS = [
+  ['date', '최근완료순'],
+  ['name', '이름순'],
+  ['level', '레벨순'],
+  ['elapsed', '소요시간순'],
+];
+function mbookSetSort(key) {
+  if (_mbookSort.key === key) _mbookSort.dir *= -1;
+  else _mbookSort = { key, dir: key === 'name' ? 1 : -1 };
+  renderMbookList();
+}
+function mbookSortedCompleted() {
+  const completed = getTrophyCompleted();
+  const { key, dir } = _mbookSort;
+  if (key === 'name') return completed.slice().sort((a, b) => (a.mobName || '').localeCompare(b.mobName || '') * dir);
+  return completed.slice().sort((a, b) => {
+    let av, bv;
+    if (key === 'level')        { av = a.level || 0;  bv = b.level || 0; }
+    else if (key === 'elapsed') { av = a.elapsed || 0; bv = b.elapsed || 0; }
+    else                        { av = a.date || '';   bv = b.date || ''; } // date
+    return av < bv ? -dir : av > bv ? dir : 0;
+  });
+}
+function mbookSortBarHtml() {
+  return `<div class="mbook-sort-bar">${MBOOK_SORT_OPTS.map(([key, label], i) => {
+    const active = _mbookSort.key === key;
+    const arrow = active ? (_mbookSort.dir === 1 ? '↑' : '↓') : '';
+    const sep = i > 0 ? '<span class="mbook-sort-sep">·</span>' : '';
+    return `${sep}<button class="mbook-sort-btn${active ? ' active' : ''}" onclick="mbookSetSort('${key}')">${label}${arrow ? ` <span class="mbook-sort-arrow">${arrow}</span>` : ''}</button>`;
+  }).join('')}</div>`;
+}
 function renderMbookList() {
   const leftPage = document.querySelector('.mbook-page.mbook-left');
   if (!leftPage) return;
-  const completed = getTrophyCompleted();
-  if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(completed); return; }
-  leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div><div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
+  const rawCompleted = getTrophyCompleted();
+  if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(rawCompleted); return; }
+  const completed = mbookSortedCompleted();
+  leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
   const cnt = document.getElementById('mbook-count');
   if (cnt) cnt.textContent = completed.length ? `(${completed.length})` : '';
   const grid = document.getElementById('mbook-mob-grid');
   if (!completed.length) { grid.innerHTML = '<div class="mbook-empty" style="grid-column:1/-1">아직 완료한 도감작이 없습니다</div>'; return; }
   const pageIdx = Number(_mbookPage);
   const slice = completed.slice(pageIdx * MBOOK_PAGE_SIZE, pageIdx * MBOOK_PAGE_SIZE + MBOOK_PAGE_SIZE);
-  let html = slice.map(c =>
-    `<div class="mbook-mob${c.mobId === _mbookSel ? ' sel' : ''}" data-mob="${c.mobId}" onclick="mbookSelect(${c.mobId})" title="${escHtml(c.mobName)}">
-       <img src="${mobImg(c.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`
-  ).join('');
+  const showBadge = getSetting('mbook_show_time_badge');
+  const showTimeBg = getSetting('mbook_show_time_bg');
+  let html = slice.map(c => {
+    const hrs = c.elapsed ? Math.round(c.elapsed / 3600000) : null;
+    const timeCol = c.elapsed ? mbookTimeBadgeColor(c.elapsed) : null;
+    const bgCol = (showTimeBg && timeCol) ? timeCol : null;
+    return `<div class="mbook-mob${c.mobId === _mbookSel ? ' sel' : ''}${bgCol ? ' time-bg' : ''}" style="${bgCol ? `--rc:${bgCol}` : ''}" data-mob="${c.mobId}" onclick="mbookSelect(${c.mobId})" title="${escHtml(c.mobName)}">
+       <img src="${mobImg(c.mobId)}" onerror="this.style.display='none'" draggable="false">
+       ${(showBadge && hrs != null) ? `<span class="mbook-mob-time" style="background:${timeCol}">${hrs}h</span>` : ''}</div>`;
+  }).join('');
   for (let i = slice.length; i < MBOOK_PAGE_SIZE; i++) html += '<div class="mbook-mob empty"></div>';
   grid.innerHTML = html;
 }
@@ -6199,6 +6278,8 @@ function renderMbookRight() {
     bodyEl.innerHTML = `<div class="mbook-colophon">
       <p>완료된 도감작이 저장됩니다</p>
       <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
+      <p class="mbook-colophon-msg">도감작을 하셨다는 것은<br>메이플랜드에서 다른 사람과는 다른 재미를 찾아<br>게임을 즐기고 있다는 것입니다!</p>
+      <p class="mbook-colophon-msg2">항상 응원합니다!</p>
       <p class="mbook-colophon-cheer">도감길드 파이팅</p>
     </div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
@@ -6219,19 +6300,31 @@ function renderMbookRight() {
   else if (_mbookTab === 'info')     bodyEl.innerHTML = mbookInfoHtml(c, drops, mobData, store);
   else                               bodyEl.innerHTML = mbookItemsHtml(c, drops, mobData, store);
 }
+// 마지막으로 획득한(가장 늦은 firstTime) 아이템 — 도감작을 완성시킨 그 아이템
+function mbookLastItem(drops, mobData) {
+  let best = null, bestT = -1;
+  drops.forEach(d => {
+    const t = mobData[d.id]?.firstTime;
+    if (t != null && t > bestT) { bestT = t; best = d; }
+  });
+  return best;
+}
 function mbookInfoHtml(c, drops, mobData, store) {
   const kills = _calcTrophyKills(c, store);
   const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
-  const chCount = (c.chCount != null) ? `${c.chCount.toLocaleString()}회` : '-';
+  const lastItem = mbookLastItem(drops, mobData);
+  const lastItemLabel = lastItem ? lastItem.name : '-';
   const activeRates = drops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
   const exp = activeRates.length ? `${_calcExpectedAll(activeRates).toLocaleString('ko-KR')}마리` : '-';
   const animBase = `https://maplestory.io/api/kms/284/mob/${c.mobId}/render`;
+  const level = c.level || store[`mob_${c.mobId}_meta`]?.level || 0;
   const bigRows = [
+    ['레벨', level ? `Lv.${level}` : '-'],
     ['소요 시간', timeStr],
     ['사냥 마릿수', kills ? `${kills.toLocaleString()}마리` : '-'],
   ];
   const smallRows = [
-    ['채널 변경 횟수', chCount],
+    ['마지막 아이템', lastItemLabel],
     ['도감 완료 기댓값', exp],
   ];
   return `<div class="mbook-info-top">
@@ -6524,23 +6617,29 @@ function openTrophyModal(mobId) {
 // ══════════════════════════════════════════
 function rarityColor(rateStr) {
   const r = parseFloat(rateStr);
-  if (isNaN(r)) return { bg:'rgba(146,117,166,.22)', fg:'#c1aecf' };
-  if (r >= 1)     return { bg:'rgba(91,147,191,.22)',  fg:'#93bcd6' };
-  if (r >= 0.1)   return { bg:'rgba(90,171,126,.20)',  fg:'#96c8a9' };
-  if (r >= 0.01)  return { bg:'rgba(203,174,80,.20)',  fg:'#dcc983' };
-  if (r >= 0.007) return { bg:'rgba(207,140,84,.20)',  fg:'#e0b491' };
-  if (r >= 0.005) return { bg:'rgba(208,107,98,.20)',  fg:'#dd9a93' };
-  return                  { bg:'rgba(146,117,166,.22)', fg:'#c1aecf' };
+  if (isNaN(r))    return { bg:'rgba(91,74,104,.22)',   fg:'#a096a7' };
+  if (r >= 30)     return { bg:'rgba(63,95,133,.22)',   fg:'#90a2b8' };
+  if (r >= 1)      return { bg:'rgba(91,147,191,.20)',  fg:'#a0c0da' };
+  if (r >= 0.1)    return { bg:'rgba(79,156,152,.20)',  fg:'#99c6c3' };
+  if (r >= 0.01)   return { bg:'rgba(79,172,133,.20)',  fg:'#99cfb8' };
+  if (r >= 0.007)  return { bg:'rgba(201,174,85,.20)',  fg:'#e0d09c' };
+  if (r >= 0.004)  return { bg:'rgba(208,107,98,.20)',  fg:'#e4a9a4' };
+  if (r >= 0.002)  return { bg:'rgba(176,106,146,.20)', fg:'#d1a9c0' };
+  if (r >= 0.001)  return { bg:'rgba(146,117,166,.20)', fg:'#c0afcb' };
+  return                   { bg:'rgba(91,74,104,.22)',   fg:'#a096a7' };
 }
 function rarityBorderColor(rateStr) {
   const r = parseFloat(rateStr);
-  if (isNaN(r)) return '#9275a6';
+  if (isNaN(r))   return '#5b4a68';
+  if (r >= 30)    return '#3f5f85';
   if (r >= 1)     return '#5b93bf';
-  if (r >= 0.1)   return '#5aab7e';
-  if (r >= 0.01)  return '#cbae50';
-  if (r >= 0.007) return '#cf8c54';
-  if (r >= 0.005) return '#d06b62';
-  return '#9275a6';
+  if (r >= 0.1)   return '#4f9c98';
+  if (r >= 0.01)  return '#4fac85';
+  if (r >= 0.007) return '#c9ae55';
+  if (r >= 0.004) return '#d06b62';
+  if (r >= 0.002) return '#b06a92';
+  if (r >= 0.001) return '#9275a6';
+  return '#5b4a68';
 }
 
 function openResultModal(mob, _overrideTab, _overrideStore) {
@@ -6885,7 +6984,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -6944,7 +7043,7 @@ applySelectPanelState();
 <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:10px;left:78px;width:22px;height:22px;border-radius:50%;background:rgba(140,148,158,.16);border:1px solid rgba(140,148,158,.32);color:rgba(120,130,142,.72);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,color .2s;z-index:9500;" onmouseenter="this.style.background='rgba(140,148,158,.3)';this.style.color='rgba(90,100,112,.95)'" onmouseleave="this.style.background='rgba(140,148,158,.16)';this.style.color='rgba(120,130,142,.72)'">☀️</button>
 
 <!-- 설정 버튼 -->
-<button id="settings-btn" onclick="toggleSettings(event)" title="설정" style="position:fixed;bottom:10px;left:12px;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb, var(--gold) 15%, transparent);border:1.5px solid color-mix(in srgb, var(--gold) 50%, transparent);color:var(--gold);font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,transform .15s,box-shadow .2s;z-index:9500;box-shadow:0 1px 5px var(--shadow);" onmouseenter="this.style.background='color-mix(in srgb, var(--gold) 30%, transparent)';this.style.transform='scale(1.1)'" onmouseleave="this.style.background='color-mix(in srgb, var(--gold) 15%, transparent)';this.style.transform='scale(1)'">⚙</button>
+<button id="settings-btn" onclick="toggleSettings(event)" title="설정" style="position:fixed;bottom:10px;left:12px;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb, var(--gold) 26%, transparent);border:1.5px solid color-mix(in srgb, var(--gold) 65%, transparent);color:var(--gold);font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .2s,transform .15s,box-shadow .2s;z-index:9500;box-shadow:0 0 0 1px rgba(255,255,255,.3), 0 1px 5px var(--shadow);" onmouseenter="this.style.background='color-mix(in srgb, var(--gold) 40%, transparent)';this.style.transform='scale(1.1)'" onmouseleave="this.style.background='color-mix(in srgb, var(--gold) 26%, transparent)';this.style.transform='scale(1)'">⚙</button>
 <!-- 설정 팝업 -->
 <div id="settings-pop" class="settings-pop" onclick="event.stopPropagation()">
   <div class="settings-title">설정</div>
@@ -7415,8 +7514,10 @@ const SETTINGS = [
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
+  { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
+  { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
 ];
-const SETTINGS_GROUPS = [['general', '일반'], ['overlay', '오버레이']];
+const SETTINGS_GROUPS = [['general', '일반'], ['overlay', '오버레이'], ['mbook', '도감']];
 function getSetting(key) {
   const s = loadS();
   const def = SETTINGS.find(o => o.key === key)?.def;
@@ -7449,6 +7550,8 @@ function onSettingChange(key, val) {
   } else if (key === 'card_in_timeline') {
     // 모든 탭 타임라인 재렌더
     tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderTimeline(p, t.mob, t); } });
+  } else if (key === 'mbook_show_time_badge' || key === 'mbook_show_time_bg') {
+    if (typeof renderMbookList === 'function' && document.getElementById('mbook-overlay')?.classList.contains('open')) renderMbookList();
   }
 }
 function toggleSettings(e) {
@@ -7590,6 +7693,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.115.2', date: '26.07.29',
+    fix: [
+      '설정에 "도감" 항목 추가 — 몹 칸 소요시간 뱃지·배경색 반영 여부를 각각 켜고 끌 수 있음',
+      '소요시간 뱃지를 파스텔톤 사각형으로 변경, 크기 축소',
+      '몹 칸 배경에 소요시간(난이도) 색을 옅게 반영',
+      '설정(⚙) 버튼이 어두운 배경(모달 등) 위에서 잘 안 보이던 문제 개선',
+    ],
+  },
   {
     ver: '1.115.1', date: '26.07.28',
     fix: [
