@@ -1158,6 +1158,7 @@
     .mbook-tab-left[data-page="1"] { background:linear-gradient(90deg,#c99b2e,#b28727); }
     .mbook-tab-left[data-page="2"] { background:linear-gradient(90deg,#3f7fc9,#3569a8); }
     .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
+    .mbook-tab-left[data-page="stats"] { background:linear-gradient(90deg,#8a8a8a,#6e6e6e); }
     .mbook-pages { display:flex; flex:1; min-width:0; }
     .mbook-page { flex:1; min-width:0; padding:14px 15px 18px; overflow-y:auto; position:relative; }
     /* 종이 섬유질 노이즈 — feTurbulence, 갈색 대신 중립 그레이 톤이라 누렇지 않음 */
@@ -1183,6 +1184,15 @@
     .mbook-sort-arrow { font-size:.56rem; }
     /* 왼쪽 몹 격자 (5×5 고정) */
     .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+    .mbook-stat-hint { text-align:center; font-size:.66rem; color:#6b5636; margin:-4px 0 8px; }
+    .mbook-mob.mbook-stat-pick img { filter:grayscale(1) opacity(.5); transition:filter .15s; }
+    .mbook-mob.mbook-stat-pick.picked img { filter:none; }
+    .mbook-chart-block + .mbook-chart-block { margin-top:18px; padding-top:16px; border-top:1px solid rgba(120,95,55,.22); }
+    .mbook-chart-label { font-size:.7rem; font-weight:800; color:#4a3318; margin-bottom:6px; text-align:center; }
+    .mbook-chart-svg { width:100%; height:auto; display:block; }
+    .mbook-chart-legend { display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:center; margin-top:10px; }
+    .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:#4a3318; font-weight:600; }
+    .mbook-chart-legend-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
     .mbook-mob { position:relative; aspect-ratio:1; border-radius:7px; background:linear-gradient(160deg,#fffdf6,#efe7d2);
       box-shadow:0 0 0 3px rgba(208,168,62,.28), 0 2px 4px rgba(0,0,0,.3); cursor:pointer;
       display:flex; align-items:center; justify-content:center; transition:transform .14s, box-shadow .14s; }
@@ -6164,6 +6174,8 @@ function renderTrophyGrid() {
 // ═══ 몬스터북 (완료 도감작을 펼친 책으로) ═══
 const MBOOK_PAGE_SIZE = 25; // 5×5
 let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'cover', _mbookNoteData = null;
+let _mbookStatSel = new Set();
+const MBOOK_CHART_PALETTE = ['#c0453f', '#c99b2e', '#3f7fc9', '#7a4fc9', '#2f9e6e', '#d06b62', '#4f9c98', '#9275a6'];
 
 function openTrophyRoom() { openMonsterBook(); }  // 진열장 트리거 → 몬스터북
 function openMonsterBook() {
@@ -6171,6 +6183,7 @@ function openMonsterBook() {
   _mbookPage = 'cover';
   _mbookSel = null;
   _mbookTab = 'info';
+  _mbookStatSel = new Set();
   mbookSyncLeftTabs();
   mbookSyncTabs();
   renderMbookList();
@@ -6191,7 +6204,7 @@ function mbookSyncLeftTabs() {
   document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
 }
 function mbookSyncTabs() {
-  const disableOthers = _mbookPage === 'cover' || _mbookSel == null;
+  const disableOthers = _mbookPage === 'cover' || _mbookPage === 'stats' || _mbookSel == null;
   document.querySelectorAll('.mbook-tab').forEach(t => {
     const isInfo = t.dataset.tab === 'info';
     t.classList.toggle('active', t.dataset.tab === _mbookTab);
@@ -6200,7 +6213,7 @@ function mbookSyncTabs() {
 }
 function mbookSetPage(page) {
   _mbookPage = page;
-  if (page === 'cover') _mbookTab = 'info'; // 표지로 오면 기본정보 책갈피 활성화
+  if (page === 'cover' || page === 'stats') _mbookTab = 'info'; // 표지/통계로 오면 기본정보 책갈피 활성화
   mbookHideNote();
   mbookSyncLeftTabs();
   mbookSyncTabs();
@@ -6208,7 +6221,7 @@ function mbookSetPage(page) {
   renderMbookRight();
 }
 function mbookSetTab(tab) {
-  if (_mbookPage === 'cover') return; // 표지에서는 탭 전환 불가
+  if (_mbookPage === 'cover' || _mbookPage === 'stats') return; // 표지/통계에서는 탭 전환 불가
   if (_mbookSel == null && tab !== 'info') return; // 몹 미선택 시 기본정보만 활성화
   _mbookTab = tab; mbookHideNote(); mbookSyncTabs(); renderMbookRight();
 }
@@ -6257,6 +6270,7 @@ function renderMbookList() {
   if (!leftPage) return;
   const rawCompleted = getTrophyCompleted();
   if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(rawCompleted); return; }
+  if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted); return; }
   const completed = mbookSortedCompleted();
   leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
   const cnt = document.getElementById('mbook-count');
@@ -6296,6 +6310,26 @@ function mbookCoverLeftHtml(completed) {
     <div class="mbook-cover-rule"></div>
     ${mbookStatListHtml(rows, 'lg')}
   </div>`;
+}
+// 통계 페이지(왼쪽) — 완료한 몬스터를 클릭해 그래프에 추가/제거하는 선택 그리드
+function mbookStatsLeftHtml(completed) {
+  if (!completed.length) return `<div class="mbook-page-title">통계</div><div class="mbook-empty">아직 완료한 도감작이 없습니다</div>`;
+  const selArr = Array.from(_mbookStatSel);
+  const cells = completed.map(c => {
+    const idx = selArr.indexOf(c.mobId);
+    const picked = idx !== -1;
+    const ring = picked ? MBOOK_CHART_PALETTE[idx % MBOOK_CHART_PALETTE.length] : null;
+    return `<div class="mbook-mob mbook-stat-pick${picked ? ' picked' : ''}" style="${ring ? `box-shadow:0 0 0 3px ${ring}, 0 2px 4px rgba(0,0,0,.3)` : ''}" data-mob="${c.mobId}" onclick="mbookToggleStatSel(${c.mobId})" title="${escHtml(c.mobName)}">
+      <img src="${mobImg(c.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`;
+  }).join('');
+  return `<div class="mbook-page-title">통계 <span class="mbook-count">(${_mbookStatSel.size}개 선택)</span></div>
+    <div class="mbook-stat-hint">몬스터를 클릭해 그래프에 추가·제거하세요</div>
+    <div class="mbook-mob-grid">${cells}</div>`;
+}
+function mbookToggleStatSel(mobId) {
+  if (_mbookStatSel.has(mobId)) _mbookStatSel.delete(mobId); else _mbookStatSel.add(mobId);
+  renderMbookList();
+  renderMbookRight();
 }
 const MBOOK_LEAF_MSGS = [
   '허규복 화이팅!', '도감길드 화이팅!', '우리 길드 정상 영업 합니다', '도감작 몬스터북작 파이팅',
@@ -6354,6 +6388,13 @@ function renderMbookRight() {
     </div>
     <div class="mbook-colophon-hint">🍁 단풍잎을 눌러보세요!</div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
+    return;
+  }
+  if (_mbookPage === 'stats') {
+    titleEl.innerHTML = `<span>통계</span>`;
+    const store2 = loadS();
+    bodyEl.innerHTML = `<div class="mbook-chart-block"><div class="mbook-chart-label">달성률 (%)</div>${mbookChartHtml(completed, store2, 'rate')}</div>
+      <div class="mbook-chart-block"><div class="mbook-chart-label">아이템 개수 (장비·주문서·표창)</div>${mbookChartHtml(completed, store2, 'count')}</div>`;
     return;
   }
   if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
@@ -6484,6 +6525,78 @@ function mbookShowNote(e, dropId) {
   document.addEventListener('click', mbookHideNote, { once: true });
 }
 function mbookToggleStatMode() { _statMode = _statMode === 'rate' ? 'count' : 'rate'; renderMbookRight(); }
+// 통계 페이지 — 선택한 몹들의 시간에 따른 달성률(%)/아이템 개수(장비·주문서·표창만)를 계단형 꺾은선으로
+function mbookChartSeries(c, store, mode) {
+  const excl = new Set(store[`excl_${c.mobId}`] || []);
+  const drops = (c.drops || []).filter(d => !excl.has(d.id));
+  const mobData = c.mobData || {};
+  if (!c.elapsed) return null;
+  if (mode === 'rate') {
+    const total = drops.length;
+    if (!total) return null;
+    const times = drops.map(d => mobData[d.id]?.firstTime).filter(t => t != null).sort((a, b) => a - b);
+    const pts = [[0, 0]];
+    times.forEach((t, i) => { pts.push([t, i / total * 100]); pts.push([t, (i + 1) / total * 100]); });
+    pts.push([c.elapsed, 100]);
+    return { pts, maxY: 100, elapsed: c.elapsed };
+  } else {
+    const diffTypes = ['장비', '주문서', '표창'];
+    const items = drops.filter(d => diffTypes.includes(itemTypeLabel(d.id)) && mobData[d.id]?.firstTime != null)
+      .map(d => ({ t: mobData[d.id].firstTime, cnt: mobData[d.id].count || 0 }))
+      .sort((a, b) => a.t - b.t);
+    let cum = 0;
+    const pts = [[0, 0]];
+    items.forEach(it => { pts.push([it.t, cum]); cum += it.cnt; pts.push([it.t, cum]); });
+    pts.push([c.elapsed, cum]);
+    return { pts, maxY: cum, elapsed: c.elapsed };
+  }
+}
+function mbookChartHtml(completed, store, mode) {
+  const selMobs = Array.from(_mbookStatSel);
+  if (!selMobs.length) return '<div class="mbook-empty">아래에서 몬스터를 선택하면 그래프에 표시됩니다</div>';
+  const series = selMobs.map((mobId, i) => {
+    const c = completed.find(x => x.mobId === mobId);
+    if (!c) return null;
+    const s = mbookChartSeries(c, store, mode);
+    if (!s) return null;
+    return { name: c.mobName, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], ...s };
+  }).filter(Boolean);
+  if (!series.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
+
+  const maxX = Math.max(...series.map(s => s.elapsed), 1);
+  const maxY = mode === 'rate' ? 100 : Math.max(...series.map(s => s.maxY), 1);
+  const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = 10;
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+  const xScale = x => PAD_L + (x / maxX) * plotW;
+  const yScale = y => PAD_T + plotH - (y / maxY) * plotH;
+
+  const paths = series.map(s => {
+    const pts = s.pts.slice();
+    if (s.elapsed < maxX) pts.push([maxX, pts[pts.length - 1][1]]);
+    const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1]).toFixed(1)}`).join(' ');
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  }).join('');
+
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const val = maxY * f;
+    const y = yScale(val).toFixed(1);
+    const label = mode === 'rate' ? `${Math.round(val)}%` : Math.round(val).toLocaleString();
+    return `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="rgba(120,95,55,.15)"/>
+      <text x="${PAD_L - 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="#6b5636">${label}</text>`;
+  }).join('');
+
+  const maxHours = maxX / 3600000;
+  const xTicks = Array.from({ length: 6 }, (_, i) => {
+    const hrs = maxHours * i / 5;
+    const x = xScale(hrs * 3600000).toFixed(1);
+    return `<text x="${x}" y="${H - PAD_B + 14}" font-size="9" text-anchor="middle" fill="#6b5636">${Math.round(hrs)}h</text>`;
+  }).join('');
+
+  const legend = series.map(s => `<span class="mbook-chart-legend-item"><span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H}" class="mbook-chart-svg">${yTicks}${xTicks}${paths}</svg>
+    <div class="mbook-chart-legend">${legend}</div>`;
+}
 function mbookStatsHtml(c, drops, mobData, store) {
   const kills = _calcTrophyKills(c, store);
   if (!drops.length) return '<div class="mbook-empty">표시할 아이템이 없습니다</div>';
@@ -7048,6 +7161,7 @@ applySelectPanelState();
     <button class="mbook-close" onclick="closeMonsterBook()">✕</button>
     <div class="mbook-tabs-left" id="mbook-tabs-left">
       <button class="mbook-tab-left active" data-page="cover" onclick="mbookSetPage('cover')" title="표지"><span class="mbook-tab-left-icon">ⓘ</span></button>
+      <button class="mbook-tab-left" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-icon">📈</span></button>
       <div class="mbook-tabs-left-gap"></div>
       <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
       <button class="mbook-tab-left" data-page="1" onclick="mbookSetPage(1)" title="노랑"></button>
@@ -7086,7 +7200,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7795,6 +7909,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.116', date: '26.07.29',
+    feat: [
+      '도감에 "통계" 페이지 신설 — 완료한 몬스터를 클릭해 그래프에 추가/제거',
+      '시간별 달성률(%) 그래프와 시간별 아이템 개수(장비·주문서·표창만) 그래프를 함께 표시',
+      '여러 몬스터를 동시에 겹쳐서 비교 가능, X축은 가장 오래 걸린 몬스터 기준으로 자동 확장',
+    ],
+  },
   {
     ver: '1.115.3', date: '26.07.29',
     fix: [
