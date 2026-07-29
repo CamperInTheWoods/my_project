@@ -1159,7 +1159,7 @@
     .mbook-tab-left[data-page="2"] { background:linear-gradient(90deg,#3f7fc9,#3569a8); }
     .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
     .mbook-pages { display:flex; flex:1; min-width:0; }
-    .mbook-page { flex:1; min-width:0; padding:14px 15px 34px; overflow-y:auto; position:relative; }
+    .mbook-page { flex:1; min-width:0; padding:14px 15px 18px; overflow-y:auto; position:relative; }
     /* 종이 섬유질 노이즈 — feTurbulence, 갈색 대신 중립 그레이 톤이라 누렇지 않음 */
     .mbook-page::before {
       content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:inherit;
@@ -1193,9 +1193,9 @@
     /* 소요시간(난이도) 색을 뱃지보다 옅게 반영한 몹 칸 배경 (설정으로 켜고 끔) */
     .mbook-mob.time-bg { background:color-mix(in srgb, var(--rc, rgba(120,95,55,.15)) 38%, #fffdf6); }
     /* 소요시간 뱃지 — 타임라인과 동일한 시간별 색조(파랑→빨강→검정)를 파스텔톤으로, 사각·픽셀 느낌 */
-    .mbook-mob-time { position:absolute; bottom:2px; right:2px; min-width:14px; height:12px; padding:0 2px; border-radius:0; z-index:2;
-      display:flex; align-items:center; justify-content:center; font-size:.44rem; font-weight:800; font-family:'Courier New',monospace;
-      color:rgba(48,36,24,.85); box-shadow:0 0 0 1px rgba(0,0,0,.45);
+    .mbook-mob-time { position:absolute; bottom:2px; right:2px; min-width:14px; height:12px; padding:0 2px; border-radius:3px; z-index:2;
+      display:flex; align-items:center; justify-content:center; font-size:.44rem; font-weight:900; font-family:'Courier New',monospace;
+      color:rgba(40,28,18,.9); text-shadow:0 0 .5px currentColor; box-shadow:0 0 0 1.6px rgba(0,0,0,.5);
       image-rendering:pixelated; }
     /* 오른쪽 */
     .mbook-right-title { font-size:.86rem; font-weight:800; color:#4a3a1a; text-align:center; margin-bottom:12px; padding-bottom:9px; border-bottom:1px solid rgba(120,95,55,.25); display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -1247,22 +1247,50 @@
     .msl-label { flex:0 0 auto; white-space:nowrap; color:#6b5636; font-size:.76rem; font-weight:600; letter-spacing:.01em; }
     .msl-dots { flex:1; min-width:14px; margin:0 6px; border-bottom:1px dotted rgba(110,90,60,.5); position:relative; top:-4px; }
     .msl-val { flex:0 0 auto; color:#2f2410; font-weight:600; font-size:.9rem; font-variant-numeric:tabular-nums; letter-spacing:.01em; }
-    .mbook-stat-list.lg { width:270px; gap:17px; }
+    .mbook-stat-list.lg { width:270px; gap:10px; }
     .mbook-stat-list.lg .msl-label { font-size:.96rem; }
     .mbook-stat-list.lg .msl-val { font-size:1.02rem; }
     /* 기본정보 탭 */
-    .mbook-info-top { display:flex; flex-direction:column; align-items:center; padding:8px 0 16px; }
-    .mbook-info-name { font-size:1.15rem; font-weight:800; color:#2f2410; margin-bottom:10px; letter-spacing:-.01em; }
+    .mbook-info-top { display:flex; flex-direction:column; align-items:center; padding:4px 0 8px; }
+    .mbook-info-name { font-size:1.15rem; font-weight:800; color:#2f2410; margin-bottom:6px; letter-spacing:-.01em; }
     .mbook-info-img { width:220px; height:220px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 6px 10px rgba(60,45,20,.32)); }
-    .mbook-info-bottom { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px; padding-top:16px; border-top:1px solid rgba(120,95,55,.22); }
-    .mbook-stat-list.sm { width:200px; gap:5px; margin:2px auto 0; }
+    .mbook-info-bottom { display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:2px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
+    .mbook-stat-list.sm { width:200px; gap:5px; margin:0 auto 0; }
     .mbook-stat-list.sm .msl-label { font-size:.6rem; }
     .mbook-stat-list.sm .msl-val { font-size:.7rem; }
     /* 표지(cover) — 책 제목면처럼: 장식 없이 여백·플뢰론 위주 */
     .mbook-cover { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:22px; }
     .mbook-cover-title { font-size:1.3rem; font-weight:800; color:#2f2410; letter-spacing:.22em; text-shadow:0 1px 0 rgba(255,255,255,.5); }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
-    .mbook-cover-leaf { font-size:3rem; line-height:1; filter:drop-shadow(0 3px 5px rgba(60,45,20,.32)); }
+    .mbook-cover-leaf { position:relative; font-size:3rem; line-height:1; cursor:pointer; }
+    .mbook-leaf-emoji { display:inline-block; filter:drop-shadow(0 3px 5px rgba(60,45,20,.32)); }
+    .mbook-cover-leaf.shake { animation:mbook-leaf-shake .45s ease; }
+    @keyframes mbook-leaf-shake {
+      0%,100% { transform:rotate(0deg); }
+      20% { transform:rotate(-16deg); }
+      40% { transform:rotate(14deg); }
+      60% { transform:rotate(-9deg); }
+      80% { transform:rotate(6deg); }
+    }
+    .mbook-leaf-bubble { position:absolute; left:50%; bottom:100%; margin-bottom:20px; --bubble-bg:#fffdf6;
+      background:var(--bubble-bg); color:#4a3318; font-size:.68rem; font-weight:800; letter-spacing:-.01em;
+      padding:6px 11px; border-radius:11px; white-space:nowrap; max-width:min(78vw,260px);
+      text-align:center;
+      box-shadow:0 0 0 1.5px rgba(120,95,55,.4), 0 3px 8px rgba(0,0,0,.25);
+      animation:mbook-leaf-bubble-pop 1.3s ease forwards; pointer-events:none; }
+    .mbook-leaf-bubble.rare { --bubble-bg:#e2e2e2; }
+    @media (max-width:700px) { .mbook-leaf-bubble { white-space:normal; } }
+    .mbook-leaf-bubble::before { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      border:6.5px solid transparent; border-top-color:rgba(120,95,55,.4); }
+    .mbook-leaf-bubble::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%) translateY(-1.8px);
+      border:5px solid transparent; border-top-color:var(--bubble-bg); }
+    @keyframes mbook-leaf-bubble-pop {
+      0%   { opacity:0; transform:translate(-50%,5px) scale(.5); }
+      12%  { opacity:1; transform:translate(-50%,0) scale(1.12); }
+      22%  { opacity:1; transform:translate(-50%,0) scale(1); }
+      72%  { opacity:1; transform:translate(-50%,0) scale(1); }
+      100% { opacity:0; transform:translate(-50%,-5px) scale(.85); }
+    }
     .mbook-cover-rule { display:flex; align-items:center; gap:10px; width:100%; max-width:190px; }
     .mbook-cover-rule::before, .mbook-cover-rule::after { content:''; flex:1; height:1px; background:rgba(110,90,60,.4); }
     /* 우측 페이지(표지) — 안내문 + 버전 */
@@ -1272,6 +1300,7 @@
     .mbook-colophon-msg2 { margin-top:10px; font-size:.78rem; font-weight:700; color:#3a2c12; }
     .mbook-colophon-cheer { margin-top:8px; font-size:.86rem; font-weight:800; color:#2f2410; letter-spacing:.03em; }
     .mbook-colophon-ver { position:absolute; right:6px; bottom:4px; font-size:.6rem; color:rgba(110,90,60,.55); letter-spacing:.02em; }
+    .mbook-colophon-hint { position:absolute; left:0; right:0; bottom:5px; text-align:center; font-size:.6rem; color:rgba(110,90,60,.5); }
 
     /* 모바일 — 펼친 책(좌우) 대신 위아래로 쌓아서 한 줄로 스크롤, 책갈피는 옆에 안 튀어나오게 상단 가로 탭으로 */
     @media (max-width: 700px) {
@@ -6147,6 +6176,12 @@ function openMonsterBook() {
   renderMbookList();
   renderMbookRight();
   document.getElementById('mbook-overlay').classList.add('open');
+  setTimeout(() => {
+    const leaf = document.querySelector('.mbook-cover-leaf');
+    if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
+      mbookLeafClick({ currentTarget: leaf });
+    }
+  }, 500);
 }
 function closeMonsterBook() {
   mbookHideNote();
@@ -6156,15 +6191,16 @@ function mbookSyncLeftTabs() {
   document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
 }
 function mbookSyncTabs() {
-  const noSel = _mbookSel == null;
+  const disableOthers = _mbookPage === 'cover' || _mbookSel == null;
   document.querySelectorAll('.mbook-tab').forEach(t => {
     const isInfo = t.dataset.tab === 'info';
     t.classList.toggle('active', t.dataset.tab === _mbookTab);
-    t.classList.toggle('disabled', noSel && !isInfo);
+    t.classList.toggle('disabled', disableOthers && !isInfo);
   });
 }
 function mbookSetPage(page) {
   _mbookPage = page;
+  if (page === 'cover') _mbookTab = 'info'; // 표지로 오면 기본정보 책갈피 활성화
   mbookHideNote();
   mbookSyncLeftTabs();
   mbookSyncTabs();
@@ -6172,6 +6208,7 @@ function mbookSetPage(page) {
   renderMbookRight();
 }
 function mbookSetTab(tab) {
+  if (_mbookPage === 'cover') return; // 표지에서는 탭 전환 불가
   if (_mbookSel == null && tab !== 'info') return; // 몹 미선택 시 기본정보만 활성화
   _mbookTab = tab; mbookHideNote(); mbookSyncTabs(); renderMbookRight();
 }
@@ -6253,12 +6290,45 @@ function mbookCoverLeftHtml(completed) {
     ['전체 사냥 마릿수', totalKills ? `${totalKills.toLocaleString()}마리` : '-'],
   ];
   return `<div class="mbook-cover">
-    <div class="mbook-cover-leaf">🍁</div>
+    <div class="mbook-cover-leaf" onclick="mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
     <div class="mbook-cover-rule"></div>
     <div class="mbook-cover-title">완료된 도감작</div>
     <div class="mbook-cover-rule"></div>
     ${mbookStatListHtml(rows, 'lg')}
   </div>`;
+}
+const MBOOK_LEAF_MSGS = [
+  '허규복 화이팅!', '도감길드 화이팅!', '우리 길드 정상 영업 합니다', '도감작 몬스터북작 파이팅',
+  '좋은 하루 되세요!', '이 넓은 맵을 혼자 쓰세요?', '건강 조심하기!', '감기 조심하세요!',
+  '척추요정: 허리 쭉 펴세요', '스트레칭 하세요! 쭉쭉', '나무꾼 여러분 감사합니다!', '도감길드 항시 모집중',
+  '파이팅!', '힘내랏!', '오늘 하루도 고생하셨어요!', '미리 굿밤!',
+  '어서오세용용', '득템하세요!', 
+  '에어컨 파워 냉방으로 틀어!', '항상 차조심!', '주문서 주세요 제발', '일비 주세요!', '안녕하세요!',
+  '왼쪽아래 설정 버튼을 사용해보세요', '여러가지 테마를 바꿔가며 사용해보세요!', '문의사항은 똘레로에게 디스코드로!',
+];
+const MBOOK_LEAF_MSGS_RARE = [
+  '몌몌뀽님 비디오님 피드백 감사합니다.', '허규복은 영상을 올려랏!',
+  '부대찌개에 콩나물 넣는 사람들이 이해가 안되요', '채널론은 진짜입니다.', '맴맴맴...',
+];
+let _mbookLastLeafMsg = null;
+function mbookLeafMsg() {
+  const rare = Math.random() < 0.01;
+  const pool = rare ? MBOOK_LEAF_MSGS_RARE : MBOOK_LEAF_MSGS;
+  let msg = pool[Math.floor(Math.random() * pool.length)];
+  if (pool.length > 1) while (msg === _mbookLastLeafMsg) msg = pool[Math.floor(Math.random() * pool.length)];
+  _mbookLastLeafMsg = msg;
+  return { msg, rare };
+}
+function mbookLeafClick(e) {
+  const leaf = e.currentTarget;
+  leaf.classList.remove('shake'); void leaf.offsetWidth; leaf.classList.add('shake');
+  leaf.querySelector('.mbook-leaf-bubble')?.remove();
+  const { msg, rare } = mbookLeafMsg();
+  const bubble = document.createElement('div');
+  bubble.className = 'mbook-leaf-bubble' + (rare ? ' rare' : '');
+  bubble.textContent = msg;
+  leaf.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 1300);
 }
 // 라벨‥값 세로 목록 공용 빌더 (책 목차식 점선 리더)
 function mbookStatListHtml(rows, size) {
@@ -6282,6 +6352,7 @@ function renderMbookRight() {
       <p class="mbook-colophon-msg2">항상 응원합니다!</p>
       <p class="mbook-colophon-cheer">도감길드 파이팅</p>
     </div>
+    <div class="mbook-colophon-hint">🍁 단풍잎을 눌러보세요!</div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
     return;
   }
@@ -6301,6 +6372,33 @@ function renderMbookRight() {
   else                               bodyEl.innerHTML = mbookItemsHtml(c, drops, mobData, store);
 }
 // 마지막으로 획득한(가장 늦은 firstTime) 아이템 — 도감작을 완성시킨 그 아이템
+function mbookDifficultyGrade(c, drops, mobData, kills) {
+  const times = drops.map(d => mobData[d.id]?.firstTime).filter(t => t != null).sort((a, b) => a - b);
+  const n = times.length;
+  if (n < 2 || !c.elapsed) return null;
+  const gapLast = times[n - 1] - times[n - 2];
+  const gap2nd  = n >= 3 ? times[n - 2] - times[n - 3] : 0;
+  const gap3rd  = n >= 4 ? times[n - 3] - times[n - 4] : 0;
+  const weighted = gapLast * 1 + gap2nd * 0.5 + gap3rd * 0.25;
+  const ratio1 = weighted / c.elapsed;
+
+  const activeRates = drops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
+  let ratio2 = 0;
+  if (activeRates.length && kills > 0) {
+    const expectedKills = _calcExpectedAll(activeRates);
+    const expectedElapsed = expectedKills * c.elapsed / kills;
+    ratio2 = Math.min(1, Math.max(0, (c.elapsed - expectedElapsed) / c.elapsed));
+  }
+
+  const ratio = ratio1 * 0.6 + ratio2 * 0.4;
+  if (ratio >= 0.85) return 'S+';
+  if (ratio >= 0.70) return 'S';
+  if (ratio >= 0.55) return 'A';
+  if (ratio >= 0.40) return 'B';
+  if (ratio >= 0.25) return 'C';
+  if (ratio >= 0.10) return 'D';
+  return 'F';
+}
 function mbookLastItem(drops, mobData) {
   let best = null, bestT = -1;
   drops.forEach(d => {
@@ -6318,14 +6416,18 @@ function mbookInfoHtml(c, drops, mobData, store) {
   const exp = activeRates.length ? `${_calcExpectedAll(activeRates).toLocaleString('ko-KR')}마리` : '-';
   const animBase = `https://maplestory.io/api/kms/284/mob/${c.mobId}/render`;
   const level = c.level || store[`mob_${c.mobId}_meta`]?.level || 0;
+  const difficulty = mbookDifficultyGrade(c, drops, mobData, kills) || '-';
   const bigRows = [
     ['레벨', level ? `Lv.${level}` : '-'],
     ['소요 시간', timeStr],
     ['사냥 마릿수', kills ? `${kills.toLocaleString()}마리` : '-'],
+    ['수집 난이도', difficulty],
   ];
+  const dateLabel = c.date ? c.date.replace(/-/g, '.') : '-';
   const smallRows = [
     ['마지막 아이템', lastItemLabel],
     ['도감 완료 기댓값', exp],
+    ['완료 날짜', dateLabel],
   ];
   return `<div class="mbook-info-top">
       <div class="mbook-info-name">${escHtml(c.mobName)}</div>
@@ -6984,7 +7086,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.115.3</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7693,6 +7795,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.115.3', date: '26.07.29',
+    fix: [
+      '도감 표지 단풍잎 클릭 시 흔들림 + 랜덤 응원 문구 말풍선 표시 (도감 열면 0.5초 뒤 자동 1회 표시), 낮은 확률로 레어 문구(회색 말풍선)',
+      '기본정보에 "완료 날짜", "수집 난이도"(막판 아이템 억까 비율 + 전체 기대시간 초과 비율 합산 등급) 추가',
+      '몹 칸 배경에 소요시간(난이도) 색 반영 기능 추가, 기본정보 하단 여백 축소',
+      '표지 화면에서는 아이템/통계/타임라인 책갈피가 눌리지 않도록 잠그고, 표지로 돌아오면 기본정보 책갈피로 자동 복귀',
+    ],
+  },
   {
     ver: '1.115.2', date: '26.07.29',
     fix: [
