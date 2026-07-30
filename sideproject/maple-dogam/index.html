@@ -885,6 +885,21 @@
     }
     .dex-card.dex-trophy .dc-title { color:#96690a; font-weight:800; }
     .dex-card.dex-trophy .dc-icon, .dex-card.dex-trophy .dc-title, .dex-card.dex-trophy .dc-sub { position:relative; }
+    /* 다크테마 — 밝은 양피지 대신 어두운 가죽 톤으로 */
+    [data-theme="dark"] .dex-card.dex-trophy {
+      background:
+        linear-gradient(160deg, #2e2a1e, #221f16) padding-box,
+        linear-gradient(135deg, #8a6a2e, #5a4318 48%, #8a6a2e) border-box;
+      box-shadow:0 2px 12px rgba(0,0,0,.4);
+    }
+    [data-theme="dark"] .dex-card.dex-trophy::before { opacity:.14; mix-blend-mode:overlay; }
+    [data-theme="dark"] .dex-card.dex-trophy:hover {
+      background:
+        linear-gradient(160deg, #383222, #2a251a) padding-box,
+        linear-gradient(135deg, #a9822e, #6b4f1a 48%, #a9822e) border-box;
+      box-shadow:0 7px 24px rgba(0,0,0,.5);
+    }
+    [data-theme="dark"] .dex-card.dex-trophy .dc-title { color:#e0b34e; }
 
     /* 트로피룸 모달 */
     .trophy-overlay {
@@ -7285,7 +7300,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.5</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7997,6 +8012,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.116.5', date: '26.07.30',
+    fix: [
+      '다크테마에서 도감 버튼이 너무 밝게(양피지색) 보이던 문제 수정 — 어두운 가죽 톤으로 변경',
+    ],
+  },
   {
     ver: '1.116.4', date: '26.07.30',
     fix: [
