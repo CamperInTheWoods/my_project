@@ -3121,11 +3121,17 @@ function _ovStyleText() {
     .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
     .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
     .ov-ch{background:#1a6fa8;}
-    .ov-item{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+    #ov-cards-row{display:flex;align-items:flex-start;justify-content:center;gap:14px;flex-wrap:wrap;}
+    .ov-item{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
     .ov-item-card{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 7px;border-radius:10px;background:${t.name}22;cursor:pointer;transition:background .15s;}
     .ov-item-card:hover{background:${t.name}38;}
     .ov-item-card img{width:38px;height:38px;object-fit:contain;image-rendering:pixelated;}
     .ov-item-cnt{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:700;min-width:18px;text-align:center;}
+    .ov-mcard{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
+    .ov-mcard-card{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 7px;border-radius:10px;background:#d0a83e22;cursor:pointer;transition:background .15s;}
+    .ov-mcard-card:hover{background:#d0a83e38;}
+    .ov-mcard-card img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated;}
+    .ov-mcard-cnt{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:700;min-width:18px;text-align:center;}
     .ov-ctx-bulk{padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;}
     .ov-bulk-cnt{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:${t.fg};}
     .ov-bulk-row{display:flex;gap:6px;}
@@ -3147,10 +3153,15 @@ function _ovStyleText() {
     body.small .ov-ch-time{font-size:.78rem;}
     body.small .ov-btns{gap:5px;}
     body.small .ov-btns button{font-size:.66rem;padding:4px 9px;border-radius:7px;}
-    body.small .ov-item{gap:6px;margin-top:3px;}
+    body.small #ov-cards-row{gap:10px;}
+    body.small .ov-item{gap:6px;}
     body.small .ov-item-card{padding:3px 9px 3px 5px;gap:5px;}
     body.small .ov-item-card img{width:29px;height:29px;}
     body.small .ov-item-cnt{font-size:.95rem;}
+    body.small .ov-mcard{gap:6px;}
+    body.small .ov-mcard-card{padding:3px 9px 3px 5px;gap:5px;}
+    body.small .ov-mcard-card img{width:26px;height:26px;}
+    body.small .ov-mcard-cnt{font-size:.95rem;}
   `;
 }
 // 테마 변경 시 열려있는 오버레이 색 갱신
@@ -3189,13 +3200,14 @@ function huntBaseDrop(mob) {
 }
 
 function _ovWinSize() {
-  const item = getSetting('ov_show_item');
+  // item·mcard는 같은 행에 나란히 뜨므로 둘 중 하나라도 켜져 있으면 한 줄 높이만 더함
+  const cardsRow = getSetting('ov_show_item') || getSetting('ov_show_mcard');
   const mob = getSetting('ov_show_mob');
   if (getSetting('ov_small')) {
-    let h = 128; if (mob) h += 56; if (item) h += 52;
+    let h = 128; if (mob) h += 56; if (cardsRow) h += 52;
     return { w: 160, h };
   }
-  let h = 165; if (mob) h += 75; if (item) h += 60;
+  let h = 165; if (mob) h += 75; if (cardsRow) h += 60;
   return { w: 240, h };
 }
 async function openOverlay() {
@@ -3226,7 +3238,10 @@ async function openOverlay() {
       <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
       <button class="ov-ch" id="ov-ch">채널변경</button>
     </div>
-    <div class="ov-item" id="ov-item" style="display:none"></div>`;
+    <div id="ov-cards-row">
+      <div class="ov-item" id="ov-item" style="display:none"></div>
+      <div class="ov-mcard" id="ov-mcard" style="display:none"></div>
+    </div>`;
   pip.document.body.appendChild(wrap);
   pip.document.body.classList.toggle('small', !!getSetting('ov_small'));
   pip.document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
@@ -3246,6 +3261,18 @@ async function openOverlay() {
     if (!id) return;
     _ovShowCtxMenu(e, id, mobId);
   });
+  const ovMcardEl = pip.document.getElementById('ov-mcard');
+  ovMcardEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.ov-mcard-card'); if (!card) return;
+    const mobId = Number(card.dataset.mobId);
+    incrementItem(MONSTER_CARD_ID, _ovFakeEvt(mobId)); _overlayTick();
+  });
+  ovMcardEl.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    const card = e.target.closest('.ov-mcard-card'); if (!card) return;
+    const mobId = Number(card.dataset.mobId);
+    _ovShowCtxMenu(e, MONSTER_CARD_ID, mobId);
+  });
   pip.addEventListener('pagehide', () => {
     if (_pipTimer) { try { pip.clearInterval(_pipTimer); } catch {} _pipTimer = null; }
     if (_pipWin === pip) _pipWin = null;
@@ -3263,7 +3290,7 @@ function _ovFitSize() {
     if (!wrap) return;
     const small = getSetting('ov_small');
     const padTop = small ? 6 : 10;
-    const wantH = Math.ceil(padTop + wrap.getBoundingClientRect().height + (small ? 8 : 10));
+    const wantH = Math.ceil(padTop + wrap.getBoundingClientRect().height + (small ? 4 : 6));
     const wantW = small ? 160 : 240;
     const dh = pip.innerHeight - wantH;
     const dw = pip.innerWidth - wantW;
@@ -3352,6 +3379,33 @@ function _overlayTick() {
     } else if (itemEl.style.display !== 'none') {
       itemEl.style.display = 'none'; itemEl.dataset.k = '';
     }
+  }
+  // 몬스터카드 (좌클릭 +1 / 우클릭 메뉴, 본문과 동기화)
+  const mcardEl = d.getElementById('ov-mcard');
+  if (mcardEl) {
+    const mcards = (getSetting('ov_show_mcard') ? mobs : []).map(m => {
+      if (!m.drops?.some(dr => dr.id === MONSTER_CARD_ID)) return null;
+      const cnt = ((loadS()[`mob_${m.id}`] || {})[MONSTER_CARD_ID] || {}).count || 0;
+      return { mobId: m.id, cnt };
+    }).filter(Boolean);
+    if (mcards.length) {
+      const key = mcards.map(c => `${c.mobId}:${c.cnt}`).join('|');
+      if (mcardEl.dataset.k !== key) {
+        mcardEl.dataset.k = key;
+        mcardEl.innerHTML = mcards.map(c =>
+          `<div class="ov-mcard-card" data-mob-id="${c.mobId}" title="몬스터카드 — 좌클릭 +1 / 우클릭 메뉴"><img src="${MONSTER_CARD_IMG}"><div class="ov-mcard-cnt">${c.cnt}</div></div>`
+        ).join('');
+      }
+      if (mcardEl.style.display === 'none') mcardEl.style.display = '';
+    } else if (mcardEl.style.display !== 'none') {
+      mcardEl.style.display = 'none'; mcardEl.dataset.k = '';
+    }
+  }
+  // 아이템/몬스터카드 둘 다 안 보이면 행 자체를 접어서 아래 여백이 남지 않게
+  const cardsRowEl = d.getElementById('ov-cards-row');
+  if (cardsRowEl) {
+    const anyShown = (itemEl && itemEl.style.display !== 'none') || (mcardEl && mcardEl.style.display !== 'none');
+    cardsRowEl.style.display = anyShown ? '' : 'none';
   }
   // 오픈/토글 직후 잠깐 동안만 창 크기를 콘텐츠에 맞춰 보정
   if (_ovFitTicks > 0) { _ovFitTicks--; _ovFitSize(); }
@@ -7330,7 +7384,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.6</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.117</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7858,6 +7912,7 @@ const SETTINGS = [
   { key: 'ov_show_mob',    label: '몹 이미지 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_name',   label: '몹 이름 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_mcard',  label: '몬스터카드 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
@@ -8042,6 +8097,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.117', date: '26.08.01',
+    feat: [
+      '오버레이 창에 몬스터카드 표시 추가 — 기준 아이템과 나란히 한 줄로, 좌클릭 +1 / 우클릭 메뉴 지원',
+      '설정에 "몬스터카드 표시" 토글 추가 (기준 아이템 표시 바로 아래)',
+    ],
+    fix: [
+      '오버레이 창 하단 여백이 과하게 남던 문제 수정 (카드 행이 비면 접히도록, 창 크기 계산 보정)',
+    ],
+  },
   {
     ver: '1.116.6', date: '26.08.01',
     fix: [
