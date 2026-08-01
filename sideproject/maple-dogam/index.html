@@ -1225,6 +1225,7 @@
     .mbook-chart-label { font-size:.7rem; font-weight:800; color:#4a3318; margin-bottom:6px; text-align:center; }
     .mbook-chart-svg { width:100%; height:auto; display:block; }
     .mbook-chart-legend { display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:center; margin-top:10px; }
+    .mbook-chart-note { text-align:center; font-size:.6rem; color:#8a7550; margin-top:4px; }
     .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:#4a3318; font-weight:600; }
     .mbook-chart-legend-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
     .mbook-mob { position:relative; aspect-ratio:1; border-radius:7px; background:linear-gradient(160deg,#fffdf6,#efe7d2);
@@ -6484,7 +6485,7 @@ function renderMbookRight() {
     titleEl.innerHTML = `<span>통계</span>`;
     const store2 = loadS();
     bodyEl.innerHTML = `<div class="mbook-chart-block"><div class="mbook-chart-label">달성률 (%)</div>${mbookChartHtml(completed, store2, 'rate')}</div>
-      <div class="mbook-chart-block"><div class="mbook-chart-label">아이템 개수 (장비·주문서·표창)</div>${mbookChartHtml(completed, store2, 'count')}</div>`;
+      <div class="mbook-chart-block"><div class="mbook-chart-label">아이템 개수 (기타 제외)</div>${mbookChartHtml(completed, store2, 'count')}</div>`;
     return;
   }
   if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
@@ -6513,15 +6514,17 @@ function mbookDifficultyGrade(c, drops, mobData, kills) {
   const weighted = gapLast * 1 + gap2nd * 0.5 + gap3rd * 0.25;
   const ratio1 = weighted / c.elapsed;
 
-  const activeRates = drops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
-  let ratio2 = 0;
-  if (activeRates.length && kills > 0) {
-    const expectedKills = _calcExpectedAll(activeRates);
-    const expectedElapsed = expectedKills * c.elapsed / kills;
-    ratio2 = Math.min(1, Math.max(0, (c.elapsed - expectedElapsed) / c.elapsed));
+  // 전체 소요시간 비율 — 100시간을 "매우 오래 걸림" 기준으로, sqrt 커브(타임라인 색상과 동일 방식)
+  const ratio3 = Math.sqrt(Math.min(c.elapsed, TL_MAX_MS) / TL_MAX_MS);
+
+  // 시간당 마릿수 비율 — 시간당 3000마리(빠른 필드 사냥)를 쉬움 기준으로 로그 스케일 정규화
+  let ratio4 = 0;
+  if (kills > 0 && c.elapsed > 0) {
+    const killRate = kills / (c.elapsed / 3600000);
+    ratio4 = Math.min(1, Math.max(0, 1 - Math.log10(killRate + 1) / Math.log10(3001)));
   }
 
-  const ratio = ratio1 * 0.6 + ratio2 * 0.4;
+  const ratio = ratio1 * 0.3 + ratio3 * 0.4 + ratio4 * 0.3;
   if (ratio >= 0.85) return 'S+';
   if (ratio >= 0.70) return 'S';
   if (ratio >= 0.55) return 'A';
@@ -6634,46 +6637,65 @@ function mbookChartSeries(c, store, mode) {
     const pts = [[0, 0]];
     allTimes.forEach((t, i) => { pts.push([t, i / allTotal * 100]); pts.push([t, (i + 1) / allTotal * 100]); });
     pts.push([c.elapsed, pts[pts.length - 1][1]]);
-    return { pts, maxY: 100, elapsed: c.elapsed, isDone, markerAt };
+    return { pts, maxY: 100, elapsed: c.elapsed, markerAt };
   } else {
-    const diffTypes = ['장비', '주문서', '표창'];
-    const items = drops.filter(d => diffTypes.includes(itemTypeLabel(d.id)) && mobData[d.id]?.firstTime != null)
-      .map(d => ({ t: mobData[d.id].firstTime, cnt: mobData[d.id].count || 0 }))
-      .sort((a, b) => a.t - b.t);
+    const tlBaseId = store[`tl_base_${c.mobId}`]?.id;
+    const qualifying = drops.filter(d => itemTypeLabel(d.id) !== '기타' && d.id !== tlBaseId && d.id !== MONSTER_CARD_ID);
+    // 최초 획득 시각에 전체 개수를 몰아넣지 않고, 개별 획득 시각(times) 전부를 계단으로 반영
+    const allPicks = [];
+    qualifying.forEach(d => {
+      const st = mobData[d.id];
+      if (!st || !(st.count > 0)) return;
+      const times = Array.isArray(st.times) ? st.times.filter(t => t != null) : [];
+      times.forEach(t => allPicks.push(t));
+      const missing = st.count - times.length; // times 기록이 없던 예전 데이터 보정
+      const fallback = st.firstTime != null ? st.firstTime : 0;
+      for (let i = 0; i < missing; i++) allPicks.push(fallback);
+    });
+    allPicks.sort((a, b) => a - b);
     let cum = 0;
     const pts = [[0, 0]];
-    items.forEach(it => { pts.push([it.t, cum]); cum += it.cnt; pts.push([it.t, cum]); });
+    allPicks.forEach(t => { pts.push([t, cum]); cum += 1; pts.push([t, cum]); });
     pts.push([c.elapsed, cum]);
-    return { pts, maxY: cum, elapsed: c.elapsed, isDone, markerAt };
+    return { pts, maxY: cum, elapsed: c.elapsed, markerAt };
   }
 }
 function mbookChartHtml(completed, store, mode) {
   const selMobs = Array.from(_mbookStatSel);
   if (!selMobs.length) return '<div class="mbook-empty">아래에서 몬스터를 선택하면 그래프에 표시됩니다</div>';
+  const showKills = mode === 'count'; // 아이템 개수 차트에만 추정 사냥 마릿수 오버레이(오른쪽 축)
   const series = selMobs.map((mobId, i) => {
     const c = completed.find(x => x.mobId === mobId) || mbookInProgressEntry(mobId, store);
     if (!c) return null;
     const s = mbookChartSeries(c, store, mode);
     if (!s) return null;
-    return { name: c.mobName, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], ...s };
+    const kills = showKills ? _calcTrophyKills(c, store) : 0;
+    return { name: c.mobName, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], kills, ...s };
   }).filter(Boolean);
   if (!series.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
 
   const maxX = Math.max(...series.map(s => s.elapsed), 1);
   const maxY = mode === 'rate' ? 100 : Math.max(...series.map(s => s.maxY), 1);
-  const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = 10;
+  const maxY2 = showKills ? Math.max(...series.map(s => s.kills || 0), 1) : 0;
+  const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = showKills ? 34 : 10;
   const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
   const xScale = x => PAD_L + (x / maxX) * plotW;
   const yScale = y => PAD_T + plotH - (y / maxY) * plotH;
+  const yScale2 = y => PAD_T + plotH - (y / maxY2) * plotH;
 
   const paths = series.map(s => {
     const pts = s.pts.slice();
-    // 완료된(100% 달성) 몹만 끝까지 평평하게 연장, 미완료는 지금까지 온 지점에서 끊어둠
-    if (s.isDone && s.elapsed < maxX) pts.push([maxX, pts[pts.length - 1][1]]);
+    // 완료 여부와 상관없이 실제 도달한 지점(마지막 데이터)에서 선을 끊음 — 완료 후 끝까지 평평하게 늘리지 않음
     const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1]).toFixed(1)}`).join(' ');
     const markerX = xScale(s.markerAt).toFixed(1);
     const marker = `<line x1="${markerX}" y1="${PAD_T}" x2="${markerX}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="4 3" opacity=".7"/>`;
-    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}`;
+    let killsLine = '';
+    if (showKills && s.kills > 0) {
+      // 사냥 속도가 일정하다고 가정한 추정 직선 (개별 킬 시각은 기록되지 않음)
+      const kd = `M${xScale(0).toFixed(1)},${yScale2(0).toFixed(1)} L${xScale(s.elapsed).toFixed(1)},${yScale2(s.kills).toFixed(1)}`;
+      killsLine = `<path d="${kd}" fill="none" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="2 3" opacity=".55"/>`;
+    }
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}${killsLine}`;
   }).join('');
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => {
@@ -6684,6 +6706,12 @@ function mbookChartHtml(completed, store, mode) {
       <text x="${PAD_L - 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="#6b5636">${label}</text>`;
   }).join('');
 
+  const y2Ticks = showKills ? [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const val = maxY2 * f;
+    const y = yScale2(val).toFixed(1);
+    return `<text x="${W - PAD_R + 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="start" fill="#6b5636">${Math.round(val).toLocaleString()}</text>`;
+  }).join('') : '';
+
   const maxHours = maxX / 3600000;
   const xTicks = Array.from({ length: 6 }, (_, i) => {
     const hrs = maxHours * i / 5;
@@ -6692,8 +6720,10 @@ function mbookChartHtml(completed, store, mode) {
   }).join('');
 
   const legend = series.map(s => `<span class="mbook-chart-legend-item"><span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
+  const killsNote = showKills ? '<div class="mbook-chart-note">실선: 아이템 개수(왼쪽 축) · 점선: 추정 사냥 마릿수(오른쪽 축, 등속 가정)</div>' : '';
 
-  return `<svg viewBox="0 0 ${W} ${H}" class="mbook-chart-svg">${yTicks}${xTicks}${paths}</svg>
+  return `<svg viewBox="0 0 ${W} ${H}" class="mbook-chart-svg">${yTicks}${y2Ticks}${xTicks}${paths}</svg>
+    ${killsNote}
     <div class="mbook-chart-legend">${legend}</div>`;
 }
 function mbookStatsHtml(c, drops, mobData, store) {
@@ -7300,7 +7330,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.5</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.116.6</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -8012,6 +8042,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.116.6', date: '26.08.01',
+    fix: [
+      '통계 "아이템 개수" 그래프가 최초 획득 시각에 전체 수량을 몰아서 표시하던 버그 수정 — 개별 획득 시각(times)마다 계단으로 반영',
+      '아이템 개수 집계 범위를 제외 안 된 전체 카테고리로 확대 (기타/기준아이템/몬스터카드는 제외)',
+      '완료된 몹도 그래프 오른쪽 끝까지 평평하게 늘리지 않고 실제 데이터 끝에서 선을 끊음',
+      '아이템 개수 그래프에 추정 사냥 마릿수(등속 가정) 오른쪽 축 오버레이 추가',
+      '수집 난이도 공식을 라스트템 억까(0.3) + 전체 소요시간(0.4) + 시간당 마릿수(0.3) 조합으로 재구성',
+    ],
+  },
   {
     ver: '1.116.5', date: '26.07.30',
     fix: [
