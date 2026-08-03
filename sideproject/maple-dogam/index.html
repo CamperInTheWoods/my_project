@@ -1969,6 +1969,18 @@
     .pn-box::-webkit-scrollbar-thumb { background:rgba(150,158,168,.55); border-radius:3px; }
     .pn-box::-webkit-scrollbar-thumb:hover { background:rgba(120,130,142,.7); }
 
+    /* ─ 사용법/공지 안내 모달 ─ */
+    .welcome-item { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+    .welcome-item:last-child { margin-bottom:0; }
+    .welcome-item-img { width:100%; border-radius:10px; border:1px solid var(--border); display:block; }
+    .welcome-item-text { font-size:.8rem; color:var(--dark); line-height:1.6; }
+    .welcome-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+    .welcome-btn { font-family:inherit; font-size:.74rem; font-weight:700; border-radius:8px; padding:7px 14px; cursor:pointer; transition:all .15s; }
+    .welcome-btn-skip { background:none; border:1px solid var(--border); color:var(--gray); }
+    .welcome-btn-skip:hover { background:var(--bg-tl-toggle); color:var(--dark); }
+    .welcome-btn-close { background:var(--gold); border:1px solid var(--gold); color:#fff; }
+    .welcome-btn-close:hover { opacity:.88; }
+
     /* ─ Responsive ─ */
     @media(max-width:640px){
       .main-layout { flex-direction:column; }
@@ -6608,7 +6620,22 @@ function mbookInfoHtml(c, drops, mobData, store) {
   const kills = _calcTrophyKills(c, store);
   const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
   const lastItem = mbookLastItem(drops, mobData);
-  const lastItemLabel = lastItem ? lastItem.name : '-';
+  let lastItemLabel = '-';
+  if (lastItem) {
+    const lastItemTime = mobData[lastItem.id]?.firstTime;
+    if (lastItemTime != null && c.elapsed > 0) {
+      // 마지막 아이템 출현시간 - 바로 그 전 아이템(기타 제외) 출현시간, 전체 소요시간 대비 비율
+      const priorTimes = drops
+        .filter(d => d.id !== lastItem.id && itemTypeLabel(d.id) !== '기타')
+        .map(d => mobData[d.id]?.firstTime)
+        .filter(t => t != null && t <= lastItemTime);
+      const prevTime = priorTimes.length ? Math.max(...priorTimes) : 0;
+      const pct = Math.round((lastItemTime - prevTime) / c.elapsed * 100);
+      lastItemLabel = `${lastItem.name} (${fmtTimeLogShort(lastItemTime)} · ${pct}%)`;
+    } else {
+      lastItemLabel = lastItem.name;
+    }
+  }
   const activeRates = drops.map(d => parseFloat(d.rate) / 100).filter(r => r > 0);
   const exp = activeRates.length ? `${_calcExpectedAll(activeRates).toLocaleString('ko-KR')}마리` : '-';
   const animBase = `https://maplestory.io/api/kms/284/mob/${c.mobId}/render`;
@@ -6621,8 +6648,16 @@ function mbookInfoHtml(c, drops, mobData, store) {
     ['수집 난이도', difficulty],
   ];
   const dateLabel = c.date ? c.date.replace(/-/g, '.') : '-';
+  // 운 지수 — 제외 안 한 아이템들의 확률 합 × 사냥 마릿수(기대 총 획득량) 대비 실제 획득량
+  const luckDrops = drops.filter(d => parseFloat(d.rate) > 0 && itemTypeLabel(d.id) !== '기타');
+  const expectedTotal = kills > 0 ? luckDrops.reduce((s, d) => s + parseFloat(d.rate) / 100 * kills, 0) : 0;
+  const actualTotal = luckDrops.reduce((s, d) => s + (mobData[d.id]?.count || 0), 0);
+  const luckLabel = expectedTotal > 0
+    ? `${actualTotal.toLocaleString()}개 / 기대 ${Math.round(expectedTotal).toLocaleString()}개 (${actualTotal >= expectedTotal ? '+' : ''}${Math.round((actualTotal / expectedTotal - 1) * 100)}%)`
+    : '-';
   const smallRows = [
     ['마지막 아이템', lastItemLabel],
+    ['운 지수', luckLabel],
     ['도감 완료 기댓값', exp],
     ['완료 날짜', dateLabel],
   ];
@@ -7422,7 +7457,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.117.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.117.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -7551,11 +7586,29 @@ applySelectPanelState();
 </div>
 
 <!-- 패치노트 모달 -->
+<!-- 사용법/공지 안내 모달 -->
+<div id="welcome-modal" onclick="if(event.target===this)closeWelcomeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9100;align-items:center;justify-content:center;padding:20px;">
+  <div class="pn-box" style="max-width:630px;">
+    <div class="pn-header">
+      <span class="pn-title">📖 사용법 & 공지</span>
+      <button class="pn-close" onclick="closeWelcomeModal()">&times;</button>
+    </div>
+    <div id="welcome-content"></div>
+    <div class="welcome-footer">
+      <button class="welcome-btn welcome-btn-skip" onclick="dismissWelcomeUntilNextPatch()">다음 패치까지 끄기</button>
+      <button class="welcome-btn welcome-btn-close" onclick="closeWelcomeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div id="patch-modal" onclick="if(event.target===this)closePatchNotes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
   <div class="pn-box">
     <div class="pn-header">
       <span class="pn-title">패치노트</span>
-      <button class="pn-close" onclick="closePatchNotes()">&times;</button>
+      <span style="display:flex;align-items:center;gap:10px;">
+        <button onclick="closePatchNotes();openWelcomeModal()" style="background:none;border:none;color:var(--gray);font-size:.68rem;font-weight:700;cursor:pointer;padding:3px 8px;border-radius:6px;transition:color .15s;" onmouseenter="this.style.color='var(--brown)'" onmouseleave="this.style.color='var(--gray)'">📖 사용법 보기</button>
+        <button class="pn-close" onclick="closePatchNotes()">&times;</button>
+      </span>
     </div>
     <div id="patch-content"></div>
   </div>
@@ -8135,6 +8188,15 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '1.117.2', date: '26.08.03',
+    feat: [
+      '기본정보에 "운 지수" 추가 — 기타 아이템 제외하고 확률×마릿수로 계산한 기대 획득량 대비 실제 획득량 비교',
+    ],
+    fix: [
+      '"마지막 아이템" 표시를 아이템명(HH:MM · N%) 형식으로 변경 — %는 마지막 아이템과 그 직전(기타 제외) 아이템 사이 간격이 전체 소요시간에서 차지하는 비율',
+    ],
+  },
   {
     ver: '1.117.1', date: '26.08.02',
     fix: [
@@ -8788,6 +8850,39 @@ function openSwHelp() {
 function closeSwHelp() {
   document.getElementById('sw-help-modal').style.display = 'none';
 }
+
+// ─ 사용법/공지 안내 ─ (img는 나중에 별도 이미지 파일 준비되면 경로 채워넣기)
+const WELCOME_NOTICE = [
+  { text: '몬스터를 검색하거나 ID로 직접 불러와서 도감작을 시작하세요' },
+  { text: '아이템을 클릭하면 획득 개수가 올라갑니다 (우클릭: 기준 지정·메모·숨기기 등 메뉴)' },
+  { text: '스톱워치로 사냥 시간을 재고, 오버레이(문서 PiP)로 화면 위에 띄워둘 수 있어요' },
+  { text: '도감(📖)에서 완료한 도감작을 모아보고, 통계 페이지에서 그래프로 비교할 수 있어요' },
+];
+function _renderWelcomeNotice() {
+  return WELCOME_NOTICE.map(item => `
+    <div class="welcome-item">
+      ${item.img ? `<img class="welcome-item-img" src="${item.img}" onerror="this.style.display='none'">` : ''}
+      <div class="welcome-item-text">${item.text}</div>
+    </div>
+  `).join('');
+}
+function openWelcomeModal() {
+  document.getElementById('welcome-content').innerHTML = _renderWelcomeNotice();
+  document.getElementById('welcome-modal').style.display = 'flex';
+}
+function closeWelcomeModal() {
+  document.getElementById('welcome-modal').style.display = 'none';
+}
+function dismissWelcomeUntilNextPatch() {
+  const ver = document.getElementById('ver-label')?.textContent || '';
+  const s = loadS(); s.welcome_dismissed_ver = ver; saveS(s);
+  closeWelcomeModal();
+}
+function _maybeShowWelcome() {
+  const ver = document.getElementById('ver-label')?.textContent || '';
+  if (loadS().welcome_dismissed_ver !== ver) openWelcomeModal();
+}
+// _maybeShowWelcome(); // 내용(이미지 등) 준비될 때까지 자동 표시 비활성화 — 패치노트 모달의 "📖 사용법 보기" 버튼으로는 계속 열람 가능
 
 function openPatchNotes() {
   document.getElementById('patch-content').innerHTML = _renderPatchNotes(PN_DEFAULT);
