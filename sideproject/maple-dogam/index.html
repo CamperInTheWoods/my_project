@@ -1357,7 +1357,8 @@
       padding:6px 11px; border-radius:11px; white-space:nowrap; max-width:min(78vw,260px);
       text-align:center;
       box-shadow:0 0 0 1.5px rgba(120,95,55,.4), 0 3px 8px rgba(0,0,0,.25);
-      animation:mbook-leaf-bubble-pop 1.3s ease forwards; pointer-events:none; }
+      animation:mbook-leaf-bubble-pop 5s ease forwards; pointer-events:none;
+      will-change:transform,opacity; backface-visibility:hidden; }
     .mbook-leaf-bubble.rare { --bubble-bg:#e2e2e2; }
     @media (max-width:700px) { .mbook-leaf-bubble { white-space:nowrap; max-width:none; } .mbook-cover-leaf { margin-top:30px; } }
     .mbook-leaf-bubble::before { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
@@ -1365,11 +1366,11 @@
     .mbook-leaf-bubble::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%) translateY(-1.8px);
       border:5px solid transparent; border-top-color:var(--bubble-bg); }
     @keyframes mbook-leaf-bubble-pop {
-      0%   { opacity:0; transform:translate(-50%,5px) scale(.5); }
-      12%  { opacity:1; transform:translate(-50%,0) scale(1.12); }
-      22%  { opacity:1; transform:translate(-50%,0) scale(1); }
-      72%  { opacity:1; transform:translate(-50%,0) scale(1); }
-      100% { opacity:0; transform:translate(-50%,-5px) scale(.85); }
+      0%   { opacity:0; transform:translate(-50%,5px) scale(.92); }
+      6%   { opacity:1; transform:translate(-50%,0) scale(1.04); }
+      10%  { opacity:1; transform:translate(-50%,0) scale(1); }
+      90%  { opacity:1; transform:translate(-50%,0) scale(1); }
+      100% { opacity:0; transform:translate(-50%,-5px) scale(.9); }
     }
     .mbook-cover-rule { display:flex; align-items:center; gap:10px; width:100%; max-width:190px; }
     .mbook-cover-rule::before, .mbook-cover-rule::after { content:''; flex:1; height:1px; background:rgba(110,90,60,.4); }
