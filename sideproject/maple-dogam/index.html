@@ -1331,7 +1331,7 @@
     .mbook-splash.opening .mbook-cover-art-wrap { transform:scale(1.08); opacity:.3; }
     /* 표지 전용 가죽 질감 — 책 모서리(rx=50/700x1000)에 맞춰 둥글게 클립, leather-pattern.png(검정 윤곽/투명 배경) 타일링 */
     .mbook-cover-art-wrap::before {
-      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.5;
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.3;
       border-radius:7.143%/5%;
       background-image:url('leather-pattern.png'); background-repeat:repeat; background-size:260px auto;
     }
@@ -1339,8 +1339,8 @@
     .mbook-cover-art-title-block { position:absolute; top:27%; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center; gap:11px; pointer-events:none; }
     .mbook-cover-art-rule { width:150px; height:4px; border-radius:2px; background:rgba(60,10,5,.45);
       box-shadow: 0 1.5px 0 rgba(255,205,150,.4), inset 0 1.5px 2px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,180,120,.15); }
-    .mbook-cover-art-title { color:#7a1600; font-size:1.9rem; font-weight:800; letter-spacing:.3em; text-align:center;
-      text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.55); }
+    .mbook-cover-art-title { color:#4a0d00; font-size:1.9rem; font-weight:900; letter-spacing:.3em; text-align:center;
+      text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.7); }
     .mbook-cover .char-status { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:4px; }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
     .mbook-cover-leaf { position:relative; font-size:3rem; line-height:1; cursor:pointer; }
