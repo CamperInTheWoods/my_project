@@ -1215,12 +1215,6 @@
     .mbook-left  { background:linear-gradient(90deg,#f4eeddee,#ece3ccee); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-right { background:linear-gradient(90deg,#ece3ccee,#f4eeddee); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
-    /* 도감작 화면 — 좌우 페이지 구분(책등, 접힘 그림자) 없이 하나의 넓은 캔버스로 */
-    .mbook-pages.is-hunt { flex-direction:column; overflow-y:auto; }
-    .mbook-pages.is-hunt .mbook-spine { display:none; }
-    .mbook-pages.is-hunt .mbook-page { flex:none; overflow:visible; }
-    .mbook-pages.is-hunt .mbook-left { border-radius:5px 5px 0 0; box-shadow:none; background:#f4eedd; }
-    .mbook-pages.is-hunt .mbook-right { border-radius:0 0 5px 5px; box-shadow:none; background:#f4eedd; }
     .mbook-page::-webkit-scrollbar { width:5px; }
     .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
     .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
