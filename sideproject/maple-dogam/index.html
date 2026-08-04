@@ -461,13 +461,13 @@
     #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
     .sw-log-entry.complete { background:rgba(216,148,38,.06); border-left:3px solid var(--gold); font-weight:700; color:var(--brown); }
 
-    /* ─ Main layout (items + stopwatch) ─ */
-    .main-layout { display:flex; gap:16px; align-items:flex-start; }
-    .items-section { flex:1; min-width:0; }
-    .sw-section { width:260px; flex-shrink:0; position:sticky; top:68px; }
+    /* ─ Main layout (items + stopwatch) — 타이머가 위, 아이템 슬롯이 아래(전체 폭) */
+    .main-layout { display:flex; flex-direction:column-reverse; gap:14px; }
+    .items-section { flex:1; min-width:0; width:100%; }
+    .sw-section { width:100%; }
     /* 스톱워치 내부 분할 — 왼쪽: 컨트롤(작은 버튼), 오른쪽: 타임라인/획득기록 */
-    .sw-split { display:flex; gap:10px; align-items:flex-start; margin-top:8px; }
-    .sw-controls { flex:0 0 96px; }
+    .sw-split { display:flex; gap:14px; align-items:flex-start; margin-top:8px; }
+    .sw-controls { flex:0 0 120px; }
     .sw-history { flex:1; min-width:0; }
     .sw-history .sw-log,
     .sw-history .tl-section { margin-top:0; }
@@ -1025,7 +1025,7 @@
     }
     .sw-display {
       font-family:'Courier New',monospace;
-      font-size:.84rem; font-weight:700; color:var(--dark);
+      font-size:.95rem; font-weight:700; color:var(--dark);
       letter-spacing:-.5px; font-variant-numeric:tabular-nums;
     }
     .reward-badge {
