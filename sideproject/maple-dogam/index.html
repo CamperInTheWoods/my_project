@@ -6456,13 +6456,32 @@ function renderMbookList() {
   for (let i = slice.length; i < MBOOK_PAGE_SIZE; i++) html += '<div class="mbook-mob empty"></div>';
   grid.innerHTML = html;
 }
-// 허규복 페이지(왼쪽) — GYUBOK_DATA를 완료한 도감작 목록과 같은 모양으로 표시 (참고용, 타임라인 비활성)
+// 허규복 페이지(왼쪽) — 몬스터북(0~3) 페이지와 완전히 동일한 UI(정렬 토글, 몹 카드, 시간 뱃지 등)로 GYUBOK_DATA 표시
+function mbookSortedGyubok() {
+  const list = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA.slice() : [];
+  const { key, dir } = _mbookSort;
+  if (key === 'name') return list.sort((a, b) => (a.mobName || '').localeCompare(b.mobName || '') * dir);
+  return list.sort((a, b) => {
+    const av = key === 'level' ? (a.level || 0) : key === 'elapsed' ? (a.elapsed || 0) : (a.date || '');
+    const bv = key === 'level' ? (b.level || 0) : key === 'elapsed' ? (b.elapsed || 0) : (b.date || '');
+    return av > bv ? dir : av < bv ? -dir : 0;
+  });
+}
 function mbookGyubokLeftHtml() {
-  const list = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
+  const list = mbookSortedGyubok();
   if (!list.length) return `<div class="mbook-page-title">허규복의 도감</div><div class="mbook-empty">아직 등록된 기록이 없습니다</div>`;
-  const cells = list.map(g => `<div class="mbook-mob${g.mobId === _mbookSel ? ' sel' : ''}" data-mob="${g.mobId}" onclick="mbookSelect(${g.mobId})" title="${escHtml(g.mobName)}">
-       <img src="${mobImg(g.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`).join('');
-  return `<div class="mbook-page-title">허규복의 도감 <span class="mbook-count">(${list.length})</span></div><div class="mbook-mob-grid">${cells}</div>`;
+  const showBadge = getSetting('mbook_show_time_badge');
+  const showTimeBg = getSetting('mbook_show_time_bg');
+  let cells = list.map(g => {
+    const hrs = g.elapsed ? Math.round(g.elapsed / 3600000) : null;
+    const timeCol = g.elapsed ? mbookTimeBadgeColor(g.elapsed) : null;
+    const bgCol = (showTimeBg && timeCol) ? timeCol : null;
+    return `<div class="mbook-mob${g.mobId === _mbookSel ? ' sel' : ''}${bgCol ? ' time-bg' : ''}" style="${bgCol ? `--rc:${bgCol}` : ''}" data-mob="${g.mobId}" onclick="mbookSelect(${g.mobId})" title="${escHtml(g.mobName)}">
+       <img src="${mobImg(g.mobId)}" onerror="this.style.display='none'" draggable="false">
+       ${(showBadge && hrs != null) ? `<span class="mbook-mob-time" style="background:${timeCol}">${hrs}h</span>` : ''}</div>`;
+  }).join('');
+  for (let i = list.length; i < MBOOK_PAGE_SIZE; i++) cells += '<div class="mbook-mob empty"></div>';
+  return `<div class="mbook-page-title">허규복의 도감 <span class="mbook-count">(${list.length})</span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid">${cells}</div>`;
 }
 // 표지(왼쪽 페이지) — 완료 도감작 전체 통계를 한곳에 모아 표시
 const MBOOK_COVER_SVG = `<svg width="700" height="1000" viewBox="0 0 700 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
