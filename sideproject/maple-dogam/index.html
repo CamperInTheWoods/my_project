@@ -1191,6 +1191,7 @@
     .mbook-tab-left[data-page="2"] { background:linear-gradient(90deg,#3f7fc9,#3569a8); }
     .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
     .mbook-tab-left[data-page="stats"] { background:linear-gradient(90deg,#8a8a8a,#6e6e6e); }
+    .mbook-tab-left[data-page="records"] { background:linear-gradient(90deg,#2f7ea8,#245f80); }
     .mbook-pages { display:flex; flex:1; min-width:0; }
     .mbook-page { flex:1; min-width:0; padding:14px 15px 18px; overflow-y:auto; position:relative; }
     /* 종이 섬유질 노이즈 — feTurbulence, 갈색 대신 중립 그레이 톤이라 누렇지 않음 */
@@ -1342,6 +1343,15 @@
     }
     .mbook-cover-rule { display:flex; align-items:center; gap:10px; width:100%; max-width:190px; }
     .mbook-cover-rule::before, .mbook-cover-rule::after { content:''; flex:1; height:1px; background:rgba(110,90,60,.4); }
+    .mbook-records-grass { margin-top:16px; font-family:inherit; font-size:.72rem; font-weight:700; color:#4a7a5a; background:rgba(80,150,100,.14); border:1px solid rgba(80,150,100,.35); border-radius:8px; padding:6px 14px; cursor:pointer; transition:background .15s; }
+    .mbook-records-grass:hover { background:rgba(80,150,100,.24); }
+    /* 목차 — 클릭 시 해당 책갈피로 이동 */
+    .mbook-toc { display:flex; flex-direction:column; gap:14px; padding:8px 6px; }
+    .mbook-toc-item { display:flex; align-items:baseline; gap:6px; cursor:pointer; font-size:.82rem; color:#4a3318; font-weight:600; }
+    .mbook-toc-item:hover { color:#96690a; }
+    .mbook-toc-item .mbook-toc-dots { flex:1; border-bottom:1px dotted rgba(110,90,60,.5); margin-bottom:3px; }
+    .mbook-toc-item.disabled { color:rgba(74,51,24,.4); cursor:default; }
+    .mbook-toc-item.disabled:hover { color:rgba(74,51,24,.4); }
     /* 우측 페이지(표지) — 안내문 + 버전 */
     .mbook-colophon { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:9px; padding:0 14px; }
     .mbook-colophon p { font-size:.84rem; color:#6b5636; line-height:1.6; }
@@ -6336,8 +6346,9 @@ function closeMonsterBook() {
 function mbookSyncLeftTabs() {
   document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
 }
+const MBOOK_NO_SEL_PAGES = ['cover', 'records', 'stats']; // 몹 선택 없이 보는 페이지 — 오른쪽 탭 잠금
 function mbookSyncTabs() {
-  const disableOthers = _mbookPage === 'cover' || _mbookPage === 'stats' || _mbookSel == null;
+  const disableOthers = MBOOK_NO_SEL_PAGES.includes(_mbookPage) || _mbookSel == null;
   document.querySelectorAll('.mbook-tab').forEach(t => {
     const isInfo = t.dataset.tab === 'info';
     t.classList.toggle('active', t.dataset.tab === _mbookTab);
@@ -6346,7 +6357,7 @@ function mbookSyncTabs() {
 }
 function mbookSetPage(page) {
   _mbookPage = page;
-  if (page === 'cover' || page === 'stats') _mbookTab = 'info'; // 표지/통계로 오면 기본정보 책갈피 활성화
+  if (MBOOK_NO_SEL_PAGES.includes(page)) _mbookTab = 'info'; // 표지/기록/통계로 오면 기본정보 책갈피 활성화
   mbookHideNote();
   mbookSyncLeftTabs();
   mbookSyncTabs();
@@ -6356,7 +6367,7 @@ function mbookSetPage(page) {
   if (window.innerWidth <= 700) document.querySelector('.mbook-pages')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function mbookSetTab(tab) {
-  if (_mbookPage === 'cover' || _mbookPage === 'stats') return; // 표지/통계에서는 탭 전환 불가
+  if (MBOOK_NO_SEL_PAGES.includes(_mbookPage)) return; // 표지/기록/통계에서는 탭 전환 불가
   if (_mbookSel == null && tab !== 'info') return; // 몹 미선택 시 기본정보만 활성화
   _mbookTab = tab; mbookHideNote(); mbookSyncTabs(); renderMbookRight();
 }
@@ -6405,6 +6416,7 @@ function renderMbookList() {
   if (!leftPage) return;
   const rawCompleted = getTrophyCompleted();
   if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(rawCompleted); return; }
+  if (_mbookPage === 'records') { leftPage.innerHTML = mbookRecordsLeftHtml(rawCompleted, loadS()); return; }
   if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted, loadS()); return; }
   const completed = mbookSortedCompleted();
   leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
@@ -6429,21 +6441,32 @@ function renderMbookList() {
 }
 // 표지(왼쪽 페이지) — 완료 도감작 전체 통계를 한곳에 모아 표시
 function mbookCoverLeftHtml(completed) {
-  const store = loadS();
-  const count = completed.length;
-  const totalMs = completed.reduce((s, c) => s + (c.elapsed || 0), 0);
-  const totalKills = completed.reduce((s, c) => s + _calcTrophyKills(c, store), 0);
-  const rows = [
-    ['완료한 도감작', count ? `${count}개` : '-'],
-    ['누적 소요시간', fmtAvgElapsed(totalMs)],
-    ['전체 사냥 마릿수', totalKills ? `${totalKills.toLocaleString()}마리` : '-'],
-  ];
   return `<div class="mbook-cover">
     <div class="mbook-cover-leaf" onclick="mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
     <div class="mbook-cover-rule"></div>
     <div class="mbook-cover-title">완료된 도감작</div>
     <div class="mbook-cover-rule"></div>
+  </div>`;
+}
+// 전체 기록 페이지(왼쪽) — 완료/진행중 도감작 요약 + 사냥 잔디 바로가기
+function mbookRecordsLeftHtml(completed, store) {
+  const inProgress = mbookInProgressList(store, completed);
+  const completedMs = completed.reduce((s, c) => s + (c.elapsed || 0), 0);
+  const inProgressMs = inProgress.reduce((s, m) => s + (mbookInProgressEntry(m.mobId, store)?.elapsed || 0), 0);
+  const totalMs = completedMs + inProgressMs;
+  const pct = totalMs > 0 ? Math.round(completedMs / totalMs * 100) : 0;
+  const rows = [
+    ['완료한 도감작', completed.length ? `${completed.length}개` : '-'],
+    ['진행중인 도감작', inProgress.length ? `${inProgress.length}개` : '-'],
+    ['완료 소요시간', fmtAvgElapsed(completedMs)],
+    ['전체 소요시간', fmtAvgElapsed(totalMs)],
+    ['완료 비율', totalMs > 0 ? `${pct}%` : '-'],
+  ];
+  return `<div class="mbook-cover">
+    <div class="mbook-cover-title">전체 기록</div>
+    <div class="mbook-cover-rule"></div>
     ${mbookStatListHtml(rows, 'lg')}
+    <button class="mbook-records-grass" onclick="openHuntGrid()">🌱 사냥 잔디 보기</button>
   </div>`;
 }
 // 통계 페이지(왼쪽) — 완료한 몬스터를 클릭해 그래프에 추가/제거하는 선택 그리드
@@ -6554,6 +6577,16 @@ function renderMbookRight() {
     </div>
     <div class="mbook-colophon-hint">🍁 단풍잎을 눌러보세요!</div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
+    return;
+  }
+  if (_mbookPage === 'records') {
+    titleEl.innerHTML = `<span>목차</span>`;
+    bodyEl.innerHTML = `<div class="mbook-toc">
+      <div class="mbook-toc-item" onclick="mbookSetPage('cover')"><span>표지</span><span class="mbook-toc-dots"></span></div>
+      <div class="mbook-toc-item" onclick="mbookSetPage(0)"><span>완료한 도감작 목록</span><span class="mbook-toc-dots"></span></div>
+      <div class="mbook-toc-item" onclick="mbookSetPage('stats')"><span>통계</span><span class="mbook-toc-dots"></span></div>
+      <div class="mbook-toc-item disabled" title="준비 중"><span>도감작 하기 (준비 중)</span><span class="mbook-toc-dots"></span></div>
+    </div>`;
     return;
   }
   if (_mbookPage === 'stats') {
@@ -7418,6 +7451,7 @@ applySelectPanelState();
     <button class="mbook-close" onclick="closeMonsterBook()">✕</button>
     <div class="mbook-tabs-left" id="mbook-tabs-left">
       <button class="mbook-tab-left active" data-page="cover" onclick="mbookSetPage('cover')" title="표지"><span class="mbook-tab-left-icon">ⓘ</span></button>
+      <button class="mbook-tab-left" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-icon">🏠</span></button>
       <button class="mbook-tab-left" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-icon">📈</span></button>
       <div class="mbook-tabs-left-gap"></div>
       <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
