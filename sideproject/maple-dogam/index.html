@@ -1324,11 +1324,11 @@
     .mbook-overlay.book-closed .mbook > *:not(#mbook-splash) { display:none; }
     .mbook-splash { display:none; position:absolute; inset:0; align-items:center; justify-content:center; cursor:pointer; z-index:6; }
     .mbook-overlay.book-closed .mbook-splash { display:flex; }
-    .mbook-cover-art-wrap { position:relative; display:inline-flex; height:98%; }
-    .mbook-splash svg { height:100%; width:auto; filter:drop-shadow(0 14px 26px rgba(0,0,0,.55)); transition:transform .22s ease, opacity .22s ease; will-change:transform,opacity; }
-    .mbook-splash:hover svg { transform:scale(1.015); }
-    .mbook-splash:active svg { transform:scale(.98); }
-    .mbook-splash.opening svg { transform:scale(1.08); opacity:.3; }
+    .mbook-cover-art-wrap { position:relative; display:inline-flex; height:98%; transition:transform .22s ease, opacity .22s ease; will-change:transform,opacity; }
+    .mbook-splash svg { height:100%; width:auto; filter:drop-shadow(0 14px 26px rgba(0,0,0,.55)); }
+    .mbook-splash:hover .mbook-cover-art-wrap { transform:scale(1.015); }
+    .mbook-splash:active .mbook-cover-art-wrap { transform:scale(.98); }
+    .mbook-splash.opening .mbook-cover-art-wrap { transform:scale(1.08); opacity:.3; }
     /* 표지 전용 가죽 질감 — 그림 위에만 얹히도록 wrap 전체(=SVG 영역)에 블렌드, 클릭은 통과 */
     .mbook-cover-art-wrap::after {
       content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:overlay; opacity:.65;
