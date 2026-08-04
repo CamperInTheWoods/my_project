@@ -1163,28 +1163,28 @@
         linear-gradient(90deg,#c9ad6f,#b8975a);
       color:#4a3a1a; font-family:inherit; white-space:nowrap; text-align:right;
       font-size:.68rem; font-weight:800; letter-spacing:.03em; box-shadow:2px 2px 5px rgba(0,0,0,.28);
-      transition:all .15s; opacity:.8;
+      transition:all .15s; opacity:1; filter:saturate(.45);
     }
-    .mbook-tab:hover { opacity:1; }
+    .mbook-tab:hover { filter:saturate(.75); }
     .mbook-tab.active {
       background:
         repeating-linear-gradient(112deg, rgba(90,66,30,.06) 0 1.5px, transparent 1.5px 4.5px),
         repeating-linear-gradient(22deg, rgba(255,255,255,.08) 0 1.5px, transparent 1.5px 4px),
         linear-gradient(90deg,#e6cf8f,#d8bd6f);
-      opacity:1; box-shadow:3px 3px 7px rgba(0,0,0,.32);
+      filter:none; box-shadow:3px 3px 7px rgba(0,0,0,.32);
     }
-    .mbook-tab.disabled { opacity:.4; cursor:default; pointer-events:none; }
+    .mbook-tab.disabled { opacity:1; filter:grayscale(1); cursor:default; pointer-events:none; }
     /* 책갈피 탭 (왼쪽 바깥 — 표지 · 페이지 색상 인덱스) */
     .mbook-tabs-left { position:absolute; right:100%; top:52px; transform:translateX(8px); display:flex; flex-direction:column; gap:7px; z-index:1; }
     .mbook-tabs-left-gap { height:100px; flex-shrink:0; }
     .mbook-tab-left {
       width:22px; height:46px; padding:0; border:none; border-radius:7px 0 0 7px; cursor:pointer;
       color:#fff; font-family:inherit; box-shadow:-2px 2px 5px rgba(0,0,0,.28);
-      transition:all .15s; opacity:.8;
+      transition:all .15s; opacity:1; filter:saturate(.45);
       display:flex; align-items:center; justify-content:center;
     }
-    .mbook-tab-left:hover { opacity:1; }
-    .mbook-tab-left.active { opacity:1; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
+    .mbook-tab-left:hover { filter:saturate(.75); }
+    .mbook-tab-left.active { filter:none; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
     .mbook-tab-left-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
     .mbook-tab-left[data-page="records"] .mbook-tab-left-icon,
     .mbook-tab-left[data-page="stats"] .mbook-tab-left-icon { filter:grayscale(1); }
@@ -1204,9 +1204,9 @@
         repeating-linear-gradient(45deg, rgba(190,40,20,.35) 0 2px, transparent 2px 8px),
         linear-gradient(90deg,#e8912f,#cf7a20);
       color:#fff; font-family:inherit; box-shadow:2px 2px 5px rgba(0,0,0,.28);
-      transition:all .15s; opacity:.8; display:flex; align-items:center; justify-content:center;
+      transition:all .15s; opacity:1; filter:saturate(.75); display:flex; align-items:center; justify-content:center;
     }
-    .mbook-tab-cover:hover { opacity:1; }
+    .mbook-tab-cover:hover { filter:saturate(1); }
     .mbook-tab-cover-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
     .mbook-pages { display:flex; flex:1; min-width:0; }
     .mbook-page { flex:1; min-width:0; padding:14px 15px 18px; overflow-y:auto; position:relative; }
