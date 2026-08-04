@@ -465,11 +465,14 @@
     .main-layout { display:flex; flex-direction:column-reverse; gap:14px; }
     .items-section { flex:1; min-width:0; width:100%; }
     .sw-section { width:100%; }
-    /* 스톱워치 내부 분할 — 왼쪽: 컨트롤(작은 버튼), 오른쪽: 타임라인/획득기록 */
+    /* 스톱워치 내부 분할 — 왼쪽: 예상마릿수/타이머/버튼/획득기록(좁게), 오른쪽: 타임라인(넓게) */
     .sw-split { display:flex; gap:14px; align-items:flex-start; margin-top:8px; }
-    .sw-controls { flex:0 0 120px; }
+    .sw-controls { flex:0 0 150px; }
+    .sw-controls .hunt-estimate .ptitle { font-size:.62rem; }
+    .sw-controls .hunt-count { font-size:1rem; padding:2px 0; }
+    .sw-controls .hunt-reason { font-size:.56rem; }
+    .sw-controls .hunt-dogam-exp { font-size:.52rem; }
     .sw-history { flex:1; min-width:0; }
-    .sw-history .sw-log,
     .sw-history .tl-section { margin-top:0; }
 
     /* ─ Item grid ─ */
@@ -1550,19 +1553,19 @@
       transition:background .15s, color .15s, border-color .15s;
     }
     .tl-toggle-btn.on { background:var(--gold); color:#fff; border-color:var(--gold); }
-    .tl-rows { margin-top:4px; max-height:300px; overflow-y:auto; }
+    .tl-rows { margin-top:4px; max-height:210px; overflow-y:auto; }
     .tl-row { position:relative; margin-bottom:4px; }
     .tl-callouts { position:relative; min-height:0; }
     .tl-bar-zone { position:relative; }
     .tl-time-labels { display:flex; justify-content:space-between; font-size:.42rem; color:#bbb; margin-top:2px; font-weight:700; line-height:1; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
-      position:relative; width:34px; height:34px;
-      border:2px solid #aaa; border-radius:6px;
+      position:relative; width:26px; height:26px;
+      border:2px solid #aaa; border-radius:5px;
       background:white; overflow:hidden;
       box-shadow:0 1px 4px rgba(0,0,0,.15);
     }
-    .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
+    .tl-callout-box img { width:21px; height:21px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
     .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
     .tl-arrow-spacer { height:5px; }
     .tl-r0 { border-color:#3f5f85; }
@@ -1576,7 +1579,7 @@
     .tl-r8 { border-color:#5b4a68; box-shadow:0 1px 6px rgba(91,74,104,.5); }
     .tl-bar-wrap { position:relative; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
     .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
-    .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
+    .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:26px; height:34px; cursor:pointer; }
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
     .tl-cluster .tl-extra { display:none; }
     .tl-cluster.open .tl-extra { display:flex; flex-direction:column; }
@@ -4574,13 +4577,6 @@ function buildTabPanel(tab) {
         <div class="item-grid"></div>
       </div>
       <div class="sw-section panel">
-        <div class="hunt-estimate" style="display:none">
-          <div class="ptitle">🗡 예상 사냥 마릿수</div>
-          <div class="hunt-count"></div>
-          <div class="hunt-reason"></div>
-          <div class="hunt-dogam-exp"></div>
-          <div class="divider" style="margin:10px 0 12px"></div>
-        </div>
         <div class="sw-header-row">
           <div class="ptitle">스톱워치</div>
           <button class="sw-help-btn" onclick="openSwHelp()" title="단축키 안내">?</button>
@@ -4593,6 +4589,13 @@ function buildTabPanel(tab) {
         </div>
         <div class="sw-split">
           <div class="sw-controls">
+            <div class="hunt-estimate" style="display:none">
+              <div class="ptitle">🗡 예상 사냥 마릿수</div>
+              <div class="hunt-count"></div>
+              <div class="hunt-reason"></div>
+              <div class="hunt-dogam-exp"></div>
+              <div class="divider" style="margin:8px 0 10px"></div>
+            </div>
             <div class="sw-timer-row">
               <div class="sw-display">00:00:00.00</div>
             </div>
@@ -4611,8 +4614,6 @@ function buildTabPanel(tab) {
               <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
               <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
             </div>
-          </div>
-          <div class="sw-history">
             <div class="sw-log">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
@@ -4623,6 +4624,8 @@ function buildTabPanel(tab) {
                 <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
+          </div>
+          <div class="sw-history">
             <div class="tl-section" style="display:none">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
                 <div style="display:flex;align-items:center;gap:3px;">
