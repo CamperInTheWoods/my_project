@@ -1144,7 +1144,7 @@
     }
     .mbook-metal.zoomed { zoom:1.1; }
     .mbook {
-      position:relative; width:min(1100px,95vw); height:min(90vh,860px); display:flex;
+      position:relative; width:min(1100px,95vw); height:min(86vh,780px); display:flex;
       background:linear-gradient(180deg,#ece2cc,#e2d6ba);
       border-radius:7px; padding:16px;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.22);
@@ -1320,7 +1320,7 @@
     .mbook-cover-title { font-size:1.3rem; font-weight:800; color:#2f2410; letter-spacing:.22em; text-shadow:0 1px 0 rgba(255,255,255,.5); }
     /* 닫힌 책(스플래시) — 책갈피 없이 표지 그림만 갈색 배경 위에 떠 있음. .mbook 크기는 펼쳐졌을 때와 동일하게 고정 */
     .mbook-overlay.book-closed .mbook-metal { background:transparent; box-shadow:none; }
-    .mbook-overlay.book-closed .mbook { background:transparent; box-shadow:none; }
+    .mbook-overlay.book-closed .mbook { background:transparent; box-shadow:none; height:min(90vh,860px); }
     .mbook-overlay.book-closed .mbook > *:not(#mbook-splash) { display:none; }
     .mbook-splash { display:none; position:absolute; inset:0; align-items:center; justify-content:center; cursor:pointer; z-index:6; }
     .mbook-overlay.book-closed .mbook-splash { display:flex; }
