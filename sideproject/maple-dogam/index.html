@@ -461,10 +461,16 @@
     #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
     .sw-log-entry.complete { background:rgba(216,148,38,.06); border-left:3px solid var(--gold); font-weight:700; color:var(--brown); }
 
-    /* ─ Main layout (items + stopwatch) — 도감작 오른쪽 페이지: 타이머가 위, 아이템 슬롯이 아래(전체 폭) */
-    .main-layout { display:flex; flex-direction:column-reverse; gap:14px; }
-    .items-section { flex:1; min-width:0; width:100%; }
-    .sw-section { width:100%; flex-shrink:0; position:sticky; top:0; }
+    /* ─ Main layout (items + stopwatch) ─ */
+    .main-layout { display:flex; gap:16px; align-items:flex-start; }
+    .items-section { flex:1; min-width:0; }
+    .sw-section { width:260px; flex-shrink:0; position:sticky; top:68px; }
+    /* 스톱워치 내부 분할 — 왼쪽: 컨트롤(작은 버튼), 오른쪽: 타임라인/획득기록 */
+    .sw-split { display:flex; gap:10px; align-items:flex-start; margin-top:8px; }
+    .sw-controls { flex:0 0 96px; }
+    .sw-history { flex:1; min-width:0; }
+    .sw-history .sw-log,
+    .sw-history .tl-section { margin-top:0; }
 
     /* ─ Item grid ─ */
     .item-grid {
@@ -788,10 +794,10 @@
     .sw-sub-row { display:flex; align-items:center; justify-content:space-between; min-height:20px; margin-bottom:2px; }
     .sw-ch-elapsed { font-size:.8rem; color:#1a6fa8; display:flex; align-items:center; gap:4px; }
     .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:.85rem; }
-    .sw-btns { display:flex; flex-direction:column; gap:8px; }
+    .sw-btns { display:flex; flex-direction:column; gap:6px; }
     .sw-btn {
-      padding:12px; border:none; border-radius:12px;
-      font-family:inherit; font-size:.85rem; font-weight:700;
+      padding:8px; border:none; border-radius:9px;
+      font-family:inherit; font-size:.74rem; font-weight:700;
       cursor:pointer; transition:transform .12s, filter .15s, box-shadow .15s; text-align:center;
     }
     .sw-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
@@ -1019,7 +1025,7 @@
     }
     .sw-display {
       font-family:'Courier New',monospace;
-      font-size:1.18rem; font-weight:700; color:var(--dark);
+      font-size:.84rem; font-weight:700; color:var(--dark);
       letter-spacing:-.5px; font-variant-numeric:tabular-nums;
     }
     .reward-badge {
@@ -4585,43 +4591,49 @@ function buildTabPanel(tab) {
             <div class="reward-drop-list" style="display:none"></div>
           </div>
         </div>
-        <div class="sw-timer-row">
-          <div class="sw-display">00:00:00.00</div>
-        </div>
-        <div class="sw-sub-row">
-          <div class="sw-ch-elapsed" style="display:none">
-            <span class="sw-ch-val">00:00:00.00</span>
-          </div>
-          <div class="reward-badge" style="display:none"></div>
-        </div>
-        <div class="sw-btns">
-          <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
-          <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
-        </div>
-        <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
-          <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
-          <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
-          <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
-        </div>
-        <div class="sw-log">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
-            <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
-            <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
-          </div>
-          <div class="sw-log-list"></div>
-          <button class="sw-log-down" onclick="_swLogGoBottom(this)" title="최신으로">
-            <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <div class="tl-section" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-            <div style="display:flex;align-items:center;gap:3px;">
-              <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
-              <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
+        <div class="sw-split">
+          <div class="sw-controls">
+            <div class="sw-timer-row">
+              <div class="sw-display">00:00:00.00</div>
             </div>
-            <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal(event)" title="크게 보기">↗</button>
+            <div class="sw-sub-row">
+              <div class="sw-ch-elapsed" style="display:none">
+                <span class="sw-ch-val">00:00:00.00</span>
+              </div>
+              <div class="reward-badge" style="display:none"></div>
+            </div>
+            <div class="sw-btns">
+              <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
+              <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
+            </div>
+            <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
+              <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
+              <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
+              <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
+            </div>
           </div>
-          <div class="tl-rows"></div>
+          <div class="sw-history">
+            <div class="sw-log">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
+                <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
+              </div>
+              <div class="sw-log-list"></div>
+              <button class="sw-log-down" onclick="_swLogGoBottom(this)" title="최신으로">
+                <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="tl-section" style="display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+                <div style="display:flex;align-items:center;gap:3px;">
+                  <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
+                  <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
+                </div>
+                <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal(event)" title="크게 보기">↗</button>
+              </div>
+              <div class="tl-rows"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>`;
