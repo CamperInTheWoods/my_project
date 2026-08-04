@@ -1198,7 +1198,7 @@
     /* 오른쪽 맨 아래 고정 책갈피 — 표지로 돌아가기, 페이지 상태와 무관하게 항상 노출 */
     .mbook-tabs-right-fixed { position:absolute; left:100%; bottom:16px; transform:translateX(-8px); z-index:1; }
     .mbook-tab-cover {
-      width:22px; height:46px; padding:0; border:none; border-radius:0 7px 7px 0; cursor:pointer;
+      width:44px; height:23px; padding:0; border:none; border-radius:0 7px 7px 0; cursor:pointer;
       background:
         repeating-linear-gradient(135deg, rgba(190,40,20,.65) 0 3px, transparent 3px 8px),
         repeating-linear-gradient(45deg, rgba(190,40,20,.35) 0 2px, transparent 2px 8px),
@@ -6878,6 +6878,7 @@ const MBOOK_COVER_SVG = `<svg width="700" height="1000" viewBox="0 0 700 1000" f
 function mbookRenderSplash() {
   const el = document.getElementById('mbook-splash');
   if (!el) return;
+  el.classList.remove('opening');
   el.innerHTML = `<div class="mbook-cover-art-wrap">
     ${MBOOK_COVER_SVG}
     <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
