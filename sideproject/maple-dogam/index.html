@@ -1329,8 +1329,15 @@
     .mbook-splash:hover svg { transform:scale(1.015); }
     .mbook-splash:active svg { transform:scale(.98); }
     .mbook-splash.opening svg { transform:scale(1.08); opacity:.3; }
-    .mbook-cover-art-wrap .mbook-cover-leaf { position:absolute; top:6%; left:0; right:0; text-align:center; }
-    .mbook-cover-art-title { position:absolute; top:19%; left:0; right:0; text-align:center; color:#7a1600; font-size:1.5rem; font-weight:800; letter-spacing:.3em; pointer-events:none;
+    /* 표지 전용 가죽 질감 — 그림 위에만 얹히도록 wrap 전체(=SVG 영역)에 블렌드, 클릭은 통과 */
+    .mbook-cover-art-wrap::after {
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.28;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0.28  0 0 0 0 0.1  0 0 0 0 0.04  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E");
+    }
+    .mbook-cover-art-wrap .mbook-cover-leaf { position:absolute; top:12%; left:0; right:0; text-align:center; z-index:2; }
+    .mbook-cover-art-title-block { position:absolute; top:27%; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center; gap:9px; pointer-events:none; }
+    .mbook-cover-art-rule { width:130px; height:1px; background:linear-gradient(90deg, transparent, rgba(255,220,180,.6), transparent); }
+    .mbook-cover-art-title { color:#7a1600; font-size:1.9rem; font-weight:800; letter-spacing:.3em; text-align:center;
       text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.55); }
     .mbook-cover .char-status { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:4px; }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
@@ -6849,7 +6856,11 @@ function mbookRenderSplash() {
   el.innerHTML = `<div class="mbook-cover-art-wrap">
     ${MBOOK_COVER_SVG}
     <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
-    <div class="mbook-cover-art-title">도감</div>
+    <div class="mbook-cover-art-title-block">
+      <div class="mbook-cover-art-rule"></div>
+      <div class="mbook-cover-art-title">도감</div>
+      <div class="mbook-cover-art-rule"></div>
+    </div>
   </div>`;
 }
 // 표지를 클릭하면 살짝 열리는 느낌을 준 뒤 책갈피가 있는 화면(전체 기록)으로 펼쳐짐
