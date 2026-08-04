@@ -1329,11 +1329,11 @@
     .mbook-splash:hover .mbook-cover-art-wrap { transform:scale(1.015); }
     .mbook-splash:active .mbook-cover-art-wrap { transform:scale(.98); }
     .mbook-splash.opening .mbook-cover-art-wrap { transform:scale(1.08); opacity:.3; }
-    /* 표지 전용 가죽 질감 — 책 모서리(rx=50/700x1000)에 맞춰 둥글게 클립, 종이 질감(.mbook-page::before)과 같은 fractalNoise 방식을 가죽톤으로 */
+    /* 표지 전용 가죽 질감 — 책 모서리(rx=50/700x1000)에 맞춰 둥글게 클립, leather-pattern.png(검정 윤곽/투명 배경) 타일링 */
     .mbook-cover-art-wrap::before {
-      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.42;
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.5;
       border-radius:7.143%/5%;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='lth'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0 0.04  0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23lth)'/%3E%3C/svg%3E");
+      background-image:url('leather-pattern.png'); background-repeat:repeat; background-size:260px auto;
     }
     .mbook-cover-art-wrap .mbook-cover-leaf { position:absolute; top:12%; left:0; right:0; text-align:center; z-index:2; }
     .mbook-cover-art-title-block { position:absolute; top:27%; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center; gap:11px; pointer-events:none; }
