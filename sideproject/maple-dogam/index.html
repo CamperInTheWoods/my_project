@@ -6008,6 +6008,21 @@ function applyItemDexState() {
   t.classList.toggle('collapsed', collapsed);
   b.style.display = collapsed ? 'none' : 'block';
 }
+function toggleMobSearchSection() {
+  const t = document.getElementById('mobsearch-toggle');
+  const b = document.getElementById('mobsearch-body');
+  const collapsed = t.classList.toggle('collapsed');
+  b.style.display = collapsed ? 'none' : '';
+  const s = loadS(); s.mobsearch_collapsed = collapsed; saveS(s);
+}
+function applyMobSearchState() {
+  const collapsed = !!loadS().mobsearch_collapsed; // 기본값: 펼침
+  const t = document.getElementById('mobsearch-toggle');
+  const b = document.getElementById('mobsearch-body');
+  if (!t || !b) return;
+  t.classList.toggle('collapsed', collapsed);
+  b.style.display = collapsed ? 'none' : '';
+}
 function toggleIdSection() {
   const toggle = document.getElementById('id-section-toggle');
   const body   = document.getElementById('id-section-body');
@@ -7833,6 +7848,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSaves();
   renderTrophy();
   applyItemDexState();
+  applyMobSearchState();
   applySavesState();
   openMonsterBook();
 });
@@ -7921,25 +7937,29 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="mbook-pages">
       <div class="mbook-page mbook-left">
         <div id="mbook-hunt-left">
-          <div class="ptitle">몬스터 검색</div>
-          <div class="search-row">
-            <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
-                   oninput="onNameInput(this.value)"
-                   onkeydown="if(event.key==='Enter')searchByName()">
-            <button class="btn" onclick="searchByName()">검색</button>
+          <div class="ptitle ptitle-toggle" id="mobsearch-toggle" onclick="toggleMobSearchSection()">
+            몬스터 검색 <span class="toggle-arrow">▼</span>
           </div>
-          <div class="ptitle-toggle id-toggle-sm collapsed" id="id-section-toggle" onclick="toggleIdSection()">
-            몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
-          </div>
-          <div class="id-section collapsed" id="id-section-body">
-            <div class="id-row">
-              <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
-              <button class="btn" onclick="loadById()">불러오기</button>
+          <div id="mobsearch-body">
+            <div class="search-row">
+              <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
+                     oninput="onNameInput(this.value)"
+                     onkeydown="if(event.key==='Enter')searchByName()">
+              <button class="btn" onclick="searchByName()">검색</button>
             </div>
+            <div class="ptitle-toggle id-toggle-sm collapsed" id="id-section-toggle" onclick="toggleIdSection()">
+              몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
+            </div>
+            <div class="id-section collapsed" id="id-section-body">
+              <div class="id-row">
+                <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
+                <button class="btn" onclick="loadById()">불러오기</button>
+              </div>
+            </div>
+            <div id="search-status" class="msg"></div>
+            <div id="load-msg" class="msg"></div>
+            <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
           </div>
-          <div id="search-status" class="msg"></div>
-          <div id="load-msg" class="msg"></div>
-          <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
 
           <div class="divider"></div>
 
