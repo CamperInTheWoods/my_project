@@ -1195,6 +1195,19 @@
     .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
     .mbook-tab-left[data-page="stats"] { background:linear-gradient(90deg,#8a8a8a,#6e6e6e); }
     .mbook-tab-left[data-page="records"] { background:linear-gradient(90deg,#2f7ea8,#245f80); }
+    /* 오른쪽 맨 아래 고정 책갈피 — 표지로 돌아가기, 페이지 상태와 무관하게 항상 노출 */
+    .mbook-tabs-right-fixed { position:absolute; left:100%; bottom:16px; transform:translateX(-8px); z-index:1; }
+    .mbook-tab-cover {
+      width:22px; height:46px; padding:0; border:none; border-radius:0 7px 7px 0; cursor:pointer;
+      background:
+        repeating-linear-gradient(135deg, rgba(190,40,20,.65) 0 3px, transparent 3px 8px),
+        repeating-linear-gradient(45deg, rgba(190,40,20,.35) 0 2px, transparent 2px 8px),
+        linear-gradient(90deg,#e8912f,#cf7a20);
+      color:#fff; font-family:inherit; box-shadow:2px 2px 5px rgba(0,0,0,.28);
+      transition:all .15s; opacity:.8; display:flex; align-items:center; justify-content:center;
+    }
+    .mbook-tab-cover:hover { opacity:1; }
+    .mbook-tab-cover-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
     .mbook-pages { display:flex; flex:1; min-width:0; }
     .mbook-page { flex:1; min-width:0; padding:14px 15px 18px; overflow-y:auto; position:relative; }
     /* 종이 섬유질 노이즈 — feTurbulence, 갈색 대신 중립 그레이 톤이라 누렇지 않음 */
@@ -6245,6 +6258,13 @@ function closeMonsterBook() {
   mbookHideNote();
   document.getElementById('mbook-overlay').classList.remove('open');
 }
+// 오른쪽 맨 아래 고정 책갈피 — 책을 다시 덮어 표지(스플래시) 화면으로 돌아감
+function mbookGoCover() {
+  mbookHideNote();
+  _mbookOpened = false;
+  document.getElementById('mbook-overlay')?.classList.add('book-closed');
+  mbookRenderSplash();
+}
 function mbookSyncLeftTabs() {
   document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
 }
@@ -6893,7 +6913,6 @@ function mbookRecordsLeftHtml(completed, store) {
     ['완료 비율', totalMs > 0 ? `${pct}%` : '-'],
   ];
   return `<div class="mbook-cover">
-    <div class="mbook-cover-leaf" onclick="mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
     <div class="mbook-cover-rule"></div>
     <div class="mbook-cover-title">전체 기록</div>
     <div class="mbook-cover-rule"></div>
@@ -7900,6 +7919,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <button class="mbook-tab" data-tab="items" onclick="mbookSetTab('items')">아이템</button>
       <button class="mbook-tab" data-tab="stats" onclick="mbookSetTab('stats')">통계</button>
       <button class="mbook-tab" data-tab="timeline" onclick="mbookSetTab('timeline')">타임라인</button>
+    </div>
+    <div class="mbook-tabs-right-fixed">
+      <button class="mbook-tab-cover" onclick="mbookGoCover()" title="표지"><span class="mbook-tab-cover-icon">📕</span></button>
     </div>
     <div class="mbook-pages">
       <div class="mbook-page mbook-left">
