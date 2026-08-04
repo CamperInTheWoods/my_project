@@ -1330,9 +1330,19 @@
     .mbook-splash:active .mbook-cover-art-wrap { transform:scale(.98); }
     .mbook-splash.opening .mbook-cover-art-wrap { transform:scale(1.08); opacity:.3; }
     /* 표지 전용 가죽 질감 — 그림 위에만 얹히도록 wrap 전체(=SVG 영역)에 블렌드, 클릭은 통과 */
+    /* 크로스해치 + 모공(pore) 반점을 CSS 그라디언트로 직접 그려 확실히 보이도록 (SVG 노이즈는 너무 은은해서 안 보였음) */
+    .mbook-cover-art-wrap::before {
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:multiply; opacity:.6;
+      background-image:
+        repeating-linear-gradient(118deg, rgba(25,8,4,.4) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(28deg, rgba(25,8,4,.32) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 2px 2px, rgba(15,4,2,.5) 1px, transparent 1.4px);
+      background-size: 5px 5px, 5px 5px, 7px 7px;
+    }
     .mbook-cover-art-wrap::after {
-      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:overlay; opacity:.65;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0.15  0 0 0 0 0.06  0 0 0 0 0.02  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E");
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:screen; opacity:.22;
+      background-image: radial-gradient(circle at 4.5px 4.5px, rgba(255,225,190,.9) 1px, transparent 1.4px);
+      background-size: 7px 7px;
     }
     .mbook-cover-art-wrap .mbook-cover-leaf { position:absolute; top:12%; left:0; right:0; text-align:center; z-index:2; }
     .mbook-cover-art-title-block { position:absolute; top:27%; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center; gap:11px; pointer-events:none; }
