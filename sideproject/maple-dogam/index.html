@@ -1133,7 +1133,8 @@
     .trophy-resume-btn:hover { background:rgba(20,100,55,.35); color:rgba(120,240,170,.95); border-color:rgba(80,200,120,.8); }
 
     /* ═══ 몬스터북 (펼친 책) ═══ */
-    .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.62); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:24px; }
+    /* 앱 셸 — 더 이상 팝업이 아니라 화면 전체를 차지하는 페이지 */
+    .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; background:#3a2f1e; align-items:center; justify-content:center; padding:28px; }
     .mbook-overlay.open { display:flex; }
     /* 나무 뒷표지(바깥) + 금속 테(안쪽 띠, 원통형 하이라이트로 입체감) — 실제 그라데이션 밴드라 각지지 않음 */
     .mbook-metal {
@@ -1143,14 +1144,14 @@
     }
     .mbook-metal.zoomed { zoom:1.1; }
     .mbook {
-      position:relative; width:min(910px,96vw); height:min(84vh,656px); display:flex;
+      position:relative; width:min(1100px,95vw); height:min(90vh,860px); display:flex;
       background:linear-gradient(180deg,#ece2cc,#e2d6ba);
       border-radius:7px; padding:16px;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.22);
     }
-    .mbook-close { position:absolute; top:9px; right:11px; z-index:3; width:24px; height:24px; border-radius:50%;
+    .mbook-close { position:absolute; top:9px; right:11px; z-index:3; height:24px; padding:0 11px 0 9px; border-radius:12px;
       border:1px solid rgba(96,74,40,.4); background:rgba(255,252,244,.6); color:rgba(96,74,40,.7);
-      font-size:.75rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+      font-size:.68rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; transition:all .15s; }
     .mbook-close:hover { background:rgba(96,74,40,.15); color:#4a3a1e; }
     /* 책갈피 탭 (오른쪽 바깥 — 선택한 몹의 내용 전환) */
     .mbook-tabs { position:absolute; left:100%; top:52px; transform:translateX(-8px); display:flex; flex-direction:column; gap:7px; z-index:1; }
@@ -1185,7 +1186,7 @@
     .mbook-tab-left:hover { opacity:1; }
     .mbook-tab-left.active { opacity:1; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
     .mbook-tab-left-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    .mbook-tab-left[data-page="cover"] { background:linear-gradient(90deg,#6b5a3e,#5a4a30); }
+    .mbook-tab-left[data-page="hunt"] { background:linear-gradient(90deg,#b2402f,#8f3025); }
     .mbook-tab-left[data-page="0"] { background:linear-gradient(90deg,#c0453f,#a83a35); }
     .mbook-tab-left[data-page="1"] { background:linear-gradient(90deg,#c99b2e,#b28727); }
     .mbook-tab-left[data-page="2"] { background:linear-gradient(90deg,#3f7fc9,#3569a8); }
@@ -1203,6 +1204,12 @@
     .mbook-left  { background:linear-gradient(90deg,#f4eeddee,#ece3ccee); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-right { background:linear-gradient(90deg,#ece3ccee,#f4eeddee); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
+    /* 도감작 화면 — 좌우 페이지 구분(책등, 접힘 그림자) 없이 하나의 넓은 캔버스로 */
+    .mbook-pages.is-hunt { flex-direction:column; overflow-y:auto; }
+    .mbook-pages.is-hunt .mbook-spine { display:none; }
+    .mbook-pages.is-hunt .mbook-page { flex:none; overflow:visible; }
+    .mbook-pages.is-hunt .mbook-left { border-radius:5px 5px 0 0; box-shadow:none; }
+    .mbook-pages.is-hunt .mbook-right { border-radius:0 0 5px 5px; box-shadow:none; }
     .mbook-page::-webkit-scrollbar { width:5px; }
     .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
     .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
@@ -1311,6 +1318,21 @@
     /* 표지(cover) — 책 제목면처럼: 장식 없이 여백·플뢰론 위주 */
     .mbook-cover { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:22px; }
     .mbook-cover-title { font-size:1.3rem; font-weight:800; color:#2f2410; letter-spacing:.22em; text-shadow:0 1px 0 rgba(255,255,255,.5); }
+    /* 닫힌 책(스플래시) — 책갈피 없이 표지 그림만 갈색 배경 위에 떠 있음. .mbook 크기는 펼쳐졌을 때와 동일하게 고정 */
+    .mbook-overlay.book-closed .mbook-metal { background:transparent; box-shadow:none; }
+    .mbook-overlay.book-closed .mbook { background:transparent; box-shadow:none; }
+    .mbook-overlay.book-closed .mbook > *:not(#mbook-splash) { display:none; }
+    .mbook-splash { display:none; position:absolute; inset:0; align-items:center; justify-content:center; cursor:pointer; z-index:6; }
+    .mbook-overlay.book-closed .mbook-splash { display:flex; }
+    .mbook-cover-art-wrap { position:relative; display:inline-flex; height:98%; }
+    .mbook-splash svg { height:100%; width:auto; filter:drop-shadow(0 14px 26px rgba(0,0,0,.55)); transition:transform .22s ease, opacity .22s ease; will-change:transform,opacity; }
+    .mbook-splash:hover svg { transform:scale(1.015); }
+    .mbook-splash:active svg { transform:scale(.98); }
+    .mbook-splash.opening svg { transform:scale(1.08); opacity:.3; }
+    .mbook-cover-art-wrap .mbook-cover-leaf { position:absolute; top:6%; left:0; right:0; text-align:center; }
+    .mbook-cover-art-title { position:absolute; top:19%; left:0; right:0; text-align:center; color:#7a1600; font-size:1.5rem; font-weight:800; letter-spacing:.3em; pointer-events:none;
+      text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.55); }
+    .mbook-cover .char-status { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:4px; }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
     .mbook-cover-leaf { position:relative; font-size:3rem; line-height:1; cursor:pointer; }
     .mbook-leaf-emoji { display:inline-block; filter:drop-shadow(0 3px 5px rgba(60,45,20,.32)); }
@@ -2124,19 +2146,7 @@
 </head>
 <body>
 
-<div id="header-wrap">
-<header>
-  <span class="leaf-btn" style="font-size:1.7rem" onclick="openHuntGrid()" title="🌱 도감작 잘 하고 계신가요?">🍁</span>
-  <div>
-    <h1>도감길드 도감작 도우미</h1>
-    <div class="sub">도감길드 파이팅</div>
-  </div>
-  <div class="char-status" id="char-status">
-    <div class="char-mobs" id="char-mobs"></div>
-    <div class="char-label">허규복 ing</div>
-  </div>
-</header>
-</div>
+<!-- 헤더(제목/잔디버튼/캐릭터상태)는 표지 안으로 이식됨 -->
 
 <canvas id="meso-rain"></canvas>
 
@@ -2167,98 +2177,7 @@
   </div>
 </div>
 
-<div class="container">
-
-  <!-- ① 몬스터 선택 -->
-  <div class="panel" id="panel-select" onclick="panelSelectExpand()">
-    <div class="select-head" id="select-toggle" onclick="event.stopPropagation();toggleSelectPanel()">
-      <span class="sh-label">도감작 메뉴</span>
-      <span class="toggle-arrow">▼</span>
-    </div>
-    <div id="select-body">
-    <div class="ptitle">몬스터 검색</div>
-    <div class="search-row">
-      <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
-             oninput="onNameInput(this.value)"
-             onkeydown="if(event.key==='Enter')searchByName()">
-      <button class="btn" onclick="searchByName()">검색</button>
-    </div>
-    <div class="ptitle-toggle id-toggle-sm collapsed" id="id-section-toggle" onclick="toggleIdSection()">
-      몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
-    </div>
-    <div class="id-section collapsed" id="id-section-body">
-      <div class="id-row">
-        <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
-        <button class="btn" onclick="loadById()">불러오기</button>
-      </div>
-    </div>
-    <div id="search-status" class="msg"></div>
-    <div id="load-msg" class="msg"></div>
-    <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
-
-    <div class="divider"></div>
-
-    <div class="ptitle ptitle-toggle" id="saves-toggle" onclick="toggleSavesSection()" style="position:relative">
-      저장된 도감작 <span class="toggle-arrow">▼</span>
-      <div class="backup-inline" onclick="event.stopPropagation()">
-        <div class="backup-inline-btns" id="backup-inline-btns">
-          <button onclick="exportData()">⬇ 내보내기</button>
-          <button onclick="document.getElementById('import-file').click()">⬆ 가져오기</button>
-          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
-        </div>
-        <button class="backup-toggle-btn" onclick="toggleBackup()">백업</button>
-      </div>
-    </div>
-    <div id="saves-list" class="saves-wrap"></div>
-
-    <div class="divider"></div>
-
-    <div class="ptitle ptitle-toggle" id="itemdex-toggle" onclick="toggleItemDexSection()">
-      아이템 도감작 <span class="toggle-arrow">▼</span>
-    </div>
-    <div id="itemdex-body">
-      <div class="dex-grid">
-        <div class="dex-card" onclick="fetchMobDrops(9999001,'표창 모으기',0)">
-          <span class="dc-icon">✳︎</span>
-          <div class="dc-title">표창 모으기</div>
-          <div class="dc-sub">12종</div>
-        </div>
-        <div class="dex-card" onclick="fetchMobDrops(9999002,'완드 모으기',0)">
-          <span class="dc-icon">🔮</span>
-          <div class="dc-title">완드 모으기</div>
-          <div class="dc-sub">15종</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="ptitle ptitle-toggle" id="dex-toggle" onclick="toggleDexSection()">
-      도감 <span class="toggle-arrow">▼</span>
-    </div>
-    <div id="dex-body">
-      <div class="dex-grid">
-        <div class="dex-card dex-trophy" id="trophy-open-btn" onclick="openTrophyRoom()">
-          <span class="dc-icon">📖</span>
-          <div class="dc-title" id="trophy-btn-title">도감</div>
-          <div class="dc-sub" id="trophy-btn-sub">완료한 도감작이 없습니다</div>
-        </div>
-      </div>
-    </div>
-    </div>
-
-  </div>
-
-  <!-- ② 체크리스트 탭 -->
-  <div id="section-checklist">
-    <div class="tab-bar-wrap">
-      <div class="tab-bar" id="tab-bar"></div>
-    </div>
-    <div id="tab-panels"></div>
-  </div>
-
-
-</div>
+<!-- 검색/저장된 도감작/트래킹 UI는 도감 안 "도감작" 책갈피(#mbook-hunt-left, #mbook-hunt-right)로 이식됨 -->
 
 <script>
 // ══════════════════════════════════════════
@@ -6041,23 +5960,6 @@ function persistSaveOrder() {
 // ══════════════════════════════════════════
 // 17-A. ID 입력 토글
 // ══════════════════════════════════════════
-function toggleSelectPanel() {
-  const collapsed = document.getElementById('select-toggle').classList.toggle('collapsed');
-  document.getElementById('select-body').style.display = collapsed ? 'none' : '';
-  const s = loadS(); s.select_collapsed = collapsed; saveS(s);
-}
-function panelSelectExpand() {
-  // 접혀 있을 때 패널 빈 영역 클릭 시 펼치기
-  if (document.getElementById('select-toggle').classList.contains('collapsed')) toggleSelectPanel();
-}
-function applySelectPanelState() {
-  const c = !!loadS().select_collapsed;
-  const t = document.getElementById('select-toggle');
-  const b = document.getElementById('select-body');
-  if (!t || !b) return;
-  t.classList.toggle('collapsed', c);
-  b.style.display = c ? 'none' : '';
-}
 function toggleSavesSection() {
   const collapsed = document.getElementById('saves-toggle').classList.toggle('collapsed');
   document.getElementById('saves-list').style.display = collapsed ? 'none' : '';
@@ -6070,21 +5972,6 @@ function applySavesState() {
   if (!t || !b) return;
   t.classList.toggle('collapsed', c);
   b.style.display = c ? 'none' : '';
-}
-function toggleDexSection() {
-  const t = document.getElementById('dex-toggle');
-  const b = document.getElementById('dex-body');
-  const collapsed = t.classList.toggle('collapsed');
-  b.style.display = collapsed ? 'none' : 'block';
-  const s = loadS(); s.dex_collapsed = collapsed; saveS(s);
-}
-function applyDexState() {
-  const collapsed = !!loadS().dex_collapsed; // 기본값: 펼침
-  const t = document.getElementById('dex-toggle');
-  const b = document.getElementById('dex-body');
-  if (!t || !b) return;
-  t.classList.toggle('collapsed', collapsed);
-  b.style.display = collapsed ? 'none' : 'block';
 }
 function toggleItemDexSection() {
   const t = document.getElementById('itemdex-toggle');
@@ -6314,18 +6201,21 @@ function renderTrophyGrid() {
 
 // ═══ 몬스터북 (완료 도감작을 펼친 책으로) ═══
 const MBOOK_PAGE_SIZE = 25; // 5×5
-let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'cover', _mbookNoteData = null;
+let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'hunt', _mbookNoteData = null;
+let _mbookOpened = false; // 처음엔 닫힌 책(스플래시)만 보이고, 클릭해야 책갈피가 있는 화면이 펼쳐짐
 let _mbookStatSel = new Set();
 let _mbookKillsMode = 'actual'; // 'actual' = 기준아이템 실제 획득시각 반영, 'linear' = 등속 가정 직선
 const MBOOK_CHART_PALETTE = ['#c0453f', '#c99b2e', '#3f7fc9', '#7a4fc9', '#2f9e6e', '#d06b62', '#4f9c98', '#9275a6'];
 
-function openTrophyRoom() { openMonsterBook(); }  // 진열장 트리거 → 몬스터북
 function openMonsterBook() {
-  // 항상 표지(기본 통계) 화면부터 시작
-  _mbookPage = 'cover';
+  // 항상 닫힌 책(스플래시)부터 시작 — 클릭해야 도감작 화면(책갈피)이 펼쳐짐
+  _mbookPage = 'hunt';
   _mbookSel = null;
   _mbookTab = 'info';
   _mbookStatSel = new Set();
+  _mbookOpened = false;
+  document.getElementById('mbook-overlay')?.classList.add('book-closed');
+  mbookRenderSplash();
   mbookSyncLeftTabs();
   mbookSyncTabs();
   renderMbookList();
@@ -6346,7 +6236,7 @@ function closeMonsterBook() {
 function mbookSyncLeftTabs() {
   document.querySelectorAll('.mbook-tab-left').forEach(t => t.classList.toggle('active', String(t.dataset.page) === String(_mbookPage)));
 }
-const MBOOK_NO_SEL_PAGES = ['cover', 'records', 'stats']; // 몹 선택 없이 보는 페이지 — 오른쪽 탭 잠금
+const MBOOK_NO_SEL_PAGES = ['hunt', 'records', 'stats']; // 몹 선택 없이 보는 페이지 — 오른쪽 탭 잠금
 function mbookSyncTabs() {
   const disableOthers = MBOOK_NO_SEL_PAGES.includes(_mbookPage) || _mbookSel == null;
   document.querySelectorAll('.mbook-tab').forEach(t => {
@@ -6412,10 +6302,14 @@ function mbookSortBarHtml() {
   }).join('')}</div>`;
 }
 function renderMbookList() {
-  const leftPage = document.querySelector('.mbook-page.mbook-left');
+  const isHunt = _mbookPage === 'hunt';
+  document.getElementById('mbook-hunt-left')?.style.setProperty('display', isHunt ? '' : 'none');
+  document.getElementById('mbook-left-body')?.style.setProperty('display', isHunt ? 'none' : '');
+  document.querySelector('.mbook-pages')?.classList.toggle('is-hunt', isHunt);
+  if (isHunt) return; // 도감작 화면은 정적 DOM 그대로 사용, 다시 그리지 않음
+  const leftPage = document.getElementById('mbook-left-body');
   if (!leftPage) return;
   const rawCompleted = getTrophyCompleted();
-  if (_mbookPage === 'cover') { leftPage.innerHTML = mbookCoverLeftHtml(rawCompleted); return; }
   if (_mbookPage === 'records') { leftPage.innerHTML = mbookRecordsLeftHtml(rawCompleted, loadS()); return; }
   if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted, loadS()); return; }
   const completed = mbookSortedCompleted();
@@ -6440,13 +6334,533 @@ function renderMbookList() {
   grid.innerHTML = html;
 }
 // 표지(왼쪽 페이지) — 완료 도감작 전체 통계를 한곳에 모아 표시
-function mbookCoverLeftHtml(completed) {
-  return `<div class="mbook-cover">
-    <div class="mbook-cover-leaf" onclick="mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
-    <div class="mbook-cover-rule"></div>
-    <div class="mbook-cover-title">완료된 도감작</div>
-    <div class="mbook-cover-rule"></div>
+const MBOOK_COVER_SVG = `<svg width="700" height="1000" viewBox="0 0 700 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_699_3)">
+<rect width="700" height="1000" rx="50" fill="#911D00"/>
+<rect width="50" height="1000" rx="15" fill="url(#paint0_linear_699_3)"/>
+<circle cx="66.6446" cy="24.5195" r="5" transform="rotate(-25 66.6446 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="94.5519" cy="34.6772" r="5" transform="rotate(-25 94.5519 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M66.7305 24.1743L94.9212 34.4349" stroke="url(#paint1_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="101.645" cy="24.5195" r="5" transform="rotate(-25 101.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="129.552" cy="34.6772" r="5" transform="rotate(-25 129.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M101.73 24.1743L129.921 34.4349" stroke="url(#paint2_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="136.645" cy="24.5195" r="5" transform="rotate(-25 136.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="164.552" cy="34.6772" r="5" transform="rotate(-25 164.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M136.73 24.1743L164.921 34.4349" stroke="url(#paint3_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="171.645" cy="24.5195" r="5" transform="rotate(-25 171.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="199.552" cy="34.6772" r="5" transform="rotate(-25 199.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M171.73 24.1743L199.921 34.4349" stroke="url(#paint4_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="206.645" cy="24.5195" r="5" transform="rotate(-25 206.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="234.552" cy="34.6772" r="5" transform="rotate(-25 234.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M206.73 24.1743L234.921 34.4349" stroke="url(#paint5_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="241.645" cy="24.5195" r="5" transform="rotate(-25 241.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="269.552" cy="34.6772" r="5" transform="rotate(-25 269.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M241.73 24.1743L269.921 34.4349" stroke="url(#paint6_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="276.645" cy="24.5195" r="5" transform="rotate(-25 276.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="304.552" cy="34.6772" r="5" transform="rotate(-25 304.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M276.73 24.1743L304.921 34.4349" stroke="url(#paint7_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="311.645" cy="24.5195" r="5" transform="rotate(-25 311.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="339.552" cy="34.6772" r="5" transform="rotate(-25 339.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M311.73 24.1743L339.921 34.4349" stroke="url(#paint8_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="346.645" cy="24.5195" r="5" transform="rotate(-25 346.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="374.552" cy="34.6772" r="5" transform="rotate(-25 374.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M346.73 24.1743L374.921 34.4349" stroke="url(#paint9_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="381.645" cy="24.5195" r="5" transform="rotate(-25 381.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="409.552" cy="34.6772" r="5" transform="rotate(-25 409.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M381.73 24.1743L409.921 34.4349" stroke="url(#paint10_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="416.645" cy="24.5195" r="5" transform="rotate(-25 416.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="444.552" cy="34.6772" r="5" transform="rotate(-25 444.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M416.73 24.1743L444.921 34.4349" stroke="url(#paint11_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="451.645" cy="24.5195" r="5" transform="rotate(-25 451.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="479.552" cy="34.6772" r="5" transform="rotate(-25 479.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M451.73 24.1743L479.921 34.4349" stroke="url(#paint12_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="486.645" cy="24.5195" r="5" transform="rotate(-25 486.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="514.552" cy="34.6772" r="5" transform="rotate(-25 514.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M486.73 24.1743L514.921 34.4349" stroke="url(#paint13_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="521.645" cy="24.5195" r="5" transform="rotate(-25 521.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="549.552" cy="34.6772" r="5" transform="rotate(-25 549.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M521.73 24.1743L549.921 34.4349" stroke="url(#paint14_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="556.645" cy="24.5195" r="5" transform="rotate(-25 556.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="584.552" cy="34.6772" r="5" transform="rotate(-25 584.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M556.73 24.1743L584.921 34.4349" stroke="url(#paint15_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="591.645" cy="24.5195" r="5" transform="rotate(-25 591.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="619.552" cy="34.6772" r="5" transform="rotate(-25 619.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M591.73 24.1743L619.921 34.4349" stroke="url(#paint16_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="626.645" cy="24.5195" r="5" transform="rotate(-25 626.645 24.5195)" fill="black" fill-opacity="0.5"/>
+<circle cx="654.552" cy="34.6772" r="5" transform="rotate(-25 654.552 34.6772)" fill="black" fill-opacity="0.5"/>
+<path d="M626.73 24.1743L654.921 34.4349" stroke="url(#paint17_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="635.552" r="5" transform="rotate(-115 655.52 635.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="607.644" r="5" transform="rotate(-115 665.677 607.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 635.466L665.435 607.275" stroke="url(#paint18_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="600.552" r="5" transform="rotate(-115 655.52 600.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="572.644" r="5" transform="rotate(-115 665.678 572.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 600.466L665.435 572.275" stroke="url(#paint19_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="565.552" r="5" transform="rotate(-115 655.52 565.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="537.644" r="5" transform="rotate(-115 665.678 537.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 565.466L665.435 537.275" stroke="url(#paint20_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="530.552" r="5" transform="rotate(-115 655.52 530.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="502.644" r="5" transform="rotate(-115 665.677 502.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 530.466L665.435 502.275" stroke="url(#paint21_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="495.552" r="5" transform="rotate(-115 655.52 495.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="467.644" r="5" transform="rotate(-115 665.678 467.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 495.466L665.435 467.275" stroke="url(#paint22_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="460.552" r="5" transform="rotate(-115 655.52 460.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="432.644" r="5" transform="rotate(-115 665.678 432.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 460.466L665.435 432.275" stroke="url(#paint23_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="425.552" r="5" transform="rotate(-115 655.52 425.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="397.644" r="5" transform="rotate(-115 665.677 397.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 425.466L665.435 397.275" stroke="url(#paint24_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="880.552" r="5" transform="rotate(-115 655.52 880.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="852.644" r="5" transform="rotate(-115 665.677 852.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 880.466L665.435 852.275" stroke="url(#paint25_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="845.552" r="5" transform="rotate(-115 655.52 845.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="817.644" r="5" transform="rotate(-115 665.678 817.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 845.466L665.435 817.275" stroke="url(#paint26_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="810.552" r="5" transform="rotate(-115 655.52 810.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="782.644" r="5" transform="rotate(-115 665.678 782.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 810.466L665.435 782.275" stroke="url(#paint27_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="656.52" cy="946.748" r="5" transform="rotate(-115 656.52 946.748)" fill="black" fill-opacity="0.5"/>
+<circle cx="666.677" cy="918.841" r="5" transform="rotate(-115 666.677 918.841)" fill="black" fill-opacity="0.5"/>
+<path d="M656.175 946.662L666.435 918.471" stroke="url(#paint28_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="656.52" cy="911.552" r="5" transform="rotate(-115 656.52 911.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="666.678" cy="883.644" r="5" transform="rotate(-115 666.678 883.644)" fill="black" fill-opacity="0.5"/>
+<path d="M656.175 911.466L666.435 883.275" stroke="url(#paint29_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="775.552" r="5" transform="rotate(-115 655.52 775.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="747.644" r="5" transform="rotate(-115 665.677 747.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 775.466L665.435 747.275" stroke="url(#paint30_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="740.552" r="5" transform="rotate(-115 655.52 740.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="712.644" r="5" transform="rotate(-115 665.678 712.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 740.466L665.435 712.275" stroke="url(#paint31_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="705.552" r="5" transform="rotate(-115 655.52 705.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="677.644" r="5" transform="rotate(-115 665.678 677.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 705.466L665.435 677.275" stroke="url(#paint32_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="670.552" r="5" transform="rotate(-115 655.52 670.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="642.644" r="5" transform="rotate(-115 665.677 642.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 670.466L665.435 642.275" stroke="url(#paint33_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="390.552" r="5" transform="rotate(-115 655.52 390.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="362.644" r="5" transform="rotate(-115 665.678 362.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 390.466L665.435 362.275" stroke="url(#paint34_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="355.552" r="5" transform="rotate(-115 655.52 355.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="327.644" r="5" transform="rotate(-115 665.678 327.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 355.466L665.435 327.275" stroke="url(#paint35_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="320.552" r="5" transform="rotate(-115 655.52 320.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="292.644" r="5" transform="rotate(-115 665.677 292.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 320.466L665.435 292.275" stroke="url(#paint36_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="285.552" r="5" transform="rotate(-115 655.52 285.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="257.644" r="5" transform="rotate(-115 665.678 257.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 285.466L665.435 257.275" stroke="url(#paint37_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="250.552" r="5" transform="rotate(-115 655.52 250.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="222.644" r="5" transform="rotate(-115 665.678 222.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 250.466L665.435 222.275" stroke="url(#paint38_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="215.552" r="5" transform="rotate(-115 655.52 215.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="187.644" r="5" transform="rotate(-115 665.678 187.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 215.466L665.435 187.275" stroke="url(#paint39_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="180.552" r="5" transform="rotate(-115 655.52 180.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="152.644" r="5" transform="rotate(-115 665.678 152.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 180.466L665.435 152.275" stroke="url(#paint40_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="145.552" r="5" transform="rotate(-115 655.52 145.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.677" cy="117.644" r="5" transform="rotate(-115 665.677 117.644)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 145.466L665.435 117.275" stroke="url(#paint41_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="110.552" r="5" transform="rotate(-115 655.52 110.552)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="82.6444" r="5" transform="rotate(-115 665.678 82.6444)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 110.466L665.435 82.275" stroke="url(#paint42_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="655.52" cy="75.5517" r="5" transform="rotate(-115 655.52 75.5517)" fill="black" fill-opacity="0.5"/>
+<circle cx="665.678" cy="47.6444" r="5" transform="rotate(-115 665.678 47.6444)" fill="black" fill-opacity="0.5"/>
+<path d="M655.175 75.4658L665.435 47.275" stroke="url(#paint43_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="73.6446" cy="965.519" r="5" transform="rotate(-25 73.6446 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="101.552" cy="975.676" r="5" transform="rotate(-25 101.552 975.676)" fill="black" fill-opacity="0.5"/>
+<path d="M73.7305 965.174L101.921 975.434" stroke="url(#paint44_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="108.645" cy="965.519" r="5" transform="rotate(-25 108.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="136.552" cy="975.677" r="5" transform="rotate(-25 136.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M108.73 965.174L136.921 975.434" stroke="url(#paint45_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="143.645" cy="965.519" r="5" transform="rotate(-25 143.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="171.552" cy="975.677" r="5" transform="rotate(-25 171.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M143.73 965.174L171.921 975.434" stroke="url(#paint46_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="178.645" cy="965.519" r="5" transform="rotate(-25 178.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="206.552" cy="975.676" r="5" transform="rotate(-25 206.552 975.676)" fill="black" fill-opacity="0.5"/>
+<path d="M178.73 965.174L206.921 975.434" stroke="url(#paint47_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="213.645" cy="965.519" r="5" transform="rotate(-25 213.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="241.552" cy="975.677" r="5" transform="rotate(-25 241.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M213.73 965.174L241.921 975.434" stroke="url(#paint48_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="248.645" cy="965.519" r="5" transform="rotate(-25 248.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="276.552" cy="975.677" r="5" transform="rotate(-25 276.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M248.73 965.174L276.921 975.434" stroke="url(#paint49_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="283.645" cy="965.519" r="5" transform="rotate(-25 283.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="311.552" cy="975.676" r="5" transform="rotate(-25 311.552 975.676)" fill="black" fill-opacity="0.5"/>
+<path d="M283.73 965.174L311.921 975.434" stroke="url(#paint50_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="318.645" cy="965.519" r="5" transform="rotate(-25 318.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="346.552" cy="975.677" r="5" transform="rotate(-25 346.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M318.73 965.174L346.921 975.434" stroke="url(#paint51_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="353.645" cy="965.519" r="5" transform="rotate(-25 353.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="381.552" cy="975.677" r="5" transform="rotate(-25 381.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M353.73 965.174L381.921 975.434" stroke="url(#paint52_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="388.645" cy="965.519" r="5" transform="rotate(-25 388.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="416.552" cy="975.676" r="5" transform="rotate(-25 416.552 975.676)" fill="black" fill-opacity="0.5"/>
+<path d="M388.73 965.174L416.921 975.434" stroke="url(#paint53_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="423.645" cy="965.519" r="5" transform="rotate(-25 423.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="451.552" cy="975.677" r="5" transform="rotate(-25 451.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M423.73 965.174L451.921 975.434" stroke="url(#paint54_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="458.645" cy="965.519" r="5" transform="rotate(-25 458.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="486.552" cy="975.677" r="5" transform="rotate(-25 486.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M458.73 965.174L486.921 975.434" stroke="url(#paint55_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="493.645" cy="965.519" r="5" transform="rotate(-25 493.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="521.552" cy="975.677" r="5" transform="rotate(-25 521.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M493.73 965.174L521.921 975.434" stroke="url(#paint56_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="528.645" cy="965.519" r="5" transform="rotate(-25 528.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="556.552" cy="975.677" r="5" transform="rotate(-25 556.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M528.73 965.174L556.921 975.434" stroke="url(#paint57_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="563.645" cy="965.519" r="5" transform="rotate(-25 563.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="591.552" cy="975.676" r="5" transform="rotate(-25 591.552 975.676)" fill="black" fill-opacity="0.5"/>
+<path d="M563.73 965.174L591.921 975.434" stroke="url(#paint58_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="598.645" cy="965.519" r="5" transform="rotate(-25 598.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="626.552" cy="975.677" r="5" transform="rotate(-25 626.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M598.73 965.174L626.921 975.434" stroke="url(#paint59_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<circle cx="633.645" cy="965.519" r="5" transform="rotate(-25 633.645 965.519)" fill="black" fill-opacity="0.5"/>
+<circle cx="661.552" cy="975.677" r="5" transform="rotate(-25 661.552 975.677)" fill="black" fill-opacity="0.5"/>
+<path d="M633.73 965.174L661.921 975.434" stroke="url(#paint60_linear_699_3)" stroke-width="6" stroke-linecap="round"/>
+<rect x="38" width="15" height="1000" fill="url(#paint61_linear_699_3)" fill-opacity="0.25"/>
+<rect x="46" y="3" width="80" height="1000" fill="url(#paint62_linear_699_3)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_699_3" x1="50" y1="500" x2="14" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#A82200"/>
+<stop offset="1" stop-color="#420D00"/>
+</linearGradient>
+<linearGradient id="paint1_linear_699_3" x1="66.5595" y1="24.6442" x2="94.7502" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint2_linear_699_3" x1="101.559" y1="24.6442" x2="129.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint3_linear_699_3" x1="136.559" y1="24.6442" x2="164.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint4_linear_699_3" x1="171.559" y1="24.6442" x2="199.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint5_linear_699_3" x1="206.559" y1="24.6442" x2="234.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint6_linear_699_3" x1="241.559" y1="24.6442" x2="269.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint7_linear_699_3" x1="276.559" y1="24.6442" x2="304.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint8_linear_699_3" x1="311.559" y1="24.6442" x2="339.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint9_linear_699_3" x1="346.559" y1="24.6442" x2="374.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint10_linear_699_3" x1="381.559" y1="24.6442" x2="409.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint11_linear_699_3" x1="416.559" y1="24.6442" x2="444.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint12_linear_699_3" x1="451.559" y1="24.6442" x2="479.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint13_linear_699_3" x1="486.559" y1="24.6442" x2="514.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint14_linear_699_3" x1="521.559" y1="24.6442" x2="549.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint15_linear_699_3" x1="556.559" y1="24.6442" x2="584.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint16_linear_699_3" x1="591.559" y1="24.6442" x2="619.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint17_linear_699_3" x1="626.559" y1="24.6442" x2="654.75" y2="34.9048" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint18_linear_699_3" x1="655.645" y1="635.637" x2="665.905" y2="607.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint19_linear_699_3" x1="655.645" y1="600.637" x2="665.905" y2="572.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint20_linear_699_3" x1="655.645" y1="565.637" x2="665.905" y2="537.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint21_linear_699_3" x1="655.645" y1="530.637" x2="665.905" y2="502.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint22_linear_699_3" x1="655.645" y1="495.637" x2="665.905" y2="467.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint23_linear_699_3" x1="655.645" y1="460.637" x2="665.905" y2="432.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint24_linear_699_3" x1="655.645" y1="425.637" x2="665.905" y2="397.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint25_linear_699_3" x1="655.645" y1="880.637" x2="665.905" y2="852.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint26_linear_699_3" x1="655.645" y1="845.637" x2="665.905" y2="817.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint27_linear_699_3" x1="655.645" y1="810.637" x2="665.905" y2="782.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint28_linear_699_3" x1="656.645" y1="946.833" x2="666.905" y2="918.642" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint29_linear_699_3" x1="656.645" y1="911.637" x2="666.905" y2="883.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint30_linear_699_3" x1="655.645" y1="775.637" x2="665.905" y2="747.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint31_linear_699_3" x1="655.645" y1="740.637" x2="665.905" y2="712.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint32_linear_699_3" x1="655.645" y1="705.637" x2="665.905" y2="677.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint33_linear_699_3" x1="655.645" y1="670.637" x2="665.905" y2="642.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint34_linear_699_3" x1="655.645" y1="390.637" x2="665.905" y2="362.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint35_linear_699_3" x1="655.645" y1="355.637" x2="665.905" y2="327.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint36_linear_699_3" x1="655.645" y1="320.637" x2="665.905" y2="292.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint37_linear_699_3" x1="655.645" y1="285.637" x2="665.905" y2="257.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint38_linear_699_3" x1="655.645" y1="250.637" x2="665.905" y2="222.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint39_linear_699_3" x1="655.645" y1="215.637" x2="665.905" y2="187.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint40_linear_699_3" x1="655.645" y1="180.637" x2="665.905" y2="152.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint41_linear_699_3" x1="655.645" y1="145.637" x2="665.905" y2="117.446" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint42_linear_699_3" x1="655.645" y1="110.637" x2="665.905" y2="82.4461" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint43_linear_699_3" x1="655.645" y1="75.6368" x2="665.905" y2="47.4461" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint44_linear_699_3" x1="73.5595" y1="965.644" x2="101.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint45_linear_699_3" x1="108.559" y1="965.644" x2="136.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint46_linear_699_3" x1="143.559" y1="965.644" x2="171.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint47_linear_699_3" x1="178.559" y1="965.644" x2="206.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint48_linear_699_3" x1="213.559" y1="965.644" x2="241.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint49_linear_699_3" x1="248.559" y1="965.644" x2="276.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint50_linear_699_3" x1="283.559" y1="965.644" x2="311.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint51_linear_699_3" x1="318.559" y1="965.644" x2="346.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint52_linear_699_3" x1="353.559" y1="965.644" x2="381.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint53_linear_699_3" x1="388.559" y1="965.644" x2="416.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint54_linear_699_3" x1="423.559" y1="965.644" x2="451.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint55_linear_699_3" x1="458.559" y1="965.644" x2="486.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint56_linear_699_3" x1="493.559" y1="965.644" x2="521.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint57_linear_699_3" x1="528.559" y1="965.644" x2="556.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint58_linear_699_3" x1="563.559" y1="965.644" x2="591.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint59_linear_699_3" x1="598.559" y1="965.644" x2="626.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint60_linear_699_3" x1="633.559" y1="965.644" x2="661.75" y2="975.904" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BF2600"/>
+<stop offset="0.5" stop-color="#5C1300"/>
+<stop offset="1" stop-color="#BF2600"/>
+</linearGradient>
+<linearGradient id="paint61_linear_699_3" x1="53" y1="500" x2="38" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#666666" stop-opacity="0"/>
+<stop offset="0.2" stop-opacity="0.9"/>
+<stop offset="0.8" stop-opacity="0.9"/>
+<stop offset="1" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint62_linear_699_3" x1="126" y1="503" x2="46" y2="503" gradientUnits="userSpaceOnUse">
+<stop stop-color="#D9D9D9" stop-opacity="0"/>
+<stop offset="0.5" stop-color="white" stop-opacity="0.1"/>
+<stop offset="1" stop-color="#D9D9D9" stop-opacity="0"/>
+</linearGradient>
+<clipPath id="clip0_699_3">
+<rect width="700" height="1000" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
+// 닫힌 책(스플래시) — 책갈피 없이 표지 그림만, 클릭하면 펼쳐짐
+function mbookRenderSplash() {
+  const el = document.getElementById('mbook-splash');
+  if (!el) return;
+  el.innerHTML = `<div class="mbook-cover-art-wrap">
+    ${MBOOK_COVER_SVG}
+    <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
+    <div class="mbook-cover-art-title">도감</div>
   </div>`;
+}
+// 표지를 클릭하면 살짝 열리는 느낌을 준 뒤 책갈피가 있는 화면(전체 기록)으로 펼쳐짐
+function mbookOpenBook(e) {
+  const splash = e.currentTarget;
+  splash.classList.add('opening');
+  setTimeout(() => {
+    _mbookOpened = true;
+    document.getElementById('mbook-overlay')?.classList.remove('book-closed');
+    mbookSetPage('records');
+  }, 220);
 }
 // 전체 기록 페이지(왼쪽) — 완료/진행중 도감작 요약 + 사냥 잔디 바로가기
 function mbookRecordsLeftHtml(completed, store) {
@@ -6463,9 +6877,15 @@ function mbookRecordsLeftHtml(completed, store) {
     ['완료 비율', totalMs > 0 ? `${pct}%` : '-'],
   ];
   return `<div class="mbook-cover">
+    <div class="mbook-cover-leaf" onclick="mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
+    <div class="mbook-cover-rule"></div>
     <div class="mbook-cover-title">전체 기록</div>
     <div class="mbook-cover-rule"></div>
     ${mbookStatListHtml(rows, 'lg')}
+    <div class="char-status" id="char-status">
+      <div class="char-mobs" id="char-mobs"></div>
+      <div class="char-label">허규복 ing</div>
+    </div>
     <button class="mbook-records-grass" onclick="openHuntGrid()">🌱 사냥 잔디 보기</button>
   </div>`;
 }
@@ -6560,33 +6980,30 @@ function mbookStatListHtml(rows, size) {
     `</div>`;
 }
 function renderMbookRight() {
+  const isHunt = _mbookPage === 'hunt';
+  document.getElementById('mbook-hunt-right')?.style.setProperty('display', isHunt ? '' : 'none');
+  document.getElementById('mbook-right-static')?.style.setProperty('display', isHunt ? 'none' : '');
+  document.getElementById('mbook-tabs-right')?.style.setProperty('display', isHunt ? 'none' : '');
+  if (isHunt) return; // 도감작 화면은 정적 DOM 그대로 사용, 다시 그리지 않음
   const titleEl = document.getElementById('mbook-right-title');
   const bodyEl  = document.getElementById('mbook-right-body');
   if (!titleEl || !bodyEl) return;
   mbookHideNote();
   const completed = getTrophyCompleted();
-  if (_mbookPage === 'cover') {
-    titleEl.textContent = '';
-    const ver = document.getElementById('ver-label')?.textContent || '';
-    bodyEl.innerHTML = `<div class="mbook-colophon">
-      <p>완료된 도감작이 저장됩니다</p>
-      <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
-      <p class="mbook-colophon-msg">도감작을 하셨다는 것은<br>메이플랜드에서 다른 사람과는 다른 재미를 찾아<br>게임을 즐기고 있다는 것입니다!</p>
-      <p class="mbook-colophon-msg2">항상 응원합니다!</p>
-      <p class="mbook-colophon-cheer">도감길드 파이팅</p>
-    </div>
-    <div class="mbook-colophon-hint">🍁 단풍잎을 눌러보세요!</div>
-    <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
-    return;
-  }
   if (_mbookPage === 'records') {
+    const ver = document.getElementById('ver-label')?.textContent || '';
     titleEl.innerHTML = `<span>목차</span>`;
     bodyEl.innerHTML = `<div class="mbook-toc">
-      <div class="mbook-toc-item" onclick="mbookSetPage('cover')"><span>표지</span><span class="mbook-toc-dots"></span></div>
+      <div class="mbook-toc-item" onclick="mbookSetPage('hunt')"><span>도감작 하기</span><span class="mbook-toc-dots"></span></div>
       <div class="mbook-toc-item" onclick="mbookSetPage(0)"><span>완료한 도감작 목록</span><span class="mbook-toc-dots"></span></div>
       <div class="mbook-toc-item" onclick="mbookSetPage('stats')"><span>통계</span><span class="mbook-toc-dots"></span></div>
-      <div class="mbook-toc-item disabled" title="준비 중"><span>도감작 하기 (준비 중)</span><span class="mbook-toc-dots"></span></div>
-    </div>`;
+    </div>
+    <div class="mbook-colophon" style="margin-top:20px;">
+      <p>완료된 도감작이 저장됩니다</p>
+      <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
+      <p class="mbook-colophon-cheer">도감길드 파이팅</p>
+    </div>
+    <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
     return;
   }
   if (_mbookPage === 'stats') {
@@ -7373,12 +7790,6 @@ function exportResultImage() {
     .catch(() => { cleanup(); alert('이미지 저장 실패. 브라우저 설정을 확인해주세요.'); });
 }
 
-renderSaves();
-renderTrophy();
-applyDexState();
-applyItemDexState();
-applySavesState();
-applySelectPanelState();
 // 테마 토글 아이콘 초기 동기화
 (function(){
   const btn = document.getElementById('theme-toggle');
@@ -7386,6 +7797,14 @@ applySelectPanelState();
   const cur = document.documentElement.getAttribute('data-theme') || 'light';
   btn.textContent = ({light:'☀️',dark:'🌙',summer:'🏖️'})[cur] || '☀️';
 })();
+// 검색/저장된 도감작/도감 UI가 전부 도감(책) 안으로 이식되어, 그 DOM이 파싱된 뒤(DOMContentLoaded)에 초기화해야 함
+document.addEventListener('DOMContentLoaded', () => {
+  renderSaves();
+  renderTrophy();
+  applyItemDexState();
+  applySavesState();
+  openMonsterBook();
+});
 </script>
 <div class="del-confirm-overlay" id="resume-confirm-overlay">
   <div class="del-confirm-dialog">
@@ -7447,11 +7866,12 @@ applySelectPanelState();
 <!-- 몬스터북 (펼친 책) -->
 <div class="mbook-overlay" id="mbook-overlay" onclick="if(event.target===this)closeMonsterBook()">
  <div class="mbook-metal">
-  <div class="mbook">
-    <button class="mbook-close" onclick="closeMonsterBook()">✕</button>
+  <div class="mbook" id="mbook-el">
+    <div id="mbook-splash" class="mbook-splash" onclick="mbookOpenBook(event)"></div>
+    <button class="mbook-close" onclick="mbookSetPage('hunt')">⚔ 도감작하기</button>
     <div class="mbook-tabs-left" id="mbook-tabs-left">
-      <button class="mbook-tab-left active" data-page="cover" onclick="mbookSetPage('cover')" title="표지"><span class="mbook-tab-left-icon">ⓘ</span></button>
       <button class="mbook-tab-left" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-icon">🏠</span></button>
+      <button class="mbook-tab-left active" data-page="hunt" onclick="mbookSetPage('hunt')" title="도감작"><span class="mbook-tab-left-icon">⚔</span></button>
       <button class="mbook-tab-left" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-icon">📈</span></button>
       <div class="mbook-tabs-left-gap"></div>
       <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
@@ -7467,13 +7887,81 @@ applySelectPanelState();
     </div>
     <div class="mbook-pages">
       <div class="mbook-page mbook-left">
-        <div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>
-        <div class="mbook-mob-grid" id="mbook-mob-grid"></div>
+        <div id="mbook-hunt-left">
+          <div class="ptitle">몬스터 검색</div>
+          <div class="search-row">
+            <input type="text" id="name-input" placeholder="몬스터 이름 입력 (예: 슬라임, 주황버섯)"
+                   oninput="onNameInput(this.value)"
+                   onkeydown="if(event.key==='Enter')searchByName()">
+            <button class="btn" onclick="searchByName()">검색</button>
+          </div>
+          <div class="ptitle-toggle id-toggle-sm collapsed" id="id-section-toggle" onclick="toggleIdSection()">
+            몬스터 ID 직접 입력 <span class="toggle-arrow">▼</span>
+          </div>
+          <div class="id-section collapsed" id="id-section-body">
+            <div class="id-row">
+              <input type="number" id="mob-id-input" placeholder="예: 7130100 (메이플노트 URL monster_detail/ 뒤 숫자)">
+              <button class="btn" onclick="loadById()">불러오기</button>
+            </div>
+          </div>
+          <div id="search-status" class="msg"></div>
+          <div id="load-msg" class="msg"></div>
+          <div id="search-results" class="mob-grid" style="margin-top:8px"></div>
+
+          <div class="divider"></div>
+
+          <div class="ptitle ptitle-toggle" id="itemdex-toggle" onclick="toggleItemDexSection()">
+            아이템 도감작 <span class="toggle-arrow">▼</span>
+          </div>
+          <div id="itemdex-body">
+            <div class="dex-grid">
+              <div class="dex-card" onclick="fetchMobDrops(9999001,'표창 모으기',0)">
+                <span class="dc-icon">✳︎</span>
+                <div class="dc-title">표창 모으기</div>
+                <div class="dc-sub">12종</div>
+              </div>
+              <div class="dex-card" onclick="fetchMobDrops(9999002,'완드 모으기',0)">
+                <span class="dc-icon">🔮</span>
+                <div class="dc-title">완드 모으기</div>
+                <div class="dc-sub">15종</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="ptitle ptitle-toggle" id="saves-toggle" onclick="toggleSavesSection()" style="position:relative">
+            저장된 도감작 <span class="toggle-arrow">▼</span>
+            <div class="backup-inline" onclick="event.stopPropagation()">
+              <div class="backup-inline-btns" id="backup-inline-btns">
+                <button onclick="exportData()">⬇ 내보내기</button>
+                <button onclick="document.getElementById('import-file').click()">⬆ 가져오기</button>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+              </div>
+              <button class="backup-toggle-btn" onclick="toggleBackup()">백업</button>
+            </div>
+          </div>
+          <div id="saves-list" class="saves-wrap"></div>
+        </div>
+        <div id="mbook-left-body">
+          <div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>
+          <div class="mbook-mob-grid" id="mbook-mob-grid"></div>
+        </div>
       </div>
       <div class="mbook-spine"></div>
       <div class="mbook-page mbook-right">
-        <div class="mbook-right-title" id="mbook-right-title">완료한 도감작을 선택하세요</div>
-        <div class="mbook-right-body" id="mbook-right-body"></div>
+        <div id="mbook-hunt-right">
+          <div id="section-checklist">
+            <div class="tab-bar-wrap">
+              <div class="tab-bar" id="tab-bar"></div>
+            </div>
+            <div id="tab-panels"></div>
+          </div>
+        </div>
+        <div id="mbook-right-static">
+          <div class="mbook-right-title" id="mbook-right-title">완료한 도감작을 선택하세요</div>
+          <div class="mbook-right-body" id="mbook-right-body"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -7491,7 +7979,7 @@ applySelectPanelState();
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;">똘레로_1.117.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_1.117.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -8942,17 +9430,6 @@ if (!_tabsRestored) {
   panel.classList.add('active');
   renderTabBar();
 }
-
-window.addEventListener('scroll', () => {
-  const sec = document.getElementById('section-checklist');
-  if (!sec || sec.style.display === 'none') return;
-  const tabBar = document.getElementById('tab-bar');
-  if (!tabBar) return;
-  const rect = tabBar.getBoundingClientRect();
-  const collapsed = rect.top <= 150;
-  document.getElementById('header-wrap').classList.toggle('collapsed', collapsed);
-  document.querySelector('header').classList.toggle('collapsed', collapsed);
-}, { passive: true });
 
 // ── 아이템 카드 우클릭 컨텍스트 메뉴 ─────────────────────────
 let _ctxDropId = null;
