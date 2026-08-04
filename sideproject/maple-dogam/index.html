@@ -1241,6 +1241,7 @@
     .mbook-tab-left[data-page="3"] { background:linear-gradient(90deg,#7a4fc9,#6640a8); }
     .mbook-tab-left[data-page="stats"] { background:linear-gradient(90deg,#8a8a8a,#6e6e6e); }
     .mbook-tab-left[data-page="records"] { background:linear-gradient(90deg,#2f7ea8,#245f80); }
+    .mbook-tab-left[data-page="gyubok"] { background:linear-gradient(90deg,#4a8a5a,#3a6e48); }
     /* 오른쪽 맨 아래 고정 책갈피 — 표지로 돌아가기, 페이지 상태와 무관하게 항상 노출 */
     .mbook-tabs-right-fixed { position:absolute; left:100%; bottom:16px; transform:translateX(-8px); z-index:1; }
     .mbook-tab-cover {
@@ -2232,6 +2233,7 @@
 
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.4.0/dom-to-image-more.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="gyubok-dogam.js"></script>
 </head>
 <body>
 
@@ -6359,8 +6361,9 @@ function mbookSyncTabs() {
   const disableOthers = MBOOK_NO_SEL_PAGES.includes(_mbookPage) || _mbookSel == null;
   document.querySelectorAll('.mbook-tab').forEach(t => {
     const isInfo = t.dataset.tab === 'info';
+    const isTimeline = t.dataset.tab === 'timeline';
     t.classList.toggle('active', t.dataset.tab === _mbookTab);
-    t.classList.toggle('disabled', disableOthers && !isInfo);
+    t.classList.toggle('disabled', (disableOthers && !isInfo) || (_mbookPage === 'gyubok' && isTimeline));
   });
 }
 function mbookSetPage(page) {
@@ -6376,6 +6379,7 @@ function mbookSetPage(page) {
 }
 function mbookSetTab(tab) {
   if (MBOOK_NO_SEL_PAGES.includes(_mbookPage)) return; // 표지/기록/통계에서는 탭 전환 불가
+  if (_mbookPage === 'gyubok' && tab === 'timeline') return; // 허규복 페이지는 타임라인 비활성화
   if (_mbookSel == null && tab !== 'info') return; // 몹 미선택 시 기본정보만 활성화
   _mbookTab = tab; mbookHideNote(); mbookSyncTabs(); renderMbookRight();
 }
@@ -6430,6 +6434,7 @@ function renderMbookList() {
   const rawCompleted = getTrophyCompleted();
   if (_mbookPage === 'records') { leftPage.innerHTML = mbookRecordsLeftHtml(rawCompleted, loadS()); return; }
   if (_mbookPage === 'stats') { leftPage.innerHTML = mbookStatsLeftHtml(rawCompleted, loadS()); return; }
+  if (_mbookPage === 'gyubok') { leftPage.innerHTML = mbookGyubokLeftHtml(); return; }
   const completed = mbookSortedCompleted();
   leftPage.innerHTML = `<div class="mbook-page-title">몬스터북 <span class="mbook-count" id="mbook-count"></span></div>${mbookSortBarHtml()}<div class="mbook-mob-grid" id="mbook-mob-grid"></div>`;
   const cnt = document.getElementById('mbook-count');
@@ -6450,6 +6455,14 @@ function renderMbookList() {
   }).join('');
   for (let i = slice.length; i < MBOOK_PAGE_SIZE; i++) html += '<div class="mbook-mob empty"></div>';
   grid.innerHTML = html;
+}
+// 허규복 페이지(왼쪽) — GYUBOK_DATA를 완료한 도감작 목록과 같은 모양으로 표시 (참고용, 타임라인 비활성)
+function mbookGyubokLeftHtml() {
+  const list = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
+  if (!list.length) return `<div class="mbook-page-title">허규복의 도감</div><div class="mbook-empty">아직 등록된 기록이 없습니다</div>`;
+  const cells = list.map(g => `<div class="mbook-mob${g.mobId === _mbookSel ? ' sel' : ''}" data-mob="${g.mobId}" onclick="mbookSelect(${g.mobId})" title="${escHtml(g.mobName)}">
+       <img src="${mobImg(g.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`).join('');
+  return `<div class="mbook-page-title">허규복의 도감 <span class="mbook-count">(${list.length})</span></div><div class="mbook-mob-grid">${cells}</div>`;
 }
 // 표지(왼쪽 페이지) — 완료 도감작 전체 통계를 한곳에 모아 표시
 const MBOOK_COVER_SVG = `<svg width="700" height="1000" viewBox="0 0 700 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -7052,10 +7065,14 @@ function mbookStatsLeftHtml(completed, store) {
   };
   const completedCells   = completed.map(c => cellHtml(c.mobId, c.mobName)).join('');
   const inProgressCells  = inProgress.map(m => cellHtml(m.mobId, m.name)).join('');
+  const gyubokList  = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
+  const gyubokCells = gyubokList.map(g => `<div class="mbook-mob" data-mob="${g.mobId}" title="${escHtml(g.mobName)}">
+      <img src="${mobImg(g.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`).join('');
   return `<div class="mbook-page-title">통계 <span class="mbook-count">(${_mbookStatSel.size}개 선택)</span></div>
     <div class="mbook-stat-hint">몬스터를 클릭해 그래프에 추가·제거하세요</div>
     ${completed.length ? `<div class="mbook-mob-grid">${completedCells}</div>` : '<div class="mbook-empty">완료한 도감작이 없습니다</div>'}
-    ${inProgress.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">진행중인 도감작</div><div class="mbook-mob-grid">${inProgressCells}</div>` : ''}`;
+    ${inProgress.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">진행중인 도감작</div><div class="mbook-mob-grid">${inProgressCells}</div>` : ''}
+    ${gyubokList.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">허규복의 도감</div><div class="mbook-mob-grid">${gyubokCells}</div>` : ''}`;
 }
 function mbookToggleStatSel(mobId) {
   if (_mbookStatSel.has(mobId)) _mbookStatSel.delete(mobId); else _mbookStatSel.add(mobId);
@@ -7132,9 +7149,9 @@ function renderMbookRight() {
         <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">📈</span></div>
         <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">통계</span><span class="mbook-nav-card-desc">그래프</span></div>
       </div>
-      <div class="mbook-nav-card" data-nav="gyubok" onclick="showToast('허규복 데이터는 준비 중입니다')">
+      <div class="mbook-nav-card" data-nav="gyubok" onclick="mbookSetPage('gyubok')">
         <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">🧑</span></div>
-        <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">허규복</span><span class="mbook-nav-card-desc">준비중</span></div>
+        <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">허규복</span><span class="mbook-nav-card-desc">참고 기록</span></div>
       </div>
     </div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
@@ -7145,6 +7162,22 @@ function renderMbookRight() {
     const store2 = loadS();
     bodyEl.innerHTML = `<div class="mbook-chart-block"><div class="mbook-chart-label">달성률 (%)</div>${mbookChartHtml(completed, store2, 'rate')}</div>
       <div class="mbook-chart-block"><div class="mbook-chart-label">아이템 개수 (기타 제외)</div>${mbookChartHtml(completed, store2, 'count')}</div>`;
+    return;
+  }
+  if (_mbookPage === 'gyubok') {
+    if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
+    const gyubokList = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
+    const g = gyubokList.find(x => x.mobId === _mbookSel);
+    if (!g) { titleEl.textContent = '-'; bodyEl.innerHTML = ''; return; }
+    titleEl.innerHTML = `<span>${escHtml(g.mobName)}</span>`;
+    const gDrops = g.drops || [];
+    const gMobData = g.mobData || {};
+    // 내 트래킹용 store를 그대로 쓰면 같은 mobId에 대한 내 tl_base/제외 설정이 섞여 들어가므로,
+    // 허규복 자신의 기준 아이템만 반영한 별도 store로 조회
+    const gStore = { ...loadS(), [`tl_base_${g.mobId}`]: g.tlBase || null, [`excl_${g.mobId}`]: [] };
+    if (_mbookTab === 'stats')     bodyEl.innerHTML = mbookStatsHtml(g, gDrops, gMobData, gStore);
+    else if (_mbookTab === 'items') bodyEl.innerHTML = mbookItemsHtml(g, gDrops, gMobData, gStore);
+    else                             bodyEl.innerHTML = mbookInfoHtml(g, gDrops, gMobData, gStore);
     return;
   }
   if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
@@ -8008,6 +8041,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <button class="mbook-tab-left" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-icon">🏠</span></button>
       <button class="mbook-tab-left active" data-page="hunt" onclick="mbookSetPage('hunt')" title="도감작"><span class="mbook-tab-left-icon">⚔</span></button>
       <button class="mbook-tab-left" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-icon">📈</span></button>
+      <button class="mbook-tab-left" data-page="gyubok" onclick="mbookSetPage('gyubok')" title="허규복"><span class="mbook-tab-left-icon">🧑</span></button>
       <div class="mbook-tabs-left-gap"></div>
       <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
       <button class="mbook-tab-left" data-page="1" onclick="mbookSetPage(1)" title="노랑"></button>
