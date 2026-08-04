@@ -461,18 +461,10 @@
     #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
     .sw-log-entry.complete { background:rgba(216,148,38,.06); border-left:3px solid var(--gold); font-weight:700; color:var(--brown); }
 
-    /* ─ Main layout (items + stopwatch) — 타이머가 위, 아이템 슬롯이 아래(전체 폭) */
-    .main-layout { display:flex; flex-direction:column-reverse; gap:14px; }
-    .items-section { flex:1; min-width:0; width:100%; }
-    .sw-section { width:100%; }
-    /* 스톱워치 내부 분할 — 왼쪽: 예상마릿수/타이머/버튼(좁게), 오른쪽: 획득기록(위)+타임라인(아래) */
-    .sw-split { display:flex; gap:14px; align-items:flex-start; margin-top:8px; }
-    .sw-controls { flex:0 0 150px; }
-    .sw-controls .hunt-estimate .ptitle { font-size:.62rem; }
-    .sw-controls .hunt-count { font-size:1rem; padding:2px 0; }
-    .sw-controls .hunt-reason { font-size:.56rem; }
-    .sw-controls .hunt-dogam-exp { font-size:.52rem; }
-    .sw-history { flex:1; min-width:0; }
+    /* ─ Main layout (items + stopwatch) ─ */
+    .main-layout { display:flex; gap:16px; align-items:flex-start; }
+    .items-section { flex:1; min-width:0; }
+    .sw-section { width:195px; flex-shrink:0; position:sticky; top:68px; }
 
     /* ─ Item grid ─ */
     .item-grid {
@@ -796,10 +788,10 @@
     .sw-sub-row { display:flex; align-items:center; justify-content:space-between; min-height:20px; margin-bottom:2px; }
     .sw-ch-elapsed { font-size:.8rem; color:#1a6fa8; display:flex; align-items:center; gap:4px; }
     .sw-ch-elapsed .sw-ch-val { font-family:'Courier New',monospace; font-weight:700; font-size:.85rem; }
-    .sw-btns { display:flex; flex-direction:column; gap:6px; }
+    .sw-btns { display:flex; flex-direction:column; gap:8px; }
     .sw-btn {
-      padding:8px; border:none; border-radius:9px;
-      font-family:inherit; font-size:.74rem; font-weight:700;
+      padding:12px; border:none; border-radius:12px;
+      font-family:inherit; font-size:.85rem; font-weight:700;
       cursor:pointer; transition:transform .12s, filter .15s, box-shadow .15s; text-align:center;
     }
     .sw-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
@@ -1027,7 +1019,7 @@
     }
     .sw-display {
       font-family:'Courier New',monospace;
-      font-size:.95rem; font-weight:700; color:var(--dark);
+      font-size:1.18rem; font-weight:700; color:var(--dark);
       letter-spacing:-.5px; font-variant-numeric:tabular-nums;
     }
     .reward-badge {
@@ -1223,6 +1215,12 @@
     .mbook-left  { background:linear-gradient(90deg,#f4eeddee,#ece3ccee); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-right { background:linear-gradient(90deg,#ece3ccee,#f4eeddee); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
+    /* 도감작 화면 — 좌우 페이지 구분(책등, 접힘 그림자) 없이 하나의 넓은 캔버스로 */
+    .mbook-pages.is-hunt { flex-direction:column; overflow-y:auto; }
+    .mbook-pages.is-hunt .mbook-spine { display:none; }
+    .mbook-pages.is-hunt .mbook-page { flex:none; overflow:visible; }
+    .mbook-pages.is-hunt .mbook-left { border-radius:5px 5px 0 0; box-shadow:none; background:#f4eedd; }
+    .mbook-pages.is-hunt .mbook-right { border-radius:0 0 5px 5px; box-shadow:none; background:#f4eedd; }
     .mbook-page::-webkit-scrollbar { width:5px; }
     .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
     .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
@@ -1552,21 +1550,21 @@
       transition:background .15s, color .15s, border-color .15s;
     }
     .tl-toggle-btn.on { background:var(--gold); color:#fff; border-color:var(--gold); }
-    .tl-rows { margin-top:4px; max-height:140px; overflow-y:auto; }
-    .tl-row { position:relative; margin-bottom:3px; }
+    .tl-rows { margin-top:4px; }
+    .tl-row { position:relative; margin-bottom:4px; }
     .tl-callouts { position:relative; min-height:0; }
     .tl-bar-zone { position:relative; }
-    .tl-time-labels { display:flex; justify-content:space-between; font-size:.4rem; color:#bbb; margin-top:2px; font-weight:700; line-height:1; }
+    .tl-time-labels { display:flex; justify-content:space-between; font-size:.42rem; color:#bbb; margin-top:2px; font-weight:700; line-height:1; }
     .tl-callout { position:absolute; transform:translateX(-50%); }
     .tl-callout-box {
-      position:relative; width:17px; height:17px;
-      border:1.5px solid #aaa; border-radius:4px;
+      position:relative; width:34px; height:34px;
+      border:2px solid #aaa; border-radius:6px;
       background:white; overflow:hidden;
       box-shadow:0 1px 4px rgba(0,0,0,.15);
     }
-    .tl-callout-box img { width:14px; height:14px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
-    .tl-arrow { width:0; height:0; border-left:3px solid transparent; border-right:3px solid transparent; border-top:3px solid #aaa; margin:0 auto; }
-    .tl-arrow-spacer { height:3px; }
+    .tl-callout-box img { width:28px; height:28px; object-fit:contain; image-rendering:pixelated; display:block; margin:1px auto; }
+    .tl-arrow { width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #aaa; margin:0 auto; }
+    .tl-arrow-spacer { height:5px; }
     .tl-r0 { border-color:#3f5f85; }
     .tl-r1 { border-color:#5b93bf; box-shadow:0 1px 5px rgba(91,147,191,.3); }
     .tl-r2 { border-color:#4f9c98; box-shadow:0 1px 5px rgba(79,156,152,.3); }
@@ -1576,9 +1574,9 @@
     .tl-r6 { border-color:#b06a92; box-shadow:0 1px 6px rgba(176,106,146,.42); }
     .tl-r7 { border-color:#9275a6; box-shadow:0 1px 6px rgba(146,117,166,.45); }
     .tl-r8 { border-color:#5b4a68; box-shadow:0 1px 6px rgba(91,74,104,.5); }
-    .tl-bar-wrap { position:relative; height:5px; border-radius:3px; background:#ececec; overflow:hidden; }
-    .tl-bar-fill { height:100%; border-radius:3px; transition:width 1s linear; }
-    .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:17px; height:23px; cursor:pointer; }
+    .tl-bar-wrap { position:relative; height:8px; border-radius:4px; background:#ececec; overflow:hidden; }
+    .tl-bar-fill { height:100%; border-radius:4px; transition:width 1s linear; }
+    .tl-cluster { position:absolute; bottom:0; transform:translateX(-50%); width:34px; height:43px; cursor:pointer; }
     .tl-callout-wrap { position:absolute; bottom:0; left:0; transform-origin:bottom center; transition:transform .25s ease; }
     .tl-cluster .tl-extra { display:none; }
     .tl-cluster.open .tl-extra { display:flex; flex-direction:column; }
@@ -4576,6 +4574,13 @@ function buildTabPanel(tab) {
         <div class="item-grid"></div>
       </div>
       <div class="sw-section panel">
+        <div class="hunt-estimate" style="display:none">
+          <div class="ptitle">🗡 예상 사냥 마릿수</div>
+          <div class="hunt-count"></div>
+          <div class="hunt-reason"></div>
+          <div class="hunt-dogam-exp"></div>
+          <div class="divider" style="margin:10px 0 12px"></div>
+        </div>
         <div class="sw-header-row">
           <div class="ptitle">스톱워치</div>
           <button class="sw-help-btn" onclick="openSwHelp()" title="단축키 안내">?</button>
@@ -4586,56 +4591,43 @@ function buildTabPanel(tab) {
             <div class="reward-drop-list" style="display:none"></div>
           </div>
         </div>
-        <div class="sw-split">
-          <div class="sw-controls">
-            <div class="hunt-estimate" style="display:none">
-              <div class="ptitle">🗡 예상 사냥 마릿수</div>
-              <div class="hunt-count"></div>
-              <div class="hunt-reason"></div>
-              <div class="hunt-dogam-exp"></div>
-              <div class="divider" style="margin:8px 0 10px"></div>
-            </div>
-            <div class="sw-timer-row">
-              <div class="sw-display">00:00:00.00</div>
-            </div>
-            <div class="sw-sub-row">
-              <div class="sw-ch-elapsed" style="display:none">
-                <span class="sw-ch-val">00:00:00.00</span>
-              </div>
-              <div class="reward-badge" style="display:none"></div>
-            </div>
-            <div class="sw-btns">
-              <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
-              <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
-            </div>
-            <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
-              <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
-              <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
-              <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
-            </div>
+        <div class="sw-timer-row">
+          <div class="sw-display">00:00:00.00</div>
+        </div>
+        <div class="sw-sub-row">
+          <div class="sw-ch-elapsed" style="display:none">
+            <span class="sw-ch-val">00:00:00.00</span>
           </div>
-          <div class="sw-history">
-            <div class="sw-log">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
-                <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
-              </div>
-              <div class="sw-log-list"></div>
-              <button class="sw-log-down" onclick="_swLogGoBottom(this)" title="최신으로">
-                <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-            <div class="tl-section" style="display:none">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-                <div style="display:flex;align-items:center;gap:3px;">
-                  <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
-                  <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
-                </div>
-                <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal(event)" title="크게 보기">↗</button>
-              </div>
-              <div class="tl-rows"></div>
-            </div>
+          <div class="reward-badge" style="display:none"></div>
+        </div>
+        <div class="sw-btns">
+          <button class="sw-btn sw-start sw-toggle" onclick="swToggle(event)">▶ 시작</button>
+          <button class="sw-btn sw-channel" onclick="swChannelMark(event)">채널변경</button>
+        </div>
+        <div style="text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+          <button class="sw-sync" onclick="swSyncToggle(event)">🔗 동기화</button>
+          <button class="sw-overlay" onclick="openOverlay()" title="오버레이 창 (항상 위·게임 위에 띄우기)">오버레이 ↗</button>
+          <button class="sw-btn sw-reset" onclick="swReset(event)">↺ 리셋</button>
+        </div>
+        <div class="sw-log">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+            <div class="ptitle" style="font-size:.65rem;margin-bottom:0">획득 기록</div>
+            <button class="tl-toggle-btn" onclick="tlToggleShowAll()">최초만</button>
           </div>
+          <div class="sw-log-list"></div>
+          <button class="sw-log-down" onclick="_swLogGoBottom(this)" title="최신으로">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="tl-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+            <div style="display:flex;align-items:center;gap:3px;">
+              <div class="ptitle" style="font-size:.65rem;margin-bottom:0;">타임라인</div>
+              <button class="tl-sec-toggle" onclick="_tlToggleExpand(this)" title="전체보기/접기">▼</button>
+            </div>
+            <button style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.65rem;padding:0 2px;" onclick="openTlModal(event)" title="크게 보기">↗</button>
+          </div>
+          <div class="tl-rows"></div>
         </div>
       </div>
     </div>`;
