@@ -458,7 +458,7 @@
     }
 
     /* ─ 메소 비 ─ */
-    #meso-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
+    #meso-rain { position:fixed; pointer-events:none; z-index:9999; }
     .sw-log-entry.complete { background:rgba(216,148,38,.06); border-left:3px solid var(--gold); font-weight:700; color:var(--brown); }
 
     /* ─ Main layout (items + stopwatch) ─ */
@@ -4952,7 +4952,7 @@ function restorePanelForTab(tab) {
   panel.querySelector('.mob-stats').textContent = '';
   // 아이템 그리드 복원
   renderItemGridInPanel(panel, mob);
-  updateProgressInPanel(panel, mob);
+  updateProgressInPanel(panel, mob, true);
   updateHuntEstimateInPanel(panel, mob);
   // 획득 기록 복원
   restoreLogEntries(panel, mob);
@@ -5611,7 +5611,7 @@ function updateProgress() {
   updateProgressInPanel(panel, activeMob);
 }
 
-function updateProgressInPanel(panel, mob) {
+function updateProgressInPanel(panel, mob, silent) {
   const store   = loadS();
   const mobData = store[`mob_${mob.id}`] || {};
   const excl    = new Set(store[`excl_${mob.id}`] || []);
@@ -5639,8 +5639,8 @@ function updateProgressInPanel(panel, mob) {
     panel.querySelectorAll('.sw-log-entry.complete').forEach(el => el.remove());
   }
 
-  // 방금 완료된 경우 (이전에 안 완료 상태였을 때만)
-  if (justCompleted && !wasComplete) {
+  // 방금 완료된 경우 (이전에 안 완료 상태였을 때만, 복원 시에는 재발동 안 함)
+  if (justCompleted && !wasComplete && !silent) {
     onDogamComplete(panel, mob);
   }
 
@@ -5744,10 +5744,17 @@ function mesoRain() {
   if (_mesoFadeId)  { clearTimeout(_mesoFadeId); _mesoFadeId = null; }
 
   const canvas = document.getElementById('meso-rain');
+  // 화면 전체가 아니라 도감작 페이지(2장, 오른쪽 트래킹 영역) 안에서만 내리도록 범위 제한
+  const scopeEl = document.getElementById('mbook-hunt-right') || document.body;
+  const rect = scopeEl.getBoundingClientRect();
   canvas.style.transition = '';
   canvas.style.opacity = '1';
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.style.top    = `${rect.top}px`;
+  canvas.style.left   = `${rect.left}px`;
+  canvas.style.width  = `${rect.width}px`;
+  canvas.style.height = `${rect.height}px`;
+  canvas.width  = rect.width;
+  canvas.height = rect.height;
   const ctx = canvas.getContext('2d');
 
   const COLORS = [
