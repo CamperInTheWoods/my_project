@@ -7053,8 +7053,7 @@ function renderMbookRight() {
   const isHunt = _mbookPage === 'hunt';
   document.getElementById('mbook-hunt-right')?.style.setProperty('display', isHunt ? '' : 'none');
   document.getElementById('mbook-right-static')?.style.setProperty('display', isHunt ? 'none' : '');
-  document.getElementById('mbook-tabs-right')?.style.setProperty('display', isHunt ? 'none' : '');
-  if (isHunt) return; // 도감작 화면은 정적 DOM 그대로 사용, 다시 그리지 않음
+  if (isHunt) return; // 도감작 화면은 정적 DOM 그대로 사용, 다시 그리지 않음 — 오른쪽 책갈피는 숨기지 않고 비활성(회색) 상태로만 표시
   const titleEl = document.getElementById('mbook-right-title');
   const bodyEl  = document.getElementById('mbook-right-body');
   if (!titleEl || !bodyEl) return;
