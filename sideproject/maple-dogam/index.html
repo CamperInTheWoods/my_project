@@ -7015,7 +7015,7 @@ function mbookOpenBook(e) {
     _mbookOpened = true;
     document.getElementById('mbook-overlay')?.classList.remove('book-closed');
     mbookSetPage('records');
-  }, 220);
+  }, 260); // 표지 페이드 트랜지션(.22s)보다 살짝 더 길게 잡아, 애니메이션이 끝나기 전에 화면이 바뀌며 버벅이던 문제 방지
 }
 // 전체 기록 페이지(왼쪽) — 완료/진행중 도감작 요약 + 사냥 잔디 바로가기
 function mbookRecordsLeftHtml(completed, store) {
