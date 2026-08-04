@@ -1272,6 +1272,20 @@
     .mbook-right-actions button:hover { background:rgba(96,74,40,.14); color:#3a2c12; }
     /* 아이템 슬롯 (테두리 색 = 드롭 희귀도) */
     .mbook-item-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    /* 목차 내비게이션 카드 — 아이템 슬롯과 같은 모양을 키워서 누르기 쉽게 */
+    .mbook-nav-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; padding:6px 4px; }
+    .mbook-nav-card { position:relative; aspect-ratio:1; border-radius:14px;
+      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 16%, #fdf8ec);
+      box-shadow:inset 0 0 0 2.5px var(--rc,rgba(120,95,55,.28)), 0 2px 6px rgba(90,66,30,.2);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; transition:transform .12s; }
+    .mbook-nav-card:hover { transform:translateY(-3px); }
+    .mbook-nav-card-icon { font-size:2rem; }
+    .mbook-nav-card-label { font-size:.86rem; font-weight:800; color:#4a3318; }
+    .mbook-nav-card[data-nav="hunt"] { --rc:#b2402f; }
+    .mbook-nav-card[data-nav="dex"] { --rc:#c99b2e; }
+    .mbook-nav-card[data-nav="stats"] { --rc:#6e6e6e; }
+    .mbook-nav-card[data-nav="gyubok"] { --rc:#3f7fc9; }
     .mbook-slot { position:relative; aspect-ratio:1; border-radius:8px;
       background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 16%, #fdf8ec);
       box-shadow:inset 0 0 0 2px var(--rc,rgba(120,95,55,.28)), 0 1px 3px rgba(90,66,30,.16);
@@ -6933,6 +6947,11 @@ function mbookRecordsLeftHtml(completed, store) {
       <div class="char-label">허규복 ing</div>
     </div>
     <button class="mbook-records-grass" onclick="openHuntGrid()">🌱 사냥 잔디 보기</button>
+    <div class="mbook-colophon" style="margin-top:20px;">
+      <p>완료된 도감작이 저장됩니다</p>
+      <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
+      <p class="mbook-colophon-cheer">도감길드 파이팅</p>
+    </div>
   </div>`;
 }
 // 통계 페이지(왼쪽) — 완료한 몬스터를 클릭해 그래프에 추가/제거하는 선택 그리드
@@ -7039,15 +7058,11 @@ function renderMbookRight() {
   if (_mbookPage === 'records') {
     const ver = document.getElementById('ver-label')?.textContent || '';
     titleEl.innerHTML = `<span>목차</span>`;
-    bodyEl.innerHTML = `<div class="mbook-toc">
-      <div class="mbook-toc-item" onclick="mbookSetPage('hunt')"><span>도감작 하기</span><span class="mbook-toc-dots"></span></div>
-      <div class="mbook-toc-item" onclick="mbookSetPage(0)"><span>완료한 도감작 목록</span><span class="mbook-toc-dots"></span></div>
-      <div class="mbook-toc-item" onclick="mbookSetPage('stats')"><span>통계</span><span class="mbook-toc-dots"></span></div>
-    </div>
-    <div class="mbook-colophon" style="margin-top:20px;">
-      <p>완료된 도감작이 저장됩니다</p>
-      <p>문의 사항이나 수정사항은 디스코드로 문의 부탁드립니다</p>
-      <p class="mbook-colophon-cheer">도감길드 파이팅</p>
+    bodyEl.innerHTML = `<div class="mbook-nav-grid">
+      <div class="mbook-nav-card" data-nav="hunt" onclick="mbookSetPage('hunt')"><span class="mbook-nav-card-icon">⚔</span><span class="mbook-nav-card-label">도감작 하기</span></div>
+      <div class="mbook-nav-card" data-nav="dex" onclick="mbookSetPage(0)"><span class="mbook-nav-card-icon">📖</span><span class="mbook-nav-card-label">도감</span></div>
+      <div class="mbook-nav-card" data-nav="stats" onclick="mbookSetPage('stats')"><span class="mbook-nav-card-icon">📈</span><span class="mbook-nav-card-label">통계</span></div>
+      <div class="mbook-nav-card" data-nav="gyubok" onclick="showToast('허규복 데이터는 준비 중입니다')"><span class="mbook-nav-card-icon">🧑</span><span class="mbook-nav-card-label">허규복</span></div>
     </div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
     return;
