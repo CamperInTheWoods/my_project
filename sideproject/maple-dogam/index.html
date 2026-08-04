@@ -1255,8 +1255,8 @@
        .mbook-mob 자체엔 clip-path를 주지 않음(자신에게 주면 밖으로 튀어나오는 ::before/::after 링이 통째로 잘려나감) —
        대신 .mbook-mob-face(안쪽 색상 칠판)와 ::before/::after(흰/검정 링)가 각자 clip-path를 갖는 독립된 형제 레이어. */
     .mbook-mob {
-      --pxcut: polygon(14% 0%,86% 0%,86% 14%,100% 14%,100% 86%,86% 86%,86% 100%,14% 100%,14% 86%,0% 86%,0% 14%,14% 14%);
-      position:relative; aspect-ratio:1;
+      --pxcut: polygon(18% 0%,82% 0%,88% 0%,88% 6%,94% 6%,94% 12%,100% 12%,100% 18%,100% 82%,100% 88%,94% 88%,94% 94%,88% 94%,88% 100%,82% 100%,18% 100%,12% 100%,12% 94%,6% 94%,6% 88%,0% 88%,0% 82%,0% 18%,0% 12%,6% 12%,6% 6%,12% 6%,12% 0%);
+      position:relative; z-index:0; aspect-ratio:1;
       cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .14s;
     }
     .mbook-mob::before { content:''; position:absolute; inset:-3.75px; z-index:-1; background:#fff; clip-path:var(--pxcut); }
