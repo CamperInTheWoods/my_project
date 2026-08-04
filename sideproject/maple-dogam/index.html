@@ -7065,9 +7065,17 @@ function mbookStatsLeftHtml(completed, store) {
   };
   const completedCells   = completed.map(c => cellHtml(c.mobId, c.mobName)).join('');
   const inProgressCells  = inProgress.map(m => cellHtml(m.mobId, m.name)).join('');
+  // 허규복 항목은 내 기록과 mobId가 겹칠 수 있어 'g:'로 구분한 별도 키로 선택 상태를 관리
   const gyubokList  = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
-  const gyubokCells = gyubokList.map(g => `<div class="mbook-mob" data-mob="${g.mobId}" title="${escHtml(g.mobName)}">
-      <img src="${mobImg(g.mobId)}" onerror="this.style.display='none'" draggable="false"></div>`).join('');
+  const gyubokCellHtml = (mobId, name) => {
+    const key = 'g:' + mobId;
+    const idx = selArr.indexOf(key);
+    const picked = idx !== -1;
+    const ring = picked ? MBOOK_CHART_PALETTE[idx % MBOOK_CHART_PALETTE.length] : null;
+    return `<div class="mbook-mob mbook-stat-pick${picked ? ' picked' : ''}" style="${ring ? `box-shadow:0 0 0 3px ${ring}, 0 2px 4px rgba(0,0,0,.3)` : ''}" data-mob="${mobId}" onclick="mbookToggleStatSel('${key}')" title="${escHtml(name)} (허규복)">
+      <img src="${mobImg(mobId)}" onerror="this.style.display='none'" draggable="false"></div>`;
+  };
+  const gyubokCells = gyubokList.map(g => gyubokCellHtml(g.mobId, g.mobName)).join('');
   return `<div class="mbook-page-title">통계 <span class="mbook-count">(${_mbookStatSel.size}개 선택)</span></div>
     <div class="mbook-stat-hint">몬스터를 클릭해 그래프에 추가·제거하세요</div>
     ${completed.length ? `<div class="mbook-mob-grid">${completedCells}</div>` : '<div class="mbook-empty">완료한 도감작이 없습니다</div>'}
@@ -7334,7 +7342,7 @@ function mbookShowNote(e, dropId) {
 }
 function mbookToggleStatMode() { _statMode = _statMode === 'rate' ? 'count' : 'rate'; renderMbookRight(); }
 // 통계 페이지 — 선택한 몹들의 시간에 따른 달성률(%)/아이템 개수(장비·주문서·표창만)를 계단형 꺾은선으로
-function mbookChartSeries(c, store, mode) {
+function mbookChartSeries(c, store, mode, respectHiddenBase) {
   const excl = new Set(store[`excl_${c.mobId}`] || []);
   const drops = (c.drops || []).filter(d => !excl.has(d.id));
   const mobData = c.mobData || {};
@@ -7354,8 +7362,15 @@ function mbookChartSeries(c, store, mode) {
     pts.push([c.elapsed, pts[pts.length - 1][1]]);
     return { pts, maxY: 100, elapsed: c.elapsed, markerAt };
   } else {
-    const tlBaseId = store[`tl_base_${c.mobId}`]?.id;
-    const qualifying = drops.filter(d => itemTypeLabel(d.id) !== '기타' && d.id !== tlBaseId && d.id !== MONSTER_CARD_ID);
+    const tlBaseObj = store[`tl_base_${c.mobId}`];
+    const tlBaseId = tlBaseObj?.id;
+    // 기준 아이템은 원래 개수 그래프에서 항상 제외되지만, respectHiddenBase가 켜져 있고
+    // hidden:false로 지정된 경우엔(=숨기지 않기로 한 경우) 예외적으로 포함시킴 (허규복 데이터용)
+    const qualifying = drops.filter(d => {
+      if (itemTypeLabel(d.id) === '기타' || d.id === MONSTER_CARD_ID) return false;
+      if (d.id === tlBaseId) return respectHiddenBase ? !tlBaseObj?.hidden : false;
+      return true;
+    });
     // 최초 획득 시각에 전체 개수를 몰아넣지 않고, 개별 획득 시각(times) 전부를 계단으로 반영
     const allPicks = [];
     qualifying.forEach(d => {
@@ -7403,14 +7418,25 @@ function mbookChartHtml(completed, store, mode) {
   const selMobs = Array.from(_mbookStatSel);
   if (!selMobs.length) return '<div class="mbook-empty">아래에서 몬스터를 선택하면 그래프에 표시됩니다</div>';
   const showKills = mode === 'count'; // 아이템 개수 차트에만 추정 사냥 마릿수 오버레이(오른쪽 축)
-  const series = selMobs.map((mobId, i) => {
-    const c = completed.find(x => x.mobId === mobId) || mbookInProgressEntry(mobId, store);
+  const series = selMobs.map((key, i) => {
+    const isGyubok = typeof key === 'string' && key.startsWith('g:');
+    let c, effStore = store;
+    if (isGyubok) {
+      const gid = Number(key.slice(2));
+      c = ((typeof GYUBOK_DATA !== 'undefined' ? GYUBOK_DATA : [])).find(x => x.mobId === gid);
+      if (!c) return null;
+      // 내 tl_base/제외 설정이 같은 mobId에 섞여 들어가지 않도록 허규복 전용 store로 분리
+      effStore = { ...store, [`tl_base_${c.mobId}`]: c.tlBase || null, [`excl_${c.mobId}`]: [] };
+    } else {
+      c = completed.find(x => x.mobId === key) || mbookInProgressEntry(key, store);
+    }
     if (!c) return null;
-    const s = mbookChartSeries(c, store, mode);
+    const s = mbookChartSeries(c, effStore, mode, isGyubok);
     if (!s) return null;
-    const kills = showKills ? _calcTrophyKills(c, store) : 0;
-    const killsPts = showKills ? mbookKillsPts(c, store) : null;
-    return { name: c.mobName, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], kills, killsPts, ...s };
+    const kills = showKills ? _calcTrophyKills(c, effStore) : 0;
+    const killsPts = showKills ? mbookKillsPts(c, effStore) : null;
+    const name = isGyubok ? `${c.mobName} (허규복)` : c.mobName;
+    return { name, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], kills, killsPts, ...s };
   }).filter(Boolean);
   if (!series.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
 
