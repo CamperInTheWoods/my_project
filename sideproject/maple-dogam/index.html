@@ -1470,7 +1470,7 @@
     }
     .mbook-cover-rule { width:100%; max-width:190px; height:5px;
       border-top:1px solid rgba(110,90,60,.55); border-bottom:1px solid rgba(110,90,60,.55); }
-    .mbook-records-grass { margin-top:auto; font-family:inherit; font-size:.72rem; font-weight:700; color:#4a7a5a; background:rgba(80,150,100,.14); border:1px solid rgba(80,150,100,.35); border-radius:8px; padding:6px 14px; cursor:pointer; transition:background .15s; }
+    .mbook-records-grass { position:absolute; left:50%; bottom:24px; transform:translateX(-50%); font-family:inherit; font-size:.72rem; font-weight:700; color:#4a7a5a; background:rgba(80,150,100,.14); border:1px solid rgba(80,150,100,.35); border-radius:8px; padding:6px 14px; cursor:pointer; transition:background .15s; }
     .mbook-records-grass:hover { background:rgba(80,150,100,.24); }
     /* 목차 — 클릭 시 해당 책갈피로 이동 */
     .mbook-toc { display:flex; flex-direction:column; gap:14px; padding:8px 6px; }
@@ -8321,7 +8321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- 사냥 잔디 모달 -->
 <div id="hunt-grid-modal" onclick="if(event.target===this)closeHuntGrid()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
+  <div style="background:#ece3cc;border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
       <span style="font-size:.9rem;font-weight:700;color:var(--dark);">🌱 도감작 잘 하고 계신가요?</span>
       <button onclick="closeHuntGrid()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
