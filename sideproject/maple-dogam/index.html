@@ -17,6 +17,19 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
   <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else if(t==='book'){document.documentElement.setAttribute('data-theme','book');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
+  <script>
+    // 폰트(Pretendard) 로딩 완료 전에는 표지 제목/이스터에그 글씨를 숨겨서, 나중에 폰트가 바뀌며
+    // 글자가 갑자기 흔들리는(폰트 스왑) 현상을 방지. 로딩이 오래 걸려도 최대 1.2초까지만 기다림.
+    (function () {
+      var reveal = function () { document.documentElement.classList.add('fonts-ready'); };
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(reveal).catch(reveal);
+      } else {
+        reveal();
+      }
+      setTimeout(reveal, 1200);
+    })();
+  </script>
   <style>
     :root { color-scheme: light;
       --brown:  #3a3f47;
@@ -1240,8 +1253,8 @@
     .mbook-tab-left.wide { width:auto; height:32px; padding:0 14px 0 10px; justify-content:flex-start; gap:6px; position:relative; overflow:hidden; }
     .mbook-tab-left.wide::before {
       content:''; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit;
-      opacity:.22; mix-blend-mode:multiply;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.36  0 0 0 0 0.34  0 0 0 0 0.3  0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity:.4; mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
     .mbook-tab-left.wide .mbook-tab-left-label { position:relative; z-index:1; }
     .mbook-tab-left-label { font-size:.68rem; font-weight:800; letter-spacing:.02em; white-space:nowrap; text-shadow:0 1px 2px rgba(0,0,0,.35); }
@@ -1441,7 +1454,9 @@
     .mbook-cover-art-rule { width:150px; height:4px; border-radius:2px; background:rgba(60,10,5,.45);
       box-shadow: 0 1.5px 0 rgba(255,205,150,.4), inset 0 1.5px 2px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,180,120,.15); }
     .mbook-cover-art-title { color:#4a0d00; font-size:1.9rem; font-weight:900; letter-spacing:.3em; text-align:center;
-      text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.7); }
+      text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.7);
+      visibility:hidden; }
+    html.fonts-ready .mbook-cover-art-title { visibility:visible; }
     .mbook-cover .char-status { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:4px; }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
     .mbook-cover-leaf { position:relative; font-size:3rem; line-height:1; cursor:pointer; }
@@ -6355,12 +6370,16 @@ function openMonsterBook() {
   renderMbookRight();
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
   document.getElementById('mbook-overlay').classList.add('open');
-  setTimeout(() => {
+  // 폰트 로딩 전에 이스터에그 말풍선이 뜨면 글씨가 나중에 흔들리므로, 폰트 준비와 0.5초 지연 중 늦는 쪽에 맞춰 실행
+  const triggerLeaf = () => {
     const leaf = document.querySelector('.mbook-cover-leaf');
     if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
       mbookLeafClick({ currentTarget: leaf });
     }
-  }, 500);
+  };
+  const delay500 = new Promise(resolve => setTimeout(resolve, 500));
+  const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(() => {}) : Promise.resolve();
+  Promise.all([delay500, fontsReady]).then(triggerLeaf);
 }
 function closeMonsterBook() {
   mbookHideNote();
