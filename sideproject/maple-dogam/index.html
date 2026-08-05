@@ -1195,7 +1195,7 @@
     .mbook-metal.zoomed { zoom:1.1; }
     .mbook {
       position:relative; width:min(1100px,95vw); height:min(86vh,780px); display:flex;
-      background:#e7dcc3;
+      background:#ece3cc;
       border-radius:0; padding:16px;
     }
     /* 책갈피 탭 (오른쪽 바깥 — 선택한 몹의 내용 전환) */
@@ -1262,8 +1262,8 @@
       opacity:.16; mix-blend-mode:multiply;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.36  0 0 0 0 0.34  0 0 0 0 0.3  0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
-    .mbook-left  { background:linear-gradient(90deg,#f4eeddee,#ece3ccee); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
-    .mbook-right { background:linear-gradient(90deg,#ece3ccee,#f4eeddee); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-left  { background:#ece3cc; border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-right { background:#ece3cc; border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
     /* 도감작 화면 — 좌우 페이지 구분(책등, 접힘 그림자) 없이 하나의 넓은 캔버스로 */
     .mbook-pages.is-hunt { flex-direction:column; overflow-y:auto; }
