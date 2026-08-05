@@ -1203,6 +1203,7 @@
       box-shadow: 0 0 0 6px #4e3018, 0 30px 70px rgba(0,0,0,.6);
     }
     .mbook-metal.zoomed { zoom:1.1; }
+    .mbook-metal.zoomed-big { zoom:1.35 !important; }
     .mbook {
       position:relative; width:100%; height:100%; display:flex;
       background:#ece3cc;
@@ -1503,7 +1504,7 @@
 
     /* 모바일 — 펼친 책(좌우) 대신 위아래로 쌓아서 한 줄로 스크롤, 책갈피는 옆에 안 튀어나오게 상단 가로 탭으로 */
     @media (max-width: 700px) {
-      .mbook-metal.zoomed { zoom:1 !important; }
+      .mbook-metal.zoomed, .mbook-metal.zoomed-big { zoom:1 !important; }
       .mbook { flex-direction:column; width:94vw; height:90vh; padding:10px; }
       .mbook-tabs-left, .mbook-tabs {
         position:static; transform:none; flex-direction:row; flex-wrap:wrap;
@@ -6375,6 +6376,7 @@ function openMonsterBook() {
   renderMbookList();
   renderMbookRight();
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
+  document.querySelector('.mbook-metal')?.classList.toggle('zoomed-big', getSetting('mbook_zoom_big'));
   document.getElementById('mbook-overlay').classList.add('open');
   setTimeout(() => {
     const leaf = document.querySelector('.mbook-cover-leaf');
@@ -7040,7 +7042,7 @@ function mbookRenderSplash() {
   el.classList.remove('opening');
   el.innerHTML = `<div class="mbook-cover-art-wrap" onclick="mbookOpenBook(event)">
     ${MBOOK_COVER_SVG}
-    <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji"><svg viewBox="0 0 100 88" width="1em" height="1em" aria-hidden="true"><path fill="#d9642f" d="M50,2 60.6,27.4 88,29.6 67.1,47.6 73.5,74.4 50,60 26.5,74.4 32.9,47.6 12,29.6 39.4,27.4Z"/><path fill="#6b4423" d="M47,58 53,58 56,86 44,86Z"/></svg></span></div>
+    <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
     <div class="mbook-cover-art-title-block">
       <div class="mbook-cover-art-rule"></div>
       <div class="mbook-cover-art-title">도감</div>
@@ -8842,6 +8844,7 @@ const SETTINGS = [
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
   { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
   { key: 'mbook_zoom',            label: '몬스터북 확대(110%)', def: true, group: 'mbook' },
+  { key: 'mbook_zoom_big',        label: '몬스터북 크게보기(135%)', def: false, group: 'mbook' },
 ];
 const SETTINGS_GROUPS = [['general', '일반'], ['overlay', '오버레이'], ['mbook', '도감']];
 function getSetting(key) {
@@ -8878,8 +8881,15 @@ function onSettingChange(key, val) {
     tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderTimeline(p, t.mob, t); } });
   } else if (key === 'mbook_show_time_badge' || key === 'mbook_show_time_bg') {
     if (typeof renderMbookList === 'function' && document.getElementById('mbook-overlay')?.classList.contains('open')) renderMbookList();
-  } else if (key === 'mbook_zoom') {
-    document.querySelector('.mbook-metal')?.classList.toggle('zoomed', val);
+  } else if (key === 'mbook_zoom' || key === 'mbook_zoom_big') {
+    // 두 확대 옵션은 동시에 켜지 않고, 하나를 켜면 다른 하나는 자동으로 꺼지게 함
+    if (val) {
+      const other = key === 'mbook_zoom' ? 'mbook_zoom_big' : 'mbook_zoom';
+      setSetting(other, false);
+      renderSettings();
+    }
+    document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
+    document.querySelector('.mbook-metal')?.classList.toggle('zoomed-big', getSetting('mbook_zoom_big'));
   }
 }
 function toggleSettings(e) {
