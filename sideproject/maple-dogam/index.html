@@ -8287,7 +8287,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_1.117.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.000.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9021,6 +9021,20 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.000.0', date: '26.08.05',
+    feat: [
+      '전체 UI를 "펼쳐진 책" 컨셉으로 개편 — 표지를 누르면 책이 펼쳐지며 왼쪽 책갈피(전체 기록/도감작하기/통계/허규복)로 이동하는 방식으로 변경',
+      '"허규복의 도감" 추가 — 규복님이 이제까지 완료한 도감작을 다른 도감작과 동일한 화면으로 열람, 통계 비교 그래프에도 함께 표시',
+      '"전체 기록" 페이지 추가 — 완료/진행중 도감작 요약과 사냥 잔디 보기 바로가기',
+    ],
+    fix: [
+      '표지 글씨가 폰트 로딩이 끝난 뒤 흔들리던(폰트 스왑) 문제 수정 — 표지는 기본 폰트로 즉시 표시하고, 책을 펼치는 애니메이션 동안 폰트 로딩을 기다렸다가 내부 페이지로 전환',
+      '표지 그림 바깥 여백을 눌러도 책이 펼쳐지던 문제 수정 — 표지 그림을 직접 눌러야만 펼쳐지도록 변경',
+      '탭을 드래그로 재정렬하면 "제외 아이템 표시"/아이템 유형 필터 설정이 엉뚱한 탭에 적용되던 문제 수정',
+      '획득 아이템이 없는 몬스터를 조회할 때 빈 화면 대신 안내 문구 표시',
+    ],
+  },
   {
     ver: '1.117.2', date: '26.08.03',
     feat: [
