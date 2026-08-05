@@ -1222,7 +1222,7 @@
         repeating-linear-gradient(112deg, rgba(90,66,30,.06) 0 1.5px, transparent 1.5px 4.5px),
         repeating-linear-gradient(22deg, rgba(255,255,255,.08) 0 1.5px, transparent 1.5px 4px),
         linear-gradient(90deg,#e6cf8f,#d8bd6f);
-      filter:none; box-shadow:3px 3px 7px rgba(0,0,0,.32);
+      filter:none; box-shadow:3px 3px 7px rgba(0,0,0,.32); transform:translateX(-15px);
     }
     .mbook-tab.disabled { opacity:1; filter:grayscale(1); cursor:default; pointer-events:none; }
     /* 책갈피 탭 (왼쪽 바깥 — 표지 · 페이지 색상 인덱스) */
@@ -1235,7 +1235,7 @@
       display:flex; align-items:center; justify-content:center;
     }
     .mbook-tab-left:hover { filter:saturate(.75); }
-    .mbook-tab-left.active { filter:none; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
+    .mbook-tab-left.active { filter:none; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(15px); }
     /* 전체기록/도감작/통계/허규복 — 글자 라벨만 있는 넓은 책갈피 */
     .mbook-tab-left.wide { width:auto; height:32px; padding:0 14px 0 10px; justify-content:flex-start; gap:6px; }
     .mbook-tab-left-label { font-size:.68rem; font-weight:800; letter-spacing:.02em; white-space:nowrap; text-shadow:0 1px 2px rgba(0,0,0,.35); }
