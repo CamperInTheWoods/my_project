@@ -1330,9 +1330,13 @@
     /* 아이템 슬롯 (테두리 색 = 드롭 희귀도) */
     .mbook-item-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
     /* 목차 내비게이션 카드 — 아이템 슬롯(.mbook-slot)과 같은 크기의 정사각형, 위엔 아이콘/아래엔 명칭+설명 */
-    .mbook-nav-grid { display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:4px 2px; }
-    .mbook-nav-row { display:flex; align-items:center; gap:12px; cursor:pointer; }
-    .mbook-nav-row-desc { font-size:.68rem; color:#6b5636; }
+    .mbook-nav-grid { display:flex; flex-direction:column; align-items:flex-start; gap:18px; padding:4px 2px; }
+    .mbook-nav-row { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
+    .mbook-nav-row-desc { padding-top:2px; }
+    .mbook-nav-row-title { font-size:.92rem; font-weight:800; color:#4a3318; margin-bottom:5px; }
+    .mbook-nav-row-desc p { font-size:.68rem; color:#6b5636; line-height:1.5; margin-bottom:2px; }
+    .mbook-nav-row-desc p:last-child { margin-bottom:0; }
+    .mbook-nav-row-desc p.i { font-style:italic; color:#8a7550; }
     .mbook-nav-card { position:relative; width:112px; aspect-ratio:1; border-radius:8px; overflow:hidden; flex-shrink:0;
       background:#fdf8ec;
       box-shadow:inset 0 0 0 2px var(--rc,rgba(120,95,55,.28)), 0 1px 3px rgba(90,66,30,.18);
@@ -7175,28 +7179,47 @@ function renderMbookRight() {
           <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">⚔</span></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">도감작 하기</span></div>
         </div>
-        <div class="mbook-nav-row-desc">몹 검색하고 사냥 기록 남기기</div>
+        <div class="mbook-nav-row-desc">
+          <div class="mbook-nav-row-title">도감작 하기</div>
+          <p>현재 하고 있는 도감작의 소요시간을 스톱워치로 측정하며 아이템 획득을 기록해보세요.</p>
+          <p>모으지 않는 아이템(물약, 기타템 등)은 제외시킬 수 있습니다.</p>
+          <p>제외하지 않은 아이템 혹은 설정한 기준아이템을 기준으로 사냥 마릿수를 계산합니다.</p>
+        </div>
       </div>
       <div class="mbook-nav-row" onclick="mbookSetPage(0)">
         <div class="mbook-nav-card" data-nav="dex">
           <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">📖</span></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">도감</span></div>
         </div>
-        <div class="mbook-nav-row-desc">완료한 도감작 전체 목록 보기</div>
+        <div class="mbook-nav-row-desc">
+          <div class="mbook-nav-row-title">도감</div>
+          <p>도감작을 완료한 몹의 정보를 보여줍니다.</p>
+          <p>얼마동안 어떻게 도감작을 하였는지 자세하게 보여줍니다.</p>
+          <p>획득한 아이템 정보와 통계, 언제 어떤 아이템을 먹었는지 확인해보세요.</p>
+        </div>
       </div>
       <div class="mbook-nav-row" onclick="mbookSetPage('stats')">
         <div class="mbook-nav-card" data-nav="stats">
           <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">📈</span></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">통계</span></div>
         </div>
-        <div class="mbook-nav-row-desc">진행 상황을 그래프로 비교</div>
+        <div class="mbook-nav-row-desc">
+          <div class="mbook-nav-row-title">통계</div>
+          <p>완료한 도감작과 진행중인 도감작, 그리고 허규복이 완료한 도감작을 통계적으로 비교합니다.</p>
+          <p>현재 내가 진행중인 도감작이 유난히 안 나오는지, 빅토리아 아일랜드보다 마가티아가 실제로 드롭률이 낮은지.</p>
+          <p class="i">허규복은 진짜 운이 안좋은 편인지 직접 확인해보세요!</p>
+        </div>
       </div>
       <div class="mbook-nav-row" onclick="mbookSetPage('gyubok')">
         <div class="mbook-nav-card" data-nav="gyubok">
           <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">🧑</span></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">허규복</span></div>
         </div>
-        <div class="mbook-nav-row-desc">허규복의 도감작 기록 참고하기</div>
+        <div class="mbook-nav-row-desc">
+          <div class="mbook-nav-row-title">허규복</div>
+          <p>규복님이 이제까지 해온 도감작의 발자취입니다.</p>
+          <p>어떤 여정을 거쳐오셨는지 확인해보세요.</p>
+        </div>
       </div>
     </div>
     <div class="mbook-colophon-ver">${escHtml(ver)}</div>`;
