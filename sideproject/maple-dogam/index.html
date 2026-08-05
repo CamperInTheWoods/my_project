@@ -1345,6 +1345,7 @@
     .mbook-nav-card-top { flex:1; display:flex; align-items:center; justify-content:center;
       background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 20%, #fdf8ec); }
     .mbook-nav-card-icon { font-size:1.8rem; }
+    .mbook-nav-card-img { width:100%; height:100%; object-fit:cover; }
     .mbook-nav-card-bottom { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;
       padding:4px 3px 6px; border-top:2px solid var(--rc,rgba(120,95,55,.28)); }
     .mbook-nav-card-label { font-size:.68rem; font-weight:800; color:#4a3318; white-space:nowrap; }
@@ -7182,7 +7183,7 @@ function renderMbookRight() {
     bodyEl.innerHTML = `<div class="mbook-nav-grid">
       <div class="mbook-nav-row" onclick="mbookSetPage('hunt')">
         <div class="mbook-nav-card" data-nav="hunt">
-          <div class="mbook-nav-card-top"><span class="mbook-nav-card-icon">⚔</span></div>
+          <div class="mbook-nav-card-top"><img class="mbook-nav-card-img" src="hunt-icon.png" alt="도감작 하기"></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">도감작 하기</span></div>
         </div>
         <div class="mbook-nav-row-desc">
