@@ -1428,9 +1428,9 @@
     .mbook-overlay.book-closed .mbook-metal { background:transparent; box-shadow:none; }
     .mbook-overlay.book-closed .mbook { background:transparent; box-shadow:none; }
     .mbook-overlay.book-closed .mbook > *:not(#mbook-splash) { display:none; }
-    .mbook-splash { display:none; position:absolute; inset:0; align-items:center; justify-content:center; cursor:pointer; z-index:6; }
+    .mbook-splash { display:none; position:absolute; inset:0; align-items:center; justify-content:center; pointer-events:none; z-index:6; }
     .mbook-overlay.book-closed .mbook-splash { display:flex; }
-    .mbook-cover-art-wrap { position:relative; display:inline-flex; height:98%; transition:transform .22s ease, opacity .22s ease; will-change:transform,opacity; }
+    .mbook-cover-art-wrap { position:relative; display:inline-flex; height:98%; cursor:pointer; pointer-events:auto; transition:transform .22s ease, opacity .22s ease; will-change:transform,opacity; }
     .mbook-splash svg { height:100%; width:auto; filter:drop-shadow(0 3px 2px rgba(0,0,0,.6)) drop-shadow(0 22px 18px rgba(0,0,0,.45)); }
     .mbook-splash:hover .mbook-cover-art-wrap { transform:scale(1.015); }
     .mbook-splash:active .mbook-cover-art-wrap { transform:scale(.98); }
@@ -7024,7 +7024,7 @@ function mbookRenderSplash() {
   const el = document.getElementById('mbook-splash');
   if (!el) return;
   el.classList.remove('opening');
-  el.innerHTML = `<div class="mbook-cover-art-wrap">
+  el.innerHTML = `<div class="mbook-cover-art-wrap" onclick="mbookOpenBook(event)">
     ${MBOOK_COVER_SVG}
     <div class="mbook-cover-leaf" onclick="event.stopPropagation();mbookLeafClick(event)"><span class="mbook-leaf-emoji">🍁</span></div>
     <div class="mbook-cover-art-title-block">
@@ -7036,7 +7036,7 @@ function mbookRenderSplash() {
 }
 // 표지를 클릭하면 살짝 열리는 느낌을 준 뒤 책갈피가 있는 화면(전체 기록)으로 펼쳐짐
 function mbookOpenBook(e) {
-  const splash = e.currentTarget;
+  const splash = e.currentTarget.closest('.mbook-splash');
   splash.classList.add('opening');
   const proceed = () => {
     _mbookOpened = true;
@@ -8154,7 +8154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="mbook-overlay" id="mbook-overlay">
  <div class="mbook-metal">
   <div class="mbook" id="mbook-el">
-    <div id="mbook-splash" class="mbook-splash" onclick="mbookOpenBook(event)"></div>
+    <div id="mbook-splash" class="mbook-splash"></div>
     <div class="mbook-tabs-left" id="mbook-tabs-left">
       <button class="mbook-tab-left wide" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-label">전체 기록</span></button>
       <button class="mbook-tab-left wide active" data-page="hunt" onclick="mbookSetPage('hunt')" title="도감작"><span class="mbook-tab-left-label">도감작하기</span></button>
