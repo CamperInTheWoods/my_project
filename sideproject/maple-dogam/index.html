@@ -7038,11 +7038,18 @@ function mbookRenderSplash() {
 function mbookOpenBook(e) {
   const splash = e.currentTarget;
   splash.classList.add('opening');
-  setTimeout(() => {
+  const proceed = () => {
     _mbookOpened = true;
     document.getElementById('mbook-overlay')?.classList.remove('book-closed');
     mbookSetPage('records');
-  }, 260); // 표지 페이드 트랜지션(.22s)보다 살짝 더 길게 잡아, 애니메이션이 끝나기 전에 화면이 바뀌며 버벅이던 문제 방지
+  };
+  // 표지 페이드 트랜지션(.22s)보다 살짝 더 길게 잡아, 애니메이션이 끝나기 전에 화면이 바뀌며 버벅이던 문제 방지.
+  // 내지(전체 기록 등)는 Pretendard로 바로 렌더링되므로, 폰트 로딩이 늦으면 페이드 시간 동안 살짝 더 기다렸다가
+  // 펼쳐서 폰트 스왑으로 글씨가 흔들리는 현상을 줄임 (최대 900ms까지만 대기, 그 이상이면 그냥 진행)
+  const minDelay = new Promise(resolve => setTimeout(resolve, 260));
+  const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(() => {}) : Promise.resolve();
+  const capped = new Promise(resolve => setTimeout(resolve, 900));
+  Promise.race([Promise.all([minDelay, fontsReady]), capped]).then(proceed);
 }
 // 전체 기록 페이지(왼쪽) — 완료/진행중 도감작 요약 + 사냥 잔디 바로가기
 function mbookRecordsLeftHtml(completed, store) {
