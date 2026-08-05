@@ -1194,9 +1194,9 @@
     }
     .mbook-metal.zoomed { zoom:1.1; }
     .mbook {
-      position:relative; width:min(1100px,95vw); height:min(86vh,780px); display:flex;
+      position:relative; width:calc(min(1100px,95vw) - 32px); height:calc(min(86vh,780px) - 32px); display:flex;
       background:#ece3cc;
-      border-radius:0; padding:16px;
+      border-radius:0; padding:0;
     }
     /* 책갈피 탭 (오른쪽 바깥 — 선택한 몹의 내용 전환) */
     .mbook-tabs { position:absolute; left:100%; top:52px; transform:translateX(-8px); display:flex; flex-direction:column; gap:7px; z-index:1; }
