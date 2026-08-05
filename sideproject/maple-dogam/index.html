@@ -1231,12 +1231,9 @@
     }
     .mbook-tab-left:hover { filter:saturate(.75); }
     .mbook-tab-left.active { filter:none; box-shadow:-3px 3px 8px rgba(0,0,0,.4); transform:translateX(-2px); }
-    .mbook-tab-left-icon { font-size:.68rem; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    /* 도감작/통계/허규복 — 글자 라벨이 있는 넓은 책갈피 */
+    /* 전체기록/도감작/통계/허규복 — 글자 라벨만 있는 넓은 책갈피 */
     .mbook-tab-left.wide { width:auto; height:32px; padding:0 14px 0 10px; justify-content:flex-start; gap:6px; }
     .mbook-tab-left-label { font-size:.68rem; font-weight:800; letter-spacing:.02em; white-space:nowrap; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    .mbook-tab-left[data-page="records"] .mbook-tab-left-icon,
-    .mbook-tab-left[data-page="stats"] .mbook-tab-left-icon { filter:grayscale(1); }
     .mbook-tab-left[data-page="hunt"] { background:linear-gradient(90deg,#b2402f,#8f3025); }
     .mbook-tab-left[data-page="0"] { background:linear-gradient(90deg,#c0453f,#a83a35); }
     .mbook-tab-left[data-page="1"] { background:linear-gradient(90deg,#c99b2e,#b28727); }
@@ -8086,10 +8083,10 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="mbook" id="mbook-el">
     <div id="mbook-splash" class="mbook-splash" onclick="mbookOpenBook(event)"></div>
     <div class="mbook-tabs-left" id="mbook-tabs-left">
-      <button class="mbook-tab-left" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-icon">🏠</span></button>
-      <button class="mbook-tab-left wide active" data-page="hunt" onclick="mbookSetPage('hunt')" title="도감작"><span class="mbook-tab-left-icon">⚔</span><span class="mbook-tab-left-label">도감작하기</span></button>
-      <button class="mbook-tab-left wide" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-icon">📈</span><span class="mbook-tab-left-label">통계</span></button>
-      <button class="mbook-tab-left wide" data-page="gyubok" onclick="mbookSetPage('gyubok')" title="허규복"><span class="mbook-tab-left-icon">🧑</span><span class="mbook-tab-left-label">허규복</span></button>
+      <button class="mbook-tab-left wide" data-page="records" onclick="mbookSetPage('records')" title="전체 기록"><span class="mbook-tab-left-label">전체 기록</span></button>
+      <button class="mbook-tab-left wide active" data-page="hunt" onclick="mbookSetPage('hunt')" title="도감작"><span class="mbook-tab-left-label">도감작하기</span></button>
+      <button class="mbook-tab-left wide" data-page="stats" onclick="mbookSetPage('stats')" title="통계"><span class="mbook-tab-left-label">통계</span></button>
+      <button class="mbook-tab-left wide" data-page="gyubok" onclick="mbookSetPage('gyubok')" title="허규복"><span class="mbook-tab-left-label">허규복</span></button>
       <div class="mbook-tabs-left-gap"></div>
       <button class="mbook-tab-left" data-page="0" onclick="mbookSetPage(0)" title="빨강"></button>
       <button class="mbook-tab-left" data-page="1" onclick="mbookSetPage(1)" title="노랑"></button>
