@@ -1347,6 +1347,7 @@
     .mbook-nav-card-icon { font-size:1.8rem; }
     .mbook-nav-card-img { width:100%; height:100%; object-fit:cover; object-position:center bottom; }
     .mbook-nav-card-img.contain { object-fit:contain; object-position:center; }
+    .mbook-nav-card-img.zoom { transform:scale(1.6); }
     .mbook-nav-card-bottom { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;
       padding:4px 3px 6px; border-top:2px solid var(--rc,rgba(120,95,55,.28)); }
     .mbook-nav-card-label { font-size:.68rem; font-weight:800; color:#4a3318; white-space:nowrap; }
@@ -7208,7 +7209,7 @@ function renderMbookRight() {
       </div>
       <div class="mbook-nav-row" onclick="mbookSetPage('stats')">
         <div class="mbook-nav-card" data-nav="stats">
-          <div class="mbook-nav-card-top"><img class="mbook-nav-card-img" src="stats-icon.png" alt="통계"></div>
+          <div class="mbook-nav-card-top"><img class="mbook-nav-card-img zoom" src="stats-icon.png" alt="통계"></div>
           <div class="mbook-nav-card-bottom"><span class="mbook-nav-card-label">통계</span></div>
         </div>
         <div class="mbook-nav-row-desc">
