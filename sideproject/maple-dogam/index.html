@@ -1187,11 +1187,14 @@
     .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; background:#3a2f1e; align-items:center; justify-content:center; padding:28px; }
     .mbook-overlay.open { display:flex; }
     /* 나무 뒷표지(바깥) + 금속 테(안쪽 띠, 원통형 하이라이트로 입체감) — 실제 그라데이션 밴드라 각지지 않음 */
+    /* 책 옆면 — 종이(.mbook)보다 살짝 큰 이 영역의 여백에 쌓인 페이지 단면(가는 줄무늬)이 보이도록 */
     .mbook-metal {
       position:relative; border-radius:11px; padding:5px;
       width:min(1100px,95vw); height:min(86vh,780px);
       display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(155deg, #8a6a3a 0%, #e8cf94 20%, #fdf3d6 32%, #cfa855 46%, #7a5a2e 62%, #4a3318 78%, #8a6a3a 100%);
+      background-color:#e8dcb8;
+      background-image:url("data:image/svg+xml,%3Csvg width='1090' height='770' viewBox='0 0 1090 770' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='1090' height='4' patternUnits='userSpaceOnUse'%3E%3Crect width='1090' height='4' fill='%23f2e9d0'/%3E%3Crect width='1090' height='1.4' y='2.6' fill='%23d9c9a0'/%3E%3C/pattern%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23000' stop-opacity='.22'/%3E%3Cstop offset='7%25' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='93%25' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='100%25' stop-color='%23000' stop-opacity='.22'/%3E%3C/linearGradient%3E%3ClinearGradient id='h' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0%25' stop-color='%23000' stop-opacity='.26'/%3E%3Cstop offset='5%25' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='95%25' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='100%25' stop-color='%23000' stop-opacity='.26'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1090' height='770' fill='url(%23p)'/%3E%3Crect width='1090' height='770' fill='url(%23v)'/%3E%3Crect width='1090' height='770' fill='url(%23h)'/%3E%3C/svg%3E");
+      background-size:cover;
       box-shadow: 0 0 0 6px #4e3018, 0 30px 70px rgba(0,0,0,.6);
     }
     .mbook-metal.zoomed { zoom:1.1; }
