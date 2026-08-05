@@ -6370,14 +6370,14 @@ function openMonsterBook() {
   renderMbookRight();
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
   document.getElementById('mbook-overlay').classList.add('open');
-  // 폰트 로딩 전에 이스터에그 말풍선이 뜨면 글씨가 나중에 흔들리므로, 폰트 준비와 0.5초 지연 중 늦는 쪽에 맞춰 실행
+  // 폰트 로딩 전에 이스터에그 말풍선이 뜨면 글씨가 나중에 흔들리므로, 폰트 준비와 1.5초 지연 중 늦는 쪽에 맞춰 실행
   const triggerLeaf = () => {
     const leaf = document.querySelector('.mbook-cover-leaf');
     if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
       mbookLeafClick({ currentTarget: leaf });
     }
   };
-  const delay500 = new Promise(resolve => setTimeout(resolve, 500));
+  const delay500 = new Promise(resolve => setTimeout(resolve, 1500));
   const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(() => {}) : Promise.resolve();
   Promise.all([delay500, fontsReady]).then(triggerLeaf);
 }
