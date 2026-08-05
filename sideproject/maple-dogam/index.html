@@ -5119,8 +5119,16 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 const EXCL_SHOW_KEY = 'maple_excl_show';
 let showExcludedByTab = (() => { try { return JSON.parse(localStorage.getItem(EXCL_SHOW_KEY)) || {}; } catch { return {}; } })();
-function getShowExcluded() { return showExcludedByTab[String(activeTabIdx)] !== false; }
-function setShowExcluded(v) { showExcludedByTab[String(activeTabIdx)] = v; try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {} }
+// 탭의 idx가 아닌 몹 id를 키로 써야 탭 드래그 재정렬 시 설정이 엉뚱한 탭으로 옮겨가지 않음
+function getShowExcluded() {
+  const mobId = activeTab()?.mob?.id;
+  return showExcludedByTab[mobId != null ? String(mobId) : String(activeTabIdx)] !== false;
+}
+function setShowExcluded(v) {
+  const mobId = activeTab()?.mob?.id;
+  showExcludedByTab[mobId != null ? String(mobId) : String(activeTabIdx)] = v;
+  try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {}
+}
 
 function _applyExclToggleBtn(panel) {
   const show = getShowExcluded();
@@ -5141,7 +5149,9 @@ function toggleExclView(e) {
 // ── 유형별 필터 (탭별, 메모리 상태 = 숨긴 유형 집합) ──
 const hiddenTypesByTab = {};
 function getHiddenTypes() {
-  const k = String(activeTabIdx);
+  // 탭의 idx가 아닌 몹 id를 키로 써야 탭 드래그 재정렬 시 필터 설정이 엉뚱한 탭으로 옮겨가지 않음
+  const mobId = activeTab()?.mob?.id;
+  const k = mobId != null ? String(mobId) : String(activeTabIdx);
   if (!hiddenTypesByTab[k]) hiddenTypesByTab[k] = new Set();
   return hiddenTypesByTab[k];
 }
@@ -5281,6 +5291,10 @@ function flipReorder(grid, renderFn) {
 function renderItemGridInPanel(panel, mob) {
   const grid = panel.querySelector('.item-grid');
   grid.innerHTML = '';
+  if (!mob.drops || !mob.drops.length) {
+    grid.innerHTML = '<div class="mbook-empty" style="grid-column:1/-1">등록된 획득 아이템이 없는 몬스터입니다</div>';
+    return;
+  }
   const store = loadS();
   const key = `mob_${mob.id}`;
   const mobData  = store[key] || {};
