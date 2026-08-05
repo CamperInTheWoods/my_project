@@ -1184,10 +1184,7 @@
 
     /* ═══ 몬스터북 (펼친 책) ═══ */
     /* 앱 셸 — 더 이상 팝업이 아니라 화면 전체를 차지하는 페이지 */
-    .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; align-items:center; justify-content:center; padding:28px;
-      background-color:#3a2f1e;
-      background-image:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)), url('wood-desk.svg');
-      background-size:cover, 260px 260px; background-repeat:no-repeat, repeat; }
+    .mbook-overlay { display:none; position:fixed; inset:0; z-index:9000; background:#3a2f1e; align-items:center; justify-content:center; padding:28px; }
     .mbook-overlay.open { display:flex; }
     /* 나무 뒷표지(바깥) + 금속 테(안쪽 띠, 원통형 하이라이트로 입체감) — 실제 그라데이션 밴드라 각지지 않음 */
     /* 책 옆면 — 중심(책등)에서 바깥으로 퍼져나가는 겹겹의 네모(쌓인 페이지 단면)로 표현 */
