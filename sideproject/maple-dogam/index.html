@@ -17,19 +17,6 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
   <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else if(t==='book'){document.documentElement.setAttribute('data-theme','book');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
-  <script>
-    // 폰트(Pretendard) 로딩 완료 전에는 표지 제목/이스터에그 글씨를 숨겨서, 나중에 폰트가 바뀌며
-    // 글자가 갑자기 흔들리는(폰트 스왑) 현상을 방지. 로딩이 오래 걸려도 최대 1.2초까지만 기다림.
-    (function () {
-      var reveal = function () { document.documentElement.classList.add('fonts-ready'); };
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(reveal).catch(reveal);
-      } else {
-        reveal();
-      }
-      setTimeout(reveal, 1200);
-    })();
-  </script>
   <style>
     :root { color-scheme: light;
       --brown:  #3a3f47;
@@ -1455,8 +1442,7 @@
       box-shadow: 0 1.5px 0 rgba(255,205,150,.4), inset 0 1.5px 2px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,180,120,.15); }
     .mbook-cover-art-title { color:#4a0d00; font-size:1.9rem; font-weight:900; letter-spacing:.3em; text-align:center;
       text-shadow:0 1px 0 rgba(255,190,140,.3), 0 -1.5px 1.5px rgba(0,0,0,.7);
-      visibility:hidden; }
-    html.fonts-ready .mbook-cover-art-title { visibility:visible; }
+      font-family:-apple-system, BlinkMacSystemFont, system-ui, 'Noto Sans KR', sans-serif; }
     .mbook-cover .char-status { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:4px; }
     .mbook-cover .mbook-stat-list { margin-top:14px; }
     .mbook-cover-leaf { position:relative; font-size:3rem; line-height:1; cursor:pointer; }
@@ -1471,6 +1457,7 @@
     }
     .mbook-leaf-bubble { position:absolute; left:50%; bottom:100%; margin-bottom:20px; --bubble-bg:#fffdf6;
       background:var(--bubble-bg); color:#4a3318; font-size:.68rem; font-weight:800; letter-spacing:-.01em;
+      font-family:-apple-system, BlinkMacSystemFont, system-ui, 'Noto Sans KR', sans-serif;
       padding:6px 11px; border-radius:11px; white-space:nowrap; max-width:min(78vw,260px);
       text-align:center;
       box-shadow:0 0 0 1.5px rgba(120,95,55,.4), 0 3px 8px rgba(0,0,0,.25);
@@ -6370,16 +6357,12 @@ function openMonsterBook() {
   renderMbookRight();
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
   document.getElementById('mbook-overlay').classList.add('open');
-  // 폰트 로딩 전에 이스터에그 말풍선이 뜨면 글씨가 나중에 흔들리므로, 폰트 준비와 1.5초 지연 중 늦는 쪽에 맞춰 실행
-  const triggerLeaf = () => {
+  setTimeout(() => {
     const leaf = document.querySelector('.mbook-cover-leaf');
     if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
       mbookLeafClick({ currentTarget: leaf });
     }
-  };
-  const delay500 = new Promise(resolve => setTimeout(resolve, 1500));
-  const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(() => {}) : Promise.resolve();
-  Promise.all([delay500, fontsReady]).then(triggerLeaf);
+  }, 1500);
 }
 function closeMonsterBook() {
   mbookHideNote();
