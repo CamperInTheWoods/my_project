@@ -8508,7 +8508,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.001.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.002.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9261,6 +9261,17 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.002.0', date: '26.08.06',
+    feat: [
+      '설정 > 일반에 "획득 기록 표시", "타임라인 표시" on/off 토글 추가',
+    ],
+    fix: [
+      '제외된 아이템 숨기기가 초기 렌더링/비활성 탭에서 적용 안 되던 버그 수정',
+      '모바일 상단 책갈피 영역 정리 — 넓은 책갈피와 도감 색상 탭이 뒤섞여 보이던 문제, 활성 탭이 옆 탭에 붙어보이던 문제 수정',
+      '모바일에서 전체 기록 하단 문구와 "사냥 잔디 보기" 버튼이 겹쳐 보이던 문제 수정',
+    ],
+  },
   {
     ver: '2.001.1', date: '26.08.06',
     fix: [
