@@ -1553,11 +1553,13 @@
       .mbook { flex-direction:column; width:94vw; height:90vh; padding:10px; }
       .mbook-tabs-left, .mbook-tabs {
         position:static; transform:none; flex-direction:row; flex-wrap:wrap;
-        justify-content:center; width:100%; gap:5px; box-shadow:none; margin-bottom:6px;
+        justify-content:center; width:100%; gap:8px; box-shadow:none; margin-bottom:6px;
       }
       /* gap을 완전히 없애지 않고 줄바꿈 지점으로만 사용 — 넓은 탭 4개와 작은 색상 탭 4개가
          한 줄에 뒤섞여 삐뚤빼뚤 보이던 문제 수정, 각각 깔끔하게 자기 줄로 분리 */
       .mbook-tabs-left-gap { display:block; height:0; flex-basis:100%; }
+      /* 데스크톱용 "파고드는" 이동 효과가 가로 줄바꿈 레이아웃에선 옆 탭과 붙어보이게 만들어서 비활성화 */
+      .mbook-tab-left.active { transform:none; }
       .mbook-tab-left { width:34px; height:26px; border-radius:6px; }
       .mbook-tab { border-radius:6px; padding:5px 10px; text-align:center; }
       /* 아래쪽 정보 탭(기본정보/아이템/통계/타임라인)은 위 책갈피 그룹과 구분되게 구분선 추가 */
@@ -1567,6 +1569,10 @@
       .mbook-spine { display:none; }
       .mbook-left, .mbook-right { border-radius:5px; background:#f0e8d4; box-shadow:none; }
       .mbook { background:#e8ddc0; }
+      /* 전체 기록 페이지 하단 문구가 길어지면 절대 위치인 "사냥 잔디 보기" 버튼과 겹쳐서
+         모바일에선 자연스러운 문서 흐름으로 배치되게 변경 */
+      .mbook-records-grass { position:static; display:block; width:fit-content; margin:14px auto 0; transform:none; }
+      .mbook-colophon-hint { position:static; margin-top:10px; }
     }
 
     /* 삭제 confirm 다이얼로그 */
