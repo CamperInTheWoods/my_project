@@ -211,6 +211,55 @@
       --header-title-shadow: none;
     }
 
+    /* 몬스터북 안(특히 "도감작 하기")은 앱 테마와 무관하게 항상 베이지 종이 배경이라,
+       다크/여름 등 다른 테마의 밝은 글씨 색이 그대로 오면 안 보이는 문제가 있었음.
+       그래서 책 내부는 앱 테마와 상관없이 항상 book 테마 색상 변수를 사용하도록 고정 */
+    #mbook-overlay {
+      --brown:  #5a4a2a;
+      --gold:   #a8791e;
+      --green:  #4a7a52;
+      --red:    #b5453a;
+      --gray:   #8a7d64;
+      --dark:   #3a2f1e;
+      --panel:  #fffdf6;
+      --border: #d8c9a0;
+      --shadow: rgba(90,66,30,.14);
+
+      --bg-body:       #ece3cc;
+      --bg-input:      #f4eedd;
+      --bg-card:       #fffdf6;
+      --bg-card-sel:   #fff3d6;
+      --bg-tab:        #e8dcc0;
+      --bg-tab-hover:  #ddcda8;
+      --bg-log:        #fffdf6;
+      --bg-log-border: #d8c9a0;
+      --bg-btn-sec:    #f4eedd;
+      --bg-tl-toggle:  #f4eedd;
+      --bg-excl-tog:   #fffdf6;
+      --bg-prog:       #ddcda8;
+      --header-bg:     #f4eedd;
+      --header-border: #d8c9a0;
+      --header-title:  #3a2f1e;
+      --header-sub:    #8a7d64;
+      --char-label:    #a89868;
+      --btn-grad:      linear-gradient(135deg,#c8922a,#a8791e);
+      --btn-shad:      rgba(168,121,30,.28);
+      --tl-tog-bg:     #f4eedd;
+      --tl-tog-col:    #6b5636;
+      --sw-ch-bg:      #f0e6cc;
+      --sw-ch-col:     #8a5a1e;
+      --sw-syn-bg:     #f0e6cc;
+      --sw-syn-col:    #8a5a1e;
+      --sw-syn-bdr:    #d8c090;
+      --shadow-header: 0 1px 3px rgba(90,66,30,.1);
+      --shadow-card:   0 4px 16px rgba(90,66,30,.16);
+      --primary-bar:   linear-gradient(90deg,#c8922a,#4a7a52);
+      --success-bar:   linear-gradient(90deg,#3a8a52,#4a7a52);
+      --sw-start-bg:   #4a7a52;
+      --sw-pause-bg:   #c8922a;
+      --header-title-shadow: none;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* 도감 테마 아이콘(📖)만 흑백으로 */
