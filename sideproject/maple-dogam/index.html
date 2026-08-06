@@ -3236,6 +3236,13 @@ function _ovStyleText() {
     .ov-mcard-card:hover{background:#d0a83e38;}
     .ov-mcard-card img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated;}
     .ov-mcard-cnt{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:700;min-width:18px;text-align:center;}
+    /* 실시간 타임라인 막대 — 최근 1시간을 왼쪽 80%에 압축, 지금 시점은 항상 80% 위치에 고정,
+       시간이 지날수록 마커가 계속 왼쪽으로 흘러가며 1시간이 지나면 화면 밖으로 사라짐 */
+    .ov-timeline{display:flex;flex-direction:column;gap:5px;width:100%;max-width:210px;margin-top:1px;}
+    .ov-tl-row{position:relative;height:16px;}
+    .ov-tl-track{position:absolute;left:0;right:0;top:50%;height:3px;transform:translateY(-50%);border-radius:2px;background:${t.name}2e;}
+    .ov-tl-now{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:1px;background:${t.ch};}
+    .ov-tl-dot{position:absolute;top:50%;width:13px;height:13px;transform:translate(-50%,-50%);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
     .ov-ctx-bulk{padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;}
     .ov-bulk-cnt{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:${t.fg};}
     .ov-bulk-row{display:flex;gap:6px;}
@@ -3266,6 +3273,9 @@ function _ovStyleText() {
     body.small .ov-mcard-card{padding:3px 9px 3px 5px;gap:5px;}
     body.small .ov-mcard-card img{width:26px;height:26px;}
     body.small .ov-mcard-cnt{font-size:.95rem;}
+    body.small .ov-timeline{max-width:150px;gap:4px;}
+    body.small .ov-tl-row{height:12px;}
+    body.small .ov-tl-dot{width:10px;height:10px;}
   `;
 }
 // 테마 변경 시 열려있는 오버레이 색 갱신
@@ -3307,11 +3317,14 @@ function _ovWinSize() {
   // item·mcard는 같은 행에 나란히 뜨므로 둘 중 하나라도 켜져 있으면 한 줄 높이만 더함
   const cardsRow = getSetting('ov_show_item') || getSetting('ov_show_mcard');
   const mob = getSetting('ov_show_mob');
+  const tl = getSetting('ov_show_timeline');
+  const tab = activeTab();
+  const tlRows = tl ? Math.max(1, (tab?.synced ? tabs.filter(t => t.synced && t.mob).length : (tab?.mob ? 1 : 0))) : 0;
   if (getSetting('ov_small')) {
-    let h = 128; if (mob) h += 56; if (cardsRow) h += 52;
+    let h = 128; if (mob) h += 56; if (cardsRow) h += 52; if (tlRows) h += 8 + tlRows * 16;
     return { w: 160, h };
   }
-  let h = 165; if (mob) h += 75; if (cardsRow) h += 60;
+  let h = 165; if (mob) h += 75; if (cardsRow) h += 60; if (tlRows) h += 10 + tlRows * 21;
   return { w: 240, h };
 }
 async function openOverlay() {
@@ -3345,7 +3358,8 @@ async function openOverlay() {
     <div id="ov-cards-row">
       <div class="ov-item" id="ov-item" style="display:none"></div>
       <div class="ov-mcard" id="ov-mcard" style="display:none"></div>
-    </div>`;
+    </div>
+    <div class="ov-timeline" id="ov-timeline" style="display:none"></div>`;
   pip.document.body.appendChild(wrap);
   pip.document.body.classList.toggle('small', !!getSetting('ov_small'));
   pip.document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
@@ -3510,6 +3524,39 @@ function _overlayTick() {
   if (cardsRowEl) {
     const anyShown = (itemEl && itemEl.style.display !== 'none') || (mcardEl && mcardEl.style.display !== 'none');
     cardsRowEl.style.display = anyShown ? '' : 'none';
+  }
+  // 실시간 타임라인 막대 — 최근 1시간 동안 먹은 아이템을 왼쪽 80% 구간에 표시,
+  // "지금" 위치는 항상 오른쪽 1/5 지점(80%)에 고정되고 시간이 지날수록 마커가 왼쪽으로 흘러감.
+  // 몹이 2개(동기화)면 왼쪽 몹을 위 행, 오른쪽 몹을 아래 행에 표시
+  const tlEl = d.getElementById('ov-timeline');
+  if (tlEl) {
+    if (!getSetting('ov_show_timeline') || !mobs.length) {
+      tlEl.style.display = 'none';
+    } else {
+      tlEl.style.display = '';
+      const TL_WINDOW_MS = 3600000; // 고정 1시간
+      const TL_NOW_PCT = 80;        // 지금 시점 위치(오른쪽에서 1/5 지점)
+      const nowMs = swElapsed(tab);
+      const s = loadS();
+      const showCard = getSetting('show_card');
+      tlEl.innerHTML = mobs.map(m => {
+        const mobData = s[`mob_${m.id}`] || {};
+        const excl = new Set(s[`excl_${m.id}`] || []);
+        const dots = (m.drops || []).flatMap(dr => {
+          if (excl.has(dr.id)) return [];
+          if (dr.id === MONSTER_CARD_ID && !showCard) return [];
+          const st = mobData[dr.id];
+          const times = Array.isArray(st?.times) ? st.times : [];
+          return times
+            .filter(t => t != null && nowMs - t >= 0 && nowMs - t <= TL_WINDOW_MS)
+            .map(t => ({ id: dr.id, pct: TL_NOW_PCT * (1 - (nowMs - t) / TL_WINDOW_MS) }));
+        });
+        const dotsHtml = dots.map(dt =>
+          `<img class="ov-tl-dot" style="left:${dt.pct.toFixed(2)}%" src="${dt.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(dt.id)}" onerror="this.style.visibility='hidden'">`
+        ).join('');
+        return `<div class="ov-tl-row" title="${escHtml(m.name)} — 최근 1시간"><div class="ov-tl-track"></div><span class="ov-tl-now" style="left:${TL_NOW_PCT}%"></span>${dotsHtml}</div>`;
+      }).join('');
+    }
   }
   // 오픈/토글 직후 잠깐 동안만 창 크기를 콘텐츠에 맞춰 보정
   if (_ovFitTicks > 0) { _ovFitTicks--; _ovFitSize(); }
@@ -8883,6 +8930,7 @@ const SETTINGS = [
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_mcard',  label: '몬스터카드 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_timeline', label: '실시간 타임라인 막대 표시 (최근 1시간)', def: true, group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
   { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
