@@ -3590,7 +3590,7 @@ function _overlayTick() {
     } else {
       tlEl.style.display = '';
       const TL_WINDOW_MS = 3600000; // 고정 1시간
-      const TL_NOW_PCT = 80;        // 지금 시점 위치(오른쪽에서 1/5 지점)
+      const TL_NOW_PCT = 88;        // 지금 시점 위치(오른쪽 끝에서 조금 더 안쪽)
       const TL_TICK_MS = 1800000;   // 30분마다 눈금
       const OVERLAP_PCT = 10;       // 이 이내로 가까우면 같은 클러스터로 묶음(본문 타임라인과 동일 기준)
       const nowMs = swElapsed(tab);
