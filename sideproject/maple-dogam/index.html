@@ -3360,9 +3360,7 @@ function huntBaseDrop(mob) {
 function _ovBaseW() {
   const small = getSetting('ov_small');
   if (getSetting('ov_tl_layout')) return small ? 380 : 520;
-  const tl = getSetting('ov_show_timeline');
-  if (small) return tl ? 280 : 160;
-  return tl ? 420 : 240;
+  return small ? 160 : 240;
 }
 function _ovWinSize() {
   const w = _ovBaseW();
@@ -3373,12 +3371,11 @@ function _ovWinSize() {
   // item·mcard는 같은 행에 나란히 뜨므로 둘 중 하나라도 켜져 있으면 한 줄 높이만 더함
   const cardsRow = getSetting('ov_show_item') || getSetting('ov_show_mcard');
   const mob = getSetting('ov_show_mob');
-  const tl = getSetting('ov_show_timeline');
   if (getSetting('ov_small')) {
-    let h = 128; if (mob) h += 56; if (cardsRow) h += 52; if (tl) h += 24;
+    let h = 128; if (mob) h += 56; if (cardsRow) h += 52;
     return { w, h };
   }
-  let h = 165; if (mob) h += 75; if (cardsRow) h += 60; if (tl) h += 31;
+  let h = 165; if (mob) h += 75; if (cardsRow) h += 60;
   return { w, h };
 }
 async function openOverlay() {
@@ -3585,7 +3582,7 @@ function _overlayTick() {
   // 몹이 2개(동기화)면 왼쪽 몹을 위 행, 오른쪽 몹을 아래 행에 표시
   const tlEl = d.getElementById('ov-timeline');
   if (tlEl) {
-    if (!(getSetting('ov_show_timeline') || getSetting('ov_tl_layout')) || !mobs.length) {
+    if (!getSetting('ov_tl_layout') || !mobs.length) {
       tlEl.style.display = 'none';
     } else {
       tlEl.style.display = '';
@@ -9040,8 +9037,7 @@ const SETTINGS = [
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_mcard',  label: '몬스터카드 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
-  { key: 'ov_show_timeline', label: '실시간 타임라인 막대 표시 (최근 1시간)', def: true, group: 'overlay' },
-  { key: 'ov_tl_layout',     label: '타임라인 전용 레이아웃 (가로로 길게, 몹 이미지/아이템 카드 숨김)', def: false, group: 'overlay' },
+  { key: 'ov_tl_layout',     label: '타임라인 전용 레이아웃 (가로로 길게, 몹 이미지/아이템 카드 숨김, 최근 1시간 타임라인 표시)', def: false, group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
   { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
