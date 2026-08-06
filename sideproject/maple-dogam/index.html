@@ -896,6 +896,11 @@
     .sw-sync { background:var(--sw-syn-bg); color:var(--sw-syn-col); border:1px solid var(--sw-syn-bdr); font-size:.72rem; padding:6px 10px; border-radius:8px; cursor:pointer; display:none; }
     .sw-sync.sw-sync-on { background:#1a6fa8; color:#fff; border-color:#1a6fa8; }
 
+    /* 설정에서 획득 기록/타임라인 섹션 전체를 끌 수 있음 (tl-section은 렌더링 시 인라인 style로도
+       display가 바뀌므로 !important로 덮어씀) */
+    body.hide-hunt-log .sw-log { display:none; }
+    body.hide-hunt-timeline .tl-section { display:none !important; }
+
     /* sw log */
     .sw-log { margin-top:14px; position:relative; }
     .sw-log-list { max-height:96px; overflow-y:auto; margin-top:6px; }
@@ -8309,6 +8314,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyItemDexState();
   applyMobSearchState();
   applySavesState();
+  _applyHuntSectionVisibility();
   openMonsterBook();
 });
 </script>
@@ -9038,6 +9044,8 @@ const SETTINGS = [
   { key: 'card_in_timeline', label: '몬스터 카드를 타임라인에 표시', def: true,  group: 'general' },
   { key: 'stamp_fx_card',    label: '몬스터 카드 5장 완성 시 도장 이팩트', def: true, group: 'general' },
   { key: 'stamp_fx',         label: '아이템 처음 획득 시 도장 이팩트', def: true, group: 'general' },
+  { key: 'show_hunt_log',      label: '획득 기록 표시', def: true, group: 'general' },
+  { key: 'show_hunt_timeline', label: '타임라인 표시', def: true, group: 'general' },
   { key: 'ov_show_mob',    label: '몹 이미지 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_name',   label: '몹 이름 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
@@ -9069,6 +9077,12 @@ function renderSettings() {
     return `<div class="settings-section"><div class="settings-section-title">${title}</div>${rows}</div>`;
   }).join('');
 }
+// 획득 기록/타임라인 섹션 전체 표시 여부 — 모든 탭 패널에 공통으로 적용되므로
+// 패널마다 따로 처리할 필요 없이 body 클래스 하나로 CSS에서 일괄 처리
+function _applyHuntSectionVisibility() {
+  document.body.classList.toggle('hide-hunt-log', !getSetting('show_hunt_log'));
+  document.body.classList.toggle('hide-hunt-timeline', !getSetting('show_hunt_timeline'));
+}
 function onSettingChange(key, val) {
   setSetting(key, val);
   if (key.startsWith('ov_')) {
@@ -9083,6 +9097,8 @@ function onSettingChange(key, val) {
   } else if (key === 'card_in_timeline') {
     // 모든 탭 타임라인 재렌더
     tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderTimeline(p, t.mob, t); } });
+  } else if (key === 'show_hunt_log' || key === 'show_hunt_timeline') {
+    _applyHuntSectionVisibility();
   } else if (key === 'mbook_show_time_badge' || key === 'mbook_show_time_bg') {
     if (typeof renderMbookList === 'function' && document.getElementById('mbook-overlay')?.classList.contains('open')) renderMbookList();
   } else if (key === 'mbook_zoom' || key === 'mbook_zoom_big') {
