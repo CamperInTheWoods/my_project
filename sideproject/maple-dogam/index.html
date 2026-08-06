@@ -1555,9 +1555,13 @@
         position:static; transform:none; flex-direction:row; flex-wrap:wrap;
         justify-content:center; width:100%; gap:5px; box-shadow:none; margin-bottom:6px;
       }
-      .mbook-tabs-left-gap { display:none; }
+      /* gap을 완전히 없애지 않고 줄바꿈 지점으로만 사용 — 넓은 탭 4개와 작은 색상 탭 4개가
+         한 줄에 뒤섞여 삐뚤빼뚤 보이던 문제 수정, 각각 깔끔하게 자기 줄로 분리 */
+      .mbook-tabs-left-gap { display:block; height:0; flex-basis:100%; }
       .mbook-tab-left { width:34px; height:26px; border-radius:6px; }
       .mbook-tab { border-radius:6px; padding:5px 10px; text-align:center; }
+      /* 아래쪽 정보 탭(기본정보/아이템/통계/타임라인)은 위 책갈피 그룹과 구분되게 구분선 추가 */
+      .mbook-tabs { margin-top:2px; padding-top:8px; border-top:1px dashed rgba(120,95,55,.3); }
       .mbook-pages { flex-direction:column; overflow-y:auto; }
       .mbook-page { flex:none; overflow:visible; }
       .mbook-spine { display:none; }
