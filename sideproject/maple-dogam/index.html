@@ -7330,7 +7330,7 @@ function renderMbookRight() {
     const gMobData = g.mobData || {};
     // 내 트래킹용 store를 그대로 쓰면 같은 mobId에 대한 내 tl_base/제외 설정이 섞여 들어가므로,
     // 허규복 자신의 기준 아이템만 반영한 별도 store로 조회
-    const gStore = { ...loadS(), [`tl_base_${g.mobId}`]: g.tlBase || null, [`excl_${g.mobId}`]: [] };
+    const gStore = { ...loadS(), [`tl_base_${g.mobId}`]: g.tlBase || null, [`excl_${g.mobId}`]: g.excl || [] };
     if (_mbookTab === 'stats')     bodyEl.innerHTML = mbookStatsHtml(g, gDrops, gMobData, gStore);
     else if (_mbookTab === 'items') bodyEl.innerHTML = mbookItemsHtml(g, gDrops, gMobData, gStore);
     else                             bodyEl.innerHTML = mbookInfoHtml(g, gDrops, gMobData, gStore);
@@ -7491,6 +7491,9 @@ function mbookShowNote(e, dropId) {
 function mbookToggleStatMode() { _statMode = _statMode === 'rate' ? 'count' : 'rate'; renderMbookRight(); }
 // 통계 페이지 — 선택한 몹들의 시간에 따른 달성률(%)/아이템 개수(장비·주문서·표창만)를 계단형 꺾은선으로
 function mbookChartSeries(c, store, mode, respectHiddenBase) {
+  // 개별 획득 개수/시각을 정확히 모르는 기록(예: 초반 방송 기록)은 "아이템 개수" 통계가
+  // 실제보다 적게 나와 오해를 줄 수 있어, 항목에 hideItemCount:true가 있으면 그 그래프만 생략
+  if (mode === 'count' && c.hideItemCount) return null;
   const excl = new Set(store[`excl_${c.mobId}`] || []);
   const drops = (c.drops || []).filter(d => !excl.has(d.id));
   const mobData = c.mobData || {};
@@ -7574,7 +7577,7 @@ function mbookChartHtml(completed, store, mode) {
       c = ((typeof GYUBOK_DATA !== 'undefined' ? GYUBOK_DATA : [])).find(x => x.mobId === gid);
       if (!c) return null;
       // 내 tl_base/제외 설정이 같은 mobId에 섞여 들어가지 않도록 허규복 전용 store로 분리
-      effStore = { ...store, [`tl_base_${c.mobId}`]: c.tlBase || null, [`excl_${c.mobId}`]: [] };
+      effStore = { ...store, [`tl_base_${c.mobId}`]: c.tlBase || null, [`excl_${c.mobId}`]: c.excl || [] };
     } else {
       c = completed.find(x => x.mobId === key) || mbookInProgressEntry(key, store);
     }
