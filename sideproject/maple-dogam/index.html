@@ -8487,7 +8487,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.000.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.001.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9230,6 +9230,18 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.001.0', date: '26.08.06',
+    feat: [
+      '오버레이에 "타임라인 전용 레이아웃" 모드 추가 — 최근 1시간 동안의 아이템 획득/채널변경을 본문 타임라인과 같은 방식(말풍선, 확률별 색, 30분 눈금, 경과시간 색)으로 실시간 표시',
+      '허규복의 도감에 파란 달팽이 기록 추가',
+      '수집 난이도 등급에 S++ 신설, 등급 기준 전체 재조정',
+      '도감(book) 테마를 기본 테마로 변경',
+    ],
+    fix: [
+      '다크테마에서 도감작 하기 화면 글씨가 배경에 묻혀 안 보이던 문제 수정',
+    ],
+  },
   {
     ver: '2.000.1', date: '26.08.05',
     feat: [
