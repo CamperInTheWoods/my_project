@@ -7527,7 +7527,8 @@ function mbookDifficultyGrade(c, drops, mobData, kills) {
   }
 
   const ratio = ratio1 * 0.3 + ratio3 * 0.4 + ratio4 * 0.3;
-  if (ratio >= 0.85) return 'S+';
+  if (ratio >= 0.97) return 'S++';
+  if (ratio >= 0.90) return 'S+';
   if (ratio >= 0.70) return 'S';
   if (ratio >= 0.55) return 'A';
   if (ratio >= 0.40) return 'B';
