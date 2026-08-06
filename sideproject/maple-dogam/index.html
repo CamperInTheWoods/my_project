@@ -3254,9 +3254,9 @@ function _ovStyleText() {
        본문 타임라인(.tl-callout 등)과 같은 시각 문법(콜아웃/클러스터/채널마커/시간색)을 축소 재현 */
     .ov-timeline{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:1px;}
     .ov-tl-row{position:relative;height:60px;display:flex;align-items:center;gap:6px;}
-    .ov-tl-icons{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex-shrink:0;}
-    .ov-tl-icon{width:32px;height:32px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
-    .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:24px;height:24px;}
+    .ov-tl-icons{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0;height:100%;}
+    .ov-tl-icon{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
+    .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:27px;height:27px;}
     .ov-tl-track-wrap{position:relative;flex:1;height:100%;}
     .ov-tl-track{position:absolute;left:0;right:0;top:50%;height:7px;transform:translateY(-50%);border-radius:4px;background:${t.name}22;overflow:hidden;}
     .ov-tl-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;}
@@ -3267,16 +3267,16 @@ function _ovStyleText() {
     .ov-tl-callout{position:absolute;transform:translateX(-50%);z-index:4;}
     .ov-tl-callout.up{bottom:calc(50% + 6px);}
     .ov-tl-callout.down{top:calc(50% + 6px);}
-    .ov-tl-callout-box{width:30px;height:30px;border:2px solid #aaa;border-radius:5px;background:#fff;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.3);}
-    .ov-tl-callout-box img{width:25px;height:25px;object-fit:contain;image-rendering:pixelated;display:block;margin:1px auto;}
+    .ov-tl-callout-box{width:30px;height:30px;border:1.5px solid rgba(0,0,0,.4);border-radius:5px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+    .ov-tl-callout-box img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;display:block;margin:2px auto;background:#fff;border-radius:3px;}
     .ov-tl-arrow{width:0;height:0;margin:0 auto;}
     .ov-tl-callout.up .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #aaa;}
     .ov-tl-callout.down .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #aaa;}
     .ov-tl-callout.down{display:flex;flex-direction:column-reverse;align-items:center;}
     .ov-tl-cluster-badge{position:absolute;top:-5px;right:-7px;background:#555;color:#fff;font-size:.46rem;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 1px;}
-    .ov-tl-r0{border-color:#3f5f85;} .ov-tl-r1{border-color:#5b93bf;} .ov-tl-r2{border-color:#4f9c98;}
-    .ov-tl-r3{border-color:#4fac85;} .ov-tl-r4{border-color:#c9ae55;} .ov-tl-r5{border-color:#d06b62;}
-    .ov-tl-r6{border-color:#b06a92;} .ov-tl-r7{border-color:#9275a6;} .ov-tl-r8{border-color:#5b4a68;}
+    .ov-tl-r0{background:#3f5f85;} .ov-tl-r1{background:#5b93bf;} .ov-tl-r2{background:#4f9c98;}
+    .ov-tl-r3{background:#4fac85;} .ov-tl-r4{background:#c9ae55;} .ov-tl-r5{background:#d06b62;}
+    .ov-tl-r6{background:#b06a92;} .ov-tl-r7{background:#9275a6;} .ov-tl-r8{background:#5b4a68;}
     .ov-ctx-bulk{padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;}
     .ov-bulk-cnt{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:${t.fg};}
     .ov-bulk-row{display:flex;gap:6px;}
@@ -3309,8 +3309,8 @@ function _ovStyleText() {
     body.small .ov-mcard-cnt{font-size:.95rem;}
     body.small .ov-timeline{gap:1px;}
     body.small .ov-tl-row{height:46px;gap:4px;}
-    body.small .ov-tl-icon{width:24px;height:24px;}
-    body.small .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:18px;height:18px;}
+    body.small .ov-tl-icon{width:40px;height:40px;}
+    body.small .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:21px;height:21px;}
     body.small .ov-tl-track{height:5px;}
     body.small .ov-tl-callout-box{width:22px;height:22px;}
     body.small .ov-tl-callout-box img{width:18px;height:18px;}
@@ -3629,7 +3629,7 @@ function _overlayTick() {
           <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" style="position:relative" title="${escHtml(rep.id === MONSTER_CARD_ID ? '몬스터카드' : (rep.name || ''))}">
             <img src="${rep.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(rep.id)}" onerror="this.style.visibility='hidden'">${badge}
           </div>
-          <div class="ov-tl-arrow"></div>
+          <div class="ov-tl-arrow" style="border-top-color:${rar.color}"></div>
         </div>`;
       }).join('');
 
