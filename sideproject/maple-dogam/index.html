@@ -5073,7 +5073,7 @@ function switchTab(idx) {
     swPanel?.querySelector('.sw-toggle') && (swPanel.querySelector('.sw-toggle').className = 'sw-btn sw-start sw-toggle');
   }
   swTickPanel(swPanel, tab);
-  _applyExclToggleBtn(swPanel);
+  _applyExclToggleBtn(swPanel, tab.mob);
   saveTabsState();
 }
 
@@ -5314,19 +5314,22 @@ function activateMob(mob) {
 // ══════════════════════════════════════════
 const EXCL_SHOW_KEY = 'maple_excl_show';
 let showExcludedByTab = (() => { try { return JSON.parse(localStorage.getItem(EXCL_SHOW_KEY)) || {}; } catch { return {}; } })();
-// 탭의 idx가 아닌 몹 id를 키로 써야 탭 드래그 재정렬 시 설정이 엉뚱한 탭으로 옮겨가지 않음
-function getShowExcluded() {
-  const mobId = activeTab()?.mob?.id;
-  return showExcludedByTab[mobId != null ? String(mobId) : String(activeTabIdx)] !== false;
+// 탭의 idx가 아닌 몹 id를 키로 써야 탭 드래그 재정렬 시 설정이 엉뚱한 탭으로 옮겨가지 않음.
+// mobId를 명시적으로 안 넘기면 "현재 활성 탭"으로 대체되는데, 활성 탭이 아닌 다른 탭의 패널을
+// 렌더링/조작할 때(초기 복원, 설정 변경 시 전체 탭 재렌더 등) 이러면 엉뚱한 몹 설정을 읽어와서
+// "숨기기 켜져있는데 안 숨겨짐" 같은 버그가 남 — 가능하면 항상 mobId를 넘길 것
+function getShowExcluded(mobId) {
+  const id = mobId != null ? mobId : activeTab()?.mob?.id;
+  return showExcludedByTab[id != null ? String(id) : String(activeTabIdx)] !== false;
 }
-function setShowExcluded(v) {
-  const mobId = activeTab()?.mob?.id;
-  showExcludedByTab[mobId != null ? String(mobId) : String(activeTabIdx)] = v;
+function setShowExcluded(v, mobId) {
+  const id = mobId != null ? mobId : activeTab()?.mob?.id;
+  showExcludedByTab[id != null ? String(id) : String(activeTabIdx)] = v;
   try { localStorage.setItem(EXCL_SHOW_KEY, JSON.stringify(showExcludedByTab)); } catch {}
 }
 
-function _applyExclToggleBtn(panel) {
-  const show = getShowExcluded();
+function _applyExclToggleBtn(panel, mob) {
+  const show = getShowExcluded(mob?.id);
   const btn = panel?.querySelector('.excl-toggle');
   if (!btn) return;
   btn.textContent = show ? '👁 제외된 아이템 보기' : '🚫 제외된 아이템 숨기는 중';
@@ -5334,19 +5337,20 @@ function _applyExclToggleBtn(panel) {
 }
 
 function toggleExclView(e) {
-  setShowExcluded(!getShowExcluded());
-  const { panel } = _tabFromEvent(e);
+  const { panel, tab } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  setShowExcluded(!getShowExcluded(mob?.id), mob?.id);
   if (!panel) return;
-  _applyExclToggleBtn(panel);
-  applyTypeFilter(panel);
+  _applyExclToggleBtn(panel, mob);
+  applyTypeFilter(panel, mob);
 }
 
 // ── 유형별 필터 (탭별, 메모리 상태 = 숨긴 유형 집합) ──
 const hiddenTypesByTab = {};
-function getHiddenTypes() {
+function getHiddenTypes(mobId) {
   // 탭의 idx가 아닌 몹 id를 키로 써야 탭 드래그 재정렬 시 필터 설정이 엉뚱한 탭으로 옮겨가지 않음
-  const mobId = activeTab()?.mob?.id;
-  const k = mobId != null ? String(mobId) : String(activeTabIdx);
+  const id = mobId != null ? mobId : activeTab()?.mob?.id;
+  const k = id != null ? String(id) : String(activeTabIdx);
   if (!hiddenTypesByTab[k]) hiddenTypesByTab[k] = new Set();
   return hiddenTypesByTab[k];
 }
@@ -5365,7 +5369,7 @@ function buildTypeChips(panel, mob) {
   if (!bar || !mob) return;
   const types = [];
   mob.drops.forEach(d => { const t = itemTypeLabel(d.id); if (t && !types.includes(t)) types.push(t); });
-  const hidden = getHiddenTypes();
+  const hidden = getHiddenTypes(mob.id);
   const allOff = types.length > 0 && types.every(t => hidden.has(t));
   const allChip = `<button class="type-chip type-chip-all${allOff ? ' off' : ''}" onclick="toggleAllTypes(event)">전체</button>`;
   bar.innerHTML = allChip + types.map(t =>
@@ -5379,25 +5383,26 @@ function toggleAllTypes(e) {
   if (!mob) return;
   const types = [];
   mob.drops.forEach(d => { const t = itemTypeLabel(d.id); if (t && !types.includes(t)) types.push(t); });
-  const hidden = getHiddenTypes();
+  const hidden = getHiddenTypes(mob.id);
   const allOff = types.length > 0 && types.every(t => hidden.has(t));
   if (allOff) hidden.clear();                  // 전체 켜기
   else        types.forEach(t => hidden.add(t)); // 전체 끄기
   buildTypeChips(panel, mob);
-  applyTypeFilter(panel);
+  applyTypeFilter(panel, mob);
 }
 function toggleTypeChip(e, type) {
   e.stopPropagation();
-  const { panel } = _tabFromEvent(e);
-  const hidden = getHiddenTypes();
+  const { panel, tab } = _tabFromEvent(e);
+  const mob = tab?.mob || activeMob;
+  const hidden = getHiddenTypes(mob?.id);
   if (hidden.has(type)) hidden.delete(type); else hidden.add(type);
   e.currentTarget.classList.toggle('off', hidden.has(type));
-  applyTypeFilter(panel);
+  applyTypeFilter(panel, mob);
 }
-function applyTypeFilter(panel) {
+function applyTypeFilter(panel, mob) {
   if (!panel) return;
-  const hidden = getHiddenTypes();
-  const showExcl = getShowExcluded();
+  const hidden = getHiddenTypes(mob?.id);
+  const showExcl = getShowExcluded(mob?.id);
   panel.querySelectorAll('.item-card').forEach(c => {
     const hideByType = hidden.has(c.dataset.type || '');
     const hideByExcl = c.classList.contains('excl') && !showExcl;
@@ -5451,7 +5456,7 @@ function renderItemGrid() {
   const panel = getActivePanel();
   if (!panel || !activeMob) return;
   renderItemGridInPanel(panel, activeMob);
-  _applyExclToggleBtn(panel);
+  _applyExclToggleBtn(panel, activeMob);
   updateProgress();
 }
 
@@ -5506,12 +5511,12 @@ function renderItemGridInPanel(panel, mob) {
     const isExcl     = excluded.has(drop.id);
     const baseState  = tlBase?.id === drop.id ? (tlBase.hidden ? 2 : 1) : 0;
     const card       = buildItemCard(drop, state, isExcl, baseState, mob);
-    if (isExcl && !getShowExcluded()) card.style.display = 'none';
+    if (isExcl && !getShowExcluded(mob.id)) card.style.display = 'none';
     grid.appendChild(card);
   });
   const fbar = panel.querySelector('.type-filter-bar');
   if (fbar && fbar.classList.contains('open')) buildTypeChips(panel, mob);
-  applyTypeFilter(panel);
+  applyTypeFilter(panel, mob);
 }
 
 // baseState: 0=없음, 1=기준(타임라인표시), 2=기준(타임라인숨김)
