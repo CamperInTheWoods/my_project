@@ -3238,8 +3238,8 @@ function _ovStyleText() {
     .ov-mcard-cnt{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:700;min-width:18px;text-align:center;}
     /* 실시간 타임라인 막대 — 최근 1시간을 왼쪽 80%에 압축, 지금 시점은 항상 80% 위치에 고정,
        시간이 지날수록 마커가 계속 왼쪽으로 흘러가며 1시간이 지나면 화면 밖으로 사라짐 */
-    .ov-timeline{display:flex;flex-direction:column;gap:5px;width:100%;max-width:210px;margin-top:1px;}
-    .ov-tl-row{position:relative;height:16px;}
+    .ov-timeline{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:1px;}
+    .ov-tl-row{position:relative;height:20px;}
     .ov-tl-track{position:absolute;left:0;right:0;top:50%;height:3px;transform:translateY(-50%);border-radius:2px;background:${t.name}2e;}
     .ov-tl-now{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:1px;background:${t.ch};}
     .ov-tl-dot{position:absolute;top:50%;width:13px;height:13px;transform:translate(-50%,-50%);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
@@ -3273,9 +3273,9 @@ function _ovStyleText() {
     body.small .ov-mcard-card{padding:3px 9px 3px 5px;gap:5px;}
     body.small .ov-mcard-card img{width:26px;height:26px;}
     body.small .ov-mcard-cnt{font-size:.95rem;}
-    body.small .ov-timeline{max-width:150px;gap:4px;}
-    body.small .ov-tl-row{height:12px;}
-    body.small .ov-tl-dot{width:10px;height:10px;}
+    body.small .ov-timeline{gap:4px;}
+    body.small .ov-tl-row{height:14px;}
+    body.small .ov-tl-dot{width:11px;height:11px;}
   `;
 }
 // 테마 변경 시 열려있는 오버레이 색 갱신
@@ -3313,6 +3313,15 @@ function huntBaseDrop(mob) {
   return best;
 }
 
+// 타임라인 막대는 가로로 넓을수록 보기 좋아서, 켜져 있으면 창 기본 폭을 더 넓게 잡음.
+// 사용자가 직접 창을 드래그해서 더 키우거나 줄이는 것도 자유롭게 가능(_ovFitSize는 열기/설정변경
+// 직후 잠깐만 이 기본 폭으로 되돌리고, 그 뒤로는 사용자가 조절한 크기를 그대로 유지함).
+function _ovBaseW() {
+  const small = getSetting('ov_small');
+  const tl = getSetting('ov_show_timeline');
+  if (small) return tl ? 280 : 160;
+  return tl ? 420 : 240;
+}
 function _ovWinSize() {
   // item·mcard는 같은 행에 나란히 뜨므로 둘 중 하나라도 켜져 있으면 한 줄 높이만 더함
   const cardsRow = getSetting('ov_show_item') || getSetting('ov_show_mcard');
@@ -3320,12 +3329,13 @@ function _ovWinSize() {
   const tl = getSetting('ov_show_timeline');
   const tab = activeTab();
   const tlRows = tl ? Math.max(1, (tab?.synced ? tabs.filter(t => t.synced && t.mob).length : (tab?.mob ? 1 : 0))) : 0;
+  const w = _ovBaseW();
   if (getSetting('ov_small')) {
     let h = 128; if (mob) h += 56; if (cardsRow) h += 52; if (tlRows) h += 8 + tlRows * 16;
-    return { w: 160, h };
+    return { w, h };
   }
   let h = 165; if (mob) h += 75; if (cardsRow) h += 60; if (tlRows) h += 10 + tlRows * 21;
-  return { w: 240, h };
+  return { w, h };
 }
 async function openOverlay() {
   if (!('documentPictureInPicture' in window)) {
@@ -3345,7 +3355,7 @@ async function openOverlay() {
   pip.document.head.appendChild(style);
   const wrap = pip.document.createElement('div');
   wrap.id = 'ov-wrap';
-  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;';
+  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;padding:0 10px;box-sizing:border-box;';
   wrap.innerHTML = `
     <div id="ov-mobs"></div>
     <div class="ov-name" id="ov-name">-</div>
@@ -3409,7 +3419,7 @@ function _ovFitSize() {
     const small = getSetting('ov_small');
     const padTop = small ? 6 : 10;
     const wantH = Math.ceil(padTop + wrap.getBoundingClientRect().height + (small ? 4 : 6));
-    const wantW = small ? 160 : 240;
+    const wantW = _ovBaseW();
     const dh = pip.innerHeight - wantH;
     const dw = pip.innerWidth - wantW;
     if (Math.abs(dh) > 2 || Math.abs(dw) > 2) pip.resizeBy(-dw, -dh);
