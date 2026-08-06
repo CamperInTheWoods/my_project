@@ -3215,6 +3215,19 @@ function _ovStyleText() {
     img{-webkit-user-drag:none;user-drag:none;}
     body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:${t.bg};color:${t.fg};
       display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;height:100vh;padding-top:10px;box-sizing:border-box;user-select:none;cursor:default;}
+    #ov-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
+    #ov-wrap>#ov-mobs{grid-area:mobs;} #ov-wrap>.ov-name{grid-area:name;} #ov-wrap>.ov-time{grid-area:time;}
+    #ov-wrap>.ov-ch-time{grid-area:chtime;} #ov-wrap>.ov-btns{grid-area:btns;}
+    #ov-wrap>#ov-cards-row{grid-area:cards;} #ov-wrap>#ov-timeline{grid-area:timeline;}
+    /* 타임라인 전용 레이아웃 — 몹 이미지/아이템 카드 숨기고, 왼쪽엔 시간·버튼, 오른쪽엔 길게 뻗은 타임라인 */
+    body.tl-layout #ov-wrap{
+      display:grid; gap:4px 14px; align-items:center; justify-items:start;
+      grid-template-columns:auto 1fr;
+      grid-template-areas:"name timeline" "time timeline" "chtime timeline" "btns timeline";
+    }
+    body.tl-layout #ov-mobs, body.tl-layout #ov-cards-row{display:none;}
+    body.tl-layout .ov-name{max-width:110px;}
+    body.tl-layout #ov-timeline{width:100%;}
     #ov-mobs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-height:65px;margin-top:0;}
     #ov-mobs .ov-mob{display:inline-flex;align-items:flex-end;}
     #ov-mobs img{width:65px;height:65px;object-fit:contain;image-rendering:pixelated;}
@@ -3318,18 +3331,28 @@ function huntBaseDrop(mob) {
 // 직후 잠깐만 이 기본 폭으로 되돌리고, 그 뒤로는 사용자가 조절한 크기를 그대로 유지함).
 function _ovBaseW() {
   const small = getSetting('ov_small');
+  if (getSetting('ov_tl_layout')) return small ? 380 : 520;
   const tl = getSetting('ov_show_timeline');
   if (small) return tl ? 280 : 160;
   return tl ? 420 : 240;
 }
+function _ovTlRows() {
+  const tab = activeTab();
+  return Math.max(1, (tab?.synced ? tabs.filter(t => t.synced && t.mob).length : (tab?.mob ? 1 : 0)));
+}
 function _ovWinSize() {
+  const w = _ovBaseW();
+  // 타임라인 전용 레이아웃: 몹 이미지/아이템 카드는 항상 숨겨지므로 고정 높이 + 몹 2개일 때만 살짝 더함
+  if (getSetting('ov_tl_layout')) {
+    const small = getSetting('ov_small');
+    const extra = Math.max(0, _ovTlRows() - 1) * (small ? 16 : 22);
+    return { w, h: (small ? 88 : 118) + extra };
+  }
   // item·mcard는 같은 행에 나란히 뜨므로 둘 중 하나라도 켜져 있으면 한 줄 높이만 더함
   const cardsRow = getSetting('ov_show_item') || getSetting('ov_show_mcard');
   const mob = getSetting('ov_show_mob');
   const tl = getSetting('ov_show_timeline');
-  const tab = activeTab();
-  const tlRows = tl ? Math.max(1, (tab?.synced ? tabs.filter(t => t.synced && t.mob).length : (tab?.mob ? 1 : 0))) : 0;
-  const w = _ovBaseW();
+  const tlRows = tl ? _ovTlRows() : 0;
   if (getSetting('ov_small')) {
     let h = 128; if (mob) h += 56; if (cardsRow) h += 52; if (tlRows) h += 8 + tlRows * 16;
     return { w, h };
@@ -3355,7 +3378,7 @@ async function openOverlay() {
   pip.document.head.appendChild(style);
   const wrap = pip.document.createElement('div');
   wrap.id = 'ov-wrap';
-  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;padding:0 10px;box-sizing:border-box;';
+  wrap.style.cssText = 'width:100%;padding:0 10px;box-sizing:border-box;';
   wrap.innerHTML = `
     <div id="ov-mobs"></div>
     <div class="ov-name" id="ov-name">-</div>
@@ -3433,6 +3456,7 @@ function _overlayTick() {
   const running = tab.sw.startTs !== null;
   let mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
   if (!mobs.length && tab.mob) mobs = [tab.mob];
+  d.body.classList.toggle('tl-layout', !!getSetting('ov_tl_layout'));
   const nm = d.getElementById('ov-name');
   if (nm) {
     if (getSetting('ov_show_name')) { nm.style.display = ''; nm.textContent = mobs.length ? mobs.map(m => m.name).join(' / ') : '도감작 없음'; }
@@ -3540,7 +3564,7 @@ function _overlayTick() {
   // 몹이 2개(동기화)면 왼쪽 몹을 위 행, 오른쪽 몹을 아래 행에 표시
   const tlEl = d.getElementById('ov-timeline');
   if (tlEl) {
-    if (!getSetting('ov_show_timeline') || !mobs.length) {
+    if (!(getSetting('ov_show_timeline') || getSetting('ov_tl_layout')) || !mobs.length) {
       tlEl.style.display = 'none';
     } else {
       tlEl.style.display = '';
@@ -8941,6 +8965,7 @@ const SETTINGS = [
   { key: 'ov_show_mcard',  label: '몬스터카드 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_timeline', label: '실시간 타임라인 막대 표시 (최근 1시간)', def: true, group: 'overlay' },
+  { key: 'ov_tl_layout',     label: '타임라인 전용 레이아웃 (가로로 길게, 몹 이미지/아이템 카드 숨김)', def: false, group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
   { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
