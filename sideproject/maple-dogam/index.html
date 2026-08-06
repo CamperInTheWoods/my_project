@@ -3267,13 +3267,15 @@ function _ovStyleText() {
     .ov-tl-callout{position:absolute;transform:translateX(-50%);z-index:4;}
     .ov-tl-callout.up{bottom:calc(50% + 6px);}
     .ov-tl-callout.down{top:calc(50% + 6px);}
-    .ov-tl-callout-box{width:30px;height:30px;border:1.5px solid rgba(0,0,0,.4);border-radius:5px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.35);}
-    .ov-tl-callout-box img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;display:block;margin:2px auto;background:#fff;border-radius:3px;}
+    .ov-tl-callout-inner{position:relative;}
+    .ov-tl-callout-box{width:30px;height:30px;border:1.5px solid rgba(0,0,0,.4);border-radius:5px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;}
+    .ov-tl-callout-box img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;display:block;
+      filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff);}
     .ov-tl-arrow{width:0;height:0;margin:0 auto;}
     .ov-tl-callout.up .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #aaa;}
     .ov-tl-callout.down .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #aaa;}
     .ov-tl-callout.down{display:flex;flex-direction:column-reverse;align-items:center;}
-    .ov-tl-cluster-badge{position:absolute;top:-5px;right:-7px;background:#555;color:#fff;font-size:.46rem;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 1px;}
+    .ov-tl-cluster-badge{position:absolute;top:-5px;right:-7px;background:#555;color:#fff;font-size:.46rem;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 1px;z-index:5;}
     .ov-tl-r0{background:#3f5f85;} .ov-tl-r1{background:#5b93bf;} .ov-tl-r2{background:#4f9c98;}
     .ov-tl-r3{background:#4fac85;} .ov-tl-r4{background:#c9ae55;} .ov-tl-r5{background:#d06b62;}
     .ov-tl-r6{background:#b06a92;} .ov-tl-r7{background:#9275a6;} .ov-tl-r8{background:#5b4a68;}
@@ -3597,15 +3599,16 @@ function _overlayTick() {
       // 설정, 기준아이템이면서 숨김 처리된 경우 제외 — 여기서 다르게 걸러서 표시가 누락되면 안 됨
       const cardOffTl = !getSetting('card_in_timeline');
       const pctOf = (t) => TL_NOW_PCT * (1 - (nowMs - t) / TL_WINDOW_MS);
-      // 동기화된 몹들은 어차피 한 세션을 같이 뛰는 거라 막대를 따로 나누지 않고 하나로 합쳐서 표시
+      // 동기화된 몹들은 막대(트랙/채우기/눈금/채널마커)는 하나로 합치되, 아이템 콜아웃은
+      // 몹을 구분할 수 있게 1번(위) 몹은 막대 위로, 2번(아래) 몹은 뒤집어서 막대 아래로 표시
       const iconsHtml = mobs.map(m => `<img class="ov-tl-icon" src="${mobImg(m.id)}" onerror="this.style.visibility='hidden'">`).join('');
 
-      // 아이템 픽업(모든 몹 합산) → 클러스터링(가까운 것끼리 묶기)
-      const picks = mobs.flatMap(m => {
+      const calloutsHtml = mobs.map((m, mobIdx) => {
+        const dir = mobIdx % 2 === 0 ? 'up' : 'down';
         const mobData = s[`mob_${m.id}`] || {};
         const excl = new Set(s[`excl_${m.id}`] || []);
         const tlBase = s[`tl_base_${m.id}`] || null;
-        return (m.drops || []).flatMap(dr => {
+        const picks = (m.drops || []).flatMap(dr => {
           if (excl.has(dr.id)) return [];
           if (tlBase?.hidden && tlBase.id === dr.id) return [];
           if (dr.id === MONSTER_CARD_ID && cardOffTl) return [];
@@ -3613,24 +3616,27 @@ function _overlayTick() {
           return times
             .filter(t => t != null && nowMs - t >= 0 && nowMs - t <= TL_WINDOW_MS)
             .map(t => ({ id: dr.id, name: dr.name, rate: dr.rate, pct: pctOf(t) }));
+        }).sort((a, b) => a.pct - b.pct);
+        const clusters = [];
+        picks.forEach(p => {
+          const hit = clusters.find(c => Math.abs(c.pct - p.pct) < OVERLAP_PCT);
+          if (hit) hit.items.push(p); else clusters.push({ pct: p.pct, items: [p] });
         });
-      }).sort((a, b) => a.pct - b.pct);
-      const clusters = [];
-      picks.forEach(p => {
-        const hit = clusters.find(c => Math.abs(c.pct - p.pct) < OVERLAP_PCT);
-        if (hit) hit.items.push(p); else clusters.push({ pct: p.pct, items: [p] });
-      });
-      const calloutsHtml = clusters.map(({ pct, items }) => {
-        const cx = Math.min(Math.max(pct, 1), TL_NOW_PCT - 1).toFixed(2);
-        const rep = items[0]; // 대표 아이콘(먼저 온 것)
-        const rar = tlRarity(rep.rate);
-        const badge = items.length > 1 ? `<div class="ov-tl-cluster-badge">+${items.length - 1}</div>` : '';
-        return `<div class="ov-tl-callout up" style="left:${cx}%">
-          <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" style="position:relative" title="${escHtml(rep.id === MONSTER_CARD_ID ? '몬스터카드' : (rep.name || ''))}">
-            <img src="${rep.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(rep.id)}" onerror="this.style.visibility='hidden'">${badge}
-          </div>
-          <div class="ov-tl-arrow" style="border-top-color:${rar.color}"></div>
-        </div>`;
+        return clusters.map(({ pct, items }) => {
+          const cx = Math.min(Math.max(pct, 1), TL_NOW_PCT - 1).toFixed(2);
+          const rep = items[0]; // 대표 아이콘(먼저 온 것)
+          const rar = tlRarity(rep.rate);
+          const badge = items.length > 1 ? `<div class="ov-tl-cluster-badge">+${items.length - 1}</div>` : '';
+          const arrowStyle = dir === 'up' ? `border-top-color:${rar.color}` : `border-bottom-color:${rar.color}`;
+          return `<div class="ov-tl-callout ${dir}" style="left:${cx}%">
+            <div class="ov-tl-callout-inner">
+              <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" title="${escHtml(rep.id === MONSTER_CARD_ID ? '몬스터카드' : (rep.name || ''))}">
+                <img src="${rep.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(rep.id)}" onerror="this.style.visibility='hidden'">
+              </div>${badge}
+            </div>
+            <div class="ov-tl-arrow" style="${arrowStyle}"></div>
+          </div>`;
+        }).join('');
       }).join('');
 
       // 채널변경 마커(모든 몹 합산, 같은 시각에 겹치면 자연히 한 곳에 겹쳐 보임)
