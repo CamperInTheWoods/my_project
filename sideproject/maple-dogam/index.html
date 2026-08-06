@@ -8487,7 +8487,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.001.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.001.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9230,6 +9230,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.001.1', date: '26.08.06',
+    fix: [
+      '도감작 하기의 아이템 갯수 조정 팝업이 눌러도 반응 없던 문제 수정 (몬스터북 화면에 가려 클릭이 안 먹히던 문제)',
+    ],
+  },
   {
     ver: '2.001.0', date: '26.08.06',
     feat: [
