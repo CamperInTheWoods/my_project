@@ -6510,6 +6510,9 @@ function updateTrophyStats(completed, store) {
 }
 
 function _calcTrophyKills(c, store) {
+  // 실제 마릿수를 직접 아는 경우(예: 허규복 기록에 제보받은 숫자) 아이템 개수÷드롭률로
+  // 역산하지 않고 그 값을 그대로 사용
+  if (c.kills != null) return c.kills;
   const mobData = c.mobData || {};
   const excl    = new Set((store[`excl_${c.mobId}`] || []));
   const drops   = (c.drops || []).filter(d => !excl.has(d.id));
