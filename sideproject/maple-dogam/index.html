@@ -7360,7 +7360,7 @@ function mbookStatsLeftHtml(completed, store) {
   const completedCells   = completed.map(c => cellHtml(c.mobId, c.mobName)).join('');
   const inProgressCells  = inProgress.map(m => cellHtml(m.mobId, m.name)).join('');
   // 허규복 항목은 내 기록과 mobId가 겹칠 수 있어 'g:'로 구분한 별도 키로 선택 상태를 관리
-  const gyubokList  = (typeof GYUBOK_DATA !== 'undefined') ? GYUBOK_DATA : [];
+  const gyubokList  = (typeof GYUBOK_DATA !== 'undefined') ? [...GYUBOK_DATA].sort((a, b) => (a.level || 0) - (b.level || 0)) : [];
   const gyubokCellHtml = (mobId, name) => {
     const key = 'g:' + mobId;
     const idx = selArr.indexOf(key);
