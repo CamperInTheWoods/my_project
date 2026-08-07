@@ -62,6 +62,18 @@
       --sw-start-bg:   #3a8a52;
       --sw-pause-bg:   #d89426;
       --header-title-shadow: none;
+      /* 몬스터북(전체기록/통계/허규복/목차 등 정적 페이지)의 종이·잉크 색 — 항상 베이지 종이라
+         테마와 무관하게 기본값은 그대로 두고, 다크테마일 때만 아래에서 오버라이드함 */
+      --book-ink-strong: #4a3318;
+      --book-ink:        #6b5636;
+      --book-ink-muted:  #8a7d64;
+      --book-paper:      #ece3cc;
+      --book-paper-light:#fffdf6;
+      --book-paper-card: #fdf8ec;
+      --book-paper-mid:  #f4eedd;
+      --book-tab-bg:     #e8dcc0;
+      --book-tab-bg-hover:#ddcda8;
+      --book-border:     #d8c9a0;
     }
 
     [data-theme="dark"] {
@@ -108,6 +120,18 @@
       --sw-start-bg:   #5a8a62;
       --sw-pause-bg:   #c09a3e;
       --header-title-shadow: 0 1px 3px rgba(0,0,0,.6);
+      /* 다크테마에서는 몬스터북 정적 페이지(전체기록/통계/허규복/목차)도 어두운 가죽 톤
+         종이로, 글씨는 밝은 크림색으로 바꿔서 진짜 "다크모드 책"처럼 보이게 함 */
+      --book-ink-strong: #f0e6c8;
+      --book-ink:        #d8c9a0;
+      --book-ink-muted:  #a89868;
+      --book-paper:      #2a2118;
+      --book-paper-light:#362b1c;
+      --book-paper-card: #3a2f1e;
+      --book-paper-mid:  #332818;
+      --book-tab-bg:     #4a3c26;
+      --book-tab-bg-hover:#5a4a2e;
+      --book-border:     #5a4a30;
     }
 
     [data-theme="summer"] { color-scheme: light;
@@ -1247,13 +1271,19 @@
       background-size:100% 100%;
       box-shadow: 0 0 0 6px #4e3018, 0 30px 70px rgba(0,0,0,.6);
     }
+    /* 다크테마에서는 책 옆면(나무 결 흉내) 패턴도 어두운 톤으로 교체 — 책 전체가 진짜 다크모드처럼 보이게 */
+    [data-theme="dark"] .mbook-metal {
+      background-color:#241d12;
+      background-image:url("data:image/svg+xml,%3Csvg width='1090' height='770' viewBox='0 0 1090 770' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1090' height='770' fill='%232e2618'/%3E%3Crect x='3' y='3' width='1084' height='764' fill='%233a2f1c'/%3E%3Crect x='6' y='6' width='1078' height='758' fill='%23241d12'/%3E%3Crect x='9' y='9' width='1072' height='752' fill='%23362c1c'/%3E%3Crect x='12' y='12' width='1066' height='746' fill='%232e2618'/%3E%3Crect x='15' y='15' width='1060' height='740' fill='%233a2f1c'/%3E%3Crect x='18' y='18' width='1054' height='734' fill='%23241d12'/%3E%3Crect x='21' y='21' width='1048' height='728' fill='%23362c1c'/%3E%3Crect x='24' y='24' width='1042' height='722' fill='%232e2618'/%3E%3Crect x='27' y='27' width='1036' height='716' fill='%233a2f1c'/%3E%3Crect x='30' y='30' width='1030' height='710' fill='%23241d12'/%3E%3Crect x='33' y='33' width='1024' height='704' fill='%23362c1c'/%3E%3Crect x='36' y='36' width='1018' height='698' fill='%232e2618'/%3E%3Crect x='39' y='39' width='1012' height='692' fill='%233a2f1c'/%3E%3Crect x='42' y='42' width='1006' height='686' fill='%23241d12'/%3E%3Crect x='45' y='45' width='1000' height='680' fill='%23362c1c'/%3E%3Crect x='48' y='48' width='994' height='674' fill='%232e2618'/%3E%3Crect x='51' y='51' width='988' height='668' fill='%233a2f1c'/%3E%3Crect x='54' y='54' width='982' height='662' fill='%23241d12'/%3E%3Crect x='57' y='57' width='976' height='656' fill='%23362c1c'/%3E%3Crect x='60' y='60' width='970' height='650' fill='%232e2618'/%3E%3Crect x='63' y='63' width='964' height='644' fill='%233a2f1c'/%3E%3Crect x='66' y='66' width='958' height='638' fill='%23241d12'/%3E%3Crect x='69' y='69' width='952' height='632' fill='%23362c1c'/%3E%3Crect x='72' y='72' width='946' height='626' fill='%232e2618'/%3E%3Crect x='75' y='75' width='940' height='620' fill='%233a2f1c'/%3E%3Crect x='78' y='78' width='934' height='614' fill='%23241d12'/%3E%3Crect x='81' y='81' width='928' height='608' fill='%23362c1c'/%3E%3Crect x='84' y='84' width='922' height='602' fill='%232e2618'/%3E%3Crect x='87' y='87' width='916' height='596' fill='%233a2f1c'/%3E%3Crect x='90' y='90' width='910' height='590' fill='%23241d12'/%3E%3Crect x='93' y='93' width='904' height='584' fill='%23362c1c'/%3E%3Crect x='96' y='96' width='898' height='578' fill='%232e2618'/%3E%3Crect x='99' y='99' width='892' height='572' fill='%233a2f1c'/%3E%3Crect x='102' y='102' width='886' height='566' fill='%23241d12'/%3E%3Crect x='105' y='105' width='880' height='560' fill='%23362c1c'/%3E%3Crect x='108' y='108' width='874' height='554' fill='%232e2618'/%3E%3Crect x='111' y='111' width='868' height='548' fill='%233a2f1c'/%3E%3Crect x='114' y='114' width='862' height='542' fill='%23241d12'/%3E%3Crect x='117' y='117' width='856' height='536' fill='%23362c1c'/%3E%3Crect x='120' y='120' width='850' height='530' fill='%232e2618'/%3E%3C/svg%3E");
+      box-shadow: 0 0 0 6px #2a1c0c, 0 30px 70px rgba(0,0,0,.75);
+    }
     .mbook-metal.zoomed { zoom:1.1; }
     .mbook-metal.zoomed-big { zoom:1.35 !important; }
     .mbook {
       position:relative; width:100%; height:100%; display:flex;
-      background:#ece3cc;
+      background:var(--book-paper);
       border-radius:0; padding:0;
-      box-shadow: 0 0 0 1px #7a5230, 0 0 0 2px #ece3cc, 0 0 0 3px #7a5230, 0 0 0 4px #ece3cc, 0 0 0 5px #7a5230;
+      box-shadow: 0 0 0 1px #7a5230, 0 0 0 2px var(--book-paper), 0 0 0 3px #7a5230, 0 0 0 4px var(--book-paper), 0 0 0 5px #7a5230;
     }
     /* 책갈피 탭 (오른쪽 바깥 — 선택한 몹의 내용 전환) */
     .mbook-tabs { position:absolute; left:100%; top:52px; transform:translateX(3px); display:flex; flex-direction:column; gap:7px; z-index:1; }
@@ -1325,15 +1355,15 @@
       opacity:.16; mix-blend-mode:multiply;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.36  0 0 0 0 0.34  0 0 0 0 0.3  0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
-    .mbook-left  { background:#ece3cc; border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
-    .mbook-right { background:#ece3cc; border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-left  { background:var(--book-paper); border-radius:5px 0 0 5px; box-shadow:inset -16px 0 20px -16px rgba(90,66,30,.4); }
+    .mbook-right { background:var(--book-paper); border-radius:0 5px 5px 0; box-shadow:inset 16px 0 20px -16px rgba(90,66,30,.4); }
     .mbook-spine { width:2px; background:linear-gradient(180deg,rgba(90,66,30,.45),rgba(90,66,30,.12),rgba(90,66,30,.45)); flex-shrink:0; }
     /* 도감작 화면 — 좌우 페이지 구분(책등, 접힘 그림자) 없이 하나의 넓은 캔버스로 */
     .mbook-pages.is-hunt { flex-direction:column; overflow-y:auto; }
     .mbook-pages.is-hunt .mbook-spine { display:none; }
     .mbook-pages.is-hunt .mbook-page { flex:none; overflow:visible; }
-    .mbook-pages.is-hunt .mbook-left { border-radius:5px 5px 0 0; box-shadow:none; background:#f4eedd; }
-    .mbook-pages.is-hunt .mbook-right { border-radius:0 0 5px 5px; box-shadow:none; background:#f4eedd; }
+    .mbook-pages.is-hunt .mbook-left { border-radius:5px 5px 0 0; box-shadow:none; background:var(--book-paper-mid); }
+    .mbook-pages.is-hunt .mbook-right { border-radius:0 0 5px 5px; box-shadow:none; background:var(--book-paper-mid); }
     .mbook-page::-webkit-scrollbar { width:5px; }
     .mbook-page::-webkit-scrollbar-thumb { background:rgba(120,95,55,.4); border-radius:3px; }
     .mbook-page-title { font-size:.72rem; font-weight:800; color:#5a4a2a; letter-spacing:.06em; text-align:center; margin-bottom:11px; padding-bottom:8px; border-bottom:1px solid rgba(120,95,55,.25); }
@@ -1352,17 +1382,17 @@
     .mbook-kills-toggle:hover { color:#4a3a1e; }
     /* 왼쪽 몹 격자 (5×5 고정) */
     .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:11px; }
-    .mbook-stat-hint { text-align:center; font-size:.66rem; color:#6b5636; margin:-4px 0 8px; }
+    .mbook-stat-hint { text-align:center; font-size:.66rem; color:var(--book-ink); margin:-4px 0 8px; }
     .mbook-stat-divider { border:none; border-top:3px dashed rgba(110,90,60,.5); margin:16px 0 10px; }
-    .mbook-stat-subtitle { font-size:.68rem; font-weight:800; color:#6b5636; margin:0 0 8px; text-align:center; }
+    .mbook-stat-subtitle { font-size:.68rem; font-weight:800; color:var(--book-ink); margin:0 0 8px; text-align:center; }
     .mbook-mob.mbook-stat-pick img { filter:grayscale(1) opacity(.5); transition:filter .15s; }
     .mbook-mob.mbook-stat-pick.picked img { filter:none; }
     .mbook-chart-block + .mbook-chart-block { margin-top:10px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
-    .mbook-chart-label { font-size:.7rem; font-weight:800; color:#4a3318; margin-bottom:3px; text-align:center; }
+    .mbook-chart-label { font-size:.7rem; font-weight:800; color:var(--book-ink-strong); margin-bottom:3px; text-align:center; }
     .mbook-chart-svg { width:100%; height:auto; display:block; }
     .mbook-chart-legend { display:flex; flex-wrap:wrap; gap:4px 14px; justify-content:center; margin-top:5px; }
-    .mbook-chart-note { text-align:center; font-size:.6rem; color:#8a7550; margin-top:2px; }
-    .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:#4a3318; font-weight:600; }
+    .mbook-chart-note { text-align:center; font-size:.6rem; color:var(--book-ink-muted); margin-top:2px; }
+    .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:var(--book-ink-strong); font-weight:600; }
     .mbook-chart-legend-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
     /* 실제 카드처럼 — 얇은 검정 테두리 > 두꺼운 흰 테두리 > 안쪽은 난이도 색 배경 */
     .mbook-mob { position:relative; aspect-ratio:1; border-radius:6px; background:#fff;
@@ -1390,30 +1420,30 @@
     .mbook-nav-grid { display:flex; flex-direction:column; align-items:flex-start; gap:18px; padding:4px 2px; }
     .mbook-nav-row { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
     .mbook-nav-row-desc { padding-top:2px; }
-    .mbook-nav-row-title { font-size:.92rem; font-weight:800; color:#4a3318; margin-bottom:5px; }
-    .mbook-nav-row-desc p { font-size:.68rem; color:#6b5636; line-height:1.5; margin-bottom:2px; }
+    .mbook-nav-row-title { font-size:.92rem; font-weight:800; color:var(--book-ink-strong); margin-bottom:5px; }
+    .mbook-nav-row-desc p { font-size:.68rem; color:var(--book-ink); line-height:1.5; margin-bottom:2px; }
     .mbook-nav-row-desc p:last-child { margin-bottom:0; }
-    .mbook-nav-row-desc p.i { font-style:italic; color:#8a7550; }
+    .mbook-nav-row-desc p.i { font-style:italic; color:var(--book-ink-muted); }
     .mbook-nav-card { position:relative; width:112px; aspect-ratio:1; border-radius:8px; overflow:hidden; flex-shrink:0;
-      background:#fdf8ec; border:4px solid var(--rc,rgba(120,95,55,.28));
+      background:var(--book-paper-card); border:4px solid var(--rc,rgba(120,95,55,.28));
       box-shadow:0 1px 3px rgba(90,66,30,.18);
       display:flex; flex-direction:column; transition:transform .12s; }
     .mbook-nav-row:hover .mbook-nav-card { transform:translateY(-2px); }
     .mbook-nav-card-top { flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center;
-      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 20%, #fdf8ec); }
+      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 20%, var(--book-paper-card)); }
     .mbook-nav-card-icon { font-size:1.8rem; }
     .mbook-nav-card-img { width:100%; height:100%; object-fit:cover; object-position:center bottom; }
     .mbook-nav-card-img.contain { object-fit:contain; object-position:center; }
     .mbook-nav-card-img.zoom { transform:scale(1.6); }
     .mbook-nav-card-bottom { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;
       padding:4px 3px 6px; border-top:2px solid var(--rc,rgba(120,95,55,.28)); }
-    .mbook-nav-card-label { font-size:.68rem; font-weight:800; color:#4a3318; white-space:nowrap; }
+    .mbook-nav-card-label { font-size:.68rem; font-weight:800; color:var(--book-ink-strong); white-space:nowrap; }
     .mbook-nav-card[data-nav="hunt"] { --rc:#b2402f; }
     .mbook-nav-card[data-nav="dex"] { --rc:#c99b2e; }
     .mbook-nav-card[data-nav="stats"] { --rc:#6e6e6e; }
     .mbook-nav-card[data-nav="gyubok"] { --rc:#3f7fc9; }
     .mbook-slot { position:relative; aspect-ratio:1; border-radius:8px;
-      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 16%, #fdf8ec);
+      background:color-mix(in srgb, var(--rc, rgba(120,95,55,.28)) 16%, var(--book-paper-card));
       box-shadow:inset 0 0 0 2px var(--rc,rgba(120,95,55,.28)), 0 1px 3px rgba(90,66,30,.16);
       display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s; }
     .mbook-slot:hover { transform:translateY(-2px); }
@@ -1447,14 +1477,14 @@
     /* 타임라인 — 본문 타임라인(.tl-row 등)과 동일한 구조·클래스를 재사용, 여백/라벨 색만 책에 맞게 보정 */
     .mbook-tl { padding:8px 6px 4px; }
     .mbook-tl .tl-row { margin-bottom:22px; }
-    .mbook-tl .tl-time-labels { color:#8a7038; }
-    .mbook-empty { color:#8a7d64; font-size:.78rem; text-align:center; padding:26px 10px; }
+    .mbook-tl .tl-time-labels { color:var(--book-ink-muted); }
+    .mbook-empty { color:var(--book-ink-muted); font-size:.78rem; text-align:center; padding:26px 10px; }
     /* 라벨‥값 세로 목록 — 책 목차식 점선 리더 (표지·기본정보 공용) */
     .mbook-stat-list { display:flex; flex-direction:column; gap:11px; margin:0 auto; width:230px; }
     .mbook-stat-list-row { display:flex; align-items:baseline; width:100%; }
-    .msl-label { flex:0 0 auto; white-space:nowrap; color:#6b5636; font-size:.76rem; font-weight:600; letter-spacing:.01em; }
+    .msl-label { flex:0 0 auto; white-space:nowrap; color:var(--book-ink); font-size:.76rem; font-weight:600; letter-spacing:.01em; }
     .msl-dots { flex:1; min-width:14px; margin:0 6px; border-bottom:1px dotted rgba(110,90,60,.5); position:relative; top:-4px; }
-    .msl-val { flex:0 0 auto; color:#2f2410; font-weight:600; font-size:.9rem; font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+    .msl-val { flex:0 0 auto; color:var(--book-ink-strong); font-weight:600; font-size:.9rem; font-variant-numeric:tabular-nums; letter-spacing:.01em; }
     .mbook-stat-list.lg { width:270px; gap:10px; }
     .mbook-stat-list.lg .msl-label { font-size:.96rem; }
     .mbook-stat-list.lg .msl-val { font-size:1.02rem; }
@@ -1533,17 +1563,17 @@
     .mbook-records-grass:hover { background:rgba(80,150,100,.24); }
     /* 목차 — 클릭 시 해당 책갈피로 이동 */
     .mbook-toc { display:flex; flex-direction:column; gap:14px; padding:8px 6px; }
-    .mbook-toc-item { display:flex; align-items:baseline; gap:6px; cursor:pointer; font-size:.82rem; color:#4a3318; font-weight:600; }
+    .mbook-toc-item { display:flex; align-items:baseline; gap:6px; cursor:pointer; font-size:.82rem; color:var(--book-ink-strong); font-weight:600; }
     .mbook-toc-item:hover { color:#96690a; }
     .mbook-toc-item .mbook-toc-dots { flex:1; border-bottom:1px dotted rgba(110,90,60,.5); margin-bottom:3px; }
-    .mbook-toc-item.disabled { color:rgba(74,51,24,.4); cursor:default; }
-    .mbook-toc-item.disabled:hover { color:rgba(74,51,24,.4); }
+    .mbook-toc-item.disabled { color:var(--book-ink-muted); opacity:.55; cursor:default; }
+    .mbook-toc-item.disabled:hover { color:var(--book-ink-muted); opacity:.55; }
     /* 우측 페이지(표지) — 안내문 + 버전 */
     .mbook-colophon { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:0 14px; }
-    .mbook-colophon p { font-size:.84rem; color:#6b5636; line-height:1.6; }
-    .mbook-colophon-msg { margin-top:14px; font-size:.84rem; color:#5a4a2a; line-height:1.75; }
-    .mbook-colophon-msg2 { margin-top:10px; font-size:.92rem; font-weight:700; color:#3a2c12; }
-    .mbook-colophon-cheer { margin-top:8px; font-size:1.02rem; font-weight:800; color:#2f2410; letter-spacing:.03em; }
+    .mbook-colophon p { font-size:.84rem; color:var(--book-ink); line-height:1.6; }
+    .mbook-colophon-msg { margin-top:14px; font-size:.84rem; color:var(--book-ink); line-height:1.75; }
+    .mbook-colophon-msg2 { margin-top:10px; font-size:.92rem; font-weight:700; color:var(--book-ink-strong); }
+    .mbook-colophon-cheer { margin-top:8px; font-size:1.02rem; font-weight:800; color:var(--book-ink-strong); letter-spacing:.03em; }
     .mbook-colophon-ver { position:absolute; right:6px; bottom:4px; font-size:.6rem; color:rgba(110,90,60,.55); letter-spacing:.02em; }
     .mbook-colophon-hint { position:absolute; left:0; right:0; bottom:5px; text-align:center; font-size:.6rem; color:rgba(110,90,60,.5); }
 
@@ -1601,7 +1631,7 @@
     .del-confirm-body {
       padding:28px 26px 20px;
       border-bottom:1px solid rgba(120,95,55,.22);
-      background:linear-gradient(180deg,#f4eedd,#ece3cc);
+      background:linear-gradient(180deg,var(--book-paper-mid),var(--book-paper));
     }
     .del-confirm-icon {
       font-size:1.5rem; text-align:center; margin-bottom:13px; opacity:.85;
@@ -1613,7 +1643,7 @@
       color:#8a6a1e; font-weight:800;
     }
     .del-confirm-sub {
-      font-size:.62rem; color:#8a7d64; margin-top:7px; text-align:center;
+      font-size:.62rem; color:var(--book-ink-muted); margin-top:7px; text-align:center;
       letter-spacing:.02em;
     }
     .del-confirm-actions {
@@ -7799,20 +7829,20 @@ function mbookChartHtml(completed, store, mode) {
     const y = yScale(val).toFixed(1);
     const label = mode === 'rate' ? `${Math.round(val)}%` : Math.round(val).toLocaleString();
     return `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="rgba(120,95,55,.15)"/>
-      <text x="${PAD_L - 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="#6b5636">${label}</text>`;
+      <text x="${PAD_L - 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="var(--book-ink)">${label}</text>`;
   }).join('');
 
   const y2Ticks = showKills ? [0, 0.25, 0.5, 0.75, 1].map(f => {
     const val = maxY2 * f;
     const y = yScale2(val).toFixed(1);
-    return `<text x="${W - PAD_R + 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="start" fill="#6b5636">${Math.round(val).toLocaleString()}</text>`;
+    return `<text x="${W - PAD_R + 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="start" fill="var(--book-ink)">${Math.round(val).toLocaleString()}</text>`;
   }).join('') : '';
 
   const maxHours = maxX / 3600000;
   const xTicks = Array.from({ length: 6 }, (_, i) => {
     const hrs = maxHours * i / 5;
     const x = xScale(hrs * 3600000).toFixed(1);
-    return `<text x="${x}" y="${H - PAD_B + 14}" font-size="9" text-anchor="middle" fill="#6b5636">${Math.round(hrs)}h</text>`;
+    return `<text x="${x}" y="${H - PAD_B + 14}" font-size="9" text-anchor="middle" fill="var(--book-ink)">${Math.round(hrs)}h</text>`;
   }).join('');
 
   const legend = series.map(s => `<span class="mbook-chart-legend-item"><span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
@@ -8580,7 +8610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- 사냥 잔디 모달 -->
 <div id="hunt-grid-modal" onclick="if(event.target===this)closeHuntGrid()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#ece3cc;border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:20px 22px 18px;position:relative;box-shadow:var(--shadow-card);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
       <span style="font-size:.9rem;font-weight:700;color:var(--dark);">🌱 도감작 잘 하고 계신가요?</span>
       <button onclick="closeHuntGrid()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;">&times;</button>
