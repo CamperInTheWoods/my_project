@@ -235,45 +235,11 @@
       --header-title-shadow: none;
     }
 
-    /* 몬스터북 안("도감작 하기" 등)은 앱 테마와 무관하게 항상 베이지 종이 배경.
-       라이트/여름/도감 테마는 원래 어두운 글씨색이라 문제 없지만, 다크테마만
-       밝은 글씨/어두운 패널 배색이라 종이 위에서 텍스트가 안 보임. 그래서 다크
-       테마를 골랐을 때만 "종이 위에서도 읽히는 다크테마 색"으로 조정 — 다른
-       테마는 원래 색 그대로 유지해서 테마별 차이는 그대로 남김 */
-    [data-theme="dark"] #mbook-overlay {
-      --brown:  #57534a;
-      --gold:   #a07d2e;
-      --green:  #3f7a4a;
-      --red:    #c65045;
-      --gray:   #726d63;
-      --dark:   #1b2530;
-      --panel:  #f2ede0;
-      --border: #c7bfa8;
-
-      --bg-input:      #f2ede0;
-      --bg-card:       #f2ede0;
-      --bg-card-sel:   #e8dcb8;
-      --bg-tab:        #e3d9c0;
-      --bg-tab-hover:  #d8cba8;
-      --bg-log:        #f2ede0;
-      --bg-log-border: #c7bfa8;
-      --bg-btn-sec:    #ece3cc;
-      --bg-tl-toggle:  #e3d9c0;
-      --bg-excl-tog:   #f2ede0;
-      --bg-prog:       #d8cba8;
-      --header-bg:     #ece3cc;
-      --header-border: #c7bfa8;
-      --header-title:  #1b2530;
-      --header-sub:    #726d63;
-      --char-label:    #726d63;
-      --tl-tog-bg:     #e3d9c0;
-      --tl-tog-col:    #8a5a1e;
-      --sw-ch-bg:      #dceefa;
-      --sw-ch-col:     #1a6fa8;
-      --sw-syn-bg:     #dceefa;
-      --sw-syn-col:    #1a6fa8;
-      --sw-syn-bdr:    #a8d4f0;
-    }
+    /* 예전엔 몬스터북 안이 테마와 무관하게 항상 밝은 베이지 종이였어서, 다크테마의
+       밝은 글씨/어두운 패널 배색이 종이 위에서 안 보이는 문제가 있어 여기서만 별도로
+       "종이 위에서도 읽히는 색"으로 오버라이드했었음. 지금은 다크테마일 때 종이 자체도
+       어둡게 바뀌므로(.mbook-metal/.mbook/.mbook-left/.mbook-right의 [data-theme="dark"]
+       규칙 참고) 더 이상 이 특수 오버라이드가 필요 없어 제거 — 기본 다크테마 색을 그대로 씀 */
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
