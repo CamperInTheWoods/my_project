@@ -8509,7 +8509,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.002.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.002.3</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9262,6 +9262,14 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.002.3', date: '26.08.06',
+    fix: [
+      '허규복 기록의 마릿수를 아이템 개수÷드롭률 역산 대신 제보받은 실제 값 그대로 표시',
+      '근사 획득시각 분배 시 사냥 종료 시점에 모든 아이템이 몰려 보이던 문제 수정',
+      '통계 페이지의 허규복 도감 목록을 레벨 낮은 순으로 정렬',
+    ],
+  },
   {
     ver: '2.002.2', date: '26.08.06',
     feat: [
