@@ -3292,9 +3292,16 @@ function _ovStyleText() {
     .ov-tl-callout.up{bottom:calc(50% + 6px);}
     .ov-tl-callout.down{top:calc(50% + 6px);}
     .ov-tl-callout-inner{position:relative;}
-    .ov-tl-callout-box{width:30px;height:30px;border:1.5px solid rgba(0,0,0,.4);border-radius:5px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;}
-    .ov-tl-callout-box img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;display:block;
+    .ov-tl-callout-box{position:relative;width:30px;height:30px;border:1.5px solid rgba(0,0,0,.4);border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;}
+    .ov-tl-callout-box img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;display:block;border-radius:4px;
       filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff);}
+    /* 아이템에 마우스 올리면 이름 표시 (본문 다시 안 그려도 CSS만으로 항상 동작) */
+    .ov-tl-callout-box:hover::after{
+      content:attr(data-name); position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+      margin-bottom:5px; background:#1e1a12; color:#f0e6c8; font-size:.6rem; font-weight:700;
+      padding:3px 7px; border-radius:5px; white-space:nowrap; pointer-events:none; z-index:20;
+      box-shadow:0 2px 6px rgba(0,0,0,.4);
+    }
     .ov-tl-arrow{width:0;height:0;margin:0 auto;}
     .ov-tl-callout.up .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #aaa;}
     .ov-tl-callout.down .ov-tl-arrow{border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #aaa;}
@@ -3610,16 +3617,27 @@ function _overlayTick() {
       tlEl.style.display = 'none';
     } else {
       tlEl.style.display = '';
-      const TL_WINDOW_MS = 3600000; // 고정 1시간
+      // 창을 오른쪽으로 늘리면(막대가 넓어지면) 보이는 시간 범위도 늘어나되, 시간당 픽셀
+      // 간격도 같이 넓어지게 sqrt 스케일 사용 — 그냥 비례로 늘리면 눈금 간격(밀도)이 그대로라
+      // "더 넓게 보이기만" 하고 안 시원해짐. width가 2배면 시간범위 약 1.41배, 눈금 간격도
+      // 약 1.41배 넓어짐(둘 다 좋아짐)
+      const TL_BASE_TRACK_PX = 442; // 기본 오버레이 폭(520px)일 때의 막대 폭 기준치
+      const TL_BASE_WINDOW_MS = 3600000; // 그 기준 폭에서 보여줄 시간 = 1시간
+      const iconColPx = mobs.length > 1 ? 27 : 52;
+      const trackWidthPx = Math.max(120, (d.body.clientWidth || 520) - iconColPx - 26);
+      const TL_WINDOW_MS = Math.min(4 * 3600000, Math.max(1200000,
+        TL_BASE_WINDOW_MS * Math.sqrt(trackWidthPx / TL_BASE_TRACK_PX)));
       const TL_NOW_PCT = 88;        // 지금 시점 위치(오른쪽 끝에서 조금 더 안쪽)
       const TL_TICK_MS = 1800000;   // 30분마다 눈금
-      const OVERLAP_PCT = 10;       // 이 이내로 가까우면 같은 클러스터로 묶음(본문 타임라인과 동일 기준)
+      const OVERLAP_PX = 24;        // 이 픽셀 이내로 가까우면 같은 클러스터로 묶음 — 시간 범위가
+                                     // 넓어져서(=간격이 벌어져서) 픽셀상 충분히 떨어지면 자동으로 풀림
       const nowMs = swElapsed(tab);
       const s = loadS();
       // 본문 타임라인(renderTimeline)과 동일한 제외 기준: 제외 아이템, 몬스터카드는 "타임라인에 표시"
       // 설정, 기준아이템이면서 숨김 처리된 경우 제외 — 여기서 다르게 걸러서 표시가 누락되면 안 됨
       const cardOffTl = !getSetting('card_in_timeline');
       const pctOf = (t) => TL_NOW_PCT * (1 - (nowMs - t) / TL_WINDOW_MS);
+      const pctToPx = (pct) => pct / 100 * trackWidthPx;
       // 동기화된 몹들은 막대(트랙/채우기/눈금/채널마커)는 하나로 합치되, 아이템 콜아웃은
       // 몹을 구분할 수 있게 1번(위) 몹은 막대 위로, 2번(아래) 몹은 뒤집어서 막대 아래로 표시
       const iconsHtml = mobs.map(m => `<img class="ov-tl-icon" src="${mobImg(m.id)}" onerror="this.style.visibility='hidden'">`).join('');
@@ -3640,18 +3658,19 @@ function _overlayTick() {
         }).sort((a, b) => a.pct - b.pct);
         const clusters = [];
         picks.forEach(p => {
-          const hit = clusters.find(c => Math.abs(c.pct - p.pct) < OVERLAP_PCT);
+          const hit = clusters.find(c => Math.abs(pctToPx(c.pct) - pctToPx(p.pct)) < OVERLAP_PX);
           if (hit) hit.items.push(p); else clusters.push({ pct: p.pct, items: [p] });
         });
         return clusters.map(({ pct, items }) => {
           const cx = Math.min(Math.max(pct, 1), TL_NOW_PCT - 1).toFixed(2);
           const rep = items[0]; // 대표 아이콘(먼저 온 것)
           const rar = tlRarity(rep.rate);
+          const repName = rep.id === MONSTER_CARD_ID ? '몬스터카드' : (rep.name || '');
           const badge = items.length > 1 ? `<div class="ov-tl-cluster-badge">+${items.length - 1}</div>` : '';
           const arrowStyle = dir === 'up' ? `border-top-color:${rar.color}` : `border-bottom-color:${rar.color}`;
           return `<div class="ov-tl-callout ${dir}" style="left:${cx}%">
             <div class="ov-tl-callout-inner">
-              <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" title="${escHtml(rep.id === MONSTER_CARD_ID ? '몬스터카드' : (rep.name || ''))}">
+              <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" data-name="${escHtml(repName)}" title="${escHtml(repName)}">
                 <img src="${rep.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(rep.id)}" onerror="this.style.visibility='hidden'">
               </div>${badge}
             </div>
