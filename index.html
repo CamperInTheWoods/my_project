@@ -6598,13 +6598,16 @@ let _mbookKillsMode = 'actual'; // 'actual' = 기준아이템 실제 획득시�
 const MBOOK_CHART_PALETTE = ['#c0453f', '#c99b2e', '#3f7fc9', '#7a4fc9', '#2f9e6e', '#d06b62', '#4f9c98', '#9275a6'];
 
 function openMonsterBook() {
-  // 항상 닫힌 책(스플래시)부터 시작 — 클릭해야 도감작 화면(책갈피)이 펼쳐짐
+  // 하다가 끄고 다시 켠 경우(진행중인 도감작 탭이 있으면)는 표지를 거치지 않고
+  // 바로 그 탭이 있는 "도감작 하기" 화면으로 열어줌. 진행중인 게 없으면 원래대로
+  // 닫힌 책(스플래시)부터 시작 — 클릭해야 도감작 화면(책갈피)이 펼쳐짐
+  const hasInProgress = tabs.some(t => t.mob);
   _mbookPage = 'hunt';
   _mbookSel = null;
   _mbookTab = 'info';
   _mbookStatSel = new Set();
-  _mbookOpened = false;
-  document.getElementById('mbook-overlay')?.classList.add('book-closed');
+  _mbookOpened = hasInProgress;
+  document.getElementById('mbook-overlay')?.classList.toggle('book-closed', !hasInProgress);
   mbookRenderSplash();
   mbookSyncLeftTabs();
   mbookSyncTabs();
@@ -6613,12 +6616,14 @@ function openMonsterBook() {
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed', getSetting('mbook_zoom'));
   document.querySelector('.mbook-metal')?.classList.toggle('zoomed-big', getSetting('mbook_zoom_big'));
   document.getElementById('mbook-overlay').classList.add('open');
-  setTimeout(() => {
-    const leaf = document.querySelector('.mbook-cover-leaf');
-    if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
-      mbookLeafClick({ currentTarget: leaf });
-    }
-  }, 1500);
+  if (!hasInProgress) {
+    setTimeout(() => {
+      const leaf = document.querySelector('.mbook-cover-leaf');
+      if (leaf && document.getElementById('mbook-overlay').classList.contains('open')) {
+        mbookLeafClick({ currentTarget: leaf });
+      }
+    }, 1500);
+  }
 }
 function closeMonsterBook() {
   mbookHideNote();
