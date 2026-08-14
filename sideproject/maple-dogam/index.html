@@ -245,17 +245,6 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* 단풍잎 커서 (설정에서 on/off) — 이스터에그 나뭇잎과 통일된 모양.
-       버튼/링크/입력창 등은 아래에서 원래 커서로 되돌려줌 */
-    body.leaf-cursor {
-      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='lf' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ff9a44'/%3E%3Cstop offset='1' stop-color='%23d9451f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M16,2 18.9,9 26.5,9.6 20.8,14.5 22.5,21.9 16,18 9.5,21.9 11.2,14.5 5.5,9.6 13.1,9Z' fill='url(%23lf)' stroke='%233a2410' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M16,5 L16,17 M16,10 L20,13 M16,10 L12,13' stroke='%23a8300f' stroke-width='0.8' stroke-linecap='round' fill='none' opacity='0.8'/%3E%3Cline x1='16' y1='18' x2='16' y2='29' stroke='%235a3820' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 16 4, auto;
-    }
-    body.leaf-cursor input, body.leaf-cursor textarea { cursor: text; }
-    body.leaf-cursor select,
-    body.leaf-cursor button,
-    body.leaf-cursor a,
-    body.leaf-cursor [onclick] { cursor: pointer; }
-
     /* 도감 테마 아이콘(📖)만 흑백으로 */
     #theme-toggle.theme-icon-mono { filter: grayscale(1); }
 
@@ -8355,7 +8344,6 @@ document.addEventListener('DOMContentLoaded', () => {
   applyMobSearchState();
   applySavesState();
   _applyHuntSectionVisibility();
-  _applyLeafCursor();
   openMonsterBook();
 });
 </script>
@@ -9087,7 +9075,6 @@ const SETTINGS = [
   { key: 'stamp_fx',         label: '아이템 처음 획득 시 도장 이팩트', def: true, group: 'general' },
   { key: 'show_hunt_log',      label: '획득 기록 표시', def: true, group: 'general' },
   { key: 'show_hunt_timeline', label: '타임라인 표시', def: true, group: 'general' },
-  { key: 'leaf_cursor',        label: '단풍잎 커서', def: true, group: 'general' },
   { key: 'ov_show_mob',    label: '몹 이미지 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_name',   label: '몹 이름 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
@@ -9125,9 +9112,6 @@ function _applyHuntSectionVisibility() {
   document.body.classList.toggle('hide-hunt-log', !getSetting('show_hunt_log'));
   document.body.classList.toggle('hide-hunt-timeline', !getSetting('show_hunt_timeline'));
 }
-function _applyLeafCursor() {
-  document.body.classList.toggle('leaf-cursor', !!getSetting('leaf_cursor'));
-}
 function onSettingChange(key, val) {
   setSetting(key, val);
   if (key.startsWith('ov_')) {
@@ -9144,8 +9128,6 @@ function onSettingChange(key, val) {
     tabs.forEach(t => { if (t.mob) { const p = getPanelOf(t.idx); if (p) renderTimeline(p, t.mob, t); } });
   } else if (key === 'show_hunt_log' || key === 'show_hunt_timeline') {
     _applyHuntSectionVisibility();
-  } else if (key === 'leaf_cursor') {
-    _applyLeafCursor();
   } else if (key === 'mbook_show_time_badge' || key === 'mbook_show_time_bg') {
     if (typeof renderMbookList === 'function' && document.getElementById('mbook-overlay')?.classList.contains('open')) renderMbookList();
   } else if (key === 'mbook_zoom' || key === 'mbook_zoom_big') {
