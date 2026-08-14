@@ -3617,20 +3617,15 @@ function _overlayTick() {
       tlEl.style.display = 'none';
     } else {
       tlEl.style.display = '';
-      // 창을 오른쪽으로 늘리면(막대가 넓어지면) 보이는 시간 범위도 늘어나되, 시간당 픽셀
-      // 간격도 같이 넓어지게 sqrt 스케일 사용 — 그냥 비례로 늘리면 눈금 간격(밀도)이 그대로라
-      // "더 넓게 보이기만" 하고 안 시원해짐. width가 2배면 시간범위 약 1.41배, 눈금 간격도
-      // 약 1.41배 넓어짐(둘 다 좋아짐)
-      const TL_BASE_TRACK_PX = 442; // 기본 오버레이 폭(520px)일 때의 막대 폭 기준치
-      const TL_BASE_WINDOW_MS = 3600000; // 그 기준 폭에서 보여줄 시간 = 1시간
+      // 보이는 시간 범위는 항상 고정 1시간 — 창을 오른쪽으로 넓히면 그 1시간을 표시하는
+      // 픽셀 폭만 늘어나서, 픽셀 밀도가 그만큼 그대로 넓어짐(=뭉쳐있던 아이템이 풀림)
+      const TL_WINDOW_MS = 3600000;
       // 직전 렌더에서 실제로 그려진 막대 폭을 우선 사용(가장 정확) — 아직 없으면(첫 렌더)
       // 오버레이 창 폭에서 아이콘/여백만큼 뺀 값으로 근사
       const iconColPx = mobs.length > 1 ? 27 : 52;
       const prevTrackEl = tlEl.querySelector('.ov-tl-track-wrap');
       const measuredPx = prevTrackEl?.getBoundingClientRect().width;
       const trackWidthPx = Math.max(120, measuredPx || ((_pipWin.innerWidth || 520) - iconColPx - 26));
-      const TL_WINDOW_MS = Math.min(4 * 3600000, Math.max(1200000,
-        TL_BASE_WINDOW_MS * Math.sqrt(trackWidthPx / TL_BASE_TRACK_PX)));
       const TL_NOW_PCT = 88;        // 지금 시점 위치(오른쪽 끝에서 조금 더 안쪽)
       const TL_TICK_MS = 1800000;   // 30분마다 눈금
       const OVERLAP_PX = 24;        // 이 픽셀 이내로 가까우면 같은 클러스터로 묶음 — 시간 범위가
