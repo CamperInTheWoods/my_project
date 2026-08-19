@@ -8674,7 +8674,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.004.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.005.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9427,6 +9427,19 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.005.0', date: '26.08.19',
+    feat: [
+      '몬스터북 바깥 배경(오버레이)을 테마별로 나뭇결/색상 구분',
+      '라이트 테마일 때 몬스터북 종이색을 더 밝게',
+      '통계 페이지의 진행중인 도감작을 최근에 손댄 순으로 정렬',
+      '통계 그래프에 마우스 올리면 해당 시점의 시간/아이템 개수/추정 마릿수 툴팁 표시',
+    ],
+    fix: [
+      '추정 마릿수 그래프에서 일괄입력·짧은 간격으로 나눠 입력한 구간이 수직선으로 튀어보이던 문제 수정 (5분 이내는 뭉쳐서 완만하게 처리)',
+      '추정 마릿수 그래프 오른쪽 Y축이 실제 곡선 값을 못 따라가 점선이 잘려보이던 문제 수정',
+    ],
+  },
   {
     ver: '2.004.1', date: '26.08.14',
     fix: [
