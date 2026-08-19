@@ -7817,8 +7817,18 @@ function mbookKillsPts(c, store) {
   if (!st || !(rate > 0) || !(st.count > 0)) return null;
   const times = Array.isArray(st.times) ? st.times.filter(t => t != null).sort((a, b) => a - b) : [];
   if (!times.length) return null;
+  // 같은 시각에 여러 개가 몰려있으면(갯수 조정으로 일괄 입력 등) 그 순간에 수직선을 그리지 않고,
+  // 하나로 묶어서 그 시점까지의 누적치만 찍음 — 그러면 직전 실제 기록 지점부터 자연스럽게
+  // 대각선으로 이어져서 "그 사이에 이만큼 사냥했다"는 취지에 맞게 표시됨
   const pts = [[0, 0]];
-  times.forEach((t, i) => pts.push([t, (i + 1) / rate]));
+  let i = 0;
+  while (i < times.length) {
+    const t = times[i];
+    let j = i;
+    while (j < times.length && times[j] === t) j++;
+    pts.push([t, j / rate]);
+    i = j;
+  }
   return pts;
 }
 function mbookChartHtml(completed, store, mode) {
