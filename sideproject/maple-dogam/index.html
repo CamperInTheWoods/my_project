@@ -78,6 +78,17 @@
       --book-border:     #d8c9a0;
     }
 
+    /* 라이트 테마(속성 없음)일 때는 book 테마의 진한 베이지 대신 더 밝은 종이색으로 */
+    html:not([data-theme]) {
+      --book-paper:      #f8f5ea;
+      --book-paper-light:#fffefa;
+      --book-paper-card: #fdfcf6;
+      --book-paper-mid:  #faf7ee;
+      --book-tab-bg:     #f0ead8;
+      --book-tab-bg-hover:#e6ddc4;
+      --book-border:     #e4dab8;
+    }
+
     [data-theme="dark"] {
       --brown:  #dcc38a;
       --gold:   #d0a83e;
