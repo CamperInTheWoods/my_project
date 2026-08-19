@@ -7817,17 +7817,18 @@ function mbookKillsPts(c, store) {
   if (!st || !(rate > 0) || !(st.count > 0)) return null;
   const times = Array.isArray(st.times) ? st.times.filter(t => t != null).sort((a, b) => a - b) : [];
   if (!times.length) return null;
-  // 같은 시각에 여러 개가 몰려있으면(갯수 조정으로 일괄 입력 등) 그 순간에 수직선을 그리지 않고,
-  // 하나로 묶어서 그 시점까지의 누적치만 찍음 — 그러면 직전 실제 기록 지점부터 자연스럽게
-  // 대각선으로 이어져서 "그 사이에 이만큼 사냥했다"는 취지에 맞게 표시됨
+  // 짧은 시간(5분) 이내에 몰려서 찍힌 픽업들은 "한 번에 입력하려다 실수로 나눠 입력한 것"으로
+  // 보고 하나로 묶어서 그 구간 끝 시점까지의 누적치만 찍음 — 그러면 직전 실제 기록 지점부터
+  // 자연스럽게 대각선으로 이어져서 "그 사이에 이만큼 사냥했다"는 취지에 맞게 표시되고,
+  // 몰아서 입력하다 두 번에 나눠 누른 정도로는 수직선처럼 안 보임
+  const CLUSTER_GAP_MS = 300000; // 5분
   const pts = [[0, 0]];
   let i = 0;
   while (i < times.length) {
-    const t = times[i];
     let j = i;
-    while (j < times.length && times[j] === t) j++;
-    pts.push([t, j / rate]);
-    i = j;
+    while (j + 1 < times.length && times[j + 1] - times[j] <= CLUSTER_GAP_MS) j++;
+    pts.push([times[j], (j + 1) / rate]);
+    i = j + 1;
   }
   return pts;
 }
