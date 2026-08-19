@@ -1373,7 +1373,14 @@
     .mbook-mob.mbook-stat-pick.picked img { filter:none; }
     .mbook-chart-block + .mbook-chart-block { margin-top:10px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
     .mbook-chart-label { font-size:.7rem; font-weight:800; color:var(--book-ink-strong); margin-bottom:3px; text-align:center; }
-    .mbook-chart-svg { width:100%; height:auto; display:block; }
+    .mbook-chart-wrap { position:relative; }
+    .mbook-chart-svg { width:100%; height:auto; display:block; cursor:crosshair; }
+    .mbook-chart-tooltip { position:absolute; z-index:5; pointer-events:none; background:var(--book-paper-card);
+      color:var(--book-ink-strong); border:1px solid var(--book-border); border-radius:6px;
+      padding:5px 8px; font-size:.62rem; line-height:1.5; box-shadow:0 3px 10px rgba(0,0,0,.35); white-space:nowrap; }
+    .mbook-chart-tooltip-time { font-weight:800; margin-bottom:2px; color:var(--book-ink); }
+    .mbook-chart-tooltip-row { display:flex; align-items:center; gap:5px; }
+    .mbook-chart-tooltip-dot { width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
     .mbook-chart-legend { display:flex; flex-wrap:wrap; gap:4px 14px; justify-content:center; margin-top:5px; }
     .mbook-chart-note { text-align:center; font-size:.6rem; color:var(--book-ink-muted); margin-top:2px; }
     .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:var(--book-ink-strong); font-weight:600; }
@@ -7910,9 +7917,75 @@ function mbookChartHtml(completed, store, mode) {
   const killsModeLabel = _mbookKillsMode === 'actual' ? '실제 획득시각 반영' : '등속 가정 직선';
   const killsNote = showKills ? `<div class="mbook-chart-note">실선: 아이템 개수(왼쪽 축) · 점선: 추정 사냥 마릿수(오른쪽 축, <button class="mbook-kills-toggle" onclick="mbookToggleKillsMode()">${killsModeLabel}</button>)</div>` : '';
 
-  return `<svg viewBox="0 0 ${W} ${H}" class="mbook-chart-svg">${yTicks}${y2Ticks}${xTicks}${paths}</svg>
+  // 그래프에 마우스 올리면 그 시점의 시간/아이템 개수/추정 마릿수를 보여주는 호버 툴팁용 컨텍스트 저장
+  _mbookChartCtxByMode[mode] = { series, mode, showKills, maxX, PAD_L, plotW, W };
+
+  return `<div class="mbook-chart-wrap">
+    <svg viewBox="0 0 ${W} ${H}" class="mbook-chart-svg">${yTicks}${y2Ticks}${xTicks}${paths}
+      <line class="mbook-chart-cursor" x1="0" y1="${PAD_T}" x2="0" y2="${(PAD_T + plotH).toFixed(1)}" stroke="rgba(90,66,30,.4)" stroke-width="1" style="display:none"/>
+      <rect x="${PAD_L}" y="${PAD_T}" width="${plotW}" height="${plotH}" fill="transparent"
+        data-chart-mode="${mode}" onmousemove="mbookChartHover(event)" onmouseleave="mbookChartHoverEnd(event)"/>
+    </svg>
+    <div class="mbook-chart-tooltip" style="display:none"></div>
     ${killsNote}
-    <div class="mbook-chart-legend">${legend}</div>`;
+    <div class="mbook-chart-legend">${legend}</div>
+  </div>`;
+}
+const _mbookChartCtxByMode = {};
+function mbookChartHover(e) {
+  const ctx = _mbookChartCtxByMode[e.currentTarget.dataset.chartMode];
+  if (!ctx) return;
+  const svg = e.currentTarget.closest('svg');
+  const wrap = svg.closest('.mbook-chart-wrap');
+  const rect = svg.getBoundingClientRect();
+  const relX = (e.clientX - rect.left) / rect.width * ctx.W;
+  const ms = Math.max(0, Math.min(ctx.maxX, (relX - ctx.PAD_L) / ctx.plotW * ctx.maxX));
+  const cursorX = (ctx.PAD_L + (ms / ctx.maxX) * ctx.plotW).toFixed(1);
+  const cursorLine = svg.querySelector('.mbook-chart-cursor');
+  if (cursorLine) { cursorLine.setAttribute('x1', cursorX); cursorLine.setAttribute('x2', cursorX); cursorLine.style.display = ''; }
+
+  const rows = ctx.series.map(s => {
+    let val = 0;
+    for (const p of s.pts) { if (p[0] <= ms) val = p[1]; else break; }
+    const valLabel = ctx.mode === 'rate' ? `${val.toFixed(1)}%` : `${Math.round(val).toLocaleString()}개`;
+    let killsLabel = '';
+    if (ctx.showKills && s.kills > 0) {
+      let kv = 0;
+      const useActual = _mbookKillsMode === 'actual' && s.killsPts && s.killsPts.length;
+      if (useActual) {
+        const kp = s.killsPts;
+        for (let i = 0; i < kp.length; i++) {
+          if (kp[i][0] > ms) break;
+          kv = kp[i][1];
+          if (i + 1 < kp.length && kp[i + 1][0] > ms) {
+            const t0 = kp[i][0], t1 = kp[i + 1][0], v0 = kp[i][1], v1 = kp[i + 1][1];
+            kv = t1 > t0 ? v0 + (v1 - v0) * (ms - t0) / (t1 - t0) : v0;
+            break;
+          }
+        }
+      } else {
+        kv = s.elapsed > 0 ? (Math.min(ms, s.elapsed) / s.elapsed) * s.kills : 0;
+      }
+      killsLabel = ` · 추정 ${Math.round(kv).toLocaleString()}마리`;
+    }
+    return `<div class="mbook-chart-tooltip-row"><span class="mbook-chart-tooltip-dot" style="background:${s.color}"></span>${escHtml(s.name)}: ${valLabel}${killsLabel}</div>`;
+  }).join('');
+
+  const tip = wrap?.querySelector('.mbook-chart-tooltip');
+  if (tip) {
+    tip.innerHTML = `<div class="mbook-chart-tooltip-time">${fmtAvgElapsed(ms)}</div>${rows}`;
+    tip.style.display = '';
+    const wrapRect = wrap.getBoundingClientRect();
+    let left = e.clientX - wrapRect.left + 12;
+    if (left + tip.offsetWidth > wrapRect.width) left = e.clientX - wrapRect.left - tip.offsetWidth - 12;
+    tip.style.left = Math.max(0, left) + 'px';
+    tip.style.top = Math.max(0, e.clientY - wrapRect.top - 10) + 'px';
+  }
+}
+function mbookChartHoverEnd(e) {
+  const wrap = e.currentTarget.closest('.mbook-chart-wrap');
+  wrap?.querySelector('.mbook-chart-tooltip')?.style.setProperty('display', 'none');
+  wrap?.querySelector('.mbook-chart-cursor')?.style.setProperty('display', 'none');
 }
 function mbookStatsHtml(c, drops, mobData, store) {
   const kills = _calcTrophyKills(c, store);
