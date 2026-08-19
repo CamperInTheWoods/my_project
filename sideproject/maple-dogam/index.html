@@ -5738,6 +5738,7 @@ function applyBulk() {
   }
   state.count = newCount;
   store[key][_bpItemId] = state;
+  touchMob(store, mob.id);
   saveS(store);
   updateCardUI(_bpItemId, state, drop, panel, mob);
   if (getSetting('stamp_fx_card') && _bpItemId === MONSTER_CARD_ID && _oldCount < 5 && newCount >= 5) _cardBurst(panel, _bpItemId);
@@ -5757,6 +5758,8 @@ function bulkOverlayClick(e) {
   if (e.target === document.getElementById('bulk-overlay')) closeBulkPopup();
 }
 
+// "진행중인 도감작" 목록을 최근에 손댄 순으로 정렬하기 위한 마지막 활동 시각(wall-clock) 기록
+function touchMob(store, mobId) { store[`touch_${mobId}`] = Date.now(); }
 function incrementItem(itemId, e) {
   // 같은 클릭 이벤트가 두 리스너로 중복 처리되어 +2 되는 것 방지 (실제 클릭에만 적용; 오버레이/일괄은 e.type 없음)
   if (e && e.type === 'click') { if (e._incDone) return; e._incDone = true; }
@@ -5778,6 +5781,7 @@ function incrementItem(itemId, e) {
   state.times.push(t);
   state.count++;
   store[key][itemId] = state;
+  touchMob(store, mob.id);
   saveS(store);
 
   updateCardUI(itemId, state, drop, panel, mob);
@@ -5818,6 +5822,7 @@ function decrementItem(e, itemId) {
     if (entries.length > 0) entries[0].remove();
   }
   store[key][itemId] = state;
+  touchMob(store, mob.id);
   saveS(store);
 
   updateCardUI(itemId, state, drop, panel, mob);
@@ -7403,8 +7408,10 @@ function mbookInProgressList(store, completed) {
     const preset = PRESET.find(m => m.id === mobId);
     const meta = store[`mob_${mobId}_meta`] || {};
     const name = (activeMob && activeMob.id === mobId) ? activeMob.name : (preset ? preset.name : (meta.name || `#${mobId}`));
-    return { mobId, name };
-  }).filter(m => !completedIds.has(m.mobId));
+    const touched = store[`touch_${mobId}`] || 0; // 최근에 손댄 순 정렬용(없으면 맨 뒤로)
+    return { mobId, name, touched };
+  }).filter(m => !completedIds.has(m.mobId))
+    .sort((a, b) => b.touched - a.touched);
 }
 // 진행중인 도감작 하나를 완료된 항목과 같은 모양(mobId/mobName/elapsed/drops/mobData)으로 변환
 function mbookInProgressEntry(mobId, store) {
