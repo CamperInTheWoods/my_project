@@ -8,7 +8,9 @@
       "Bash(powershell.exe -Command \"Get-Date -Format ''yyyy-MM-dd HH:mm''\")",
       "Bash(python -c \"print\\(''안녕하세요''\\)\")",
       "Bash(git subtree *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git branch *)"
     ]
   }
 }
