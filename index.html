@@ -7867,7 +7867,8 @@ function mbookChartHtml(completed, store, mode) {
 
   const maxX = Math.max(...series.map(s => s.elapsed), 1);
   const maxY = mode === 'rate' ? 100 : Math.max(...series.map(s => s.maxY), 1);
-  const maxY2 = showKills ? Math.max(...series.map(s => s.kills || 0), 1) : 0;
+  const _y2Peaks = series.flatMap(s => [s.kills || 0, ...((s.killsPts || []).map(p => p[1]))]);
+  const maxY2 = showKills ? Math.max(..._y2Peaks, 1) : 0;
   const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = showKills ? 34 : 10;
   const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
   const xScale = x => PAD_L + (x / maxX) * plotW;
