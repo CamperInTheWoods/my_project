@@ -1228,6 +1228,11 @@
         repeating-linear-gradient(to bottom, rgba(255,225,190,.05) 0px, rgba(255,225,190,.05) 2px, transparent 2px, transparent 13px),
         repeating-linear-gradient(to bottom, rgba(0,0,0,.1) 0px, rgba(0,0,0,.1) 3px, transparent 3px, transparent 27px); }
     .mbook-overlay.open { display:flex; }
+    /* book 테마(기본값)만 나뭇결이 잘 어울려서 그대로 두고, 다른 테마는 나뭇결 대신
+       그 테마 고유 색 그라데이션으로 — 여름/다크에서 갈색 나뭇결이 붕 뜨던 것 개선 */
+    html:not([data-theme]) .mbook-overlay { background-image:linear-gradient(160deg,#eef0f3,#cfd3d9); }
+    [data-theme="dark"] .mbook-overlay { background-image:linear-gradient(160deg,#20242c,#0e0f12); }
+    [data-theme="summer"] .mbook-overlay { background-image:linear-gradient(160deg,#eaf7fa,#b8e4ea); }
     /* 나무 뒷표지(바깥) + 금속 테(안쪽 띠, 원통형 하이라이트로 입체감) — 실제 그라데이션 밴드라 각지지 않음 */
     /* 책 옆면 — 중심(책등)에서 바깥으로 퍼져나가는 겹겹의 네모(쌓인 페이지 단면)로 표현 */
     .mbook-metal {
