@@ -2251,7 +2251,7 @@
     .bulk-overlay.open { display:flex; }
     .bulk-popup {
       background:var(--panel); border:2px solid var(--gold);
-      border-radius:16px; padding:22px 24px 18px;
+      border-radius:16px; padding:22px 24px 18px;22
       box-shadow:0 8px 40px rgba(0,0,0,.7);
       min-width:260px; max-width:320px; width:90%;
       animation:fadeIn .2s ease;
@@ -3271,12 +3271,13 @@ function _ovStyleText() {
     #ov-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
     #ov-wrap>#ov-mobs{grid-area:mobs;} #ov-wrap>.ov-name{grid-area:name;} #ov-wrap>.ov-time{grid-area:time;}
     #ov-wrap>.ov-ch-time{grid-area:chtime;} #ov-wrap>.ov-btns{grid-area:btns;}
+    #ov-wrap>.ov-last-item-time{grid-area:lastitem;}
     #ov-wrap>#ov-cards-row{grid-area:cards;} #ov-wrap>#ov-timeline{grid-area:timeline;}
     /* 타임라인 전용 레이아웃 — 몹 이미지/아이템 카드 숨기고, 왼쪽엔 시간·버튼, 오른쪽엔 길게 뻗은 타임라인 */
     body.tl-layout #ov-wrap{
       display:grid; gap:4px 14px; align-items:center; justify-items:start;
       grid-template-columns:auto 1fr;
-      grid-template-areas:"name timeline" "time timeline" "chtime timeline" "btns timeline";
+      grid-template-areas:"name timeline" "time timeline" "chtime timeline" "lastitem timeline" "btns timeline";
     }
     body.tl-layout #ov-mobs, body.tl-layout #ov-cards-row{display:none;}
     body.tl-layout .ov-name{max-width:110px;}
@@ -3288,7 +3289,6 @@ function _ovStyleText() {
     .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
     .ov-ch-time{font-family:'Courier New',monospace;font-size:.98rem;font-weight:700;color:${t.ch};}
     .ov-last-item-time{font-family:'Courier New',monospace;font-size:.98rem;font-weight:700;color:${t.warn};}
-    body.tl-layout .ov-last-item-time{display:none!important;}
     .ov-btns{display:flex;gap:6px;margin-top:2px;}
     .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
     .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
@@ -3328,8 +3328,8 @@ function _ovStyleText() {
       filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff);}
     /* 아이템에 마우스 올리면 이름 표시 (본문 다시 안 그려도 CSS만으로 항상 동작) */
     .ov-tl-callout-box:hover::after{
-      content:attr(data-name); position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
-      margin-bottom:5px; background:#1e1a12; color:#f0e6c8; font-size:.6rem; font-weight:700;
+      content:attr(data-name); position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      margin-top:5px; background:#1e1a12; color:#f0e6c8; font-size:.6rem; font-weight:700;
       padding:3px 7px; border-radius:5px; white-space:nowrap; pointer-events:none; z-index:20;
       box-shadow:0 2px 6px rgba(0,0,0,.4);
     }
@@ -3597,15 +3597,16 @@ function _overlayTick() {
       const mobData = s[`mob_${m.id}`] || {};
       const excl = new Set(s[`excl_${m.id}`] || []);
       const tlBase = s[`tl_base_${m.id}`] || null;
-      (m.drops || []).forEach(dr => {
-        if (excl.has(dr.id)) return;
-        if (tlBase && tlBase.id === dr.id) return;
-        const times = Array.isArray(mobData[dr.id]?.times) ? mobData[dr.id].times : [];
+      Object.keys(mobData).forEach(idStr => {
+        const id = Number(idStr);
+        if (excl.has(id)) return;
+        if (tlBase && tlBase.id === id) return;
+        const times = Array.isArray(mobData[idStr]?.times) ? mobData[idStr].times : [];
         times.forEach(tm => { if (tm != null && tm > lastT) lastT = tm; });
       });
     });
     if (lastT > 0) {
-      lastItemEl.textContent = `마지막 아이템 ${fmtTime(Math.max(0, swElapsed(tab) - lastT))} 전`;
+      lastItemEl.textContent = fmtTime(Math.max(0, swElapsed(tab) - lastT));
       lastItemEl.style.display = '';
     } else {
       lastItemEl.style.display = 'none';
@@ -8703,7 +8704,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.005.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9457,6 +9458,16 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.006.0', date: '26.08.20',
+    feat: [
+      '오버레이 타임라인 몹 아이콘 확대 (여백 축소)',
+      '오버레이에 "마지막 아이템(기준템 제외) 이후 경과 시간" 옵션 추가 (기본 꺼짐, 채널변경 경과 시간 바로 아래 표시)',
+    ],
+    fix: [
+      '오버레이 타임라인 아이템 호버 시 이름 툴팁이 창 위쪽에서 잘리던 문제 수정 (아래쪽에 표시되도록 변경)',
+    ],
+  },
   {
     ver: '2.005.0', date: '26.08.19',
     feat: [
