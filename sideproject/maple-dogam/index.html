@@ -602,6 +602,7 @@
       background:var(--panel); border:1px solid var(--border); border-radius:12px;
       box-shadow:0 6px 22px var(--shadow); padding:10px 0; display:none; }
     .settings-pop.open { display:block; }
+    #settings-body { max-height:340px; overflow-y:auto; }
     .settings-pop .settings-title { font-size:.7rem; font-weight:800; color:var(--dark); letter-spacing:.2px; padding:2px 14px 8px; }
     .settings-pop .settings-section + .settings-section { border-top:1px solid var(--border); margin-top:5px; padding-top:5px; }
     .settings-pop .settings-section-title { font-size:.62rem; font-weight:800; color:var(--gray); letter-spacing:.4px; padding:3px 14px 4px; }
@@ -1369,6 +1370,7 @@
     .mbook-stat-hint { text-align:center; font-size:.66rem; color:var(--book-ink); margin:-4px 0 8px; }
     .mbook-stat-divider { border:none; border-top:3px dashed rgba(110,90,60,.5); margin:16px 0 10px; }
     .mbook-stat-subtitle { font-size:.68rem; font-weight:800; color:var(--book-ink); margin:0 0 8px; text-align:center; }
+    .mbook-stat-note { font-size:.62rem; color:var(--book-ink-muted); text-align:center; line-height:1.5; margin:18px 4px 4px; }
     .mbook-mob.mbook-stat-pick img { filter:grayscale(1) opacity(.5); transition:filter .15s; }
     .mbook-mob.mbook-stat-pick.picked img { filter:none; }
     .mbook-chart-block + .mbook-chart-block { margin-top:10px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
@@ -7489,7 +7491,8 @@ function mbookStatsLeftHtml(completed, store) {
     <div class="mbook-stat-hint">몬스터를 클릭해 그래프에 추가·제거하세요</div>
     ${completed.length ? `<div class="mbook-mob-grid">${completedCells}</div>` : '<div class="mbook-empty">완료한 도감작이 없습니다</div>'}
     ${inProgress.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">진행중인 도감작</div><div class="mbook-mob-grid">${inProgressCells}</div>` : ''}
-    ${gyubokList.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">허규복의 도감</div><div class="mbook-mob-grid">${gyubokCells}</div>` : ''}`;
+    ${gyubokList.length ? `<hr class="mbook-stat-divider"><div class="mbook-stat-subtitle">허규복의 도감</div><div class="mbook-mob-grid">${gyubokCells}</div>` : ''}
+    <div class="mbook-stat-note">허규복 통계는 계속 추가중입니다.<br>영상에서 나온 마릿수 및 아이템 획득 시간이 부정확한 몹은 통계 또한 부정확할 수 있습니다.<br>참고용으로 봐주세요.</div>`;
 }
 function mbookToggleStatSel(mobId) {
   if (_mbookStatSel.has(mobId)) _mbookStatSel.delete(mobId); else _mbookStatSel.add(mobId);
@@ -8704,7 +8707,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9458,6 +9461,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.006.1', date: '26.08.20',
+    feat: [
+      '설정 팝업에 스크롤 추가 (항목이 많아져도 일부만 표시)',
+      '통계 페이지 하단에 허규복 도감 데이터 관련 안내 문구 추가',
+    ],
+  },
   {
     ver: '2.006.0', date: '26.08.20',
     feat: [
