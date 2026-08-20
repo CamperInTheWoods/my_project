@@ -3254,9 +3254,9 @@ document.addEventListener('visibilitychange', () => {
 let _pipWin = null, _pipTimer = null, _ovFitTicks = 0;
 // 오버레이 테마 팔레트 (앱 테마 자동 추종)
 const OV_THEME = {
-  light:  { bg:'#ffffff', fg:'#2b2f36', name:'#8b9098', ch:'#1a6fa8' },
-  dark:   { bg:'#181b20', fg:'#e6e8ec', name:'#8b909b', ch:'#5fb0e8' },
-  summer: { bg:'#eaf6fb', fg:'#1c3a44', name:'#4f8a99', ch:'#1a72b0' },
+  light:  { bg:'#ffffff', fg:'#2b2f36', name:'#8b9098', ch:'#1a6fa8', warn:'#b8421c' },
+  dark:   { bg:'#181b20', fg:'#e6e8ec', name:'#8b909b', ch:'#5fb0e8', warn:'#e8834a' },
+  summer: { bg:'#eaf6fb', fg:'#1c3a44', name:'#4f8a99', ch:'#1a72b0', warn:'#b8421c' },
 };
 function _ovTheme() {
   return OV_THEME[document.documentElement.getAttribute('data-theme') || 'light'] || OV_THEME.light;
@@ -3287,6 +3287,8 @@ function _ovStyleText() {
     .ov-name{font-size:.68rem;color:${t.name};max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .ov-time{font-family:'Courier New',monospace;font-size:1.7rem;font-weight:700;line-height:1;transition:opacity .2s;}
     .ov-ch-time{font-family:'Courier New',monospace;font-size:.98rem;font-weight:700;color:${t.ch};}
+    .ov-last-item-time{font-family:'Courier New',monospace;font-size:.98rem;font-weight:700;color:${t.warn};}
+    body.tl-layout .ov-last-item-time{display:none!important;}
     .ov-btns{display:flex;gap:6px;margin-top:2px;}
     .ov-btns button{font-family:inherit;font-size:.78rem;font-weight:700;border:none;border-radius:8px;padding:6px 13px;cursor:pointer;color:#fff;}
     .ov-toggle{background:#3a8a52;} .ov-toggle.run{background:#d89426;}
@@ -3308,7 +3310,7 @@ function _ovStyleText() {
     .ov-timeline{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:1px;}
     .ov-tl-row{position:relative;height:60px;display:flex;align-items:center;gap:6px;}
     .ov-tl-icons{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0;height:100%;}
-    .ov-tl-icon{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
+    .ov-tl-icon{width:58px;height:58px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
     .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:27px;height:27px;}
     .ov-tl-track-wrap{position:relative;flex:1;height:100%;}
     .ov-tl-track{position:absolute;left:0;right:0;top:50%;height:7px;transform:translateY(-50%);border-radius:4px;background:${t.name}22;overflow:hidden;}
@@ -3358,6 +3360,7 @@ function _ovStyleText() {
     body.small .ov-name{font-size:.58rem;max-width:170px;}
     body.small .ov-time{font-size:1.2rem;}
     body.small .ov-ch-time{font-size:.78rem;}
+    body.small .ov-last-item-time{font-size:.78rem;}
     body.small .ov-btns{gap:5px;}
     body.small .ov-btns button{font-size:.66rem;padding:4px 9px;border-radius:7px;}
     body.small #ov-cards-row{gap:10px;}
@@ -3371,7 +3374,7 @@ function _ovStyleText() {
     body.small .ov-mcard-cnt{font-size:.95rem;}
     body.small .ov-timeline{gap:1px;}
     body.small .ov-tl-row{height:46px;gap:4px;}
-    body.small .ov-tl-icon{width:40px;height:40px;}
+    body.small .ov-tl-icon{width:44px;height:44px;}
     body.small .ov-tl-icons:has(.ov-tl-icon:nth-child(2)) .ov-tl-icon{width:21px;height:21px;}
     body.small .ov-tl-track{height:5px;}
     body.small .ov-tl-callout-box{width:22px;height:22px;}
@@ -3462,6 +3465,7 @@ async function openOverlay() {
     <div class="ov-name" id="ov-name">-</div>
     <div class="ov-time" id="ov-time">00:00:00.00</div>
     <div class="ov-ch-time" id="ov-ch-time" style="display:none"></div>
+    <div class="ov-last-item-time" id="ov-last-item-time" style="display:none"></div>
     <div class="ov-btns">
       <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
       <button class="ov-ch" id="ov-ch">채널변경</button>
@@ -3580,6 +3584,31 @@ function _overlayTick() {
       chTimeEl.style.display = '';
     } else {
       chTimeEl.style.display = 'none';
+    }
+  }
+  // 마지막 아이템(기준템 제외, 제외 처리 안 된 것) 이후 경과
+  const lastItemEl = d.getElementById('ov-last-item-time');
+  if (lastItemEl && !getSetting('ov_show_last_item_time')) {
+    lastItemEl.style.display = 'none';
+  } else if (lastItemEl) {
+    const s = loadS();
+    let lastT = 0;
+    mobs.forEach(m => {
+      const mobData = s[`mob_${m.id}`] || {};
+      const excl = new Set(s[`excl_${m.id}`] || []);
+      const tlBase = s[`tl_base_${m.id}`] || null;
+      (m.drops || []).forEach(dr => {
+        if (excl.has(dr.id)) return;
+        if (tlBase && tlBase.id === dr.id) return;
+        const times = Array.isArray(mobData[dr.id]?.times) ? mobData[dr.id].times : [];
+        times.forEach(tm => { if (tm != null && tm > lastT) lastT = tm; });
+      });
+    });
+    if (lastT > 0) {
+      lastItemEl.textContent = `마지막 아이템 ${fmtTime(Math.max(0, swElapsed(tab) - lastT))} 전`;
+      lastItemEl.style.display = '';
+    } else {
+      lastItemEl.style.display = 'none';
     }
   }
   if (t) t.style.opacity = running ? '1' : '.38'; // 멈추면 흐리게
@@ -9227,6 +9256,7 @@ const SETTINGS = [
   { key: 'ov_show_item',   label: '기준 아이템 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_mcard',  label: '몬스터카드 표시', def: true,  group: 'overlay' },
   { key: 'ov_show_chtime', label: '채널 경과 시간 표시', def: true,  group: 'overlay' },
+  { key: 'ov_show_last_item_time', label: '마지막 아이템(기준템 제외) 이후 경과 시간 표시', def: false, group: 'overlay' },
   { key: 'ov_tl_layout',     label: '타임라인 전용 레이아웃 (가로로 길게, 몹 이미지/아이템 카드 숨김, 최근 1시간 타임라인 표시)', def: false, group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
