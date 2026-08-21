@@ -3601,6 +3601,7 @@ function _overlayTick() {
       const tlBase = s[`tl_base_${m.id}`] || null;
       Object.keys(mobData).forEach(idStr => {
         const id = Number(idStr);
+        if (id === MONSTER_CARD_ID) return;
         if (excl.has(id)) return;
         if (tlBase && tlBase.id === id) return;
         const times = Array.isArray(mobData[idStr]?.times) ? mobData[idStr].times : [];
@@ -7351,7 +7352,13 @@ function mbookRenderSplash() {
   const el = document.getElementById('mbook-splash');
   if (!el) return;
   el.classList.remove('opening');
-  const resumeIdx = tabs.findIndex(t => t.mob);
+  const _rsStore = loadS();
+  let resumeIdx = -1, _rsBestTouch = -1;
+  tabs.forEach((t, i) => {
+    if (!t.mob) return;
+    const touched = _rsStore[`touch_${t.mob.id}`] || 0;
+    if (touched > _rsBestTouch) { _rsBestTouch = touched; resumeIdx = i; }
+  });
   const postitHtml = resumeIdx === -1 ? '' : (() => {
     const tab = tabs[resumeIdx];
     const elapsedStr = fmtAvgElapsed(swElapsed(tab));
@@ -8707,7 +8714,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9461,6 +9468,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.006.2', date: '26.08.21',
+    fix: [
+      '표지 "이어하기" 포스트잇이 항상 가장 왼쪽 탭 기준으로 뜨던 문제 수정 — 가장 최근에 손댄 도감작 기준으로 표시',
+      '오버레이 "마지막 아이템 경과 시간"이 몬스터카드 획득 시 초기화되던 문제 수정 (몬스터카드도 제외 대상에 포함)',
+    ],
+  },
   {
     ver: '2.006.1', date: '26.08.20',
     feat: [
