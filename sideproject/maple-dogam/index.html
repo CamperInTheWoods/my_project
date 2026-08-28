@@ -8714,7 +8714,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.006.2</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.007.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9468,6 +9468,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.007.0', date: '26.08.28',
+    fix: [
+      '더 이상 사용하지 않는 EXE 리모컨 연동 코드 제거 — 리모컨 프로그램 없이 접속하면 3초마다 연결 실패가 반복되며 개발자도구 콘솔에 오류가 계속 쌓이던 문제 해소',
+    ],
+  },
   {
     ver: '2.006.2', date: '26.08.21',
     fix: [
