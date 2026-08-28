@@ -10476,41 +10476,6 @@ document.addEventListener('contextmenu', e => {
 // 우클릭 드래그로 선택/드래그되는 것 방지
 document.addEventListener('mousedown', e => { if (e.button === 2) e.preventDefault(); });
 
-// ── 리모컨 WebSocket 클라이언트 ───────────────────────────────
-(function _remote() {
-  let ws, _pushT = null;
-
-  function _pushState() {
-    if (!ws || ws.readyState !== 1) return;
-    const tab = activeTab();
-    const ms = tab ? swElapsed(tab) : 0;
-    const running = tab ? (tab.sw?.startTs !== null && tab.sw?.startTs !== undefined) : false;
-    const mob_id   = tab?.mob?.id   ?? null;
-    const mob_name = tab?.mob?.name ?? null;
-    const panel = getActivePanel();
-    let ch_ms = null;
-    if (panel) {
-      const entries = panel.querySelectorAll('.sw-log-entry.sw-log-channel');
-      const last = entries.length ? entries[entries.length - 1] : null;
-      if (last) ch_ms = Math.max(0, ms - (parseFloat(last.dataset.chMs) || 0));
-    }
-    try { ws.send(JSON.stringify({ type:'tick', ms, ch_ms, running, mob_id, mob_name })); } catch(e) {}
-  }
-
-  function connect() {
-    try {
-      ws = new WebSocket('ws://localhost:9999');
-      ws.onopen  = () => { _pushT = setInterval(_pushState, 300); };
-      ws.onmessage = ({ data }) => {
-        if (data === 'sw_toggle')  swToggle();
-        if (data === 'sw_channel') swChannelMark();
-      };
-      ws.onclose = () => { clearInterval(_pushT); setTimeout(connect, 3000); };
-      ws.onerror = () => {};
-    } catch(e) {}
-  }
-  connect();
-})();
 </script>
 <!-- 아이템 메모 모달 -->
 <div id="note-modal" onclick="if(event.target===this)closeNoteModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;align-items:center;justify-content:center;padding:20px;">
