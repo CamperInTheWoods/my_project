@@ -1365,6 +1365,14 @@
       color:#96690a; font-family:inherit; text-decoration:underline; text-underline-offset:2px; text-decoration-style:dashed;
       padding:0; margin-left:4px; transition:color .15s; }
     .mbook-kills-toggle:hover { color:#4a3a1e; }
+    /* 라인차트 오버레이(마릿수/기대획득량) 켜고 끄기 — 오버레이를 설명하던 문구를 그대로 버튼으로 씀.
+       켜져 있을 때(.on)는 기존 kills-toggle과 같은 톤, 꺼져 있으면 흐리게 + 취소선으로 "꺼짐"을 표시 */
+    .mbook-chart-note-toggle { font-size:.6rem; font-weight:700; cursor:pointer; border:none; background:none;
+      font-family:inherit; padding:0; transition:color .15s, opacity .15s;
+      color:var(--book-ink-muted); text-decoration:line-through; text-decoration-thickness:1px; opacity:.65; }
+    .mbook-chart-note-toggle:hover { opacity:1; }
+    .mbook-chart-note-toggle.on { color:#96690a; text-decoration:underline; text-underline-offset:2px; text-decoration-style:dashed; opacity:1; }
+    .mbook-chart-note-toggle.on:hover { color:#4a3a1e; }
     /* 왼쪽 몹 격자 (5×5 고정) */
     .mbook-mob-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:11px; }
     .mbook-stat-hint { text-align:center; font-size:.66rem; color:var(--book-ink); margin:-4px 0 8px; }
@@ -6738,6 +6746,8 @@ let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'hunt', _mbookNoteData = 
 let _mbookOpened = false; // 처음엔 닫힌 책(스플래시)만 보이고, 클릭해야 책갈피가 있는 화면이 펼쳐짐
 let _mbookStatSel = new Set();
 let _mbookKillsMode = 'actual'; // 'actual' = 기준아이템 실제 획득시각 반영, 'linear' = 등속 가정 직선
+let _mbookShowKillsLine = true;    // 굵은 점선(추정 마릿수, 오른쪽 축) 오버레이 표시 여부
+let _mbookShowExpectedLine = true; // 가는 점선(기대 획득량, 왼쪽 축) 오버레이 표시 여부
 let _mbookStatsChartMode = 'rate'; // 통계 페이지 라인차트 토글 — 'rate' = 달성률(%), 'count' = 아이템 개수
 let _mbookChartHlIdx = null; // 범례 hover/click으로 강조 중인 시리즈 인덱스 (null = 전체 표시)
 const MBOOK_CHART_PALETTE = ['#c0453f', '#c99b2e', '#3f7fc9', '#7a4fc9', '#2f9e6e', '#d06b62', '#4f9c98', '#9275a6'];
@@ -7584,6 +7594,14 @@ function mbookToggleStatsChartMode() {
   _mbookStatsChartMode = _mbookStatsChartMode === 'rate' ? 'count' : 'rate';
   renderMbookRight();
 }
+function mbookToggleShowKillsLine() {
+  _mbookShowKillsLine = !_mbookShowKillsLine;
+  renderMbookRight();
+}
+function mbookToggleShowExpectedLine() {
+  _mbookShowExpectedLine = !_mbookShowExpectedLine;
+  renderMbookRight();
+}
 const MBOOK_LEAF_MSGS = [
   '허규복 화이팅!', '도감길드 화이팅!', '우리 길드 정상 영업 합니다', '도감작 몬스터북작 파이팅',
   '좋은 하루 되세요!', '이 넓은 맵을 혼자 쓰세요?', '건강 조심하기!',
@@ -7947,7 +7965,10 @@ function mbookChartSeries(c, store, mode, respectHiddenBase) {
     const pts = [[0, 0]];
     allPicks.forEach(t => { pts.push([t, cum]); cum += 1; pts.push([t, cum]); });
     pts.push([c.elapsed, cum]);
-    return { pts, maxY: cum, elapsed: c.elapsed, markerAt };
+    // 추정 잡은 마릿수 × (기준 아이템 제외 전체 아이템 확률 합) — "평균 운이었다면 이 시점까지 이만큼
+    // 나왔을 개수" 기대값 곡선을 그리기 위한 계수. 실제 아이템 개수(cum)와 같은 왼쪽 축을 씀.
+    const expRate = qualifying.reduce((s, d) => s + parseFloat(d.rate) / 100, 0) || 0;
+    return { pts, maxY: cum, elapsed: c.elapsed, markerAt, expRate };
   }
 }
 // 마릿수 추정 기준 아이템의 실제 획득 시각(times)마다 꺾이는 사냥 마릿수 곡선
@@ -8019,11 +8040,16 @@ function mbookChartHtml(completed, store, mode) {
   }).filter(Boolean);
   if (!series.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
 
+  // 오른쪽 축(마릿수)은 그 오버레이가 실제로 켜져 있을 때만 자리를 차지 — 꺼놓으면 왼쪽 그래프가 더 넓게 씀
+  const showKillsAxis = showKills && _mbookShowKillsLine;
   const maxX = Math.max(...series.map(s => s.elapsed), 1);
-  const maxY = mode === 'rate' ? 100 : Math.max(...series.map(s => s.maxY), 1);
+  // 기대 획득량(추정 마릿수 × 확률) 곡선도 같은 왼쪽 축을 쓰므로, 켜져 있을 때만
+  // 그 곡선의 최고점(= kills × expRate)도 축 범위 계산에 포함시켜야 위쪽이 안 잘림
+  const _expPeaks = (showKills && _mbookShowExpectedLine) ? series.map(s => (s.kills || 0) * (s.expRate || 0)) : [];
+  const maxY = mode === 'rate' ? 100 : Math.max(...series.map(s => s.maxY), ..._expPeaks, 1);
   const _y2Peaks = series.flatMap(s => [s.kills || 0, ...((s.killsPts || []).map(p => p[1]))]);
-  const maxY2 = showKills ? Math.max(..._y2Peaks, 1) : 0;
-  const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = showKills ? 34 : 10;
+  const maxY2 = showKillsAxis ? Math.max(..._y2Peaks, 1) : 0;
+  const W = 560, H = 240, PAD_L = 38, PAD_B = 24, PAD_T = 10, PAD_R = showKillsAxis ? 34 : 10;
   const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
   const xScale = x => PAD_L + (x / maxX) * plotW;
   const yScale = y => PAD_T + plotH - (y / maxY) * plotH;
@@ -8035,17 +8061,26 @@ function mbookChartHtml(completed, store, mode) {
     const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1]).toFixed(1)}`).join(' ');
     const markerX = xScale(s.markerAt).toFixed(1);
     const marker = `<line x1="${markerX}" y1="${PAD_T}" x2="${markerX}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="4 3" opacity=".7"/>`;
-    let killsLine = '';
-    if (showKills && s.kills > 0) {
+    let killsLine = '', expectedLine = '';
+    // 마릿수/기대획득량 곡선은 둘 다 같은 kpts(마릿수 시계열)에서 파생되므로,
+    // 둘 중 하나라도 켜져 있으면 한 번만 계산해서 공유
+    if (showKills && s.kills > 0 && (_mbookShowKillsLine || _mbookShowExpectedLine)) {
       // 기준 아이템의 실제 획득 시각마다 꺾이는 곡선, 토글 시 등속 가정 직선으로도 볼 수 있음
       const useActual = _mbookKillsMode === 'actual' && s.killsPts && s.killsPts.length;
       const kpts = useActual ? s.killsPts.slice() : [[0, 0], [s.elapsed, s.kills]];
       if (kpts[kpts.length - 1][0] < s.elapsed) kpts.push([s.elapsed, kpts[kpts.length - 1][1]]);
-      const kd = kpts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale2(p[1]).toFixed(1)}`).join(' ');
-      killsLine = `<path d="${kd}" fill="none" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="2 3" opacity=".55"/>`;
+      if (_mbookShowKillsLine) {
+        const kd = kpts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale2(p[1]).toFixed(1)}`).join(' ');
+        killsLine = `<path d="${kd}" fill="none" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="2 3" opacity=".55"/>`;
+      }
+      // 기대 획득량 = 같은 마릿수 곡선 × (기준 아이템 제외 전체 확률 합) — 왼쪽 축(실제 개수와 동일 단위)
+      if (_mbookShowExpectedLine && s.expRate > 0) {
+        const ed = kpts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1] * s.expRate).toFixed(1)}`).join(' ');
+        expectedLine = `<path d="${ed}" fill="none" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="1 2.5" opacity=".8"/>`;
+      }
     }
     // 범례 hover/click 시 이 시리즈만 강조할 수 있도록 그룹으로 묶고 인덱스를 표시
-    return `<g class="mbook-series-g" data-idx="${i}"><path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}${killsLine}</g>`;
+    return `<g class="mbook-series-g" data-idx="${i}"><path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}${killsLine}${expectedLine}</g>`;
   }).join('');
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => {
@@ -8056,7 +8091,7 @@ function mbookChartHtml(completed, store, mode) {
       <text x="${PAD_L - 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="var(--book-ink)">${label}</text>`;
   }).join('');
 
-  const y2Ticks = showKills ? [0, 0.25, 0.5, 0.75, 1].map(f => {
+  const y2Ticks = showKillsAxis ? [0, 0.25, 0.5, 0.75, 1].map(f => {
     const val = maxY2 * f;
     const y = yScale2(val).toFixed(1);
     return `<text x="${W - PAD_R + 5}" y="${(+y + 3).toFixed(1)}" font-size="9" text-anchor="start" fill="var(--book-ink)">${Math.round(val).toLocaleString()}</text>`;
@@ -8073,7 +8108,17 @@ function mbookChartHtml(completed, store, mode) {
       onmouseenter="mbookChartLegendEnter(event,${i})" onmouseleave="mbookChartLegendLeave(event)" onclick="mbookChartLegendClick(event,${i})">
       <span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
   const killsModeLabel = _mbookKillsMode === 'actual' ? '실제 획득시각 반영' : '등속 가정 직선';
-  const killsNote = showKills ? `<div class="mbook-chart-note">실선: 아이템 개수(왼쪽 축) · 점선: 추정 사냥 마릿수(오른쪽 축, <button class="mbook-kills-toggle" onclick="mbookToggleKillsMode()">${killsModeLabel}</button>)</div>` : '';
+  // 오버레이 두 개(마릿수/기대획득량) 켜고 끄는 토글 — 새 버튼 줄을 따로 안 만들고, 그 오버레이를
+  // 설명하던 문구 자체를 클릭 가능하게 만들어서 "이게 뭔지 설명 + 켜고 끄기"를 한 자리에서 처리.
+  // 몹을 여러 개 겹쳐 놓으면 선이 3배로 늘어나 복잡해지길래(실선/마릿수/기대획득량), 필요할 때만 켜라고 추가함.
+  const killsToggleClass = 'mbook-chart-note-toggle' + (_mbookShowKillsLine ? ' on' : '');
+  const expToggleClass = 'mbook-chart-note-toggle' + (_mbookShowExpectedLine ? ' on' : '');
+  const killsModeBtn = _mbookShowKillsLine
+    ? ` (<button class="mbook-kills-toggle" onclick="mbookToggleKillsMode()">${killsModeLabel}</button>)` : '';
+  const killsNote = showKills ? `<div class="mbook-chart-note">실선: 아이템 개수(왼쪽 축)
+    · <button class="${killsToggleClass}" onclick="mbookToggleShowKillsLine()" title="켜기/끄기">굵은 점선: 추정 사냥 마릿수(오른쪽 축)</button>${killsModeBtn}
+    · <button class="${expToggleClass}" onclick="mbookToggleShowExpectedLine()" title="켜기/끄기">가는 점선: 기대 획득량(왼쪽 축, 평균 운 기준선)</button>
+  </div>` : '';
 
   // 그래프에 마우스 올리면 그 시점의 시간/아이템 개수/추정 마릿수를 보여주는 호버 툴팁용 컨텍스트 저장
   _mbookChartCtxByMode[mode] = { series, mode, showKills, maxX, PAD_L, plotW, W };
@@ -8203,8 +8248,8 @@ function mbookChartHover(e) {
     let val = 0;
     for (const p of s.pts) { if (p[0] <= ms) val = p[1]; else break; }
     const valLabel = ctx.mode === 'rate' ? `${val.toFixed(1)}%` : `${Math.round(val).toLocaleString()}개`;
-    let killsLabel = '';
-    if (ctx.showKills && s.kills > 0) {
+    let killsLabel = '', expLabel = '';
+    if (ctx.showKills && s.kills > 0 && (_mbookShowKillsLine || _mbookShowExpectedLine)) {
       let kv = 0;
       const useActual = _mbookKillsMode === 'actual' && s.killsPts && s.killsPts.length;
       if (useActual) {
@@ -8221,9 +8266,10 @@ function mbookChartHover(e) {
       } else {
         kv = s.elapsed > 0 ? (Math.min(ms, s.elapsed) / s.elapsed) * s.kills : 0;
       }
-      killsLabel = ` · 추정 ${Math.round(kv).toLocaleString()}마리`;
+      if (_mbookShowKillsLine) killsLabel = ` · 추정 ${Math.round(kv).toLocaleString()}마리`;
+      if (_mbookShowExpectedLine && s.expRate > 0) expLabel = ` · 기대 ${Math.round(kv * s.expRate).toLocaleString()}개`;
     }
-    return `<div class="mbook-chart-tooltip-row"><span class="mbook-chart-tooltip-dot" style="background:${s.color}"></span>${escHtml(s.name)}: ${valLabel}${killsLabel}</div>`;
+    return `<div class="mbook-chart-tooltip-row"><span class="mbook-chart-tooltip-dot" style="background:${s.color}"></span>${escHtml(s.name)}: ${valLabel}${killsLabel}${expLabel}</div>`;
   }).join('');
 
   const tip = wrap?.querySelector('.mbook-chart-tooltip');
@@ -8932,7 +8978,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.008.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9686,6 +9732,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.009.0', date: '26.09.09',
+    feat: [
+      '통계 페이지 "아이템 개수" 그래프에 기대 획득량(추정 마릿수 × 기준아이템 제외 확률 합) 곡선 추가 — 실제 획득량과 겹쳐서 시간대별로 운이 좋았는지 나빴는지 비교 가능',
+      '위 그래프에 마릿수/기대획득량 오버레이 각각 켜고 끄는 토글 추가 (범례 설명 문구를 그대로 버튼으로 사용) — 몹을 여러 개 겹쳐 볼 때 선이 너무 많아지는 문제 완화',
+    ],
+  },
   {
     ver: '2.008.0', date: '26.09.09',
     feat: [
