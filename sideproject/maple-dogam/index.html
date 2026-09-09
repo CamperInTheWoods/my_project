@@ -18,7 +18,7 @@
           async src="//gc.zgo.at/count.js"></script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
-  <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else if(t==='book'||t===null){document.documentElement.setAttribute('data-theme','book');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
+  <script>(function(){var t=localStorage.getItem('maple-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}else if(t==='summer'){document.documentElement.setAttribute('data-theme','summer');document.documentElement.style.colorScheme='light';}else if(t==='book'){document.documentElement.setAttribute('data-theme','book');document.documentElement.style.colorScheme='light';}else{document.documentElement.style.colorScheme='light';}})()</script>
   <style>
     :root { color-scheme: light;
       --brown:  #3a3f47;
@@ -1375,6 +1375,10 @@
     .mbook-mob.mbook-stat-pick.picked img { filter:none; }
     .mbook-chart-block + .mbook-chart-block { margin-top:10px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
     .mbook-chart-label { font-size:.7rem; font-weight:800; color:var(--book-ink-strong); margin-bottom:3px; text-align:center; }
+    /* 토글 버튼이 있는 차트 제목 — 버튼 폭만큼 반대쪽에 안 보이는 같은 버튼을 두어 제목이 항상 정중앙에 오게 함 */
+    .mbook-chart-label-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:6px; margin-bottom:3px; }
+    .mbook-chart-label-title { font-size:.7rem; font-weight:800; color:var(--book-ink-strong); text-align:center; }
+    .mbook-chart-mode-btn-ghost { visibility:hidden; pointer-events:none; }
     .mbook-chart-wrap { position:relative; }
     .mbook-chart-svg { width:100%; height:auto; display:block; cursor:crosshair; }
     .mbook-chart-tooltip { position:absolute; z-index:5; pointer-events:none; background:var(--book-paper-card);
@@ -1387,6 +1391,30 @@
     .mbook-chart-note { text-align:center; font-size:.6rem; color:var(--book-ink-muted); margin-top:2px; }
     .mbook-chart-legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:var(--book-ink-strong); font-weight:600; }
     .mbook-chart-legend-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+    .mbook-chart-mode-btn { font-size:.6rem; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
+      border:1px solid var(--book-border); background:var(--book-paper-card); color:var(--book-ink);
+      border-radius:10px; padding:2px 8px; transition:background .15s, color .15s; }
+    .mbook-chart-mode-btn:hover { background:var(--book-tab-bg-hover); color:var(--book-ink-strong); }
+    /* 범례 hover/click 강조 — 특정 몹 선만 굵게, 나머지는 흐리게 */
+    .mbook-chart-legend-item { cursor:pointer; padding:1px 5px; border-radius:5px; transition:opacity .15s, background .15s; }
+    .mbook-chart-legend-item:hover { background:rgba(120,95,55,.1); }
+    .mbook-chart-legend-item.hl { font-weight:800; background:rgba(120,95,55,.16); }
+    .mbook-chart-legend.hl-active .mbook-chart-legend-item:not(.hl) { opacity:.4; }
+    .mbook-series-g { transition:opacity .15s; }
+    .mbook-chart-svg.hl-active .mbook-series-g:not(.hl) { opacity:.15; }
+    /* 통계 페이지 — 선택한 몹 비교 막대차트(지표별 스몰멀티플) */
+    .mbook-cmp-block { margin-top:10px; padding-top:10px; border-top:1px solid rgba(120,95,55,.22); }
+    .mbook-cmp-empty { text-align:center; font-size:.66rem; color:var(--book-ink-muted); padding:12px 4px; }
+    .mbook-cmp-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:8px; }
+    .mbook-cmp-panel { background:var(--book-paper-card); border:1px solid var(--book-border); border-radius:8px; padding:8px 10px 9px; }
+    .mbook-cmp-panel-title { font-size:.64rem; font-weight:800; color:var(--book-ink-strong); text-align:center; margin-bottom:7px; }
+    .mbook-cmp-panel .mbook-cmp-empty { padding:4px 0; font-size:.6rem; }
+    .mbook-cmp-row { display:flex; align-items:center; gap:6px; margin:6px 0; }
+    .mbook-cmp-icon { width:18px; height:18px; object-fit:contain; image-rendering:pixelated; flex:0 0 auto; border-radius:3px; }
+    .mbook-cmp-track { flex:1; height:10px; background:var(--book-paper-mid); border-radius:5px; overflow:hidden; position:relative; }
+    .mbook-cmp-fill { height:100%; border-radius:5px; min-width:3px; transition:width .25s; }
+    .mbook-cmp-ref { position:absolute; top:0; bottom:0; width:0; border-left:1.5px dashed rgba(120,95,55,.55); z-index:1; }
+    .mbook-cmp-val { flex:0 0 auto; font-size:.6rem; font-weight:700; color:var(--book-ink); min-width:46px; text-align:right; font-variant-numeric:tabular-nums; }
     /* 실제 카드처럼 — 얇은 검정 테두리 > 두꺼운 흰 테두리 > 안쪽은 난이도 색 배경 */
     .mbook-mob { position:relative; aspect-ratio:1; border-radius:6px; background:#fff;
       box-shadow:0 0 0 3.75px #fff, 0 0 0 5.25px #241a12, 0 2px 4px rgba(0,0,0,.28); cursor:pointer;
@@ -6710,6 +6738,8 @@ let _mbookSel = null, _mbookTab = 'info', _mbookPage = 'hunt', _mbookNoteData = 
 let _mbookOpened = false; // 처음엔 닫힌 책(스플래시)만 보이고, 클릭해야 책갈피가 있는 화면이 펼쳐짐
 let _mbookStatSel = new Set();
 let _mbookKillsMode = 'actual'; // 'actual' = 기준아이템 실제 획득시각 반영, 'linear' = 등속 가정 직선
+let _mbookStatsChartMode = 'rate'; // 통계 페이지 라인차트 토글 — 'rate' = 달성률(%), 'count' = 아이템 개수
+let _mbookChartHlIdx = null; // 범례 hover/click으로 강조 중인 시리즈 인덱스 (null = 전체 표시)
 const MBOOK_CHART_PALETTE = ['#c0453f', '#c99b2e', '#3f7fc9', '#7a4fc9', '#2f9e6e', '#d06b62', '#4f9c98', '#9275a6'];
 
 function openMonsterBook() {
@@ -7542,11 +7572,16 @@ function mbookStatsLeftHtml(completed, store) {
 }
 function mbookToggleStatSel(mobId) {
   if (_mbookStatSel.has(mobId)) _mbookStatSel.delete(mobId); else _mbookStatSel.add(mobId);
+  _mbookChartHlLocked = false; _mbookChartHlIdx = null; // 선택이 바뀌면 시리즈 순서가 바뀌므로 강조 고정 해제
   renderMbookList();
   renderMbookRight();
 }
 function mbookToggleKillsMode() {
   _mbookKillsMode = _mbookKillsMode === 'actual' ? 'linear' : 'actual';
+  renderMbookRight();
+}
+function mbookToggleStatsChartMode() {
+  _mbookStatsChartMode = _mbookStatsChartMode === 'rate' ? 'count' : 'rate';
   renderMbookRight();
 }
 const MBOOK_LEAF_MSGS = [
@@ -7657,8 +7692,21 @@ function renderMbookRight() {
   if (_mbookPage === 'stats') {
     titleEl.innerHTML = `<span>통계</span>`;
     const store2 = loadS();
-    bodyEl.innerHTML = `<div class="mbook-chart-block"><div class="mbook-chart-label">달성률 (%)</div>${mbookChartHtml(completed, store2, 'rate')}</div>
-      <div class="mbook-chart-block"><div class="mbook-chart-label">아이템 개수 (기타 제외)</div>${mbookChartHtml(completed, store2, 'count')}</div>`;
+    const chartLabel = _mbookStatsChartMode === 'rate' ? '달성률 (%)' : '아이템 개수 (기타 제외)';
+    const otherLabel = _mbookStatsChartMode === 'rate' ? '아이템 개수' : '달성률';
+    const toggleBtnText = `${otherLabel}로 보기 ⇄`;
+    bodyEl.innerHTML = `<div class="mbook-chart-block">
+        <div class="mbook-chart-label-row">
+          <button class="mbook-chart-mode-btn mbook-chart-mode-btn-ghost" aria-hidden="true" tabindex="-1">${toggleBtnText}</button>
+          <span class="mbook-chart-label-title">${chartLabel}</span>
+          <button class="mbook-chart-mode-btn" onclick="mbookToggleStatsChartMode()" title="차트 전환">${toggleBtnText}</button>
+        </div>
+        ${mbookChartHtml(completed, store2, _mbookStatsChartMode)}
+      </div>
+      <div class="mbook-chart-block mbook-cmp-block">
+        <div class="mbook-chart-label">선택한 몹 비교</div>
+        ${mbookCmpBarsHtml(completed, store2)}
+      </div>`;
     return;
   }
   if (_mbookPage === 'gyubok') {
@@ -7674,7 +7722,7 @@ function renderMbookRight() {
     const gStore = { ...loadS(), [`tl_base_${g.mobId}`]: g.tlBase || null, [`excl_${g.mobId}`]: g.excl || [] };
     if (_mbookTab === 'stats')     bodyEl.innerHTML = mbookStatsHtml(g, gDrops, gMobData, gStore);
     else if (_mbookTab === 'items') bodyEl.innerHTML = mbookItemsHtml(g, gDrops, gMobData, gStore);
-    else                             bodyEl.innerHTML = mbookInfoHtml(g, gDrops, gMobData, gStore);
+    else                             bodyEl.innerHTML = mbookInfoHtml(g, gDrops, gMobData, gStore, true);
     return;
   }
   if (_mbookSel == null) { titleEl.textContent = '몬스터를 선택하세요'; bodyEl.innerHTML = ''; return; }
@@ -7714,14 +7762,35 @@ function mbookDifficultyGrade(c, drops, mobData, kills) {
   }
 
   const ratio = ratio1 * 0.2 + ratio3 * 0.6 + ratio4 * 0.2;
-  if (ratio >= 0.97) return 'S++';
-  if (ratio >= 0.78) return 'S+';
-  if (ratio >= 0.65) return 'S';
-  if (ratio >= 0.52) return 'A';
-  if (ratio >= 0.39) return 'B';
-  if (ratio >= 0.26) return 'C';
-  if (ratio >= 0.13) return 'D';
-  return 'F';
+  let grade;
+  if (ratio >= 0.97) grade = 'S++';
+  else if (ratio >= 0.78) grade = 'S+';
+  else if (ratio >= 0.65) grade = 'S';
+  else if (ratio >= 0.52) grade = 'A';
+  else if (ratio >= 0.39) grade = 'B';
+  else if (ratio >= 0.26) grade = 'C';
+  else if (ratio >= 0.13) grade = 'D';
+  else grade = 'F';
+  return { grade, ratio };
+}
+// 마릿수 추정용 기준 아이템은 "아이템 개수" 라인차트에서 원래 항상 제외되는데(kills 자체를 그
+// 아이템 개수÷드롭률로 역산했으니 기대치와 거의 항상 일치해서 넣으면 통계가 왜곡됨), 정보 탭
+// 운지수/비교 막대차트는 그 규칙을 안 타고 있었어서 별도로 맞춰줌 — 허규복 기록만 hidden:false로
+// 명시된 경우 예외적으로 포함(라인차트와 동일한 규칙).
+function _mbookTlBaseExcludeId(c, store, respectHiddenBase) {
+  const tlBaseObj = store[`tl_base_${c.mobId}`];
+  if (!tlBaseObj) return null;
+  if (respectHiddenBase && tlBaseObj.hidden === false) return null;
+  return tlBaseObj.id;
+}
+// 운 지수 — 제외 안 한 아이템들의 확률 합 × 사냥 마릿수(기대 총 획득량) 대비 실제 획득량.
+// 정보 탭 단일 몹 표시와 통계 페이지 비교 막대차트가 같은 값을 쓰도록 공용화.
+function _mbookLuckStats(drops, mobData, kills, excludeId) {
+  const luckDrops = drops.filter(d => parseFloat(d.rate) > 0 && itemTypeLabel(d.id) !== '기타' && d.id !== excludeId);
+  const expectedTotal = kills > 0 ? luckDrops.reduce((s, d) => s + parseFloat(d.rate) / 100 * kills, 0) : 0;
+  const actualTotal = luckDrops.reduce((s, d) => s + (mobData[d.id]?.count || 0), 0);
+  if (expectedTotal <= 0) return null;
+  return { actualTotal, expectedTotal, luckPct: actualTotal / expectedTotal * 100 };
 }
 function mbookLastItem(drops, mobData) {
   let best = null, bestT = -1;
@@ -7731,7 +7800,7 @@ function mbookLastItem(drops, mobData) {
   });
   return best;
 }
-function mbookInfoHtml(c, drops, mobData, store) {
+function mbookInfoHtml(c, drops, mobData, store, isGyubok) {
   const kills = _calcTrophyKills(c, store);
   const timeStr = c.elapsed ? fmtTime(c.elapsed).replace(/\.\d+$/, '') : '-';
   const lastItem = mbookLastItem(drops, mobData);
@@ -7755,7 +7824,7 @@ function mbookInfoHtml(c, drops, mobData, store) {
   const exp = activeRates.length ? `${_calcExpectedAll(activeRates).toLocaleString('ko-KR')}마리` : '-';
   const animBase = `https://maplestory.io/api/kms/284/mob/${c.mobId}/render`;
   const level = c.level || store[`mob_${c.mobId}_meta`]?.level || 0;
-  const difficulty = mbookDifficultyGrade(c, drops, mobData, kills) || '-';
+  const difficulty = mbookDifficultyGrade(c, drops, mobData, kills)?.grade || '-';
   const bigRows = [
     ['레벨', level ? `Lv.${level}` : '-'],
     ['소요 시간', timeStr],
@@ -7763,12 +7832,10 @@ function mbookInfoHtml(c, drops, mobData, store) {
     ['수집 난이도', difficulty],
   ];
   const dateLabel = c.date ? c.date.replace(/-/g, '.') : '-';
-  // 운 지수 — 제외 안 한 아이템들의 확률 합 × 사냥 마릿수(기대 총 획득량) 대비 실제 획득량
-  const luckDrops = drops.filter(d => parseFloat(d.rate) > 0 && itemTypeLabel(d.id) !== '기타');
-  const expectedTotal = kills > 0 ? luckDrops.reduce((s, d) => s + parseFloat(d.rate) / 100 * kills, 0) : 0;
-  const actualTotal = luckDrops.reduce((s, d) => s + (mobData[d.id]?.count || 0), 0);
-  const luckLabel = expectedTotal > 0
-    ? `${actualTotal.toLocaleString()}개 / 기대 ${Math.round(expectedTotal).toLocaleString()}개 (${actualTotal >= expectedTotal ? '+' : ''}${Math.round((actualTotal / expectedTotal - 1) * 100)}%)`
+  const tlExcludeId = _mbookTlBaseExcludeId(c, store, !!isGyubok);
+  const luck = _mbookLuckStats(drops, mobData, kills, tlExcludeId);
+  const luckLabel = luck
+    ? `${luck.actualTotal.toLocaleString()}개 / 기대 ${Math.round(luck.expectedTotal).toLocaleString()}개 (${luck.actualTotal >= luck.expectedTotal ? '+' : ''}${Math.round((luck.actualTotal / luck.expectedTotal - 1) * 100)}%)`
     : '-';
   const smallRows = [
     ['마지막 아이템', lastItemLabel],
@@ -7918,28 +7985,36 @@ function mbookKillsPts(c, store) {
   }
   return pts;
 }
+// 통계 페이지에서 고른 몹 하나(mobId 또는 'g:'+id = 허규복 기록)를 실제 데이터로 풀어냄.
+// 라인차트/막대 비교차트가 동일한 방식으로 몹을 찾도록 공용화.
+function _mbookResolveSelEntry(key, completed, store) {
+  const isGyubok = typeof key === 'string' && key.startsWith('g:');
+  let c, effStore = store;
+  if (isGyubok) {
+    const gid = Number(key.slice(2));
+    c = ((typeof GYUBOK_DATA !== 'undefined' ? GYUBOK_DATA : [])).find(x => x.mobId === gid);
+    if (!c) return null;
+    // 내 tl_base/제외 설정이 같은 mobId에 섞여 들어가지 않도록 허규복 전용 store로 분리
+    effStore = { ...store, [`tl_base_${c.mobId}`]: c.tlBase || null, [`excl_${c.mobId}`]: c.excl || [] };
+  } else {
+    c = completed.find(x => x.mobId === key) || mbookInProgressEntry(key, store);
+  }
+  if (!c) return null;
+  const name = isGyubok ? `${c.mobName} (허규복)` : c.mobName;
+  return { c, effStore, isGyubok, name };
+}
 function mbookChartHtml(completed, store, mode) {
   const selMobs = Array.from(_mbookStatSel);
   if (!selMobs.length) return '<div class="mbook-empty">아래에서 몬스터를 선택하면 그래프에 표시됩니다</div>';
   const showKills = mode === 'count'; // 아이템 개수 차트에만 추정 사냥 마릿수 오버레이(오른쪽 축)
   const series = selMobs.map((key, i) => {
-    const isGyubok = typeof key === 'string' && key.startsWith('g:');
-    let c, effStore = store;
-    if (isGyubok) {
-      const gid = Number(key.slice(2));
-      c = ((typeof GYUBOK_DATA !== 'undefined' ? GYUBOK_DATA : [])).find(x => x.mobId === gid);
-      if (!c) return null;
-      // 내 tl_base/제외 설정이 같은 mobId에 섞여 들어가지 않도록 허규복 전용 store로 분리
-      effStore = { ...store, [`tl_base_${c.mobId}`]: c.tlBase || null, [`excl_${c.mobId}`]: c.excl || [] };
-    } else {
-      c = completed.find(x => x.mobId === key) || mbookInProgressEntry(key, store);
-    }
-    if (!c) return null;
+    const entry = _mbookResolveSelEntry(key, completed, store);
+    if (!entry) return null;
+    const { c, effStore, isGyubok, name } = entry;
     const s = mbookChartSeries(c, effStore, mode, isGyubok);
     if (!s) return null;
     const kills = showKills ? _calcTrophyKills(c, effStore) : 0;
     const killsPts = showKills ? mbookKillsPts(c, effStore) : null;
-    const name = isGyubok ? `${c.mobName} (허규복)` : c.mobName;
     return { name, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], kills, killsPts, ...s };
   }).filter(Boolean);
   if (!series.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
@@ -7954,7 +8029,7 @@ function mbookChartHtml(completed, store, mode) {
   const yScale = y => PAD_T + plotH - (y / maxY) * plotH;
   const yScale2 = y => PAD_T + plotH - (y / maxY2) * plotH;
 
-  const paths = series.map(s => {
+  const paths = series.map((s, i) => {
     const pts = s.pts.slice();
     // 완료 여부와 상관없이 실제 도달한 지점(마지막 데이터)에서 선을 끊음 — 완료 후 끝까지 평평하게 늘리지 않음
     const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale(p[1]).toFixed(1)}`).join(' ');
@@ -7969,7 +8044,8 @@ function mbookChartHtml(completed, store, mode) {
       const kd = kpts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(1)},${yScale2(p[1]).toFixed(1)}`).join(' ');
       killsLine = `<path d="${kd}" fill="none" stroke="${s.color}" stroke-width="1.3" stroke-dasharray="2 3" opacity=".55"/>`;
     }
-    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}${killsLine}`;
+    // 범례 hover/click 시 이 시리즈만 강조할 수 있도록 그룹으로 묶고 인덱스를 표시
+    return `<g class="mbook-series-g" data-idx="${i}"><path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>${marker}${killsLine}</g>`;
   }).join('');
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => {
@@ -7993,7 +8069,9 @@ function mbookChartHtml(completed, store, mode) {
     return `<text x="${x}" y="${H - PAD_B + 14}" font-size="9" text-anchor="middle" fill="var(--book-ink)">${Math.round(hrs)}h</text>`;
   }).join('');
 
-  const legend = series.map(s => `<span class="mbook-chart-legend-item"><span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
+  const legend = series.map((s, i) => `<span class="mbook-chart-legend-item" data-idx="${i}"
+      onmouseenter="mbookChartLegendEnter(event,${i})" onmouseleave="mbookChartLegendLeave(event)" onclick="mbookChartLegendClick(event,${i})">
+      <span class="mbook-chart-legend-dot" style="background:${s.color}"></span>${escHtml(s.name)}</span>`).join('');
   const killsModeLabel = _mbookKillsMode === 'actual' ? '실제 획득시각 반영' : '등속 가정 직선';
   const killsNote = showKills ? `<div class="mbook-chart-note">실선: 아이템 개수(왼쪽 축) · 점선: 추정 사냥 마릿수(오른쪽 축, <button class="mbook-kills-toggle" onclick="mbookToggleKillsMode()">${killsModeLabel}</button>)</div>` : '';
 
@@ -8011,7 +8089,104 @@ function mbookChartHtml(completed, store, mode) {
     <div class="mbook-chart-legend">${legend}</div>
   </div>`;
 }
+// 범례 항목에 hover하면 그 시리즈(선+마커)만 진하게, 나머지는 흐리게 — 3개 이상 겹칠 때 특정 몹 추적용.
+// 클릭하면 hover가 끝나도 강조가 유지되는 "고정" 상태로 전환(터치 기기 대응), 같은 항목을 다시 클릭하면 해제.
+let _mbookChartHlLocked = false;
+function _mbookChartApplyHl(wrap, idx) {
+  if (!wrap) return;
+  const svg = wrap.querySelector('.mbook-chart-svg');
+  const legend = wrap.querySelector('.mbook-chart-legend');
+  if (svg) {
+    svg.classList.toggle('hl-active', idx != null);
+    svg.querySelectorAll('.mbook-series-g').forEach(g => g.classList.toggle('hl', Number(g.dataset.idx) === idx));
+  }
+  if (legend) {
+    legend.classList.toggle('hl-active', idx != null);
+    legend.querySelectorAll('.mbook-chart-legend-item').forEach(el => el.classList.toggle('hl', Number(el.dataset.idx) === idx));
+  }
+}
+function mbookChartLegendEnter(e, idx) {
+  if (_mbookChartHlLocked) return;
+  _mbookChartHlIdx = idx;
+  _mbookChartApplyHl(e.currentTarget.closest('.mbook-chart-wrap'), idx);
+}
+function mbookChartLegendLeave(e) {
+  if (_mbookChartHlLocked) return;
+  _mbookChartHlIdx = null;
+  _mbookChartApplyHl(e.currentTarget.closest('.mbook-chart-wrap'), null);
+}
+function mbookChartLegendClick(e, idx) {
+  const wrap = e.currentTarget.closest('.mbook-chart-wrap');
+  if (_mbookChartHlLocked && _mbookChartHlIdx === idx) {
+    _mbookChartHlLocked = false; _mbookChartHlIdx = null;
+    _mbookChartApplyHl(wrap, null);
+  } else {
+    _mbookChartHlLocked = true; _mbookChartHlIdx = idx;
+    _mbookChartApplyHl(wrap, idx);
+  }
+}
 const _mbookChartCtxByMode = {};
+// 통계 페이지 "선택한 몹 비교" — 지표마다 단위/스케일이 달라(시간/마릿수/개수/%) 하나의 축에 욱여넣지 않고
+// 지표별로 작은 가로 막대차트를 따로 그리는 스몰멀티플 방식.
+// 몹 색상은 위 라인차트/범례와 동일한 인덱스로 맞춰서, 같은 몹이면 항상 같은 색으로 보이게 함.
+function _mbookCmpMetrics(entry) {
+  const { c, effStore, isGyubok } = entry;
+  const excl = new Set(effStore[`excl_${c.mobId}`] || []);
+  const drops = (c.drops || []).filter(d => !excl.has(d.id));
+  const mobData = c.mobData || {};
+  const kills = _calcTrophyKills(c, effStore) || 0;
+  const diff = mbookDifficultyGrade(c, drops, mobData, kills);
+  const base = { mobId: c.mobId, elapsed: c.elapsed || 0, kills,
+    diffGrade: diff ? diff.grade : null, diffRatio: diff ? diff.ratio : null };
+  // 초반 방송 기록처럼 정확한 획득 개수를 모르는 몹은 아이템개수/기대량/운지수를 아예 표시 안 함(오해 방지)
+  if (c.hideItemCount) return { ...base, itemCount: null, expectedCount: null, luckPct: null };
+  // 마릿수 추정에 쓴 기준 아이템은 제외 — kills 자체가 이 아이템 개수÷드롭률로 나온 값이라
+  // 넣으면 "기대량 ≈ 실제량"이 거의 항상 성립해서 운 지수가 인위적으로 100%에 가깝게 쏠림
+  const tlExcludeId = _mbookTlBaseExcludeId(c, effStore, isGyubok);
+  const luckDrops = drops.filter(d => parseFloat(d.rate) > 0 && itemTypeLabel(d.id) !== '기타' && d.id !== tlExcludeId);
+  const itemCount = luckDrops.reduce((s, d) => s + (mobData[d.id]?.count || 0), 0);
+  const expectedCount = (kills > 0 && luckDrops.length) ? luckDrops.reduce((s, d) => s + parseFloat(d.rate) / 100 * kills, 0) : null;
+  const luckPct = (expectedCount > 0) ? (itemCount / expectedCount * 100) : null;
+  return { ...base, itemCount, expectedCount, luckPct };
+}
+// 기대 획득량 = 제외 안 한 아이템들의 확률 합 × 사냥 마릿수 — "평균 운이었다면 이만큼 나왔을 개수".
+// 운 지수는 그 기대치 대비 실제 획득량 비율(100% = 딱 평균, 그 이상이면 운이 좋았던 것).
+const MBOOK_CMP_METRICS = [
+  { key: 'elapsed',       label: '소요 시간',      fmt: v => fmtHuntDur(v) },
+  { key: 'kills',         label: '사냥 마릿수',    fmt: v => `${Math.round(v).toLocaleString()}마리` },
+  { key: 'itemCount',     label: '획득 아이템 수', fmt: v => `${Math.round(v).toLocaleString()}개` },
+  { key: 'expectedCount', label: '기대 획득량',    fmt: v => `${Math.round(v).toLocaleString()}개` },
+  { key: 'luckPct',       label: '운 지수',        fmt: v => `${Math.round(v)}%`, fixedDomain: 200, refAt: 100 },
+  { key: 'diffRatio',     label: '난이도',         fmt: (v, row) => row.diffGrade || '-', fixedDomain: 1 },
+];
+function mbookCmpBarsHtml(completed, store) {
+  const selMobs = Array.from(_mbookStatSel);
+  if (!selMobs.length) return '<div class="mbook-empty">위에서 몬스터를 선택하면 항목별로 비교됩니다</div>';
+  const rows = selMobs.map((key, i) => {
+    const entry = _mbookResolveSelEntry(key, completed, store);
+    if (!entry) return null;
+    return { name: entry.name, color: MBOOK_CHART_PALETTE[i % MBOOK_CHART_PALETTE.length], m: _mbookCmpMetrics(entry) };
+  }).filter(Boolean);
+  if (!rows.length) return '<div class="mbook-empty">표시할 데이터가 없습니다</div>';
+
+  const panels = MBOOK_CMP_METRICS.map(metric => {
+    const withVal = rows.map(r => ({ r, v: r.m[metric.key] })).filter(x => x.v != null);
+    if (!withVal.length) return `<div class="mbook-cmp-panel"><div class="mbook-cmp-panel-title">${metric.label}</div><div class="mbook-cmp-empty">데이터 부족</div></div>`;
+    withVal.sort((a, b) => b.v - a.v);
+    const domainMax = metric.fixedDomain || Math.max(...withVal.map(x => x.v), 1e-9);
+    const refLine = metric.refAt != null ? `<div class="mbook-cmp-ref" style="left:${(metric.refAt / domainMax * 100).toFixed(1)}%" title="평균(${metric.refAt}%)"></div>` : '';
+    const bars = withVal.map(({ r, v }) => {
+      const pct = Math.max(3, Math.min(100, v / domainMax * 100));
+      return `<div class="mbook-cmp-row" title="${escHtml(r.name)}">
+        <img class="mbook-cmp-icon" src="${mobImg(r.m.mobId)}" onerror="this.style.display='none'">
+        <div class="mbook-cmp-track">${refLine}<div class="mbook-cmp-fill" style="width:${pct}%;background:${r.color}"></div></div>
+        <span class="mbook-cmp-val">${metric.fmt(v, r.m)}</span>
+      </div>`;
+    }).join('');
+    return `<div class="mbook-cmp-panel"><div class="mbook-cmp-panel-title">${metric.label}</div>${bars}</div>`;
+  }).join('');
+  return `<div class="mbook-cmp-grid">${panels}</div>`;
+}
 function mbookChartHover(e) {
   const ctx = _mbookChartCtxByMode[e.currentTarget.dataset.chartMode];
   if (!ctx) return;
@@ -8554,14 +8729,17 @@ function exportResultImage() {
     .catch(() => { cleanup(); alert('이미지 저장 실패. 브라우저 설정을 확인해주세요.'); });
 }
 
-// 테마 토글 아이콘 초기 동기화
-(function(){
+// 테마 토글 아이콘 초기 동기화 — #theme-toggle 버튼은 이 스크립트 블록보다 나중에 파싱되는
+// 순수 HTML(8970번대)이라 여기서 바로 찾으면 항상 null이라 조용히 아무 일도 안 하고 있었음.
+// (버튼 자체는 항상 정상 동작하지만, 저장된 테마가 dark/summer/book일 때 새로고침 직후엔
+//  실제 테마와 무관하게 아이콘이 계속 ☀️로 보이는 문제) DOMContentLoaded 이후로 옮겨서 실제로 버튼을 찾게 함.
+function syncThemeToggleIcon() {
   const btn = document.getElementById('theme-toggle');
   if (!btn) return;
   const cur = document.documentElement.getAttribute('data-theme') || 'light';
-  btn.textContent = ({light:'☀️',dark:'🌙',summer:'🏖️',book:'📖'})[cur] || '☀️';
+  btn.textContent = (typeof THEME_ICON !== 'undefined' ? THEME_ICON[cur] : null) || '☀️';
   btn.classList.toggle('theme-icon-mono', cur === 'book');
-})();
+}
 // 검색/저장된 도감작/도감 UI가 전부 도감(책) 안으로 이식되어, 그 DOM이 파싱된 뒤(DOMContentLoaded)에 초기화해야 함
 document.addEventListener('DOMContentLoaded', () => {
   renderSaves();
@@ -8571,6 +8749,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applySavesState();
   _applyHuntSectionVisibility();
   openMonsterBook();
+  syncThemeToggleIcon();
 });
 </script>
 <div class="del-confirm-overlay" id="resume-confirm-overlay">
@@ -8753,7 +8932,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.007.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.008.0</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9507,6 +9686,19 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.008.0', date: '26.09.09',
+    feat: [
+      '통계 페이지 그래프에 "달성률 ⇄ 아이템 개수" 전환 버튼 추가 — 이제 둘 다 세로로 쌓아 보여주지 않고 하나씩 전환해서 봄',
+      '통계 그래프 범례에 마우스를 올리거나 클릭하면 해당 몹의 선만 강조되고 나머지는 흐려짐 (클릭하면 계속 고정, 다시 클릭하면 해제)',
+      '통계 페이지에 "선택한 몹 비교" 막대그래프 추가 — 소요시간·사냥 마릿수·획득 아이템 수·기대 획득량·운 지수·난이도를 몹별로 한눈에 비교',
+    ],
+    fix: [
+      '최초 방문 시 기본 테마가 book(베이지 종이) 테마로 뜨던 것을 화이트(라이트) 테마로 수정',
+      '테마 토글 버튼 아이콘이 새로고침 직후엔 실제 테마와 다르게(항상 ☀️로) 보이던 문제 수정',
+      '"운 지수" 계산에 마릿수 추정용 기준 아이템이 섞여 들어가 수치가 실제보다 100%에 가깝게 왜곡되던 문제 수정 (정보 탭 · 통계 비교 막대그래프 공통)',
+    ],
+  },
   {
     ver: '2.007.1', date: '26.09.06',
     feat: [
