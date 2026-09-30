@@ -2807,6 +2807,46 @@ const PRESET = [
     ]
   },
   {
+    id:4230106, name:"루나픽시", level:45, hp:2500,
+    drops:[
+      {name:"루나픽시의 달조각",        id:4000060, rate:"50%"    },
+      {name:"마법 구름 조각",           id:4031309, rate:"6%"     },
+      {name:"뻣뻣한 깃털",              id:4003004, rate:"4%"     },
+      {name:"하얀 포션",                id:2000002, rate:"1%"     },
+      {name:"파란 포션",                id:2000003, rate:"1%"     },
+      {name:"활전용 화살",              id:2060000, rate:"0.8%"   },
+      {name:"석궁전용 화살",            id:2061000, rate:"0.8%"   },
+      {name:"은의 원석",                id:4010004, rate:"0.4%"   },
+      {name:"사파이어의 원석",          id:4020005, rate:"0.3%"   },
+      {name:"지혜의 크리스탈 원석",     id:4004001, rate:"0.1%"   },
+      {name:"마법의 돌",                id:4006000, rate:"0.08%"  },
+      {name:"블랙 슐트",                id:1082201, rate:"0.07%"  },
+      {name:"마법의 가루(검정)",        id:4007007, rate:"0.03%"  },
+      {name:"마법의 가루(파랑)",        id:4007002, rate:"0.03%"  },
+      {name:"다크 브리건",              id:1082036, rate:"0.01%"  },
+      {name:"골드 아르비욘",            id:1082045, rate:"0.01%"  },
+      {name:"화이트 피에뜨",            id:1040081, rate:"0.01%"  },
+      {name:"블루 피에뜨 바지",         id:1060070, rate:"0.01%"  },
+      {name:"황진일갑주 바지",          id:1060075, rate:"0.01%"  },
+      {name:"청진일갑주",               id:1040086, rate:"0.01%"  },
+      {name:"레드 피에르슈즈",          id:1072118, rate:"0.01%"  },
+      {name:"폴암 제작의 촉진제",       id:4130009, rate:"0.01%"  },
+      {name:"두손둔기 제작의 촉진제",   id:4130007, rate:"0.01%"  },
+      {name:"한손도끼 제작의 촉진제",   id:4130003, rate:"0.01%"  },
+      {name:"목비 표창",                id:2070002, rate:"0.01%"  },
+      {name:"노란색 우산",              id:1302016, rate:"0.008%" },
+      {name:"청선백궁",                 id:1050052, rate:"0.007%" },
+      {name:"귀 장식 행운 주문서 100%", id:2040319, rate:"0.007%" },
+      {name:"적월 바지",                id:1061079, rate:"0.007%" },
+      {name:"적월",                     id:1041080, rate:"0.007%" },
+      {name:"황 흑일모자",              id:1002210, rate:"0.007%" },
+      {name:"아쿠아 골든서클릿",        id:1002216, rate:"0.007%" },
+      {name:"블루 칼라프",              id:1051032, rate:"0.007%" },
+      {name:"신발 점프력 주문서 10%",   id:2040705, rate:"0.003%" },
+      {name:"레드 로얄미스티",          id:1002628, rate:"0.002%" },
+    ]
+  },
+  {
     id:4130100, name:"카파 드레이크", level:45, hp:2700,
     drops:[
       {name:"드레이크의 머리뼈",         id:4000014, rate:"50%"    },
@@ -8978,7 +9018,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.0</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.1</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9732,6 +9772,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.009.1', date: '26.10.01',
+    fix: [
+      '루나픽시(Lv.45) 정보가 안 불러와지던 문제 수정 — 프리셋에 직접 추가해서 검색/크롤링 없이 바로 로드되게 함',
+    ],
+  },
   {
     ver: '2.009.0', date: '26.09.09',
     feat: [
