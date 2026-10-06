@@ -3554,6 +3554,7 @@ function _desktopSend() {
 function _runDesktopCommand(cmd) {
   if (cmd.type === 'toggle') swToggle({});
   else if (cmd.type === 'channel') swChannelMark({});
+  else if (cmd.type === 'inc') { incrementItem(cmd.dropId, _ovFakeEvt(cmd.mobId)); _overlayTick(); }
 }
 function syncDesktopOverlay() {
   clearInterval(DESKTOP_OV.probeTimer);
@@ -3713,7 +3714,7 @@ function buildOverlaySnapshot() {
       return { mobId: m.id, dropId: bd.id, name: bd.name, cnt: ((store[`mob_${m.id}`] || {})[bd.id] || {}).count || 0, isAuto: !getTlBase(m.id) };
     }).filter(Boolean),
     mcards: mobs.filter(m => m.drops?.some(dr => dr.id === MONSTER_CARD_ID))
-      .map(m => ({ mobId: m.id, cnt: ((store[`mob_${m.id}`] || {})[MONSTER_CARD_ID] || {}).count || 0 })),
+      .map(m => ({ mobId: m.id, dropId: MONSTER_CARD_ID, cnt: ((store[`mob_${m.id}`] || {})[MONSTER_CARD_ID] || {}).count || 0 })),
     picks,
     settings,
   };
