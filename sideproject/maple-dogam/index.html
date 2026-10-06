@@ -3535,7 +3535,7 @@ async function _desktopProbe() {
 }
 function _desktopSend() {
   if (!DESKTOP_OV.available) return;
-  const snap = buildOverlaySnapshot();
+  const snap = buildOverlaySnapshot(true);
   if (!snap) return;
   // 설치형 창이 웹과 똑같은 스타일/테마/마크 이미지로 그리도록 같이 보냄 (스타일 텍스트는 웹 것을 그대로 재사용)
   snap.style = _ovStyleText();
@@ -3672,7 +3672,7 @@ function _ovFitSize() {
 }
 // 방송 오버레이가 그리는 데 필요한 상태를 DOM을 건드리지 않고 평범한 객체로 뽑아낸다.
 // 설치형 오버레이가 같은 데이터를 받아 그릴 수 있도록 준비하는 단계 (아직 아무도 호출하지 않음).
-function buildOverlaySnapshot() {
+function buildOverlaySnapshot(withTimeline = false) {
   const tab = activeTab();
   if (!tab) return null;
   const mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
@@ -3717,6 +3717,10 @@ function buildOverlaySnapshot() {
       .map(m => ({ mobId: m.id, dropId: MONSTER_CARD_ID, cnt: ((store[`mob_${m.id}`] || {})[MONSTER_CARD_ID] || {}).count || 0 })),
     picks,
     settings,
+    winW: _ovBaseW(),
+    timelineHtml: withTimeline && getSetting('ov_tl_layout') && mobs.length
+      ? buildOverlayTimelineHtml(mobs, tab, Math.max(120, _ovBaseW() - (mobs.length > 1 ? 27 : 52) - 26))
+      : null,
   };
 }
 function _overlayTick() {
@@ -3855,116 +3859,121 @@ function _overlayTick() {
       const prevTrackEl = tlEl.querySelector('.ov-tl-track-wrap');
       const measuredPx = prevTrackEl?.getBoundingClientRect().width;
       const trackWidthPx = Math.max(120, measuredPx || ((_pipWin.innerWidth || 520) - iconColPx - 26));
-      // 창을 넓히면 보이는 시간 범위도 같이 늘어나되, 폭보다 천천히 늘어난다.
-      // 폭 2배 → 시간 1.5배(2시간→3시간). 남는 폭이 아이템 간격으로 가기 때문에
-      // 더 긴 시간을 보면서 동시에 더 띄엄띄엄 자세하게 보인다.
-      const TL_BASE_WINDOW_MS = 7200000;   // 기본 폭에서 보이는 시간 = 2시간
-      const baseTrackPx = Math.max(120, _ovBaseW() - iconColPx - 26);
-      const widthRatio  = Math.max(1, trackWidthPx / baseTrackPx);
-      const TL_WINDOW_MS = Math.round(TL_BASE_WINDOW_MS * (1 + (widthRatio - 1) * 0.5));
-      const TL_NOW_PCT = 88;        // 지금 시점 위치(오른쪽 끝에서 조금 더 안쪽)
-      const TL_TICK_MS = 1800000;   // 30분마다 눈금
-      const OVERLAP_PX = 24;        // 이 픽셀 이내로 가까우면 같은 클러스터로 묶음 — 시간 범위가
-                                     // 넓어져서(=간격이 벌어져서) 픽셀상 충분히 떨어지면 자동으로 풀림
-      const nowMs = swElapsed(tab);
-      const s = loadS();
-      // 본문 타임라인(renderTimeline)과 동일한 제외 기준: 제외 아이템, 몬스터카드는 "타임라인에 표시"
-      // 설정, 기준아이템이면서 숨김 처리된 경우 제외 — 여기서 다르게 걸러서 표시가 누락되면 안 됨
-      const cardOffTl = !getSetting('card_in_timeline');
-      // 사냥 초반에는 '지금' 표시가 왼쪽 10%에서 시작해 오른쪽으로 흘러가고,
-      // 목표 위치(TL_NOW_PCT)에 닿으면 거기 고정되어 그때부터 타임라인이 흘러간다.
-      // 두 구간의 1ms당 픽셀 비율이 같아서 전환되는 순간에 튀지 않는다.
-      const nowPct = Math.min(TL_NOW_PCT, 10 + TL_NOW_PCT * nowMs / TL_WINDOW_MS);
-      const pctOf = (t) => nowPct - (nowMs - t) * TL_NOW_PCT / TL_WINDOW_MS;
-      const pctToPx = (pct) => pct / 100 * trackWidthPx;
-      // 동기화된 몹들은 막대(트랙/채우기/눈금/채널마커)는 하나로 합치되, 아이템 콜아웃은
-      // 몹을 구분할 수 있게 1번(위) 몹은 막대 위로, 2번(아래) 몹은 뒤집어서 막대 아래로 표시
-      const iconsHtml = mobs.map(m => `<img class="ov-tl-icon" src="${mobImg(m.id)}" onerror="this.style.visibility='hidden'">`).join('');
-
-      const calloutsHtml = mobs.map((m, mobIdx) => {
-        const dir = mobIdx % 2 === 0 ? 'up' : 'down';
-        const mobData = s[`mob_${m.id}`] || {};
-        const excl = new Set(s[`excl_${m.id}`] || []);
-        const tlBase = s[`tl_base_${m.id}`] || null;
-        const picks = (m.drops || []).flatMap(dr => {
-          if (excl.has(dr.id)) return [];
-          if (tlBase?.hidden && tlBase.id === dr.id) return [];
-          if (dr.id === MONSTER_CARD_ID && cardOffTl) return [];
-          const times = Array.isArray(mobData[dr.id]?.times) ? mobData[dr.id].times : [];
-          return times
-            .filter(t => t != null && nowMs - t >= 0 && nowMs - t <= TL_WINDOW_MS)
-            .map(t => ({ id: dr.id, name: dr.name, rate: dr.rate, pct: pctOf(t), t }));
-        }).sort((a, b) => a.pct - b.pct);
-        const clusters = [];
-        picks.forEach(p => {
-          const hit = clusters.find(c => Math.abs(pctToPx(c.pct) - pctToPx(p.pct)) < OVERLAP_PX);
-          if (hit) hit.items.push(p); else clusters.push({ pct: p.pct, items: [p] });
-        });
-        const clampPct = (v) => Math.min(Math.max(v, 1), nowPct - 1).toFixed(2);
-        const calloutHtml = (p, leftPct, ckey, badgeHtml) => {
-          const rar = tlRarity(p.rate);
-          const nm = p.id === MONSTER_CARD_ID ? '몬스터카드' : (p.name || '');
-          const arrowStyle = dir === 'up' ? `border-top-color:${rar.color}` : `border-bottom-color:${rar.color}`;
-          return `<div class="ov-tl-callout ${dir}" data-ckey="${escHtml(ckey)}" style="left:${leftPct}%">
-            <div class="ov-tl-callout-inner">
-              <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" data-name="${escHtml(nm)}" title="${escHtml(nm)}">
-                <img src="${p.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(p.id)}" onerror="this.style.visibility='hidden'">
-              </div>${badgeHtml}
-            </div>
-            <div class="ov-tl-arrow" style="${arrowStyle}"></div>
-          </div>`;
-        };
-        return clusters.map(({ pct, items }) => {
-          // 시각은 변하지 않으므로 가장 이른 획득 시각을 클러스터의 안정적인 키로 쓴다
-          const ckey = `${m.id}:${items[0].t}`;
-          if (items.length > 1 && _ovExpanded.has(ckey)) {
-            // 펼친 상태 — 겹쳐 있던 아이템을 실제 폭 기준으로 좌우 균등하게 벌려 전부 표시
-            const stepPct = 32 / trackWidthPx * 100;
-            return items.map((p, i) =>
-              calloutHtml(p, clampPct(pct + (i - (items.length - 1) / 2) * stepPct), ckey, '')
-            ).join('');
-          }
-          const badge = items.length > 1 ? `<div class="ov-tl-cluster-badge">+${items.length - 1}</div>` : '';
-          return calloutHtml(items[0], clampPct(pct), ckey, badge);
-        }).join('');
-      }).join('');
-
-      // 채널변경 마커(모든 몹 합산, 같은 시각에 겹치면 자연히 한 곳에 겹쳐 보임)
-      const chHtml = mobs.flatMap(m => s[`sw_ch_${m.id}`] || [])
-        .filter(ms => nowMs - ms >= 0 && nowMs - ms <= TL_WINDOW_MS)
-        .map(ms => `<div class="ov-tl-ch" style="left:${pctOf(ms).toFixed(2)}%"></div>`).join('');
-
-      // 30분 주기 눈금 + 시간 라벨(예: 1h30m) — 사냥 시작 기준 절대 경과시간
-      let tickHtml = '';
-      // 사냥 시작(0) 이전은 존재하지 않는 시간이므로 눈금을 그리지 않는다
-      const firstTick = Math.max(0, Math.ceil((nowMs - TL_WINDOW_MS) / TL_TICK_MS) * TL_TICK_MS);
-      for (let tms = firstTick; tms <= nowMs; tms += TL_TICK_MS) {
-        const x = pctOf(tms).toFixed(2);
-        const lh = Math.floor(tms / 3600000), lm = Math.floor((tms % 3600000) / 60000);
-        tickHtml += `<div class="ov-tl-tick" style="left:${x}%"></div>` +
-          `<div class="ov-tl-tick-label" style="left:${x}%">${lh}h${String(lm).padStart(2,'0')}m</div>`;
-      }
-
-      // 지나온 시간(왼쪽) 색상 — 본문 타임라인과 동일하게 절대 경과시간 기준 그라데이션
-      const fillGrad = `linear-gradient(90deg,${tlColor(Math.max(0, nowMs - TL_WINDOW_MS))},${tlColor(nowMs)})`;
-      // 경과 시간이 표시 범위보다 짧으면 왼쪽의 '아직 없는 시간'까지 색이 칠해지므로,
-      // 사냥 시작 지점(0초)부터 채우기 시작한다
-      const fillStartPct = Math.max(0, Math.min(nowPct, pctOf(0)));
-
-      const _winLabel = (TL_WINDOW_MS / 3600000).toFixed(TL_WINDOW_MS % 3600000 ? 1 : 0);
-      tlEl.innerHTML = `<div class="ov-tl-row" title="${escHtml(mobs.map(m => m.name).join(' / '))} — 최근 ${_winLabel}시간 (창을 넓히면 더 길게)">
-        <div class="ov-tl-icons">${iconsHtml}</div>
-        <div class="ov-tl-track-wrap">
-          <div class="ov-tl-track"><div class="ov-tl-fill" style="left:${fillStartPct.toFixed(2)}%;width:${Math.max(0, nowPct - fillStartPct).toFixed(2)}%;background:${fillGrad}"></div></div>
-          ${tickHtml}${chHtml}
-          <span class="ov-tl-now" style="left:${nowPct.toFixed(2)}%"></span>
-          ${calloutsHtml}
-        </div>
-      </div>`;
+      tlEl.innerHTML = buildOverlayTimelineHtml(mobs, tab, trackWidthPx);
     }
   }
   // 오픈/토글 직후 잠깐 동안만 창 크기를 콘텐츠에 맞춰 보정
   if (_ovFitTicks > 0) { _ovFitTicks--; _ovFitSize(); }
+}
+// 실시간 타임라인 HTML — 웹 PiP와 설치형 오버레이가 같은 결과를 쓰도록 분리
+function buildOverlayTimelineHtml(mobs, tab, trackWidthPx) {
+  const iconColPx = mobs.length > 1 ? 27 : 52;
+  // 창을 넓히면 보이는 시간 범위도 같이 늘어나되, 폭보다 천천히 늘어난다.
+  // 폭 2배 → 시간 1.5배(2시간→3시간). 남는 폭이 아이템 간격으로 가기 때문에
+  // 더 긴 시간을 보면서 동시에 더 띄엄띄엄 자세하게 보인다.
+  const TL_BASE_WINDOW_MS = 7200000;   // 기본 폭에서 보이는 시간 = 2시간
+  const baseTrackPx = Math.max(120, _ovBaseW() - iconColPx - 26);
+  const widthRatio  = Math.max(1, trackWidthPx / baseTrackPx);
+  const TL_WINDOW_MS = Math.round(TL_BASE_WINDOW_MS * (1 + (widthRatio - 1) * 0.5));
+  const TL_NOW_PCT = 88;        // 지금 시점 위치(오른쪽 끝에서 조금 더 안쪽)
+  const TL_TICK_MS = 1800000;   // 30분마다 눈금
+  const OVERLAP_PX = 24;        // 이 픽셀 이내로 가까우면 같은 클러스터로 묶음 — 시간 범위가
+                                 // 넓어져서(=간격이 벌어져서) 픽셀상 충분히 떨어지면 자동으로 풀림
+  const nowMs = swElapsed(tab);
+  const s = loadS();
+  // 본문 타임라인(renderTimeline)과 동일한 제외 기준: 제외 아이템, 몬스터카드는 "타임라인에 표시"
+  // 설정, 기준아이템이면서 숨김 처리된 경우 제외 — 여기서 다르게 걸러서 표시가 누락되면 안 됨
+  const cardOffTl = !getSetting('card_in_timeline');
+  // 사냥 초반에는 '지금' 표시가 왼쪽 10%에서 시작해 오른쪽으로 흘러가고,
+  // 목표 위치(TL_NOW_PCT)에 닿으면 거기 고정되어 그때부터 타임라인이 흘러간다.
+  // 두 구간의 1ms당 픽셀 비율이 같아서 전환되는 순간에 튀지 않는다.
+  const nowPct = Math.min(TL_NOW_PCT, 10 + TL_NOW_PCT * nowMs / TL_WINDOW_MS);
+  const pctOf = (t) => nowPct - (nowMs - t) * TL_NOW_PCT / TL_WINDOW_MS;
+  const pctToPx = (pct) => pct / 100 * trackWidthPx;
+  // 동기화된 몹들은 막대(트랙/채우기/눈금/채널마커)는 하나로 합치되, 아이템 콜아웃은
+  // 몹을 구분할 수 있게 1번(위) 몹은 막대 위로, 2번(아래) 몹은 뒤집어서 막대 아래로 표시
+  const iconsHtml = mobs.map(m => `<img class="ov-tl-icon" src="${mobImg(m.id)}" onerror="this.style.visibility='hidden'">`).join('');
+
+  const calloutsHtml = mobs.map((m, mobIdx) => {
+    const dir = mobIdx % 2 === 0 ? 'up' : 'down';
+    const mobData = s[`mob_${m.id}`] || {};
+    const excl = new Set(s[`excl_${m.id}`] || []);
+    const tlBase = s[`tl_base_${m.id}`] || null;
+    const picks = (m.drops || []).flatMap(dr => {
+      if (excl.has(dr.id)) return [];
+      if (tlBase?.hidden && tlBase.id === dr.id) return [];
+      if (dr.id === MONSTER_CARD_ID && cardOffTl) return [];
+      const times = Array.isArray(mobData[dr.id]?.times) ? mobData[dr.id].times : [];
+      return times
+        .filter(t => t != null && nowMs - t >= 0 && nowMs - t <= TL_WINDOW_MS)
+        .map(t => ({ id: dr.id, name: dr.name, rate: dr.rate, pct: pctOf(t), t }));
+    }).sort((a, b) => a.pct - b.pct);
+    const clusters = [];
+    picks.forEach(p => {
+      const hit = clusters.find(c => Math.abs(pctToPx(c.pct) - pctToPx(p.pct)) < OVERLAP_PX);
+      if (hit) hit.items.push(p); else clusters.push({ pct: p.pct, items: [p] });
+    });
+    const clampPct = (v) => Math.min(Math.max(v, 1), nowPct - 1).toFixed(2);
+    const calloutHtml = (p, leftPct, ckey, badgeHtml) => {
+      const rar = tlRarity(p.rate);
+      const nm = p.id === MONSTER_CARD_ID ? '몬스터카드' : (p.name || '');
+      const arrowStyle = dir === 'up' ? `border-top-color:${rar.color}` : `border-bottom-color:${rar.color}`;
+      return `<div class="ov-tl-callout ${dir}" data-ckey="${escHtml(ckey)}" style="left:${leftPct}%">
+        <div class="ov-tl-callout-inner">
+          <div class="ov-tl-callout-box ${rar.cls.replace('tl-', 'ov-tl-')}" data-name="${escHtml(nm)}" title="${escHtml(nm)}">
+            <img src="${p.id === MONSTER_CARD_ID ? MONSTER_CARD_IMG : itemImg(p.id)}" onerror="this.style.visibility='hidden'">
+          </div>${badgeHtml}
+        </div>
+        <div class="ov-tl-arrow" style="${arrowStyle}"></div>
+      </div>`;
+    };
+    return clusters.map(({ pct, items }) => {
+      // 시각은 변하지 않으므로 가장 이른 획득 시각을 클러스터의 안정적인 키로 쓴다
+      const ckey = `${m.id}:${items[0].t}`;
+      if (items.length > 1 && _ovExpanded.has(ckey)) {
+        // 펼친 상태 — 겹쳐 있던 아이템을 실제 폭 기준으로 좌우 균등하게 벌려 전부 표시
+        const stepPct = 32 / trackWidthPx * 100;
+        return items.map((p, i) =>
+          calloutHtml(p, clampPct(pct + (i - (items.length - 1) / 2) * stepPct), ckey, '')
+        ).join('');
+      }
+      const badge = items.length > 1 ? `<div class="ov-tl-cluster-badge">+${items.length - 1}</div>` : '';
+      return calloutHtml(items[0], clampPct(pct), ckey, badge);
+    }).join('');
+  }).join('');
+
+  // 채널변경 마커(모든 몹 합산, 같은 시각에 겹치면 자연히 한 곳에 겹쳐 보임)
+  const chHtml = mobs.flatMap(m => s[`sw_ch_${m.id}`] || [])
+    .filter(ms => nowMs - ms >= 0 && nowMs - ms <= TL_WINDOW_MS)
+    .map(ms => `<div class="ov-tl-ch" style="left:${pctOf(ms).toFixed(2)}%"></div>`).join('');
+
+  // 30분 주기 눈금 + 시간 라벨(예: 1h30m) — 사냥 시작 기준 절대 경과시간
+  let tickHtml = '';
+  // 사냥 시작(0) 이전은 존재하지 않는 시간이므로 눈금을 그리지 않는다
+  const firstTick = Math.max(0, Math.ceil((nowMs - TL_WINDOW_MS) / TL_TICK_MS) * TL_TICK_MS);
+  for (let tms = firstTick; tms <= nowMs; tms += TL_TICK_MS) {
+    const x = pctOf(tms).toFixed(2);
+    const lh = Math.floor(tms / 3600000), lm = Math.floor((tms % 3600000) / 60000);
+    tickHtml += `<div class="ov-tl-tick" style="left:${x}%"></div>` +
+      `<div class="ov-tl-tick-label" style="left:${x}%">${lh}h${String(lm).padStart(2,'0')}m</div>`;
+  }
+
+  // 지나온 시간(왼쪽) 색상 — 본문 타임라인과 동일하게 절대 경과시간 기준 그라데이션
+  const fillGrad = `linear-gradient(90deg,${tlColor(Math.max(0, nowMs - TL_WINDOW_MS))},${tlColor(nowMs)})`;
+  // 경과 시간이 표시 범위보다 짧으면 왼쪽의 '아직 없는 시간'까지 색이 칠해지므로,
+  // 사냥 시작 지점(0초)부터 채우기 시작한다
+  const fillStartPct = Math.max(0, Math.min(nowPct, pctOf(0)));
+
+  const _winLabel = (TL_WINDOW_MS / 3600000).toFixed(TL_WINDOW_MS % 3600000 ? 1 : 0);
+  return `<div class="ov-tl-row" title="${escHtml(mobs.map(m => m.name).join(' / '))} — 최근 ${_winLabel}시간 (창을 넓히면 더 길게)">
+    <div class="ov-tl-icons">${iconsHtml}</div>
+    <div class="ov-tl-track-wrap">
+      <div class="ov-tl-track"><div class="ov-tl-fill" style="left:${fillStartPct.toFixed(2)}%;width:${Math.max(0, nowPct - fillStartPct).toFixed(2)}%;background:${fillGrad}"></div></div>
+      ${tickHtml}${chHtml}
+      <span class="ov-tl-now" style="left:${nowPct.toFixed(2)}%"></span>
+      ${calloutsHtml}
+    </div>
+  </div>`;
 }
 // 특정 몹의 탭/패널을 가리키는 가짜 이벤트 (본문 increment/decrement 재사용용)
 function _ovFakeEvt(mobId) {
