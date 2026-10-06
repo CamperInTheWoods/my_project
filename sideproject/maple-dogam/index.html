@@ -3623,6 +3623,55 @@ function _ovFitSize() {
     if (Math.abs(dh) > 2 || Math.abs(dw) > 2) pip.resizeBy(-dw, -dh);
   } catch {}
 }
+// 방송 오버레이가 그리는 데 필요한 상태를 DOM을 건드리지 않고 평범한 객체로 뽑아낸다.
+// 설치형 오버레이가 같은 데이터를 받아 그릴 수 있도록 준비하는 단계 (아직 아무도 호출하지 않음).
+function buildOverlaySnapshot() {
+  const tab = activeTab();
+  if (!tab) return null;
+  const mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
+  if (!mobs.length && tab.mob) mobs.push(tab.mob);
+  const elapsedMs = swElapsed(tab);
+  const store = loadS();
+  const chEntries = getActivePanel()?.querySelectorAll('.sw-log-entry.sw-log-channel');
+  const lastCh = chEntries?.length ? chEntries[chEntries.length - 1] : null;
+  const picks = [];
+  let lastItemT = 0;
+  mobs.forEach(m => {
+    const mobData = store[`mob_${m.id}`] || {};
+    const excl = new Set(store[`excl_${m.id}`] || []);
+    const tlBase = store[`tl_base_${m.id}`] || null;
+    const names = new Map((m.drops || []).map(dr => [dr.id, dr.name]));
+    Object.keys(mobData).forEach(idStr => {
+      const id = Number(idStr);
+      if (id === MONSTER_CARD_ID || excl.has(id) || (tlBase && tlBase.id === id)) return;
+      (mobData[idStr]?.times || []).forEach(tm => {
+        if (tm == null) return;
+        picks.push({ mobId: m.id, dropId: id, name: names.get(id) || '', t: tm });
+        if (tm > lastItemT) lastItemT = tm;
+      });
+    });
+  });
+  const settings = {};
+  SETTINGS.forEach(o => {
+    if (o.key.startsWith('ov_') || o.key === 'card_in_timeline' || o.key === 'show_card') settings[o.key] = !!getSetting(o.key);
+  });
+  return {
+    running: tab.sw.startTs !== null,
+    elapsedMs,
+    chTimeMs: lastCh ? Math.max(0, elapsedMs - (parseFloat(lastCh.dataset.chMs) || 0)) : null,
+    lastItemMs: lastItemT > 0 ? Math.max(0, elapsedMs - lastItemT) : null,
+    mobs: mobs.map(m => ({ id: m.id, name: m.name, img: m.img || null })),
+    itemCards: mobs.map(m => {
+      const bd = huntBaseDrop(m);
+      if (!bd) return null;
+      return { mobId: m.id, dropId: bd.id, name: bd.name, cnt: ((store[`mob_${m.id}`] || {})[bd.id] || {}).count || 0, isAuto: !getTlBase(m.id) };
+    }).filter(Boolean),
+    mcards: mobs.filter(m => m.drops?.some(dr => dr.id === MONSTER_CARD_ID))
+      .map(m => ({ mobId: m.id, cnt: ((store[`mob_${m.id}`] || {})[MONSTER_CARD_ID] || {}).count || 0 })),
+    picks,
+    settings,
+  };
+}
 function _overlayTick() {
   if (!_pipWin || _pipWin.closed) return;
   const tab = activeTab();
