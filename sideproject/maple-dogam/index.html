@@ -3677,7 +3677,8 @@ function _overlayTick() {
   const tab = activeTab();
   const d = _pipWin.document;
   if (!tab) return; // 탭 전환 중 등 일시적으로 활성 탭이 없을 때 방어
-  const running = tab.sw.startTs !== null;
+  const snap = buildOverlaySnapshot();
+  const running = snap.running;
   let mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
   if (!mobs.length && tab.mob) mobs = [tab.mob];
   d.body.classList.toggle('tl-layout', !!getSetting('ov_tl_layout'));
@@ -3718,11 +3719,8 @@ function _overlayTick() {
   if (chTimeEl && !getSetting('ov_show_chtime')) {
     chTimeEl.style.display = 'none';
   } else if (chTimeEl) {
-    const chEntries = getActivePanel()?.querySelectorAll('.sw-log-entry.sw-log-channel');
-    const lastCh = chEntries?.length ? chEntries[chEntries.length - 1] : null;
-    if (lastCh) {
-      const lastChMs = parseFloat(lastCh.dataset.chMs) || 0;
-      chTimeEl.textContent = fmtTime(Math.max(0, swElapsed(tab) - lastChMs));
+    if (snap.chTimeMs != null) {
+      chTimeEl.textContent = fmtTime(snap.chTimeMs);
       chTimeEl.style.display = '';
     } else {
       chTimeEl.style.display = 'none';
@@ -3733,23 +3731,8 @@ function _overlayTick() {
   if (lastItemEl && !getSetting('ov_show_last_item_time')) {
     lastItemEl.style.display = 'none';
   } else if (lastItemEl) {
-    const s = loadS();
-    let lastT = 0;
-    mobs.forEach(m => {
-      const mobData = s[`mob_${m.id}`] || {};
-      const excl = new Set(s[`excl_${m.id}`] || []);
-      const tlBase = s[`tl_base_${m.id}`] || null;
-      Object.keys(mobData).forEach(idStr => {
-        const id = Number(idStr);
-        if (id === MONSTER_CARD_ID) return;
-        if (excl.has(id)) return;
-        if (tlBase && tlBase.id === id) return;
-        const times = Array.isArray(mobData[idStr]?.times) ? mobData[idStr].times : [];
-        times.forEach(tm => { if (tm != null && tm > lastT) lastT = tm; });
-      });
-    });
-    if (lastT > 0) {
-      lastItemEl.textContent = fmtTime(Math.max(0, swElapsed(tab) - lastT));
+    if (snap.lastItemMs != null) {
+      lastItemEl.textContent = fmtTime(snap.lastItemMs);
       lastItemEl.style.display = '';
     } else {
       lastItemEl.style.display = 'none';
