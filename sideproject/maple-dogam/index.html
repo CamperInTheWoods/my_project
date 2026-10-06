@@ -3537,6 +3537,10 @@ function _desktopSend() {
   if (!DESKTOP_OV.available) return;
   const snap = buildOverlaySnapshot();
   if (!snap) return;
+  // 설치형 창이 웹과 똑같은 스타일/테마/마크 이미지로 그리도록 같이 보냄 (스타일 텍스트는 웹 것을 그대로 재사용)
+  snap.style = _ovStyleText();
+  snap.theme = _ovTheme();
+  snap.mcardImg = MONSTER_CARD_IMG;
   fetch(`${DESKTOP_OV.base}/snapshot`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
