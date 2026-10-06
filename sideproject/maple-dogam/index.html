@@ -3522,7 +3522,41 @@ function _ovWinSize() {
   let h = 165; if (mob) h += 75; if (cardsRow) h += 60;
   return { w, h };
 }
+// 설치형 오버레이(도감 오버레이 앱)와 로컬 연결 — 설정을 켠 사람에게만 연결을 시도하므로
+// 기존 사용자는 로컬 요청이 아예 나가지 않음
+const DESKTOP_OV = { base: 'http://127.0.0.1:47823', available: false, probeTimer: null, sendTimer: null };
+async function _desktopProbe() {
+  try {
+    const r = await fetch(`${DESKTOP_OV.base}/ping`, { signal: AbortSignal.timeout(600) });
+    DESKTOP_OV.available = r.ok;
+  } catch {
+    DESKTOP_OV.available = false;
+  }
+}
+function _desktopSend() {
+  if (!DESKTOP_OV.available) return;
+  const snap = buildOverlaySnapshot();
+  if (!snap) return;
+  fetch(`${DESKTOP_OV.base}/snapshot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(snap),
+  }).catch(() => { DESKTOP_OV.available = false; });
+}
+function syncDesktopOverlay() {
+  clearInterval(DESKTOP_OV.probeTimer);
+  clearInterval(DESKTOP_OV.sendTimer);
+  DESKTOP_OV.probeTimer = DESKTOP_OV.sendTimer = null;
+  if (!getSetting('ov_use_desktop')) { DESKTOP_OV.available = false; return; }
+  _desktopProbe();
+  DESKTOP_OV.probeTimer = setInterval(_desktopProbe, 3000);
+  DESKTOP_OV.sendTimer = setInterval(_desktopSend, 500);
+}
 async function openOverlay() {
+  if (getSetting('ov_use_desktop') && DESKTOP_OV.available) {
+    showToast('설치형 오버레이로 표시 중입니다');
+    return;
+  }
   if (!('documentPictureInPicture' in window)) {
     alert('이 브라우저는 오버레이(문서 PiP)를 지원하지 않습니다.\n크롬/엣지 데스크톱에서 사용해 주세요.');
     return;
@@ -8868,6 +8902,7 @@ document.addEventListener('DOMContentLoaded', () => {
   _applyHuntSectionVisibility();
   openMonsterBook();
   syncThemeToggleIcon();
+  syncDesktopOverlay();
 });
 </script>
 <div class="del-confirm-overlay" id="resume-confirm-overlay">
@@ -9606,6 +9641,7 @@ const SETTINGS = [
   { key: 'ov_show_last_item_time', label: '마지막 아이템(기준템 제외) 이후 경과 시간 표시', def: false, group: 'overlay' },
   { key: 'ov_tl_layout',     label: '타임라인 전용 레이아웃 (가로로 길게, 몹 이미지/아이템 카드 숨김, 최근 1시간 타임라인 표시)', def: false, group: 'overlay' },
   { key: 'ov_small',       label: '스몰 모드 (더 작게)', def: false, group: 'overlay' },
+  { key: 'ov_use_desktop', label: '설치형 오버레이가 켜져 있으면 웹 PiP 대신 사용', def: false, group: 'overlay' },
   { key: 'mbook_show_time_badge', label: '몹 칸에 소요시간 뱃지 표시', def: true, group: 'mbook' },
   { key: 'mbook_show_time_bg',    label: '몹 칸 배경에 소요시간(난이도) 색 반영', def: true, group: 'mbook' },
   { key: 'mbook_zoom',            label: '몬스터북 확대(110%)', def: true, group: 'mbook' },
@@ -9639,6 +9675,7 @@ function _applyHuntSectionVisibility() {
 function onSettingChange(key, val) {
   setSetting(key, val);
   if (key.startsWith('ov_')) {
+    if (key === 'ov_use_desktop') syncDesktopOverlay();
     if (_pipWin && !_pipWin.closed) {
       _pipWin.document.body.classList.toggle('small', !!getSetting('ov_small'));
       _overlayTick();
