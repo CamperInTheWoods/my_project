@@ -3545,7 +3545,15 @@ function _desktopSend() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(snap),
-  }).catch(() => { DESKTOP_OV.available = false; });
+  })
+    .then(r => r.json())
+    .then(res => (res.commands || []).forEach(_runDesktopCommand))
+    .catch(() => { DESKTOP_OV.available = false; });
+}
+// 설치형 창에서 누른 버튼을 웹 쪽 기존 동작으로 그대로 실행 (이벤트 없이도 동작하도록 빈 객체 전달)
+function _runDesktopCommand(cmd) {
+  if (cmd.type === 'toggle') swToggle({});
+  else if (cmd.type === 'channel') swChannelMark({});
 }
 function syncDesktopOverlay() {
   clearInterval(DESKTOP_OV.probeTimer);
