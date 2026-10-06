@@ -3524,7 +3524,7 @@ function _ovWinSize() {
 }
 // 설치형 오버레이(도감 오버레이 앱)와 로컬 연결 — 설정을 켠 사람에게만 연결을 시도하므로
 // 기존 사용자는 로컬 요청이 아예 나가지 않음
-const DESKTOP_OV = { base: 'http://127.0.0.1:47823', available: false, probeTimer: null, sendTimer: null };
+const DESKTOP_OV = { base: 'http://127.0.0.1:47823', available: false, probeTimer: null, sendTimer: null, width: null };
 async function _desktopProbe() {
   try {
     const r = await fetch(`${DESKTOP_OV.base}/ping`, { signal: AbortSignal.timeout(600) });
@@ -3535,7 +3535,7 @@ async function _desktopProbe() {
 }
 function _desktopSend() {
   if (!DESKTOP_OV.available) return;
-  const snap = buildOverlaySnapshot(true);
+  const snap = buildOverlaySnapshot(true, DESKTOP_OV.width);
   if (!snap) return;
   // 설치형 창이 웹과 똑같은 스타일/테마/마크 이미지로 그리도록 같이 보냄 (스타일 텍스트는 웹 것을 그대로 재사용)
   snap.style = _ovStyleText();
@@ -3547,7 +3547,10 @@ function _desktopSend() {
     body: JSON.stringify(snap),
   })
     .then(r => r.json())
-    .then(res => (res.commands || []).forEach(_runDesktopCommand))
+    .then(res => {
+      if (res.width) DESKTOP_OV.width = res.width;
+      (res.commands || []).forEach(_runDesktopCommand);
+    })
     .catch(() => { DESKTOP_OV.available = false; });
 }
 // 설치형 창에서 누른 버튼을 웹 쪽 기존 동작으로 그대로 실행 (이벤트 없이도 동작하도록 빈 객체 전달)
@@ -3672,7 +3675,7 @@ function _ovFitSize() {
 }
 // 방송 오버레이가 그리는 데 필요한 상태를 DOM을 건드리지 않고 평범한 객체로 뽑아낸다.
 // 설치형 오버레이가 같은 데이터를 받아 그릴 수 있도록 준비하는 단계 (아직 아무도 호출하지 않음).
-function buildOverlaySnapshot(withTimeline = false) {
+function buildOverlaySnapshot(withTimeline = false, windowWidth = null) {
   const tab = activeTab();
   if (!tab) return null;
   const mobs = tab.synced ? tabs.filter(t => t.synced && t.mob).map(t => t.mob) : (tab.mob ? [tab.mob] : []);
@@ -3719,7 +3722,7 @@ function buildOverlaySnapshot(withTimeline = false) {
     settings,
     winW: _ovBaseW(),
     timelineHtml: withTimeline && getSetting('ov_tl_layout') && mobs.length
-      ? buildOverlayTimelineHtml(mobs, tab, Math.max(120, _ovBaseW() - (mobs.length > 1 ? 27 : 52) - 26))
+      ? buildOverlayTimelineHtml(mobs, tab, Math.max(120, (windowWidth || _ovBaseW()) - (mobs.length > 1 ? 27 : 52) - 26))
       : null,
   };
 }
