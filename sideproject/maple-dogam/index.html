@@ -3566,7 +3566,7 @@ function syncDesktopOverlay() {
   if (!getSetting('ov_use_desktop')) { DESKTOP_OV.available = false; return; }
   _desktopProbe();
   DESKTOP_OV.probeTimer = setInterval(_desktopProbe, 3000);
-  DESKTOP_OV.sendTimer = setInterval(_desktopSend, 500);
+  DESKTOP_OV.sendTimer = setInterval(_desktopSend, 200);
 }
 async function openOverlay() {
   if (getSetting('ov_use_desktop') && DESKTOP_OV.available) {
