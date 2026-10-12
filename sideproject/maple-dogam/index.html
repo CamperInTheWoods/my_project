@@ -4841,20 +4841,22 @@ function onNameInput(v) {
 // 9. CORS 프록시 (여러 개 순차 시도)
 // ══════════════════════════════════════════
 async function proxyFetch(url) {
+  // corsproxy.io는 익명 무료 사용이 중단(키 필수로 전환)되어 항상 403 — 목록에서 제거함.
+  // api.allorigins.win / api.codetabs.com도 최근 응답이 느리거나(8~15초) 자주 실패해서
+  // cors.eu.org를 1순위로 두고, 나머지는 백업으로만 남김.
   const proxies = [
     async u => {
-      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(u)}`, {signal: AbortSignal.timeout(8000)});
+      const r = await fetch(`https://cors.eu.org/${u}`, {signal: AbortSignal.timeout(10000)});
       if (!r.ok) throw new Error(r.status);
       return r.text();
     },
     async u => {
-      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, {signal: AbortSignal.timeout(8000)});
+      const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, {signal: AbortSignal.timeout(15000)});
       if (!r.ok) throw new Error(r.status);
-      const j = await r.json();
-      return j.contents;
+      return r.text();
     },
     async u => {
-      const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, {signal: AbortSignal.timeout(8000)});
+      const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, {signal: AbortSignal.timeout(15000)});
       if (!r.ok) throw new Error(r.status);
       return r.text();
     },
@@ -5032,8 +5034,9 @@ async function fetchMobDrops(mobId, knownName, knownLevel) {
 
 function parseMapleNote(html, mobId, fallbackName, fallbackLevel) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  const h2   = doc.querySelector('h2');
-  const name = (h2 ? h2.textContent.trim() : '') || fallbackName || `몬스터 #${mobId}`;
+  // 몹 이름은 <h1>에 있음 (사이트 개편으로 <h2>는 STATS/SPAWN/GET 섹션 제목이 됨 — <h2>를 쓰면 이름이 "STATS"로 잘못 들어감)
+  const h1   = doc.querySelector('h1');
+  const name = (h1 ? h1.textContent.trim() : '') || fallbackName || `몬스터 #${mobId}`;
   let level = 0;
   doc.querySelectorAll('h3').forEach(h => {
     const m = h.textContent.match(/Lv\s*:?\s*(\d+)/);
@@ -5059,7 +5062,7 @@ function parseMapleNote(html, mobId, fallbackName, fallbackLevel) {
     const rate  = nums && nums.length ? `${nums[nums.length - 1]}%` : '?';
     drops.push({ name: itemName, id: itemId, rate });
   });
-  if (!drops.length && !h2) return null;
+  if (!drops.length && !h1) return null;
   return { id: mobId, name, level, hp, drops };
 }
 
@@ -9115,7 +9118,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.1</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.2</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9871,6 +9874,13 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.009.2', date: '26.10.12',
+    fix: [
+      '[중요] 검색으로 몹을 불러올 때 메이플노트 드롭 정보가 거의 항상 로드 실패하던 문제 수정 — 쓰던 CORS 프록시(corsproxy.io)가 무료 사용을 중단해서 항상 막히고 있었음. 작동하는 프록시로 교체',
+      '메이플노트 사이트 개편으로 몹 이름이 엉뚱하게("STATS" 등) 들어가던 문제 수정 — 이름 위치가 h2에서 h1으로 바뀐 것 반영',
+    ],
+  },
   {
     ver: '2.009.1', date: '26.10.01',
     fix: [
