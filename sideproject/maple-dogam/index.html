@@ -3573,6 +3573,16 @@ function syncDesktopOverlay() {
   clearInterval(DESKTOP_OV.sendTimer);
   DESKTOP_OV.probeTimer = DESKTOP_OV.sendTimer = null;
   if (!getSetting('ov_use_desktop')) { DESKTOP_OV.available = false; return; }
+  // 진단용 — 브라우저가 "로컬 네트워크 접근" 권한을 실제로 어떻게 인식하는지 콘솔에 바로 찍음.
+  // Permissions API가 이 이름 자체를 모르면 catch로 떨어지는 것도 중요한 정보(= 아직 이 기능이 그 이름으로
+  // 노출돼 있지 않다는 뜻).
+  if (navigator.permissions?.query) {
+    navigator.permissions.query({ name: 'local-network-access' })
+      .then(r => console.log('[도감 오버레이 진단] local-network-access permission.state =', r.state))
+      .catch(e => console.log('[도감 오버레이 진단] local-network-access 권한 이름을 모름:', e.message));
+  } else {
+    console.log('[도감 오버레이 진단] navigator.permissions.query 자체가 없음');
+  }
   _desktopProbe();
   DESKTOP_OV.probeTimer = setInterval(_desktopProbe, 3000);
 }
@@ -9121,7 +9131,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.4</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.5</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9877,6 +9887,12 @@ function _renderTlModalRows(mob, tab) {
 // 패치노트
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
+  {
+    ver: '2.009.5', date: '26.10.21',
+    fix: [
+      '설치형 오버레이 연동 — 브라우저의 "로컬 네트워크 접근" 권한 실제 상태를 콘솔에 찍는 진단 로그 추가 (원인 조사용)',
+    ],
+  },
   {
     ver: '2.009.4', date: '26.10.21',
     fix: [
