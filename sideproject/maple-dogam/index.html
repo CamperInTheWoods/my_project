@@ -2289,7 +2289,7 @@
     .bulk-overlay.open { display:flex; }
     .bulk-popup {
       background:var(--panel); border:2px solid var(--gold);
-      border-radius:16px; padding:22px 24px 18px;22
+      border-radius:16px; padding:22px 24px 18px;
       box-shadow:0 8px 40px rgba(0,0,0,.7);
       min-width:260px; max-width:320px; width:90%;
       animation:fadeIn .2s ease;
@@ -3533,9 +3533,9 @@ function _desktopSetAvailable(ok) {
 }
 async function _desktopProbe() {
   try {
-    // targetAddressSpace: 'private' — 이게 없으면 최신 Chrome의 "로컬 네트워크 액세스" 정책이
-    // 권한 프롬프트도 안 띄우고 조용히 요청을 막아버림 (안 알려진 브라우저에서는 그냥 무시되는 옵션이라 안전)
-    const r = await fetch(`${DESKTOP_OV.base}/ping`, { signal: AbortSignal.timeout(600), targetAddressSpace: 'private' });
+    // targetAddressSpace: 'loopback' — 127.0.0.1은 'private'가 아니라 'loopback' 주소 공간이라
+    // 값이 안 맞으면 Chrome이 "address space mismatch"로 요청 자체를 막아버림
+    const r = await fetch(`${DESKTOP_OV.base}/ping`, { signal: AbortSignal.timeout(600), targetAddressSpace: 'loopback' });
     _desktopSetAvailable(r.ok);
   } catch {
     _desktopSetAvailable(false);
@@ -3553,7 +3553,7 @@ function _desktopSend() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(snap),
-    targetAddressSpace: 'private',
+    targetAddressSpace: 'loopback',
   })
     .then(r => r.json())
     .then(res => {
@@ -9121,7 +9121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.3</div>
+<div id="ver-label" style="position:fixed;bottom:10px;right:12px;font-size:.6rem;color:rgba(140,148,158,.55);cursor:default;user-select:none;letter-spacing:.03em;z-index:9500;">똘레로_2.009.4</div>
 
 <!-- 확률 계산기 모달 -->
 <!-- 운 계산기 모달 -->
@@ -9878,9 +9878,9 @@ function _renderTlModalRows(mob, tab) {
 // ══════════════════════════════════════════
 const PATCH_NOTES = [
   {
-    ver: '2.009.3', date: '26.10.21',
+    ver: '2.009.4', date: '26.10.21',
     fix: [
-      '설치형 오버레이 연동이 최신 Chrome에서 권한 프롬프트조차 안 뜨고 조용히 막히던 문제 수정 (로컬 네트워크 요청에 targetAddressSpace 지정)',
+      '설치형 오버레이 연동이 최신 Chrome에서 요청 자체가 막히던 문제 수정 (127.0.0.1에 맞는 targetAddressSpace 값 지정)',
     ],
   },
   {
